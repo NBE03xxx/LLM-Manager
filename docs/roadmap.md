@@ -80,7 +80,7 @@ Safe Apply core実装済み: local sandbox向けBackup Store（16 MiB上限、07
 
 残作業: 暗号化envelopeとSecret Service、remote復旧copy、PolicyKit/remote helper、service/API/effective config Validator、remote journalとのSSH切断統合。これらが完了するまでPhase 4 Exitは未達とする。
 
-暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。Secret Service実装と一般配布buildの既定ON設定は引き続き残作業である。
+暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。SecretStorage adapterはdefault collection、属性検索、OS unlock prompt、32-byte master keyのcreate/reuse、競合時再読込、cancel/timeout/unavailable停止を実装した。現在の開発環境にはSecretStorage依存が未導入のため、実desktop keyring Gateと一般配布buildの既定ON設定は引き続き残作業である。
 
 ## Phase 5: PySide6 GUI
 

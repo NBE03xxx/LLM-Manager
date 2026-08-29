@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.14"
 license = "MIT"
 authors = [{ name = "LLM-Manager contributors" }]
-dependencies = ["cryptography>=46.0.5,<47"]
+dependencies = [
+    "cryptography>=46.0.5,<47",
+    "SecretStorage>=3.5,<4; sys_platform == 'linux'",
+]
 
 [project.optional-dependencies]
 gui = ["PySide6>=6.8.6"]
