@@ -18,6 +18,8 @@ def _request(content: bytes) -> HelperRequest:
         target=DROP_IN_PATH,
         staged_content_hash=hashlib.sha256(content).hexdigest(),
         expected_mode=0o644,
+        expected_uid=0,
+        expected_gid=0,
     )
     return HelperRequest(1, "operation-1", "host-1", "plan-1", "a" * 64, (operation,), now, now + timedelta(minutes=5)).with_hash()
 

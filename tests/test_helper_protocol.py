@@ -80,6 +80,23 @@ class HelperProtocolTests(unittest.TestCase):
                 with self.assertRaises(AdapterError):
                     encode_request(request)
 
+    def test_rejects_unsafe_file_metadata_and_unconditional_remove(self) -> None:
+        now = datetime.now(UTC)
+        base = _request(now)
+        invalid_operations = (
+            replace(base.operations[0], expected_mode=0o666),
+            replace(base.operations[0], expected_uid=1000),
+            HelperOperation(
+                "remove-1", HelperOperationKind.REMOVE_CREATED_FILE,
+                target=DROP_IN_PATH, before_hash=None,
+            ),
+        )
+        for operation in invalid_operations:
+            request = replace(base, operations=(operation,), request_hash="").with_hash()
+            with self.subTest(operation=operation):
+                with self.assertRaises(AdapterError):
+                    encode_request(request)
+
 
 if __name__ == "__main__":
     unittest.main()

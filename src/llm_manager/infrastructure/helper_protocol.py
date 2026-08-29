@@ -119,14 +119,16 @@ def _validate_operation(operation: HelperOperation) -> None:
             _digest(operation.before_hash)
         if operation.kind in {HelperOperationKind.ATOMIC_REPLACE, HelperOperationKind.RESTORE_FILE}:
             _digest(operation.staged_content_hash)
-            if operation.expected_mode is None or not 0 <= operation.expected_mode <= 0o7777:
+            if operation.expected_mode != 0o644:
                 raise AdapterError("invalid_metadata", "helper file mode is invalid")
-        elif operation.staged_content_hash is not None:
-            raise AdapterError("invalid_operation", "remove operation must not include staged content")
-        if operation.expected_uid is not None and operation.expected_uid < 0:
-            raise AdapterError("invalid_metadata", "helper uid is invalid")
-        if operation.expected_gid is not None and operation.expected_gid < 0:
-            raise AdapterError("invalid_metadata", "helper gid is invalid")
+            if operation.expected_uid != 0 or operation.expected_gid != 0:
+                raise AdapterError("invalid_metadata", "helper file must be installed as root:root")
+        elif operation.staged_content_hash is not None or operation.before_hash is None:
+            raise AdapterError("invalid_operation", "remove operation requires only a before hash")
+        if operation.kind is HelperOperationKind.REMOVE_CREATED_FILE and any(
+            value is not None for value in (operation.expected_mode, operation.expected_uid, operation.expected_gid)
+        ):
+            raise AdapterError("invalid_metadata", "remove operation must not include metadata")
         return
     if operation.kind is HelperOperationKind.DAEMON_RELOAD:
         if any(value is not None for value in (operation.target, operation.unit, operation.before_hash, operation.staged_content_hash, operation.expected_mode, operation.expected_uid, operation.expected_gid)):
