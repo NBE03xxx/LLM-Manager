@@ -15,6 +15,9 @@ dependencies = [
     "SecretStorage>=3.5,<4; sys_platform == 'linux'",
 ]
 
+[project.scripts]
+llm-manager-helper = "llm_manager.infrastructure.helper_cli:main"
+
 [project.optional-dependencies]
 gui = ["PySide6>=6.8.6"]
 

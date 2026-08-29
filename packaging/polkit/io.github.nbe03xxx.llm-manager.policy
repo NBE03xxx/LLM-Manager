@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>LLM-Manager contributors</vendor>
+  <vendor_url>https://github.com/NBE03xxx/LLM-Manager</vendor_url>
+  <action id="io.github.nbe03xxx.llm-manager.apply-system-settings">
+    <description>Apply approved LLM-Manager system settings</description>
+    <message>Authentication is required to apply approved Ollama system settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-helper</annotate>
+  </action>
+</policyconfig>
