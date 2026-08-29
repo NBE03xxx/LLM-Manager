@@ -137,6 +137,8 @@ root側remote recovery executorはrequest ID/hashからuser staging pathを再�
 
 remote helper CLIは`user-stage-prepare`、`user-stage-remove`、`invoke-recovery`の固定subcommandだけを受ける。前二者は実効UIDと実UIDが一致する非root userだけが使え、固定home-relative operation path以外を拒否する。`invoke-recovery`はrootかつ有効な`SUDO_UID`を必須とし、user homeをOS account情報から導出する。cleanupはrequest/result/items以外のentryやunsafe metadataがあれば何も削除しない。
 
+remote復旧鍵providerは`/var/lib/llm-manager/keys/<key-reference>.key`を固定root-only storeとし、backup content/receiptとは別directoryに置く。初回は32-byte random keyをO_EXCL、0600で生成し、directory fsync後に再読込検証する。以後は0700 root directory、0600 root regular file、非symlink、正確な32-byte長を毎回確認する。不完全・unsafeな既存keyを削除・再生成して過去backupを復号不能にせず、明示的な復旧対応を要求する。
+
 user-only stagingはremote home基準の`.local/state/llm-manager/remote-helper/<request-id>/<request-hash>`へ固定し、directory/private file作成をSSH runner契約へ委譲する。復元itemをindex/hash由来名で先に転送し、`request.json`を最後に転送するため、helperは部分転送を正式requestとして扱わない。helper起動へ渡す値はrequest ID/hashだけで、resultは同じ操作directoryの固定`result.json`からbounded readする。staging cleanupはreceipt永続化後の明示操作とし、切断時の照合材料を先に消さない。
 
 OpenSSH staging runnerはsystem `ssh`/`scp`をshellなしの固定argvで起動し、ユーザーのOpenSSH alias、Agent、ProxyJump、ControlPathを利用する。upload内容は0700 runtime配下の一時directoryに0600で置き、argvやlogへ含めない。remote pathは固定staging root内の相対pathだけを許す。root helper起動はfile transferから分離したinvokerがpasswordlessまたは外部端末対話sudoを選び、runner自身は`sudo -n`へ短絡しない。
