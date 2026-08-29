@@ -302,6 +302,31 @@ def _receipt_bytes(receipt: RemoteRecoveryReceipt) -> bytes:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
+def encode_remote_receipt(receipt: RemoteRecoveryReceipt) -> bytes:
+    """Encode a validated receipt for transfer across the untrusted SSH boundary."""
+    _validate_receipt_hash(receipt)
+    return _receipt_bytes(receipt)
+
+
+def decode_remote_receipt(content: bytes) -> RemoteRecoveryReceipt:
+    """Decode only the canonical, hash-bound remote helper receipt schema."""
+    if len(content) > 1024 * 1024:
+        raise AdapterError("invalid_remote_backup_receipt", "remote receipt exceeds 1 MiB")
+    try:
+        receipt = _decode_receipt(json.loads(content.decode("utf-8")))
+    except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+        raise AdapterError("invalid_remote_backup_receipt", "remote receipt is malformed") from error
+    if content != _receipt_bytes(receipt):
+        raise AdapterError("invalid_remote_backup_receipt", "remote receipt is not canonical")
+    _validate_receipt_hash(receipt)
+    return receipt
+
+
+def _validate_receipt_hash(receipt: RemoteRecoveryReceipt) -> None:
+    if receipt.receipt_hash != _receipt_hash(replace(receipt, receipt_hash="")):
+        raise AdapterError("invalid_remote_backup_receipt", "remote receipt integrity check failed")
+
+
 def _decode_receipt(value: object) -> RemoteRecoveryReceipt:
     if not isinstance(value, dict) or set(value) != {
         "backup_id", "change_set_hash", "envelope_version", "host_fingerprint", "host_id",

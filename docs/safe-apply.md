@@ -129,6 +129,8 @@ SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検
 
 remote helper側保存処理のsandbox modelは、一時rootでのみ起動でき、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。これはremote側backendのfault-injection用であり、実`/var/lib`配置やSSH transportを有効化するものではない。
 
+user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportからsandbox root backendへ接続する故障注入modelだけで、実SSH転送やremote executableは起動しない。
+
 ## 9. 冪等性・競合
 
 - 既に推奨値なら no-op として ChangeSet から除外する。
