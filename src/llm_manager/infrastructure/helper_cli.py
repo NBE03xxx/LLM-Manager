@@ -14,6 +14,7 @@ from llm_manager.domain.models import utc_now
 from .helper_backend import LocalSystemHelperBackend
 from .helper_executor import DeclaredHelperExecutor, HelperExecutionBackend, HelperOperationResult
 from .helper_protocol import MAX_REQUEST_BYTES, decode_request
+from .helper_receipts import HelperReceiptStore
 from .helper_staging import HelperStagingStore
 
 _IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
@@ -54,6 +55,7 @@ def run_helper(
     environ: dict[str, str] | None = None,
     runtime_base: Path = Path("/run/user"),
     backend: HelperExecutionBackend | None = None,
+    receipts: HelperReceiptStore | None = None,
     effective_uid: int | None = None,
 ) -> tuple[HelperOperationResult, ...]:
     if not _IDENTIFIER.fullmatch(operation_id) or not _DIGEST.fullmatch(expected_hash):
@@ -69,7 +71,11 @@ def run_helper(
     if request.operation_id != operation_id:
         raise AdapterError("operation_mismatch", "request does not match the invoked operation")
     executor = DeclaredHelperExecutor(staging, backend or LocalSystemHelperBackend())
-    return executor.execute(request, expected_hash)
+    receipt_store = receipts or HelperReceiptStore()
+    receipt_store.begin(request)
+    results = executor.execute(request, expected_hash)
+    receipt_store.finish(request, results)
+    return results
 
 
 def _invoking_uid(environ: dict[str, str]) -> int:

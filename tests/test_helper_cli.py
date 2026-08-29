@@ -8,6 +8,7 @@ from pathlib import Path
 from llm_manager.application.errors import AdapterError
 from llm_manager.infrastructure.helper_cli import run_helper
 from llm_manager.infrastructure.helper_protocol import HelperOperation, HelperOperationKind, HelperRequest, encode_request
+from llm_manager.infrastructure.helper_receipts import HelperReceiptStore
 from llm_manager.planning.ollama import DROP_IN_PATH
 
 
@@ -67,12 +68,20 @@ class HelperCliTests(unittest.TestCase):
             request, request_path = _stage(runtime, uid)
             self.assertEqual(path_owner, request_path.stat().st_uid)
             backend = _Backend()
+            receipts = HelperReceiptStore(runtime / "receipts", sandbox=True)
             results = run_helper(
                 request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)},
                 runtime_base=runtime, backend=backend, effective_uid=0,
+                receipts=receipts,
             )
             self.assertTrue(results[0].completed)
             self.assertEqual(backend.content, (request_path.parent / "write-1.content").read_bytes())
+            with self.assertRaises(AdapterError) as replayed:
+                run_helper(
+                    request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)},
+                    runtime_base=runtime, backend=backend, effective_uid=0, receipts=receipts,
+                )
+            self.assertEqual(replayed.exception.code, "replayed_request")
 
     def test_rejects_non_root_ambiguous_uid_wrong_mode_and_operation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -80,22 +89,22 @@ class HelperCliTests(unittest.TestCase):
             uid = runtime.stat().st_uid
             request, path = _stage(runtime, uid)
             with self.assertRaises(AdapterError):
-                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=uid)
+                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=uid, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
             with self.assertRaises(AdapterError):
-                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid), "SUDO_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0)
+                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid), "SUDO_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
             path.chmod(0o644)
             with self.assertRaises(AdapterError):
-                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0)
+                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
             path.chmod(0o600)
             with self.assertRaises(AdapterError):
-                run_helper("other-operation", request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0)
+                run_helper("other-operation", request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
             outside = runtime / "outside-request"
             outside.write_bytes(encode_request(request))
             outside.chmod(0o600)
             path.unlink()
             path.symlink_to(outside)
             with self.assertRaises(AdapterError):
-                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0)
+                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
 
     def test_policy_requires_active_admin_and_fixed_executable(self) -> None:
         policy = Path("packaging/polkit/io.github.nbe03xxx.llm-manager.policy")
