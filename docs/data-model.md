@@ -49,7 +49,7 @@ domain model は原則 immutable な dataclass（または同等の値オブジ�
 | `ChangeSet` | 順序付き変更の単位 | `change_set_id`, `host_id`, `changes`, `dependencies`, `affected_services`, `aggregate_diff`, `risk_summary`, `content_hash`, `status` |
 | `ApprovalRecord` | Review した内容への明示承認 | `approval_id`, `plan_id`, `report_hash`, `change_set_hash`, `backup_policy_hash`, `plaintext_backup_acknowledged`, `approved_at`, `actor`, `expires_at` |
 | `ValidationResult` | 検証 1 件または集約 | `validation_id`, `scope`, `check`, `expected`, `actual`, `status`, `severity`, `message`, `duration_ms`, `children` |
-| `BackupManifest` | 復元に必要な不変記録 | `backup_id`, `plan_id`, `host_id`, `host_fingerprint`, `created_at`, `items`, `manifest_hash`, `storage_location`, `encryption`, `key_scope`, `protected`, `retention_expires_at`, `status` |
+| `BackupManifest` | 復元に必要な不変記録 | `backup_id`, `plan_id`, `change_set_hash`, `host_id`, `host_fingerprint`, `created_at`, `items`, `manifest_hash`, `storage_location`, `encryption`, `key_scope`, `protected`, `retention_expires_at`, `status` |
 | `BackupItem` | 対象単位の復元情報 | `target`, `existed`, `content_ref`, `sha256`, `mode`, `uid`, `gid`, `selinux_context`, `service_state`, `storage_location` |
 
 remote backup の保管位置は各 `BackupItem` に明記する。`actor` はOSユーザー等の監査識別子であり、認証秘密を含めない。

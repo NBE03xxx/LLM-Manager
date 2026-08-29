@@ -78,7 +78,7 @@ Exit: sandbox対象で成功・失敗・復元・復元失敗を安全に再現�
 
 Safe Apply core実装済み: local sandbox向けBackup Store（16 MiB上限、0700/0600、manifest/content hash検証、厳格なschema/identity検査、再起動後の一覧再構築、30日/10世代保持、manual protection永続化）、同一targetのsource-span統合、before hash/path/symlink検査、fsync+atomic rename、file hash/OpenCode JSONC/Ollama専用systemd drop-in Validator、Ollama service/effective environment/APIとOpenCode再読込の実行後Validator、ApprovalRecordに束縛したCoordinator、redacted hash-chain audit log、atomic operation journal、before/after/unknown状態照合、逆順rollback、`RECOVERY_REQUIRED`終端。runtime validation失敗もrollbackへ接続した。実Ollama/OpenCode/systemd/SSH先は変更していない。
 
-残作業: Secret Service実desktop Gate、remote復旧copy、PolicyKit/remote helperとdaemon-reload/restart実行、実環境integration Gate、remote journalとのSSH切断統合。これらが完了するまでPhase 4 Exitは未達とする。
+残作業: Secret Service実desktop Gate、remote復旧copy、PolicyKit/remote helperの実環境integration Gate、remote journalとのSSH切断統合。local root変更のdaemon-reload/restartはsandbox fake workflowまで完了し、実systemd操作はdeb/PolicyKit Gateまで行わない。これらが完了するまでPhase 4 Exitは未達とする。
 
 特権helper protocol先行実装: protocol v1のcanonical JSON、request hash、10分以下の期限、operation/plan/host/change-set束縛を追加した。operationは`atomic_replace`, `remove_created_file`, `restore_file`, `daemon_reload`, `restart_unit`の固定enumのみで、ファイル対象はLLM-Manager専用Ollama drop-in、unitは`ollama.service`だけを許可する。shell、argv、環境変数、任意pathをschemaとして受け取らず、未知field、改ざん、期限切れ、未来時刻、path/unit逸脱を拒否する。drop-in書込metadataは0644/root:rootに固定し、removeにもbefore hashを必須とする。PolicyKit policy、root-owned helper executableと実systemd backendは残作業である。
 
@@ -95,6 +95,8 @@ Helper replay receipt実装: root-only receipt directoryへoperation IDを`O_EXC
 Local PolicyKit invoker実装: requestに必要な全contentをhash検証付きでstageした後、canonical requestを最後にimmutable stageし、`/usr/bin/pkexec /usr/bin/llm-manager-helper <operation-id> <request-hash>`の固定argvだけをrunnerへ渡す。helper結果は1 MiB以下のcanonical JSON、operation ID/kind/order/exit status一致を検証する。timeout、PolicyKit deny/dismiss、launch failure、helper failureをstable error codeへ分離した。単体テストはfake runnerのみで、実認証は起動していない。
 
 Approved privileged apply境界実装: `ApprovalRecord.is_valid_for`へplan期限も追加し、plan/report/change-set/backup-policy/plaintext acknowledgement/plan期限/approval期限の一致をhelper request生成前に再検証する。MVPの単一Ollama専用drop-in root changeだけを`atomic_replace → daemon_reload → restart ollama.service`へ変換し、request期限をplan・approval・5分の最短値に束縛する。allowlist外path、非root/mixed/複数change、欠落restart/reloadをPolicyKit呼出し前に拒否する。
+
+Privileged Safe Apply workflow実装: local root変更専用CoordinatorでBackup検証後だけhelper Applyを開始し、成功後にruntime validation、失敗時に別の期限付きhelper rollback requestを実行する。既存fileは`restore_file`、新規fileは`remove_created_file`を逆順生成し、その後`daemon_reload → restart ollama.service`を行う。write/reload/restart/runtime validationとrollback各段階のsandbox故障注入、`RECOVERY_REQUIRED`終端を追加した。manifestのchange-set hashと、approval/backup/manifest/request identityをhelper request・receipt対応hash・journalへ束縛した。実PolicyKit認証とsystemd操作は行っていない。
 
 暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。SecretStorage adapterはdefault collection、属性検索、OS unlock prompt、32-byte master keyのcreate/reuse、競合時再読込、cancel/timeout/unavailable停止を実装した。現在の開発環境にはSecretStorage依存が未導入のため、実desktop keyring Gateは引き続き残作業である。
 

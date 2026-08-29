@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper coreと外部端末SSH対話認証まで実装済みです。PySide6 GUI、deb packaging/integration Gate、remote backupはまだ実装していません。
+Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper core、root変更専用Safe Apply workflowと外部端末SSH対話認証まで実装済みです。PySide6 GUI、deb packaging/integration Gate、remote backupはまだ実装していません。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
@@ -42,7 +42,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 
 ## 現在の実装とテスト
 
-Phase 1〜3の基盤に加え、Phase 4ではsandbox限定のLocalBackupStore、複数source-spanを束ねるAtomicFileExecutor、stale hash/path/symlink検査、FileValidator、承認に束縛されたSafeApplyCoordinator、逆順rollbackと故障注入テストを実装しています。単体テストは次のコマンドで実行できます。
+Phase 1〜3の基盤に加え、Phase 4ではsandbox限定のLocalBackupStore、複数source-spanを束ねるAtomicFileExecutor、stale hash/path/symlink検査、FileValidator、承認に束縛されたSafeApplyCoordinator、root変更専用のBackup→helper Apply→runtime Validate→helper Rollback、逆順rollbackと故障注入テストを実装しています。単体テストは次のコマンドで実行できます。
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v

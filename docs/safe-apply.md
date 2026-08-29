@@ -76,7 +76,7 @@ backup に秘密が含まれる可能性を前提に、一覧やログで内容�
 4. fsync 後に atomic rename する。atomicity が保証できない場合はリスク表示し、MVP の自動変更対象から外すことを優先する。
 5. 必要な全ファイル変更後に、必要な service だけを所定順で restart/reload する。
 
-特権操作は署名ではなく内容 hash で固定した宣言的 request を限定 helper に渡す。helper は許可 path、operation、before hash を再検証する。任意 argv や shell command は受け取らない。
+特権操作は署名ではなく内容 hash で固定した宣言的 request を限定 helper に渡す。helper は許可 path、operation、before hash を再検証する。任意 argv や shell command は受け取らない。local root workflowではbackup manifestへ`change_set_hash`を保存し、helper requestとoperation journalへapproval ID、backup ID、manifest hash、request hashを束縛する。root helper receiptは同じoperation IDとrequest hashを保持するため、別Plan・別backup・別requestの結果を成功として受理しない。
 
 ### MVP変更allowlist
 
@@ -114,6 +114,8 @@ helper request は `protocol_version`, `host_id`, `plan_id`, `change_set_hash`, 
 ## 8. Rollback
 
 Apply または required validation の失敗時は既定で自動 rollback する。変更の逆順で元内容または「元は不存在」を復元し、metadata と元 service state を可能な範囲で戻す。その後、設定 parse、hash、service、API を再検証する。
+
+local root変更のrollbackも新しい期限付き宣言requestとして生成する。元ファイルが存在したitemは`restore_file`、不存在だったitemは`remove_created_file`とし、itemの逆順後に`daemon_reload`と必要なservice restartを実行する。Applyのfile write前にhelperが明確にfail-stopした場合は変更なしとして終了し、write後または実行状態が不明な失敗ではbefore hash付きrollbackを試行する。
 
 復元に失敗した場合は `RECOVERY_REQUIRED` とし、自動再試行を無限に行わない。影響対象、成功/失敗 item、backup location、手動復旧手順を表示する。ユーザーが Backup 画面から過去 backup を選ぶ手動 rollback も、対象 host identity と current diff の再確認・承認を必要とする。
 
