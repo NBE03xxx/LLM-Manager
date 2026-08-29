@@ -13,6 +13,7 @@ from llm_manager.domain.workflow import PlanStateMachine
 from llm_manager.planning.opencode import locate_scalar_spans
 
 from .backup import MAX_ITEM_BYTES, _atomic_write, _fsync_directory, _within
+from .journal import JournalStatus, JournalTarget, LocalOperationJournal
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,12 +30,24 @@ class AtomicFileExecutor:
         self.allowed_roots = tuple(root.resolve() for root in allowed_roots)
 
     def apply(self, change_set: ChangeSet, cancellation: CancellationToken) -> tuple[AppliedFile, ...]:
+        planned = self.prepare(change_set, cancellation)
+        for item in planned:
+            _cancel(cancellation)
+            changes = [change for change in change_set.changes if change.target == item.target]
+            target = self._target(item.target)
+            content = self._current(target, changes)
+            rendered = self._render(content, changes)
+            mode = (target.stat().st_mode & 0o7777) if target.exists() else 0o600
+            _atomic_write(target, rendered, mode)
+        return planned
+
+    def prepare(self, change_set: ChangeSet, cancellation: CancellationToken) -> tuple[AppliedFile, ...]:
         grouped: dict[str, list[Change]] = {}
         for change in change_set.changes:
             if change.requires_root or change.operation not in {ChangeOperation.CREATE_FILE, ChangeOperation.REPLACE_FILE}:
                 raise AdapterError("unsupported_change", "atomic user executor accepts only non-root file writes")
             grouped.setdefault(change.target, []).append(change)
-        applied: list[AppliedFile] = []
+        planned: list[AppliedFile] = []
         for target_text, changes in grouped.items():
             _cancel(cancellation)
             target = self._target(target_text)
@@ -42,11 +55,9 @@ class AtomicFileExecutor:
             rendered = self._render(content, changes)
             if len(rendered) > MAX_ITEM_BYTES:
                 raise AdapterError("item_too_large", "rendered target exceeds 16 MiB")
-            mode = (target.stat().st_mode & 0o7777) if target.exists() else 0o600
-            _atomic_write(target, rendered, mode)
             checks = tuple(dict.fromkeys(check for change in changes for check in change.validation_checks))
-            applied.append(AppliedFile(str(target), hashlib.sha256(rendered).hexdigest(), checks))
-        return tuple(applied)
+            planned.append(AppliedFile(str(target), hashlib.sha256(rendered).hexdigest(), checks))
+        return tuple(planned)
 
     def _target(self, text: str) -> Path:
         path = Path(text)
@@ -133,11 +144,12 @@ class ApplyOutcome:
 
 
 class SafeApplyCoordinator:
-    def __init__(self, backups: BackupStorePort, executor: AtomicFileExecutor, validator: FileValidator, audit: AuditPort | None = None) -> None:
+    def __init__(self, backups: BackupStorePort, executor: AtomicFileExecutor, validator: FileValidator, audit: AuditPort | None = None, journal: LocalOperationJournal | None = None) -> None:
         self.backups = backups
         self.executor = executor
         self.validator = validator
         self.audit = audit
+        self.journal = journal
 
     def execute(self, plan: OptimizationPlan, approval: ApprovalRecord, backup_id: str, cancellation: CancellationToken) -> ApplyOutcome:
         if plan.change_set is None or not approval.is_valid_for(plan):
@@ -145,6 +157,7 @@ class SafeApplyCoordinator:
         self._audit("apply.approved", plan, (("approval_id", approval.approval_id),))
         machine = PlanStateMachine(plan.plan_id, PlanStatus.APPROVED)
         manifest: BackupManifest | None = None
+        operation_id = backup_id
         try:
             manifest = self.backups.create(BackupRequest(backup_id, plan.plan_id, plan.change_set.host_id, None, plan.change_set), cancellation)
             backup_checks = self.backups.verify(manifest, cancellation)
@@ -152,33 +165,49 @@ class SafeApplyCoordinator:
                 self._audit("backup.failed", plan, (("backup_id", backup_id),))
                 return ApplyOutcome(PlanStatus.APPROVED, manifest, backup_checks, "backup verification failed")
             self._audit("backup.verified", plan, (("backup_id", backup_id),))
+            prepared = self.executor.prepare(plan.change_set, cancellation)
+            if self.journal is not None:
+                before_hashes = {change.target: change.before_hash for change in plan.change_set.changes}
+                self.journal.create(
+                    operation_id,
+                    plan.plan_id,
+                    plan.change_set.host_id,
+                    plan.change_set.content_hash,
+                    tuple(JournalTarget(item.target, before_hashes[item.target], item.sha256) for item in prepared),
+                )
             machine = machine.transition_to(PlanStatus.BACKED_UP).transition_to(PlanStatus.APPLYING)
             applied = self.executor.apply(plan.change_set, cancellation)
+            if not self._journal_update(operation_id, JournalStatus.VALIDATING):
+                return self._rollback(machine, manifest, cancellation, (), "journal update failed", plan, operation_id)
             machine = machine.transition_to(PlanStatus.VALIDATING)
             validations = self.validator.validate(applied, cancellation)
             if _passed(validations):
+                if not self._journal_update(operation_id, JournalStatus.COMMITTED):
+                    return self._rollback(machine, manifest, cancellation, validations, "journal commit failed", plan, operation_id)
                 outcome = ApplyOutcome(machine.transition_to(PlanStatus.COMMITTED).status, manifest, validations)
                 self._audit("apply.committed", plan, (("backup_id", backup_id),))
                 return outcome
-            return self._rollback(machine, manifest, cancellation, validations, "validation failed", plan)
+            return self._rollback(machine, manifest, cancellation, validations, "validation failed", plan, operation_id)
         except (AdapterError, OSError, OperationCancelled) as error:
             if manifest is None or machine.status is PlanStatus.APPROVED:
                 self._audit("backup.failed", plan, (("error_code", getattr(error, "code", type(error).__name__)),))
                 return ApplyOutcome(machine.status, manifest, error=str(error))
-            return self._rollback(machine, manifest, cancellation, (), str(error), plan)
+            return self._rollback(machine, manifest, cancellation, (), str(error), plan, operation_id)
 
-    def _rollback(self, machine: PlanStateMachine, manifest: BackupManifest, cancellation: CancellationToken, validations: tuple[ValidationResult, ...], error: str, plan: OptimizationPlan) -> ApplyOutcome:
+    def _rollback(self, machine: PlanStateMachine, manifest: BackupManifest, cancellation: CancellationToken, validations: tuple[ValidationResult, ...], error: str, plan: OptimizationPlan, operation_id: str) -> ApplyOutcome:
         if machine.status is PlanStatus.VALIDATING:
             machine = machine.transition_to(PlanStatus.ROLLING_BACK)
         elif machine.status is PlanStatus.APPLYING:
             machine = machine.transition_to(PlanStatus.ROLLING_BACK)
+        journal_ok = self._journal_update(operation_id, JournalStatus.ROLLING_BACK)
         try:
             restored = self.backups.restore(manifest, cancellation)
-            status = PlanStatus.ROLLED_BACK if _passed(restored) else PlanStatus.RECOVERY_REQUIRED
+            status = PlanStatus.ROLLED_BACK if _passed(restored) and journal_ok else PlanStatus.RECOVERY_REQUIRED
         except (AdapterError, OSError, OperationCancelled) as restore_error:
             restored = (_result("rollback.exception", False, "restored", getattr(restore_error, "code", type(restore_error).__name__)),)
             status = PlanStatus.RECOVERY_REQUIRED
         machine = machine.transition_to(status)
+        self._journal_update(operation_id, JournalStatus.ROLLED_BACK if status is PlanStatus.ROLLED_BACK else JournalStatus.RECOVERY_REQUIRED)
         self._audit("rollback.completed" if status is PlanStatus.ROLLED_BACK else "rollback.recovery_required", plan, (("backup_id", manifest.backup_id),))
         return ApplyOutcome(machine.status, manifest, validations + restored, error)
 
@@ -188,6 +217,15 @@ class SafeApplyCoordinator:
         correlation_id = plan.plan_id if plan is not None else "safe-apply"
         base = (("plan_id", plan.plan_id), ("host_id", plan.change_set.host_id if plan and plan.change_set else None)) if plan else ()
         self.audit.append(event_type, correlation_id, base + fields)
+
+    def _journal_update(self, operation_id: str, status: JournalStatus) -> bool:
+        if self.journal is None:
+            return True
+        try:
+            self.journal.update(operation_id, status)
+            return True
+        except (AdapterError, OSError):
+            return False
 
 
 def _passed(results: tuple[ValidationResult, ...]) -> bool:

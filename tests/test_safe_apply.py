@@ -13,6 +13,7 @@ from llm_manager.adapters.fakes import FakeAuditAdapter
 from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
 from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, LocalizedMessage, ValidationResult
 from llm_manager.infrastructure.backup import LocalBackupStore, MAX_ITEM_BYTES
+from llm_manager.infrastructure.journal import JournalStatus, LocalOperationJournal, ReconciliationState
 from llm_manager.infrastructure.safe_apply import AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from tests.fixtures import plan
 
@@ -249,6 +250,46 @@ class CoordinatorTests(unittest.TestCase):
             self.assertEqual(outcome.status, PlanStatus.APPROVED)
             self.assertEqual(target.read_text(encoding="utf-8"), "old")
             self.assertEqual([event[0] for event in audit.events], ["apply.approved", "backup.failed"])
+
+    def test_operation_journal_tracks_commit_and_reconciliation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            journal = LocalOperationJournal(root / "journal", (root,))
+            coordinator = SafeApplyCoordinator(
+                LocalBackupStore(root / "backups", (root,)),
+                AtomicFileExecutor((root,)),
+                FileValidator(),
+                journal=journal,
+            )
+            outcome = coordinator.execute(current_plan, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.COMMITTED)
+            self.assertEqual(journal.load("operation-1").status, JournalStatus.COMMITTED)
+            self.assertEqual(journal.reconcile("operation-1")[0].state, ReconciliationState.APPLIED)
+
+    def test_operation_journal_tracks_successful_rollback(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            journal = LocalOperationJournal(root / "journal", (root,))
+            coordinator = SafeApplyCoordinator(
+                LocalBackupStore(root / "backups", (root,)),
+                AtomicFileExecutor((root,)),
+                _FailValidator(),
+                journal=journal,
+            )
+            outcome = coordinator.execute(current_plan, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
+            self.assertEqual(journal.load("operation-1").status, JournalStatus.ROLLED_BACK)
+            self.assertEqual(journal.reconcile("operation-1")[0].state, ReconciliationState.UNAPPLIED)
 
 
 class _FailValidator(FileValidator):

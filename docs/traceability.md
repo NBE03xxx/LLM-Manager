@@ -14,10 +14,10 @@
 | FR-APPLY-01 | ADR-0004, allowlist | `AtomicExecutorTests`, `CoordinatorTests`（path/symlink/stale/write failure）、helper/restart待ち | Phase 4一部完了 |
 | FR-VALIDATE-01 | allowlist, version matrix | `FileValidatorTests`, `CoordinatorTests`（file hash/JSONC/systemd drop-in構文）、service/API/effective config待ち | Phase 4一部完了 |
 | FR-ROLLBACK-01 | ADR-0005, threat model | `CoordinatorTests`（逆順restore/recovery required）、disconnect待ち | Phase 4一部完了 |
-| FR-AUDIT-01 | threat model | `CoordinatorTests`（redacted workflow event）、永続journal/replay待ち | Phase 4一部完了 |
+| FR-AUDIT-01 | threat model | `CoordinatorTests`, `LocalOperationJournalTests`（redacted event、atomic journal、tamper/replay/state reconciliation）、audit log永続化待ち | Phase 4一部完了 |
 | FR-I18N-01..02 | ADR-0006, gui | ja/en/fallback/key completeness/layout | Phase 5 |
 | AC-09/10 | ADR-0003, architecture | `ArchitectureTests`（domain依存境界）、Phase 5でQt event-loop | Phase 1完了/5 |
-| AC-13/14 | allowlist, ADR-0004/0005 | unknown version denial/journal reconciliation | Phase 4 |
+| AC-13/14 | allowlist, ADR-0004/0005 | unknown version denial、`LocalOperationJournalTests`（before/after/unknown）、remote統合待ち | Phase 4一部完了 |
 | SSH helper prerequisite | ADR-0008, version matrix | absent/incompatible/owner-mode/package tests | Phase 2/4 |
 | Backup crypto/recovery | ADR-0009, threat model | local/remote key loss、tamper、standalone restore | Phase 4 |
 | Endpoint confinement | ADR-0010, setting allowlist | loopback allow、external/redirect/userinfo deny | Phase 3/4 |
