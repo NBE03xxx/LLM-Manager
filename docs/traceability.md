@@ -11,7 +11,7 @@
 | FR-PLAN-01..02 | allowlist, safe-apply | `OpenCodePlannerTests`, `OllamaDropInPlannerTests` | Phase 3完了 |
 | FR-APPROVE-01 | data-model, safe-apply | `ApprovalTests`, `CoordinatorTests`（plan/report/change hash・期限・apply統合） | Phase 4 core完了 |
 | FR-BACKUP-01 | ADR-0005, threat model | `LocalBackupStoreTests`（local integrity/permission/restart reload/retention/protection）、dual copy/encryption待ち | Phase 4一部完了 |
-| FR-APPLY-01 | ADR-0004, allowlist | `AtomicExecutorTests`, `CoordinatorTests`（path/symlink/stale/write failure）、helper/restart待ち | Phase 4一部完了 |
+| FR-APPLY-01 | ADR-0004, allowlist | `AtomicExecutorTests`, `CoordinatorTests`, `HelperProtocolTests`（path/symlink/stale/write failure、canonical request/hash/expiry/operation/path/unit allowlist）、root helper/restart統合待ち | Phase 4一部完了 |
 | FR-VALIDATE-01 | allowlist, version matrix | `FileValidatorTests`, `CoordinatorTests`（file hash/JSONC/systemd drop-in構文）、service/API/effective config待ち | Phase 4一部完了 |
 | FR-ROLLBACK-01 | ADR-0005, threat model | `CoordinatorTests`（逆順restore/recovery required）、disconnect待ち | Phase 4一部完了 |
 | FR-AUDIT-01 | threat model | `LocalAuditLogTests`, `CoordinatorTests`, `LocalOperationJournalTests`（redaction、hash-chain永続化、tamper/deletion/replay/state reconciliation） | Phase 4 core完了 |
