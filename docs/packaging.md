@@ -7,6 +7,7 @@ Ubuntu 26.04 / Debian 13向け一般配布の先行Gateとして、local privile
 debは次をroot-owned固定pathへ配置する。
 
 - `/usr/bin/llm-manager-helper`: mode 0755、`/usr/bin/python3 -I`で起動する限定helper
+- `/usr/share/llm-manager/helper-metadata.json`: mode 0644、package/version/protocolのcanonical metadata
 - `/usr/share/polkit-1/actions/io.github.nbe03xxx.llm-manager.policy`: mode 0644、上記helperだけを許可するPolicyKit action
 - `/usr/lib/python3/dist-packages/llm_manager`: helperとcoreのPython package
 - `/usr/share/man/man8/llm-manager-helper.8.gz`: 管理者向け境界説明
@@ -28,7 +29,7 @@ dpkg-buildpackage -us -uc -b
 packaging/verify-deb.sh ../llm-manager_0.1.0~dev0_all.deb
 ```
 
-検査項目はhelper/policyのarchive内root ownershipとmode、isolated shebang、PolicyKit executable path、runtime dependencyである。build中にも全unit testを実行する。
+検査項目はhelper/policy/metadataのarchive内root ownershipとmode、isolated shebang、PolicyKit executable path、canonical package/version/protocol metadata、runtime dependencyである。build中にも全unit testを実行する。
 
 ## 未完了Gate
 

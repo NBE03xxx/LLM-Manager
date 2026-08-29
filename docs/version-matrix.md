@@ -17,8 +17,8 @@
 | Ollama | 0.33.2 | Local: D、SSH: D→A候補 | Local API/systemd統合済み。SSH、allowlist、restart/rollback test |
 | OpenCode | 1.18.25 | Local: D、SSH: D→A候補 | Local複数provider JSONC解析済み。merge provenance、SSH、round-trip、connection validation |
 | OpenCode | 1.18.18 | SSH: R | 実設定のread-only解析は成功。tag固定schema差分とfixture追加後にDを判断 |
-| Local helper | appと同一release/protocol | Local | required for A | root owner/mode、PolicyKit action、protocol contract |
-| Remote helper | app互換protocolの別deb | SSH | required for root A | package/version、root owner/mode、sudo、journal/recovery test |
+| Local helper | appと同一release/protocol | Local | required for A | 固定path、root owner/mode、canonical package/version/protocol metadata、PolicyKit action、protocol contract |
+| Remote helper | app互換protocolの別deb | SSH | required for root A | 固定path、canonical package/version/protocol metadata、root owner/mode、sudo、journal/recovery test |
 
 PySide6は公式release note上6.8.6からPython 3.14対応が明記されるため最低版とする。ただし配布時は、検証済みの同一versionへupper/lower pinし、未検証の新minorへ自動追随しない。
 
