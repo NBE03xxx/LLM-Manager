@@ -4,7 +4,7 @@ import hashlib
 import json
 import os
 import tempfile
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -26,6 +26,17 @@ from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, MAX_ENV
 
 MAX_ITEM_BYTES = 16 * 1024 * 1024
 MAX_MANIFEST_BYTES = 1024 * 1024
+
+
+@dataclass(frozen=True, slots=True)
+class BackupRestoreItem:
+    target: str
+    existed: bool
+    content: bytes | None
+    sha256: str | None
+    mode: int | None
+    uid: int | None
+    gid: int | None
 
 
 class LocalBackupStore:
@@ -87,6 +98,7 @@ class LocalBackupStore:
                 backup_id=request.backup_id,
                 schema_version="1.0",
                 plan_id=request.plan_id,
+                change_set_hash=request.change_set.content_hash,
                 host_id=request.host_id,
                 host_fingerprint=request.host_fingerprint,
                 items=tuple(items),
@@ -187,6 +199,30 @@ class LocalBackupStore:
             except (OSError, AdapterError) as error:
                 results.append(_result(f"restore.item.{index}", False, "restored", str(error)))
         return tuple(results)
+
+    def restore_items(
+        self, manifest: BackupManifest, cancellation: CancellationToken
+    ) -> tuple[BackupRestoreItem, ...]:
+        """Return verified plaintext needed by a declared privileged rollback."""
+        verification = self.verify(manifest, cancellation)
+        if not verification or any(result.status is not ValidationStatus.PASSED for result in verification):
+            raise AdapterError("invalid_backup", "backup cannot be used for privileged rollback")
+        base = Path(manifest.storage_location).resolve()
+        restored: list[BackupRestoreItem] = []
+        for item in reversed(manifest.items):
+            _cancel(cancellation)
+            content = None
+            if item.existed:
+                if item.content_ref is None:
+                    raise AdapterError("invalid_manifest", "existing backup item has no content")
+                stored = (base / item.content_ref).read_bytes()
+                content = self._decode_content(
+                    stored, manifest.encryption, manifest.backup_id, manifest.host_fingerprint, item.target
+                )
+                if hashlib.sha256(content).hexdigest() != item.sha256:
+                    raise AdapterError("invalid_backup", "backup item hash changed after verification")
+            restored.append(BackupRestoreItem(item.target, item.existed, content, item.sha256, item.mode, item.uid, item.gid))
+        return tuple(restored)
 
     def list_manifests(self, host_id: str) -> tuple[BackupManifest, ...]:
         self._load_host_manifests(host_id)
@@ -329,6 +365,7 @@ def _read_manifest(path: Path, backup_directory: Path, expected_host_id: str) ->
             backup_id=_text(value, "backup_id"),
             schema_version=schema_version,
             plan_id=_text(value, "plan_id"),
+            change_set_hash=_text(value, "change_set_hash"),
             host_id=_text(value, "host_id"),
             host_fingerprint=_optional_text(value, "host_fingerprint"),
             items=items,

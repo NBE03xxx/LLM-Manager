@@ -81,6 +81,7 @@ def manifest() -> BackupManifest:
         backup_id="backup-1",
         schema_version="1.0",
         plan_id="plan-1",
+        change_set_hash="c" * 64,
         host_id="host-1",
         host_fingerprint="fingerprint",
         items=(),

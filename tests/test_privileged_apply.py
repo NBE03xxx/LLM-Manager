@@ -1,12 +1,18 @@
 import hashlib
+import tempfile
 import unittest
 from dataclasses import replace
+from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken
-from llm_manager.domain.enums import ChangeOperation
-from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet
-from llm_manager.infrastructure.privileged_apply import ApprovedHelperRequestFactory, LocalPrivilegedApplyService
+from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
+from llm_manager.domain.models import ApprovalRecord, BackupItem, BackupManifest, Change, ChangeSet, EncryptionInfo, LocalizedMessage, ValidationResult
+from llm_manager.infrastructure.backup import BackupRestoreItem
+from llm_manager.infrastructure.helper_executor import HelperOperationResult
+from llm_manager.infrastructure.helper_protocol import HelperOperationKind
+from llm_manager.infrastructure.journal import JournalStatus, LocalOperationJournal
+from llm_manager.infrastructure.privileged_apply import ApprovedHelperRequestFactory, LocalPrivilegedApplyService, PrivilegedRollbackRequestFactory, PrivilegedSafeApplyCoordinator
 from llm_manager.planning.ollama import DROP_IN_PATH
 from tests.fixtures import plan
 
@@ -56,12 +62,152 @@ class ApprovedHelperRequestFactoryTests(unittest.TestCase):
         self.assertEqual(invoker.request.plan_id, current.plan_id)
         self.assertEqual(invoker.contents[0][0], "operation-1:write")
 
+    def test_manifest_binding_rejects_another_change_set(self) -> None:
+        current, approval, _ = _approved()
+        item = BackupItem(DROP_IN_PATH, False, None, None)
+        manifest = BackupManifest(
+            "operation-1", "1.0", current.plan_id, "c" * 64,
+            current.change_set.host_id, None, (item,), "d" * 64, "/tmp/backup",
+            current.backup_policy, complete=True,
+        )
+        with self.assertRaises(AdapterError) as caught:
+            ApprovedHelperRequestFactory().prepare(
+                current, approval, "operation-1", manifest=manifest
+            )
+        self.assertEqual(caught.exception.code, "workflow_binding_mismatch")
+
+
+class PrivilegedSafeApplyCoordinatorTests(unittest.TestCase):
+    def test_success_binds_backup_approval_request_and_journal(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            coordinator, backend, backups, journal, current, approval = self._workflow(Path(directory), b"old")
+            outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.COMMITTED)
+            self.assertEqual(backend.content, current.change_set.changes[0].replacement_text.encode())
+            record = journal.load("operation-1")
+            self.assertEqual(record.approval_id, approval.approval_id)
+            self.assertEqual(record.backup_id, outcome.manifest.backup_id)
+            self.assertEqual(record.manifest_hash, outcome.manifest.manifest_hash)
+            self.assertEqual(record.request_hash, backend.requests[0].request_hash)
+            self.assertEqual(backend.requests[0].manifest_hash, outcome.manifest.manifest_hash)
+            self.assertEqual(outcome.manifest.change_set_hash, current.change_set.content_hash)
+
+    def test_apply_stage_failures_and_runtime_failure_rollback(self) -> None:
+        for failure in ("atomic_replace", "daemon_reload", "restart_unit", "validation"):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                validator = _RuntimeValidator(failure != "validation")
+                coordinator, backend, _, journal, current, approval = self._workflow(Path(directory), b"old", validator)
+                backend.fail_apply = failure if failure != "validation" else None
+                outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+                self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
+                self.assertEqual(backend.content, b"old")
+                self.assertEqual(journal.load("operation-1").status, JournalStatus.ROLLED_BACK)
+                if failure == "atomic_replace":
+                    self.assertEqual(len(backend.requests), 1)
+                else:
+                    self.assertEqual([item.kind for item in backend.requests[-1].operations], [HelperOperationKind.RESTORE_FILE, HelperOperationKind.DAEMON_RELOAD, HelperOperationKind.RESTART_UNIT])
+                    self.assertEqual(journal.load("operation-1").rollback_request_hash, backend.requests[-1].request_hash)
+
+    def test_created_file_rollback_removes_then_reloads_and_restarts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            coordinator, backend, _, _, current, approval = self._workflow(Path(directory), None, _RuntimeValidator(False))
+            outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
+            self.assertIsNone(backend.content)
+            self.assertEqual([item.kind for item in backend.requests[-1].operations], [HelperOperationKind.REMOVE_CREATED_FILE, HelperOperationKind.DAEMON_RELOAD, HelperOperationKind.RESTART_UNIT])
+
+    def test_rollback_failures_require_recovery(self) -> None:
+        for failure in ("restore_file", "daemon_reload", "restart_unit"):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                coordinator, backend, _, journal, current, approval = self._workflow(Path(directory), b"old", _RuntimeValidator(False))
+                backend.fail_rollback = failure
+                outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+                self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
+                self.assertEqual(journal.load("operation-1").status, JournalStatus.RECOVERY_REQUIRED)
+
+    @staticmethod
+    def _workflow(root: Path, before: bytes | None, validator=None):
+        current, approval, _ = _approved()
+        change = current.change_set.changes[0]
+        operation = ChangeOperation.CREATE_FILE if before is None else ChangeOperation.REPLACE_FILE
+        rollback = ChangeOperation.REMOVE_CREATED_FILE if before is None else ChangeOperation.REPLACE_FILE
+        change = replace(change, operation=operation, rollback_operation=rollback, before_hash=hashlib.sha256(before).hexdigest() if before is not None else None)
+        changes = replace(current.change_set, changes=(change,))
+        current = replace(current, change_set=changes)
+        approval = replace(approval, change_set_hash=changes.content_hash)
+        backend = _WorkflowInvoker(before)
+        backups = _BackupStore(backend, root)
+        journal = LocalOperationJournal(root / "journal", (Path("/etc/systemd/system"),))
+        coordinator = PrivilegedSafeApplyCoordinator(backups, ApprovedHelperRequestFactory(), PrivilegedRollbackRequestFactory(), backend, validator or _RuntimeValidator(True), journal)
+        return coordinator, backend, backups, journal, current, approval
+
 
 class _Invoker:
     def invoke(self, request, staged_contents, cancellation):
         self.request = request
         self.contents = staged_contents
         return ()
+
+
+class _BackupStore:
+    def __init__(self, backend, root):
+        self.backend = backend
+        self.root = root
+
+    def create(self, request, cancellation):
+        before = self.backend.content
+        item = BackupItem(DROP_IN_PATH, before is not None, "item" if before is not None else None, hashlib.sha256(before).hexdigest() if before is not None else None, 0o644 if before is not None else None, 0 if before is not None else None, 0 if before is not None else None)
+        return BackupManifest(request.backup_id, "1.0", request.plan_id, request.change_set.content_hash, request.host_id, request.host_fingerprint, (item,), "d" * 64, str(self.root), request.encryption, complete=True)
+
+    def verify(self, manifest, cancellation):
+        return (_validation("backup", True),)
+
+    def restore_items(self, manifest, cancellation):
+        item = manifest.items[0]
+        return (BackupRestoreItem(item.target, item.existed, self.backend.original, item.sha256, item.mode, item.uid, item.gid),)
+
+
+class _WorkflowInvoker:
+    def __init__(self, content):
+        self.content = content
+        self.original = content
+        self.fail_apply = None
+        self.fail_rollback = None
+        self.requests = []
+
+    def invoke(self, request, staged_contents, cancellation):
+        self.requests.append(request)
+        staged = dict(staged_contents)
+        rollback = request.operation_id.endswith("-rollback")
+        failure = self.fail_rollback if rollback else self.fail_apply
+        results = []
+        stopped = False
+        for operation in request.operations:
+            if stopped:
+                results.append(HelperOperationResult(operation.operation_id, operation.kind, False, "not_executed"))
+                continue
+            if failure == operation.kind.value:
+                results.append(HelperOperationResult(operation.operation_id, operation.kind, False, "injected_failure"))
+                stopped = True
+                continue
+            if operation.kind in {HelperOperationKind.ATOMIC_REPLACE, HelperOperationKind.RESTORE_FILE}:
+                self.content = staged[operation.operation_id]
+            elif operation.kind is HelperOperationKind.REMOVE_CREATED_FILE:
+                self.content = None
+            results.append(HelperOperationResult(operation.operation_id, operation.kind, True))
+        return tuple(results)
+
+
+class _RuntimeValidator:
+    def __init__(self, passed):
+        self.passed = passed
+
+    def validate(self, change_set, cancellation):
+        return (_validation("runtime", self.passed),)
+
+
+def _validation(check, passed):
+    return ValidationResult(check, "test", check, ValidationStatus.PASSED if passed else ValidationStatus.FAILED, "passed", "passed" if passed else "failed", Severity.INFO if passed else Severity.HIGH, LocalizedMessage("test.validation"))
 
 
 if __name__ == "__main__":

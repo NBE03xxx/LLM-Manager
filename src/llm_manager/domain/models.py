@@ -456,6 +456,7 @@ class BackupManifest:
     backup_id: str
     schema_version: str
     plan_id: str
+    change_set_hash: str
     host_id: str
     host_fingerprint: str | None
     items: tuple[BackupItem, ...]

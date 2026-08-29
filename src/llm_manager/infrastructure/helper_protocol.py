@@ -51,6 +51,9 @@ class HelperRequest:
     requested_at: datetime
     expires_at: datetime
     request_hash: str = ""
+    approval_id: str | None = None
+    backup_id: str | None = None
+    manifest_hash: str | None = None
 
     def with_hash(self) -> "HelperRequest":
         return replace(self, request_hash=_hash(replace(self, request_hash="")))
@@ -93,6 +96,15 @@ def validate_request(request: HelperRequest, expected_hash: str, *, now: datetim
     _digest(expected_hash)
     if request.request_hash != expected_hash or _hash(replace(request, request_hash="")) != request.request_hash:
         raise AdapterError("request_hash_mismatch", "helper request integrity check failed")
+    bindings = (request.approval_id, request.backup_id, request.manifest_hash)
+    if any(value is not None for value in bindings) and not all(value is not None for value in bindings):
+        raise AdapterError("invalid_workflow_binding", "helper workflow binding must be complete")
+    if request.approval_id is not None and not _IDENTIFIER.fullmatch(request.approval_id):
+        raise AdapterError("invalid_identifier", "helper approval_id is invalid")
+    if request.backup_id is not None and not _IDENTIFIER.fullmatch(request.backup_id):
+        raise AdapterError("invalid_identifier", "helper backup_id is invalid")
+    if request.manifest_hash is not None:
+        _digest(request.manifest_hash)
     if request.requested_at.tzinfo is None or request.expires_at.tzinfo is None:
         raise AdapterError("invalid_expiry", "helper request timestamps require timezone")
     lifetime = request.expires_at - request.requested_at
@@ -151,7 +163,7 @@ def _bytes(request: HelperRequest) -> bytes:
 
 def _decode(value: object) -> HelperRequest:
     if not isinstance(value, dict) or set(value) != {
-        "change_set_hash", "expires_at", "host_id", "operation_id", "operations", "plan_id",
+        "approval_id", "backup_id", "change_set_hash", "expires_at", "host_id", "manifest_hash", "operation_id", "operations", "plan_id",
         "protocol_version", "request_hash", "requested_at",
     }:
         raise ValueError("invalid request fields")
@@ -169,6 +181,9 @@ def _decode(value: object) -> HelperRequest:
         requested_at=_time(value, "requested_at"),
         expires_at=_time(value, "expires_at"),
         request_hash=_text(value, "request_hash"),
+        approval_id=_optional_text(value, "approval_id"),
+        backup_id=_optional_text(value, "backup_id"),
+        manifest_hash=_optional_text(value, "manifest_hash"),
     )
 
 

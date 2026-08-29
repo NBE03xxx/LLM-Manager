@@ -54,6 +54,11 @@ class OperationJournal:
     plan_id: str
     host_id: str
     change_set_hash: str
+    approval_id: str | None
+    backup_id: str | None
+    manifest_hash: str | None
+    request_hash: str | None
+    rollback_request_hash: str | None
     status: JournalStatus
     targets: tuple[JournalTarget, ...]
     created_at: datetime
@@ -80,6 +85,11 @@ class LocalOperationJournal:
         host_id: str,
         change_set_hash: str,
         targets: tuple[JournalTarget, ...],
+        *,
+        approval_id: str | None = None,
+        backup_id: str | None = None,
+        manifest_hash: str | None = None,
+        request_hash: str | None = None,
     ) -> OperationJournal:
         _component(operation_id)
         if not targets or len({item.target for item in targets}) != len(targets):
@@ -89,11 +99,17 @@ class LocalOperationJournal:
             _digest(item.after_hash)
             if item.before_hash is not None:
                 _digest(item.before_hash)
+        bindings = (approval_id, backup_id, manifest_hash, request_hash)
+        if any(value is not None for value in bindings) and not all(value is not None for value in bindings):
+            raise AdapterError("invalid_journal_binding", "privileged journal binding must be complete")
+        if manifest_hash is not None:
+            _digest(manifest_hash)
+            _digest(request_hash)  # type: ignore[arg-type]
         path = self._path(operation_id)
         if path.exists():
             raise AdapterError("operation_exists", "operation journal already exists")
         now = utc_now()
-        journal = OperationJournal(operation_id, "1.0", plan_id, host_id, change_set_hash, JournalStatus.APPLYING, targets, now, now, "")
+        journal = OperationJournal(operation_id, "1.1", plan_id, host_id, change_set_hash, approval_id, backup_id, manifest_hash, request_hash, None, JournalStatus.APPLYING, targets, now, now, "")
         return self._write(replace(journal, journal_hash=_hash(journal)))
 
     def update(self, operation_id: str, status: JournalStatus) -> OperationJournal:
@@ -101,6 +117,14 @@ class LocalOperationJournal:
         if status not in _TRANSITIONS[current.status]:
             raise AdapterError("invalid_journal_transition", "operation journal transition is not allowed")
         updated = replace(current, status=status, updated_at=utc_now(), journal_hash="")
+        return self._write(replace(updated, journal_hash=_hash(updated)))
+
+    def bind_rollback(self, operation_id: str, request_hash: str) -> OperationJournal:
+        current = self.load(operation_id)
+        if current.status is not JournalStatus.ROLLING_BACK or current.rollback_request_hash is not None:
+            raise AdapterError("invalid_journal_transition", "rollback request cannot be bound in the current state")
+        _digest(request_hash)
+        updated = replace(current, rollback_request_hash=request_hash, updated_at=utc_now(), journal_hash="")
         return self._write(replace(updated, journal_hash=_hash(updated)))
 
     def load(self, operation_id: str) -> OperationJournal:
@@ -164,24 +188,33 @@ def _bytes(journal: OperationJournal) -> bytes:
 
 
 def _decode(value: object) -> OperationJournal:
-    if not isinstance(value, dict) or value.get("schema_version") != "1.0":
+    if not isinstance(value, dict) or value.get("schema_version") != "1.1":
         raise ValueError("unsupported journal schema")
     targets_value = value["targets"]
     if not isinstance(targets_value, list):
         raise ValueError("targets must be a list")
     targets = tuple(JournalTarget(_text(item, "target"), _optional_digest(item, "before_hash"), _required_digest(item, "after_hash")) for item in targets_value)
-    return OperationJournal(
+    journal = OperationJournal(
         operation_id=_text(value, "operation_id"),
-        schema_version="1.0",
+        schema_version="1.1",
         plan_id=_text(value, "plan_id"),
         host_id=_text(value, "host_id"),
         change_set_hash=_text(value, "change_set_hash"),
+        approval_id=_optional_text(value, "approval_id"),
+        backup_id=_optional_text(value, "backup_id"),
+        manifest_hash=_optional_digest(value, "manifest_hash"),
+        request_hash=_optional_digest(value, "request_hash"),
+        rollback_request_hash=_optional_digest(value, "rollback_request_hash"),
         status=JournalStatus(_text(value, "status")),
         targets=targets,
         created_at=_time(value, "created_at"),
         updated_at=_time(value, "updated_at"),
         journal_hash=_required_digest(value, "journal_hash"),
     )
+    bindings = (journal.approval_id, journal.backup_id, journal.manifest_hash, journal.request_hash)
+    if any(item is not None for item in bindings) and not all(item is not None for item in bindings):
+        raise ValueError("incomplete privileged journal binding")
+    return journal
 
 
 def _text(value: object, key: str) -> str:
@@ -210,6 +243,15 @@ def _optional_digest(value: object, key: str) -> str | None:
     if not isinstance(item, str):
         raise ValueError(f"invalid {key}")
     return _digest(item)
+
+
+def _optional_text(value: object, key: str) -> str | None:
+    if not isinstance(value, dict):
+        raise ValueError("invalid journal")
+    item = value.get(key)
+    if item is not None and (not isinstance(item, str) or not item):
+        raise ValueError(f"invalid {key}")
+    return item
 
 
 def _digest(value: str) -> str:
