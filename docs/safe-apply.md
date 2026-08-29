@@ -135,6 +135,8 @@ user側からremote helperへ渡す境界は`create_recovery_copy`だけを許�
 
 user-only stagingはremote home基準の`.local/state/llm-manager/remote-helper/<request-id>/<request-hash>`へ固定し、directory/private file作成をSSH runner契約へ委譲する。復元itemをindex/hash由来名で先に転送し、`request.json`を最後に転送するため、helperは部分転送を正式requestとして扱わない。helper起動へ渡す値はrequest ID/hashだけで、resultは同じ操作directoryの固定`result.json`からbounded readする。staging cleanupはreceipt永続化後の明示操作とし、切断時の照合材料を先に消さない。
 
+OpenSSH staging runnerはsystem `ssh`/`scp`をshellなしの固定argvで起動し、ユーザーのOpenSSH alias、Agent、ProxyJump、ControlPathを利用する。upload内容は0700 runtime配下の一時directoryに0600で置き、argvやlogへ含めない。remote pathは固定staging root内の相対pathだけを許す。root helper起動はfile transferから分離したinvokerがpasswordlessまたは外部端末対話sudoを選び、runner自身は`sudo -n`へ短絡しない。
+
 remote sandbox retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、symlink、非regular fileがあれば一部削除を始めず拒否する。実remote helperへはまだretention operationを公開しない。
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。
