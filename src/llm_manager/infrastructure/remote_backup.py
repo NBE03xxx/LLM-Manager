@@ -299,6 +299,19 @@ class RemoteRootRecoveryStore:
         self._verify_file_metadata(directory / "retention.json", 1024 * 1024)
         return updated
 
+    def delete(
+        self, manifest: BackupManifest, cancellation: CancellationToken
+    ) -> None:
+        """Delete one explicitly selected, verified, unprotected remote copy."""
+        _cancel(cancellation)
+        receipt = self.load(manifest, cancellation)
+        record = self._load_retention(self._directory(manifest), receipt)
+        if manifest.protected or record.protected:
+            raise AdapterError("protected_backup", "protected remote backup cannot be deleted")
+        directory = self._directory(manifest)
+        self._validate_backup_directory(directory)
+        self._remove_backup_directory(directory)
+
     def list_retention(
         self,
         host_id: str,

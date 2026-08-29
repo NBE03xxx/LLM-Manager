@@ -247,6 +247,22 @@ class LocalBackupStore:
         self._manifests[key] = updated
         return updated
 
+    def delete(self, manifest: BackupManifest, cancellation: CancellationToken) -> None:
+        """Delete one explicitly selected, verified, unprotected local backup."""
+        _cancel(cancellation)
+        if manifest.protected:
+            raise AdapterError("protected_backup", "protected backup cannot be deleted")
+        if not Path(manifest.storage_location).exists():
+            raise AdapterError("backup_not_found", "local backup was already absent")
+        results = self.verify(manifest, cancellation)
+        if not results or any(item.status is not ValidationStatus.PASSED for item in results):
+            raise AdapterError("invalid_backup", "local backup must verify before deletion")
+        directory = Path(manifest.storage_location).resolve()
+        if not _within(directory, self.root):
+            raise AdapterError("invalid_backup", "local backup is outside its store")
+        _remove_backup_tree(directory)
+        self._manifests.pop((manifest.host_id, manifest.backup_id), None)
+
     def prune(self, host_id: str, now: datetime | None = None, keep_generations: int = 10) -> tuple[str, ...]:
         """Remove expired/excess unprotected backups while retaining one recovery point."""
         current = now or utc_now()
@@ -500,6 +516,9 @@ def _remove_backup_tree(directory: Path) -> None:
     # The store creates a fixed two-level layout; reject links and unexpected directories.
     if directory.is_symlink() or not directory.is_dir():
         raise AdapterError("invalid_backup", f"unsafe backup directory: {directory}")
+    allowed = {"items", "manifest.json"}
+    if {item.name for item in directory.iterdir()} - allowed:
+        raise AdapterError("invalid_backup", "unexpected backup entry prevents deletion")
     items = directory / "items"
     if items.exists():
         if items.is_symlink() or not items.is_dir():
