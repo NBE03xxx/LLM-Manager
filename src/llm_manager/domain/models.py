@@ -415,6 +415,7 @@ class ApprovalRecord:
             and self.change_set_hash == plan.change_set.content_hash
             and self.backup_policy_hash == plan.backup_policy.content_hash
             and (plan.backup_policy.enabled or self.plaintext_backup_acknowledged)
+            and (plan.expires_at is None or current < plan.expires_at)
             and (self.expires_at is None or current < self.expires_at)
         )
 

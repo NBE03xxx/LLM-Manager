@@ -94,6 +94,8 @@ Helper replay receipt実装: root-only receipt directoryへoperation IDを`O_EXC
 
 Local PolicyKit invoker実装: requestに必要な全contentをhash検証付きでstageした後、canonical requestを最後にimmutable stageし、`/usr/bin/pkexec /usr/bin/llm-manager-helper <operation-id> <request-hash>`の固定argvだけをrunnerへ渡す。helper結果は1 MiB以下のcanonical JSON、operation ID/kind/order/exit status一致を検証する。timeout、PolicyKit deny/dismiss、launch failure、helper failureをstable error codeへ分離した。単体テストはfake runnerのみで、実認証は起動していない。
 
+Approved privileged apply境界実装: `ApprovalRecord.is_valid_for`へplan期限も追加し、plan/report/change-set/backup-policy/plaintext acknowledgement/plan期限/approval期限の一致をhelper request生成前に再検証する。MVPの単一Ollama専用drop-in root changeだけを`atomic_replace → daemon_reload → restart ollama.service`へ変換し、request期限をplan・approval・5分の最短値に束縛する。allowlist外path、非root/mixed/複数change、欠落restart/reloadをPolicyKit呼出し前に拒否する。
+
 暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。SecretStorage adapterはdefault collection、属性検索、OS unlock prompt、32-byte master keyのcreate/reuse、競合時再読込、cancel/timeout/unavailable停止を実装した。現在の開発環境にはSecretStorage依存が未導入のため、実desktop keyring Gateは引き続き残作業である。
 
 Backup設定実装: 一般配布buildは暗号化ON、明示的development buildはOFFを初回既定とし、保存済みユーザー選択が存在すればbuild既定で上書きしない。設定は0600、親directoryは0700、canonical schemaで保存する。暗号化OFFのApplyは`ApprovalRecord.plaintext_backup_acknowledged=true`がなければ拒否する。

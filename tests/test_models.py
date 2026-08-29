@@ -1,5 +1,5 @@
 import unittest
-from dataclasses import FrozenInstanceError
+from dataclasses import FrozenInstanceError, replace
 from datetime import UTC, datetime, timedelta
 
 from llm_manager.domain.enums import ChangeOperation, HostKind, ProbeStatus, ValidationStatus
@@ -104,6 +104,14 @@ class ApprovalTests(unittest.TestCase):
             backup_policy_hash=item.backup_policy.content_hash,
             plaintext_backup_acknowledged=True,
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
+        )
+        self.assertFalse(approval.is_valid_for(item))
+
+    def test_expired_plan_invalidates_approval(self) -> None:
+        item = replace(plan(), expires_at=datetime.now(UTC) - timedelta(seconds=1))
+        approval = ApprovalRecord(
+            "approval", item.plan_id, item.report_hash, item.change_set.content_hash,  # type: ignore[union-attr]
+            "tester", item.backup_policy.content_hash, True,
         )
         self.assertFalse(approval.is_valid_for(item))
 
