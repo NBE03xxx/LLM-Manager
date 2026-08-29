@@ -19,7 +19,7 @@
 | AC-09/10 | ADR-0003, architecture | `ArchitectureTests`（domain依存境界）、Phase 5でQt event-loop | Phase 1完了/5 |
 | AC-13/14 | allowlist, ADR-0004/0005 | unknown version denial、`LocalOperationJournalTests`（before/after/unknown）、remote統合待ち | Phase 4一部完了 |
 | SSH helper prerequisite | ADR-0008, version matrix | absent/incompatible/owner-mode/package tests | Phase 2/4 |
-| Backup crypto/recovery | ADR-0009, threat model | `BackupCryptoTests`, `SecretServiceKeyProviderTests`, `LocalBackupStoreTests`, `CoordinatorTests`（AES-GCM/AAD/nonce/tamper/key scope/size/key create-reuse/cancel/restore/approval invalidation）、desktop keyring Gate・remote統合待ち | Phase 4一部完了 |
+| Backup crypto/recovery | ADR-0009, threat model | `BackupCryptoTests`, `SecretServiceKeyProviderTests`, `BackupSettingsTests`, `LocalBackupStoreTests`, `CoordinatorTests`（AES-GCM/AAD/nonce/tamper/key scope/size/key create-reuse/cancel/build default/user persistence/plaintext acknowledgement/restore/approval invalidation）、desktop keyring Gate・remote統合待ち | Phase 4一部完了 |
 | Endpoint confinement | ADR-0010, setting allowlist | loopback allow、external/redirect/userinfo deny | Phase 3/4 |
 | OpenCode safe edit | ADR-0011, setting allowlist | scalar span、comment、escape、byte-diff fixtures | Phase 3/4 |
 

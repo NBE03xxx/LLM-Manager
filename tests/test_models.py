@@ -67,6 +67,18 @@ class ModelInvariantTests(unittest.TestCase):
 
 
 class ApprovalTests(unittest.TestCase):
+    def test_plaintext_backup_requires_explicit_acknowledgement(self) -> None:
+        item = plan()
+        approval = ApprovalRecord(
+            "approval-1",
+            item.plan_id,
+            item.report_hash,
+            item.change_set.content_hash,  # type: ignore[union-attr]
+            "tester",
+            item.backup_policy.content_hash,
+        )
+        self.assertFalse(approval.is_valid_for(item))
+
     def test_approval_is_bound_to_plan_and_hashes(self) -> None:
         item = plan()
         approval = ApprovalRecord(
@@ -76,6 +88,7 @@ class ApprovalTests(unittest.TestCase):
             change_set_hash=item.change_set.content_hash,  # type: ignore[union-attr]
             actor="tester",
             backup_policy_hash=item.backup_policy.content_hash,
+            plaintext_backup_acknowledged=True,
             expires_at=datetime.now(UTC) + timedelta(minutes=1),
         )
         self.assertTrue(approval.is_valid_for(item))
@@ -89,6 +102,7 @@ class ApprovalTests(unittest.TestCase):
             change_set_hash="changes-hash",
             actor="tester",
             backup_policy_hash=item.backup_policy.content_hash,
+            plaintext_backup_acknowledged=True,
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
         )
         self.assertFalse(approval.is_valid_for(item))

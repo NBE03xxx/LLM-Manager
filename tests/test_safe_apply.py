@@ -197,7 +197,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             store = LocalBackupStore(root / "backups", (root,))
             coordinator = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), FileValidator())
             outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -217,7 +217,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             store = _RestoreFailStore(LocalBackupStore(root / "backups", (root,)))
             outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
             self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
@@ -229,7 +229,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             store = _RestoreExceptionStore(LocalBackupStore(root / "backups", (root,)))
             outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
             self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
@@ -242,7 +242,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", "wrong-plan", current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", "wrong-plan", current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
             with self.assertRaises(AdapterError):
                 coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -254,7 +254,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             original = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", original.plan_id, original.report_hash, changes.content_hash, "tester", original.backup_policy.content_hash)
+            approval = ApprovalRecord("a", original.plan_id, original.report_hash, changes.content_hash, "tester", original.backup_policy.content_hash, True)
             encrypted = replace(original, backup_policy=EncryptionInfo(True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service"))
             coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
             with self.assertRaises(AdapterError):
@@ -267,7 +267,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
             with patch("llm_manager.infrastructure.safe_apply._atomic_write", side_effect=OSError("injected write failure")):
                 outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -281,7 +281,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             audit = FakeAuditAdapter()
             coordinator = SafeApplyCoordinator(_BackupFailStore(), AtomicFileExecutor((root,)), FileValidator(), audit)
             outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -296,7 +296,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             journal = LocalOperationJournal(root / "journal", (root,))
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),
@@ -316,7 +316,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             journal = LocalOperationJournal(root / "journal", (root,))
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),
@@ -336,7 +336,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
             audit = LocalAuditLog(root / "audit")
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),

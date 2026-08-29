@@ -402,6 +402,7 @@ class ApprovalRecord:
     change_set_hash: str
     actor: str
     backup_policy_hash: str = ""
+    plaintext_backup_acknowledged: bool = False
     approved_at: datetime = field(default_factory=utc_now)
     expires_at: datetime | None = None
 
@@ -413,6 +414,7 @@ class ApprovalRecord:
             and self.report_hash == plan.report_hash
             and self.change_set_hash == plan.change_set.content_hash
             and self.backup_policy_hash == plan.backup_policy.content_hash
+            and (plan.backup_policy.enabled or self.plaintext_backup_acknowledged)
             and (self.expires_at is None or current < self.expires_at)
         )
 
