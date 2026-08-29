@@ -13,6 +13,7 @@ from llm_manager.adapters.fakes import FakeAuditAdapter
 from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
 from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, LocalizedMessage, ValidationResult
 from llm_manager.infrastructure.backup import LocalBackupStore, MAX_ITEM_BYTES
+from llm_manager.infrastructure.audit import LocalAuditLog
 from llm_manager.infrastructure.journal import JournalStatus, LocalOperationJournal, ReconciliationState
 from llm_manager.infrastructure.safe_apply import AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from tests.fixtures import plan
@@ -290,6 +291,28 @@ class CoordinatorTests(unittest.TestCase):
             self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
             self.assertEqual(journal.load("operation-1").status, JournalStatus.ROLLED_BACK)
             self.assertEqual(journal.reconcile("operation-1")[0].state, ReconciliationState.UNAPPLIED)
+
+    def test_persistent_audit_records_redacted_workflow(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            audit = LocalAuditLog(root / "audit")
+            coordinator = SafeApplyCoordinator(
+                LocalBackupStore(root / "backups", (root,)),
+                AtomicFileExecutor((root,)),
+                FileValidator(),
+                audit=audit,
+            )
+            outcome = coordinator.execute(current_plan, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.COMMITTED)
+            self.assertEqual(
+                [event.event_type for event in audit.read_all()],
+                ["apply.approved", "backup.verified", "apply.committed"],
+            )
 
 
 class _FailValidator(FileValidator):

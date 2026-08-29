@@ -182,10 +182,10 @@ class SafeApplyCoordinator:
             machine = machine.transition_to(PlanStatus.VALIDATING)
             validations = self.validator.validate(applied, cancellation)
             if _passed(validations):
+                self._audit("apply.committed", plan, (("backup_id", backup_id),))
                 if not self._journal_update(operation_id, JournalStatus.COMMITTED):
                     return self._rollback(machine, manifest, cancellation, validations, "journal commit failed", plan, operation_id)
                 outcome = ApplyOutcome(machine.transition_to(PlanStatus.COMMITTED).status, manifest, validations)
-                self._audit("apply.committed", plan, (("backup_id", backup_id),))
                 return outcome
             return self._rollback(machine, manifest, cancellation, validations, "validation failed", plan, operation_id)
         except (AdapterError, OSError, OperationCancelled) as error:
@@ -206,9 +206,11 @@ class SafeApplyCoordinator:
         except (AdapterError, OSError, OperationCancelled) as restore_error:
             restored = (_result("rollback.exception", False, "restored", getattr(restore_error, "code", type(restore_error).__name__)),)
             status = PlanStatus.RECOVERY_REQUIRED
-        machine = machine.transition_to(status)
+        event_type = "rollback.completed" if status is PlanStatus.ROLLED_BACK else "rollback.recovery_required"
+        if not self._try_audit(event_type, plan, (("backup_id", manifest.backup_id),)):
+            status = PlanStatus.RECOVERY_REQUIRED
         self._journal_update(operation_id, JournalStatus.ROLLED_BACK if status is PlanStatus.ROLLED_BACK else JournalStatus.RECOVERY_REQUIRED)
-        self._audit("rollback.completed" if status is PlanStatus.ROLLED_BACK else "rollback.recovery_required", plan, (("backup_id", manifest.backup_id),))
+        machine = machine.transition_to(status)
         return ApplyOutcome(machine.status, manifest, validations + restored, error)
 
     def _audit(self, event_type: str, plan: OptimizationPlan | None, fields: tuple[tuple[str, object], ...]) -> None:
@@ -217,6 +219,13 @@ class SafeApplyCoordinator:
         correlation_id = plan.plan_id if plan is not None else "safe-apply"
         base = (("plan_id", plan.plan_id), ("host_id", plan.change_set.host_id if plan and plan.change_set else None)) if plan else ()
         self.audit.append(event_type, correlation_id, base + fields)
+
+    def _try_audit(self, event_type: str, plan: OptimizationPlan, fields: tuple[tuple[str, object], ...]) -> bool:
+        try:
+            self._audit(event_type, plan, fields)
+            return True
+        except (AdapterError, OSError):
+            return False
 
     def _journal_update(self, operation_id: str, status: JournalStatus) -> bool:
         if self.journal is None:

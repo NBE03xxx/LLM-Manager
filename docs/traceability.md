@@ -14,7 +14,7 @@
 | FR-APPLY-01 | ADR-0004, allowlist | `AtomicExecutorTests`, `CoordinatorTests`（path/symlink/stale/write failure）、helper/restart待ち | Phase 4一部完了 |
 | FR-VALIDATE-01 | allowlist, version matrix | `FileValidatorTests`, `CoordinatorTests`（file hash/JSONC/systemd drop-in構文）、service/API/effective config待ち | Phase 4一部完了 |
 | FR-ROLLBACK-01 | ADR-0005, threat model | `CoordinatorTests`（逆順restore/recovery required）、disconnect待ち | Phase 4一部完了 |
-| FR-AUDIT-01 | threat model | `CoordinatorTests`, `LocalOperationJournalTests`（redacted event、atomic journal、tamper/replay/state reconciliation）、audit log永続化待ち | Phase 4一部完了 |
+| FR-AUDIT-01 | threat model | `LocalAuditLogTests`, `CoordinatorTests`, `LocalOperationJournalTests`（redaction、hash-chain永続化、tamper/deletion/replay/state reconciliation） | Phase 4 core完了 |
 | FR-I18N-01..02 | ADR-0006, gui | ja/en/fallback/key completeness/layout | Phase 5 |
 | AC-09/10 | ADR-0003, architecture | `ArchitectureTests`（domain依存境界）、Phase 5でQt event-loop | Phase 1完了/5 |
 | AC-13/14 | allowlist, ADR-0004/0005 | unknown version denial、`LocalOperationJournalTests`（before/after/unknown）、remote統合待ち | Phase 4一部完了 |
