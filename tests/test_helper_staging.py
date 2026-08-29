@@ -41,6 +41,11 @@ class HelperStagingTests(unittest.TestCase):
         self.assertEqual(self.store.verify(request, request.operations[0]), content)
         self.assertEqual(path.stat().st_mode & 0o777, 0o600)
         self.assertEqual(path.parent.stat().st_mode & 0o777, 0o700)
+        request_path = self.store.stage_request(request)
+        self.assertEqual(request_path, path.parent / "request.json")
+        self.assertEqual(request_path.stat().st_mode & 0o777, 0o600)
+        with self.assertRaises(AdapterError):
+            self.store.stage_request(request)
         self.store.cleanup("operation-1")
         self.assertFalse(path.parent.exists())
 

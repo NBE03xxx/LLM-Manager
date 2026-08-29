@@ -9,7 +9,7 @@ from llm_manager.application.errors import AdapterError
 from llm_manager.domain.models import utc_now
 
 from .backup import MAX_ITEM_BYTES, _atomic_write, _fsync_directory, _within
-from .helper_protocol import HelperOperation, HelperOperationKind, HelperRequest, validate_request
+from .helper_protocol import HelperOperation, HelperOperationKind, HelperRequest, encode_request, validate_request
 
 
 class HelperStagingStore:
@@ -36,6 +36,15 @@ class HelperStagingStore:
         _atomic_write(path, content, 0o600)
         return path
 
+    def stage_request(self, request: HelperRequest) -> Path:
+        validate_request(request, request.request_hash, now=utc_now())
+        directory = self._operation_directory(request.operation_id, create=True)
+        path = directory / "request.json"
+        if path.exists() or path.is_symlink():
+            raise AdapterError("staged_request_exists", "helper request is immutable once written")
+        _atomic_write(path, encode_request(request), 0o600)
+        return path
+
     def verify(self, request: HelperRequest, operation: HelperOperation) -> bytes:
         validate_request(request, request.request_hash, now=utc_now())
         if operation.kind not in {HelperOperationKind.ATOMIC_REPLACE, HelperOperationKind.RESTORE_FILE}:
@@ -58,7 +67,7 @@ class HelperStagingStore:
         directory = self._operation_directory(operation_id, create=False)
         entries = tuple(directory.iterdir())
         for path in entries:
-            if path.is_symlink() or not path.is_file() or path.suffix != ".content":
+            if path.is_symlink() or not path.is_file() or (path.suffix != ".content" and path.name != "request.json"):
                 raise AdapterError("unsafe_staging", "unexpected staging entry prevents cleanup")
         for path in entries:
             path.unlink()
