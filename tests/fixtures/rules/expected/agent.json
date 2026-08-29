@@ -1,0 +1,80 @@
+[
+  {
+    "actionable": true,
+    "confidence": "high",
+    "conflicts_with": [],
+    "current_value": false,
+    "evidence": [["opencode_version", "1.18.25"], ["current", false]],
+    "impact": {
+      "arguments": [],
+      "fallback_text": "recommendation.agent_compaction.impact",
+      "message_key": "recommendation.agent_compaction.impact"
+    },
+    "reason": {
+      "arguments": [["setting", "compaction.auto"]],
+      "fallback_text": "recommendation.agent_compaction.reason",
+      "message_key": "recommendation.agent_compaction.reason"
+    },
+    "recommendation_id": "agent.compaction.auto:agent",
+    "recommended_value": true,
+    "requires_restart": false,
+    "requires_root": false,
+    "risk": {
+      "message": {
+        "arguments": [],
+        "fallback_text": "recommendation.agent_compaction.risk",
+        "message_key": "recommendation.agent_compaction.risk"
+      },
+      "mitigations": [{
+        "arguments": [],
+        "fallback_text": "recommendation.backup_and_validate",
+        "message_key": "recommendation.backup_and_validate"
+      }],
+      "severity": "low"
+    },
+    "rule_id": "agent.compaction.auto",
+    "rule_version": 1,
+    "setting_key": "compaction.auto",
+    "severity": "medium",
+    "target": "/home/test/.config/opencode/opencode.jsonc"
+  },
+  {
+    "actionable": true,
+    "confidence": "high",
+    "conflicts_with": [],
+    "current_value": false,
+    "evidence": [["opencode_version", "1.18.25"], ["current", false]],
+    "impact": {
+      "arguments": [],
+      "fallback_text": "recommendation.agent_compaction.impact",
+      "message_key": "recommendation.agent_compaction.impact"
+    },
+    "reason": {
+      "arguments": [["setting", "compaction.prune"]],
+      "fallback_text": "recommendation.agent_compaction.reason",
+      "message_key": "recommendation.agent_compaction.reason"
+    },
+    "recommendation_id": "agent.compaction.prune:agent",
+    "recommended_value": true,
+    "requires_restart": false,
+    "requires_root": false,
+    "risk": {
+      "message": {
+        "arguments": [],
+        "fallback_text": "recommendation.agent_compaction.risk",
+        "message_key": "recommendation.agent_compaction.risk"
+      },
+      "mitigations": [{
+        "arguments": [],
+        "fallback_text": "recommendation.backup_and_validate",
+        "message_key": "recommendation.backup_and_validate"
+      }],
+      "severity": "low"
+    },
+    "rule_id": "agent.compaction.prune",
+    "rule_version": 1,
+    "setting_key": "compaction.prune",
+    "severity": "medium",
+    "target": "/home/test/.config/opencode/opencode.jsonc"
+  }
+]

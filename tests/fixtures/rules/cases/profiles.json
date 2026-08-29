@@ -1,0 +1,9 @@
+{
+  "catalog_version": "1.0.0",
+  "report_fixture": "baseline-opencode-1.18.25",
+  "cases": [
+    {"profile": "balanced", "expected": "balanced.json"},
+    {"profile": "coding", "expected": "coding.json"},
+    {"profile": "agent", "expected": "agent.json"}
+  ]
+}

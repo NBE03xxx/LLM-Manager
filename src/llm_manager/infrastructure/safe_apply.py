@@ -1,0 +1,165 @@
+from __future__ import annotations
+
+import hashlib
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+from llm_manager.application.errors import AdapterError, OperationCancelled
+from llm_manager.application.ports import BackupRequest, BackupStorePort, CancellationToken
+from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
+from llm_manager.domain.models import ApprovalRecord, BackupManifest, Change, ChangeSet, LocalizedMessage, OptimizationPlan, ValidationResult
+from llm_manager.domain.workflow import PlanStateMachine
+
+from .backup import MAX_ITEM_BYTES, _atomic_write, _fsync_directory, _within
+
+
+@dataclass(frozen=True, slots=True)
+class AppliedFile:
+    target: str
+    sha256: str
+
+
+class AtomicFileExecutor:
+    """Applies an approved user-level ChangeSet within explicit sandbox roots."""
+
+    def __init__(self, allowed_roots: tuple[Path, ...]) -> None:
+        self.allowed_roots = tuple(root.resolve() for root in allowed_roots)
+
+    def apply(self, change_set: ChangeSet, cancellation: CancellationToken) -> tuple[AppliedFile, ...]:
+        grouped: dict[str, list[Change]] = {}
+        for change in change_set.changes:
+            if change.requires_root or change.operation not in {ChangeOperation.CREATE_FILE, ChangeOperation.REPLACE_FILE}:
+                raise AdapterError("unsupported_change", "atomic user executor accepts only non-root file writes")
+            grouped.setdefault(change.target, []).append(change)
+        applied: list[AppliedFile] = []
+        for target_text, changes in grouped.items():
+            _cancel(cancellation)
+            target = self._target(target_text)
+            content = self._current(target, changes)
+            rendered = self._render(content, changes)
+            if len(rendered) > MAX_ITEM_BYTES:
+                raise AdapterError("item_too_large", "rendered target exceeds 16 MiB")
+            mode = (target.stat().st_mode & 0o7777) if target.exists() else 0o600
+            _atomic_write(target, rendered, mode)
+            applied.append(AppliedFile(str(target), hashlib.sha256(rendered).hexdigest()))
+        return tuple(applied)
+
+    def _target(self, text: str) -> Path:
+        path = Path(text)
+        if not path.is_absolute() or path.is_symlink():
+            raise AdapterError("invalid_target", "target must be an absolute non-symlink path")
+        parent = path.parent.resolve()
+        if not any(_within(parent, root) for root in self.allowed_roots):
+            raise AdapterError("target_not_allowed", "target is outside allowed roots")
+        return parent / path.name
+
+    def _current(self, target: Path, changes: list[Change]) -> bytes:
+        hashes = {change.before_hash for change in changes}
+        if len(hashes) != 1:
+            raise AdapterError("inconsistent_precondition", "changes for one target have different before hashes")
+        expected = next(iter(hashes))
+        if target.exists():
+            if not target.is_file():
+                raise AdapterError("unsupported_target", "target is not a regular file")
+            content = target.read_bytes()
+            actual = hashlib.sha256(content).hexdigest()
+            if expected is None or actual != expected:
+                raise AdapterError("stale_plan", "target content changed after planning")
+            return content
+        if expected is not None or any(change.operation is not ChangeOperation.CREATE_FILE for change in changes):
+            raise AdapterError("stale_plan", "target existence changed after planning")
+        return b""
+
+    @staticmethod
+    def _render(content: bytes, changes: list[Change]) -> bytes:
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise AdapterError("unsupported_encoding", "target is not UTF-8") from error
+        spans: list[tuple[int, int, str]] = []
+        for change in changes:
+            if change.replacement_text is None:
+                raise AdapterError("missing_replacement", "file change has no replacement text")
+            span = change.source_span or (0, len(text))
+            spans.append((span[0], span[1], change.replacement_text))
+        spans.sort(reverse=True)
+        previous_start = len(text) + 1
+        for start, end, replacement in spans:
+            if end > len(text) or end > previous_start:
+                raise AdapterError("overlapping_changes", "source spans overlap or exceed target")
+            text = text[:start] + replacement + text[end:]
+            previous_start = start
+        return text.encode("utf-8")
+
+
+class FileValidator:
+    def validate(self, applied: tuple[AppliedFile, ...], cancellation: CancellationToken) -> tuple[ValidationResult, ...]:
+        results: list[ValidationResult] = []
+        for item in applied:
+            _cancel(cancellation)
+            path = Path(item.target)
+            actual = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() and not path.is_symlink() else None
+            passed = actual == item.sha256
+            results.append(_result(f"file:{item.target}", passed, item.sha256, actual))
+        return tuple(results)
+
+
+@dataclass(frozen=True, slots=True)
+class ApplyOutcome:
+    status: PlanStatus
+    manifest: BackupManifest | None
+    validations: tuple[ValidationResult, ...] = ()
+    error: str | None = None
+
+
+class SafeApplyCoordinator:
+    def __init__(self, backups: BackupStorePort, executor: AtomicFileExecutor, validator: FileValidator) -> None:
+        self.backups = backups
+        self.executor = executor
+        self.validator = validator
+
+    def execute(self, plan: OptimizationPlan, approval: ApprovalRecord, backup_id: str, cancellation: CancellationToken) -> ApplyOutcome:
+        if plan.change_set is None or not approval.is_valid_for(plan):
+            raise AdapterError("invalid_approval", "approval does not match the current plan")
+        machine = PlanStateMachine(plan.plan_id, PlanStatus.APPROVED)
+        manifest: BackupManifest | None = None
+        try:
+            manifest = self.backups.create(BackupRequest(backup_id, plan.plan_id, plan.change_set.host_id, None, plan.change_set), cancellation)
+            backup_checks = self.backups.verify(manifest, cancellation)
+            if not _passed(backup_checks):
+                return ApplyOutcome(PlanStatus.APPROVED, manifest, backup_checks, "backup verification failed")
+            machine = machine.transition_to(PlanStatus.BACKED_UP).transition_to(PlanStatus.APPLYING)
+            applied = self.executor.apply(plan.change_set, cancellation)
+            machine = machine.transition_to(PlanStatus.VALIDATING)
+            validations = self.validator.validate(applied, cancellation)
+            if _passed(validations):
+                return ApplyOutcome(machine.transition_to(PlanStatus.COMMITTED).status, manifest, validations)
+            return self._rollback(machine, manifest, cancellation, validations, "validation failed")
+        except (AdapterError, OSError, OperationCancelled) as error:
+            if manifest is None or machine.status is PlanStatus.APPROVED:
+                return ApplyOutcome(machine.status, manifest, error=str(error))
+            return self._rollback(machine, manifest, cancellation, (), str(error))
+
+    def _rollback(self, machine: PlanStateMachine, manifest: BackupManifest, cancellation: CancellationToken, validations: tuple[ValidationResult, ...], error: str) -> ApplyOutcome:
+        if machine.status is PlanStatus.VALIDATING:
+            machine = machine.transition_to(PlanStatus.ROLLING_BACK)
+        elif machine.status is PlanStatus.APPLYING:
+            machine = machine.transition_to(PlanStatus.ROLLING_BACK)
+        restored = self.backups.restore(manifest, cancellation)
+        status = PlanStatus.ROLLED_BACK if _passed(restored) else PlanStatus.RECOVERY_REQUIRED
+        machine = machine.transition_to(status)
+        return ApplyOutcome(machine.status, manifest, validations + restored, error)
+
+
+def _passed(results: tuple[ValidationResult, ...]) -> bool:
+    return bool(results) and all(item.status is ValidationStatus.PASSED for item in results)
+
+
+def _cancel(cancellation: CancellationToken) -> None:
+    if cancellation.cancelled:
+        raise OperationCancelled("safe apply cancelled")
+
+
+def _result(check: str, passed: bool, expected: str | None, actual: str | None) -> ValidationResult:
+    return ValidationResult(check, "file", check, ValidationStatus.PASSED if passed else ValidationStatus.FAILED, expected, actual, Severity.INFO if passed else Severity.HIGH, LocalizedMessage(f"validation.{check}"))
