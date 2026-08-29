@@ -137,7 +137,15 @@ class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
             remote.create(current, (restore,), CancellationToken())
             manifests.append(current)
         remote.set_protected(manifests[0], True)
-        removed = remote.prune("ssh:gpu-box", now=start + timedelta(days=12))
+        with self.assertRaises(AdapterError):
+            remote.prune(
+                "ssh:gpu-box", now=start + timedelta(days=12),
+                expected_fingerprint="SHA256:" + "b" * 43,
+            )
+        removed = remote.prune(
+            "ssh:gpu-box", now=start + timedelta(days=12),
+            expected_fingerprint=manifest.host_fingerprint,
+        )
         self.assertEqual(removed, ("retention-1",))
         records = remote.list_retention("ssh:gpu-box")
         self.assertEqual(len(records), 11)

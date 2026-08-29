@@ -147,7 +147,9 @@ OpenSSH staging runnerはsystem `ssh`/`scp`をshellなしの固定argvで起動�
 
 remote sudo invokerは最初に固定`sudo -n -v`だけでpasswordless可否を調べる。成功時は同じOpenSSH経路で限定helperを非対話実行し、helper failureをそのまま失敗として扱う。probe失敗時だけ外部端末を開き、`ssh -t`内のsudoへ認証入力を委譲する。アプリは端末stdinへ接続せず、固定resultの完成を期限・cancel付きで観測する。これによりhelper実行失敗を認証要求と誤認して二重実行しない。
 
-remote retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、owner/mode不一致、symlink、非regular fileがあれば一部削除を始めず拒否する。実remote helperへはまだretention operationを公開しない。
+remote retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、owner/mode不一致、symlink、非regular fileがあれば一部削除を始めず拒否する。
+
+限定`invoke-retention <request-id> <request-hash>` operationはuser stagingのcanonical requestをroot側で再読込し、host ID/fingerprint、request hash、5分以下の期限と現在時刻を検証する。保持世代数や任意pathはrequestに含めず10世代へ固定する。全receiptのhost fingerprintを削除前に照合し、canonical resultへroot評価時刻、removed/remaining backup ID、`completed/partial/failed/unknown`を束縛する。削除途中失敗後はread-only再一覧だけを行い、再一覧も不可能ならunknownとして自動再削除しない。resultはuser stagingへ0600 immutable保存するため、SSH timeout等でinvoke結果が曖昧でも同じrequest identityから再読込・検証する。OpenSSHはhelper互換性再検証後の固定passwordless sudoだけを使う。fake統合まで完了し、実SSH先では未実行である。
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。
 

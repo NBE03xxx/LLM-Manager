@@ -299,7 +299,12 @@ class RemoteRootRecoveryStore:
         self._verify_file_metadata(directory / "retention.json", 1024 * 1024)
         return updated
 
-    def list_retention(self, host_id: str) -> tuple[RemoteRetentionRecord, ...]:
+    def list_retention(
+        self,
+        host_id: str,
+        *,
+        expected_fingerprint: str | None = None,
+    ) -> tuple[RemoteRetentionRecord, ...]:
         host_root = self.root / _safe_component(host_id)
         if not host_root.exists():
             return ()
@@ -312,6 +317,14 @@ class RemoteRootRecoveryStore:
                 raise AdapterError("invalid_remote_retention", "remote backup entry is unsafe")
             self._verify_directory_metadata(directory)
             receipt = self._load_receipt_unbound(directory)
+            if (
+                receipt.host_id != host_id
+                or expected_fingerprint is not None
+                and receipt.host_fingerprint != expected_fingerprint
+            ):
+                raise AdapterError(
+                    "invalid_remote_retention", "remote receipt host identity is invalid"
+                )
             record = self._load_retention(directory, receipt)
             if record.host_id != host_id or record.backup_id != directory.name:
                 raise AdapterError("invalid_remote_retention", "remote retention identity is invalid")
@@ -319,11 +332,16 @@ class RemoteRootRecoveryStore:
         return tuple(sorted(records, key=lambda item: item.created_at, reverse=True))
 
     def prune(
-        self, host_id: str, *, now: datetime, keep_generations: int = 10
+        self,
+        host_id: str,
+        *,
+        now: datetime,
+        keep_generations: int = 10,
+        expected_fingerprint: str | None = None,
     ) -> tuple[str, ...]:
         if now.tzinfo is None or keep_generations < 1:
             raise ValueError("remote retention requires timezone and at least one generation")
-        records = self.list_retention(host_id)
+        records = self.list_retention(host_id, expected_fingerprint=expected_fingerprint)
         candidates = [
             item for index, item in enumerate(records)
             if not item.protected

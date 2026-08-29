@@ -102,7 +102,7 @@ User-only SSH staging具体化: remote userの固定相対root `.local/state/llm
 
 Remote sudo invoker実装: system OpenSSHで固定`sudo -n -v`だけをpasswordless probeし、成功時は限定helperを非対話実行する。probe失敗時は外部端末の`ssh -t`内でsudo認証を行い、user stagingの固定result completionをbounded pollする。helper自身の失敗を認証失敗と誤認して再端末起動せず、cancel/timeout/terminal failureを分離する。fake runner/terminalのみで、実remote sudo認証Gateは未実施である。
 
-Remote retention backend実装: immutable receipt hashへ束縛したcanonical retention recordを0600で保存し、hostごと30日かつ直近10世代の未保護copyを古い順に削除する。protected copyと最後の1 copyは自動削除せず、record改ざん、owner/mode、symlink、未知entryがあれば削除前にfail-closedにする。実remote helperのretention operationとproduction配置Gateは未実施である。
+Remote retention backend/helper境界実装: immutable receipt hashへ束縛したcanonical retention recordを0600で保存し、hostごと30日かつ直近10世代の未保護copyを古い順に削除する。protected copyと最後の1 copyは自動削除しない。canonical request/resultはrequest ID/hash、host ID/fingerprint、5分以下の期限、root評価時刻、removed/remaining IDs、completed/partial/failed/unknownを束縛する。世代数はrequest入力にせず10へ固定し、全receipt fingerprint、record hash、owner/mode、symlink、未知entryを削除前に検証する。削除故障後はread-only再一覧し、再一覧不能ならunknownにする。resultはuser stagingへimmutable保存し、SSH invoke結果が曖昧でも再読込・binding検証できる。user staging→限定`invoke-retention` CLI→固定passwordless sudoのfake統合まで完了し、実SSH/production配置Gateは未実施である。
 
 Dual-copy削除後照合core実装: local/remoteを独立にread-only観測し、`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`の表示用状態へ集約する。片側だけ残った場合と観測不能・改ざんはattention requiredとし、自動的に残存copyを追加削除・再作成しない。実際のlocal/remote協調削除commandと再試行UXは未実装である。
 

@@ -18,6 +18,7 @@ from .remote_keys import RemoteRootKeyProvider
 from .remote_helper_executor import RemoteRecoveryHelperExecutor
 from .backup import _within
 from .remote_journal import RemoteRootJournalEvidenceStore, decode_remote_journal_evidence
+from .remote_retention import RemoteRetentionHelperExecutor
 
 
 REMOTE_USER_ROOT = PurePosixPath(".local/state/llm-manager/remote-helper")
@@ -73,6 +74,21 @@ def run_remote_helper(
                 staging_root, backend, invoking_uid
             ).execute(request_id, request_hash, token)
             return 0, _result(True, "invoke-recovery")
+        if len(argv) == 3 and argv[0] == "invoke-retention":
+            if euid != 0:
+                raise AdapterError("root_required", "remote retention invocation requires root")
+            invoking_uid = _invoking_uid(env)
+            request_id, request_hash = argv[1:]
+            if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
+                raise AdapterError("invalid_remote_retention_identity", "retention identity is invalid")
+            if backend is None:
+                raise AdapterError("remote_backend_unavailable", "remote retention backend is unavailable")
+            home = _safe_home(home_lookup(invoking_uid))
+            staging_root = home / Path(REMOTE_USER_ROOT.as_posix())
+            content = RemoteRetentionHelperExecutor(
+                staging_root, backend, invoking_uid
+            ).execute(request_id, request_hash, token)
+            return 0, content
         if len(argv) == 3 and argv[0] == "read-journal-evidence":
             if euid != 0:
                 raise AdapterError("root_required", "remote journal evidence requires root")
@@ -121,7 +137,7 @@ def main(
     backend = None
     journal_loader = None
     resolved_euid = os.geteuid() if effective_uid is None else effective_uid
-    if arguments[:1] == ["invoke-recovery"] and resolved_euid == 0:
+    if arguments[:1] in (["invoke-recovery"], ["invoke-retention"]) and resolved_euid == 0:
         try:
             backend = backend_factory()
         except (AdapterError, OSError, ValueError):
