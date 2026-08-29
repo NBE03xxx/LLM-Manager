@@ -185,6 +185,7 @@ class RemoteJournalReconciler:
     """Reconcile an interrupted SSH operation without retrying any mutation."""
 
     journals: LocalOperationJournal
+    remote_journal: object
 
     def reconcile(
         self,
@@ -210,6 +211,20 @@ class RemoteJournalReconciler:
                 "recovery_binding_mismatch",
                 "journal and backup manifest do not describe the same operation",
             )
+        try:
+            from .remote_journal import decode_remote_journal_evidence, validate_evidence_binding
+            evidence_content = self.remote_journal.load_journal_evidence(
+                operation_id, journal.request_hash, cancellation
+            )
+            evidence = decode_remote_journal_evidence(evidence_content)
+            validate_evidence_binding(evidence, journal, manifest.host_fingerprint)
+        except OperationCancelled:
+            raise
+        except (AdapterError, OSError, ValueError) as error:
+            raise AdapterError(
+                "remote_journal_unverified",
+                "remote root journal could not be verified safely",
+            ) from error
         try:
             identity = host.identify(cancellation)
         except OperationCancelled:

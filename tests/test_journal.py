@@ -8,6 +8,7 @@ from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import CancellationToken, FileStat
 from llm_manager.infrastructure.backup import _manifest_hash
 from llm_manager.infrastructure.journal import JournalStatus, JournalTarget, LocalOperationJournal, ReconciliationState, RemoteJournalReconciler
+from llm_manager.infrastructure.remote_journal import RemoteJournalEvidence, encode_remote_journal_evidence
 from tests.fixtures import host_info, manifest
 
 
@@ -89,7 +90,9 @@ class LocalOperationJournalTests(unittest.TestCase):
             manifest_hash=current_manifest.manifest_hash, request_hash="e" * 64,
         )
         remote = _RemoteHost(current_manifest.host_fingerprint, self.before)
-        reconciler = RemoteJournalReconciler(remote_store)
+        reconciler = RemoteJournalReconciler(
+            remote_store, _EvidencePort(remote_store, current_manifest.host_fingerprint)
+        )
         result = reconciler.reconcile("op-remote", current_manifest, remote, CancellationToken())
         self.assertEqual(result[0].state, ReconciliationState.UNAPPLIED)
         remote.digest = self.after
@@ -123,7 +126,9 @@ class LocalOperationJournalTests(unittest.TestCase):
             approval_id="approval", backup_id="op-remote",
             manifest_hash=current_manifest.manifest_hash, request_hash="e" * 64,
         )
-        reconciler = RemoteJournalReconciler(remote_store)
+        reconciler = RemoteJournalReconciler(
+            remote_store, _EvidencePort(remote_store, current_manifest.host_fingerprint)
+        )
         for changed in (
             replace(current_manifest, manifest_hash="c" * 64),
             replace(current_manifest, host_fingerprint=None),
@@ -149,22 +154,75 @@ class LocalOperationJournalTests(unittest.TestCase):
                 CancellationToken(cancelled=True),
             )
 
+    def test_remote_root_journal_tamper_or_disconnect_prevents_stat_reconciliation(self) -> None:
+        current_manifest = replace(
+            manifest(), backup_id="op-remote", plan_id="plan-1",
+            change_set_hash="change-hash", host_id="ssh:gpu-box",
+            host_fingerprint="SHA256:" + "a" * 43,
+            manifest_hash="", complete=True,
+        )
+        current_manifest = replace(current_manifest, manifest_hash=_manifest_hash(current_manifest))
+        store = LocalOperationJournal(self.base / "remote-evidence", (Path("/etc/systemd/system"),))
+        store.create(
+            "op-remote", "plan-1", "ssh:gpu-box", "change-hash",
+            (JournalTarget("/etc/systemd/system/ollama.service.d/90-llm-manager.conf", self.before, self.after),),
+            approval_id="approval", backup_id="op-remote",
+            manifest_hash=current_manifest.manifest_hash, request_hash="e" * 64,
+        )
+        for mode in ("tamper", "disconnect", "wrong-binding"):
+            with self.subTest(mode=mode):
+                host = _RemoteHost(current_manifest.host_fingerprint, self.before)
+                reconciler = RemoteJournalReconciler(
+                    store, _EvidencePort(store, current_manifest.host_fingerprint, mode=mode)
+                )
+                with self.assertRaises(AdapterError) as caught:
+                    reconciler.reconcile("op-remote", current_manifest, host, CancellationToken())
+                self.assertEqual(caught.exception.code, "remote_journal_unverified")
+                self.assertEqual(host.identify_calls, 0)
+                self.assertEqual(host.stat_calls, 0)
+
 
 class _RemoteHost:
     def __init__(self, fingerprint, digest, fail=False):
         self.fingerprint = fingerprint
         self.digest = digest
         self.fail = fail
+        self.identify_calls = 0
+        self.stat_calls = 0
 
     def identify(self, cancellation):
+        self.identify_calls += 1
         return replace(
             host_info(), host_id="ssh:gpu-box", fingerprint=self.fingerprint,
         )
 
     def stat(self, path, cancellation):
+        self.stat_calls += 1
         if self.fail:
             raise OSError("injected disconnect")
         return FileStat(path, True, sha256=self.digest)
+
+
+class _EvidencePort:
+    def __init__(self, store, fingerprint, mode=None):
+        self.store = store
+        self.fingerprint = fingerprint
+        self.mode = mode
+
+    def load_journal_evidence(self, operation_id, request_hash, cancellation):
+        if self.mode == "disconnect":
+            raise OSError("injected journal retrieval disconnect")
+        journal = self.store.load(operation_id)
+        evidence = RemoteJournalEvidence(
+            "1.0", journal.operation_id, journal.plan_id, journal.host_id,
+            self.fingerprint, journal.change_set_hash, journal.backup_id,
+            journal.manifest_hash, journal.request_hash, journal.rollback_request_hash,
+            journal.status, journal.targets, "f" * 64,
+        ).with_hash()
+        if self.mode == "wrong-binding":
+            evidence = replace(evidence, manifest_hash="a" * 64, evidence_hash="").with_hash()
+        content = encode_remote_journal_evidence(evidence)
+        return content + b"\n" if self.mode == "tamper" else content
 
 
 if __name__ == "__main__":
