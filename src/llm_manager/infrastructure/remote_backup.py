@@ -5,6 +5,7 @@ import json
 import os
 import stat
 from dataclasses import dataclass, replace
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Protocol
 
@@ -40,6 +41,22 @@ class RemoteRecoveryReceipt:
 
     def with_hash(self) -> "RemoteRecoveryReceipt":
         return replace(self, receipt_hash=_receipt_hash(self))
+
+
+@dataclass(frozen=True, slots=True)
+class RemoteRetentionRecord:
+    schema_version: str
+    backup_id: str
+    host_id: str
+    receipt_hash: str
+    created_at: datetime
+    retention_expires_at: datetime
+    protected: bool
+    record_hash: str = ""
+
+    def with_hash(self) -> "RemoteRetentionRecord":
+        value = replace(self, record_hash="")
+        return replace(value, record_hash=hashlib.sha256(_retention_bytes(value)).hexdigest())
 
 
 class RemoteRecoveryCopyPort(Protocol):
@@ -231,6 +248,13 @@ class SandboxRemoteRecoveryStore:
         ).with_hash()
         self._verify_files(manifest, receipt, directory)
         _atomic_write(directory / "receipt.json", _receipt_bytes(receipt), 0o600)
+        retention = RemoteRetentionRecord(
+            "1.0", manifest.backup_id, manifest.host_id, receipt.receipt_hash,
+            manifest.created_at,
+            manifest.retention_expires_at or manifest.created_at + timedelta(days=30),
+            manifest.protected,
+        ).with_hash()
+        _atomic_write(directory / "retention.json", _retention_bytes(retention), 0o600)
         return receipt
 
     def load(
@@ -250,7 +274,114 @@ class SandboxRemoteRecoveryStore:
             raise AdapterError("invalid_remote_backup_receipt", "remote receipt is not canonical")
         _validate_receipt(manifest, receipt)
         self._verify_files(manifest, receipt, directory)
+        self._load_retention(directory, receipt)
         return receipt
+
+    def set_protected(
+        self, manifest: BackupManifest, protected: bool
+    ) -> RemoteRetentionRecord:
+        receipt = self.load(manifest, CancellationToken())
+        directory = self._directory(manifest)
+        current = self._load_retention(directory, receipt)
+        updated = replace(current, protected=protected, record_hash="").with_hash()
+        _atomic_write(directory / "retention.json", _retention_bytes(updated), 0o600)
+        return updated
+
+    def list_retention(self, host_id: str) -> tuple[RemoteRetentionRecord, ...]:
+        host_root = self.root / _safe_component(host_id)
+        if not host_root.exists():
+            return ()
+        if host_root.is_symlink() or not host_root.is_dir():
+            raise AdapterError("invalid_remote_retention", "remote host backup root is unsafe")
+        records: list[RemoteRetentionRecord] = []
+        for directory in host_root.iterdir():
+            if directory.is_symlink() or not directory.is_dir():
+                raise AdapterError("invalid_remote_retention", "remote backup entry is unsafe")
+            receipt = self._load_receipt_unbound(directory)
+            record = self._load_retention(directory, receipt)
+            if record.host_id != host_id or record.backup_id != directory.name:
+                raise AdapterError("invalid_remote_retention", "remote retention identity is invalid")
+            records.append(record)
+        return tuple(sorted(records, key=lambda item: item.created_at, reverse=True))
+
+    def prune(
+        self, host_id: str, *, now: datetime, keep_generations: int = 10
+    ) -> tuple[str, ...]:
+        if now.tzinfo is None or keep_generations < 1:
+            raise ValueError("remote retention requires timezone and at least one generation")
+        records = self.list_retention(host_id)
+        candidates = [
+            item for index, item in enumerate(records)
+            if not item.protected
+            and (index >= keep_generations or item.retention_expires_at <= now)
+        ]
+        removable = candidates[: max(0, len(records) - 1)]
+        directories = [self.root / _safe_component(host_id) / item.backup_id for item in removable]
+        for directory in directories:
+            self._validate_backup_directory(directory)
+        removed: list[str] = []
+        for item in sorted(removable, key=lambda value: value.created_at):
+            self._remove_backup_directory(self.root / _safe_component(host_id) / item.backup_id)
+            removed.append(item.backup_id)
+        return tuple(removed)
+
+    def _load_receipt_unbound(self, directory: Path) -> RemoteRecoveryReceipt:
+        path = directory / "receipt.json"
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+            raise AdapterError("invalid_remote_retention", "remote receipt is missing or unsafe")
+        return decode_remote_receipt(path.read_bytes())
+
+    def _load_retention(
+        self, directory: Path, receipt: RemoteRecoveryReceipt
+    ) -> RemoteRetentionRecord:
+        path = directory / "retention.json"
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+            raise AdapterError("invalid_remote_retention", "remote retention record is missing or unsafe")
+        try:
+            record = _decode_retention(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            raise AdapterError("invalid_remote_retention", "remote retention record is malformed") from error
+        if path.read_bytes() != _retention_bytes(record):
+            raise AdapterError("invalid_remote_retention", "remote retention record is not canonical")
+        expected = hashlib.sha256(_retention_bytes(replace(record, record_hash=""))).hexdigest()
+        if (
+            record.record_hash != expected
+            or record.backup_id != receipt.backup_id
+            or record.host_id != receipt.host_id
+            or record.receipt_hash != receipt.receipt_hash
+            or record.created_at.tzinfo is None
+            or record.retention_expires_at.tzinfo is None
+            or record.retention_expires_at < record.created_at
+        ):
+            raise AdapterError("invalid_remote_retention", "remote retention binding is invalid")
+        return record
+
+    def _remove_backup_directory(self, directory: Path) -> None:
+        self._validate_backup_directory(directory)
+        items = directory / "items"
+        for path in items.iterdir():
+            path.unlink()
+        items.rmdir()
+        for name in ("receipt.json", "retention.json"):
+            (directory / name).unlink()
+        directory.rmdir()
+
+    def _validate_backup_directory(self, directory: Path) -> None:
+        if directory.is_symlink() or not directory.is_dir():
+            raise AdapterError("unsafe_remote_prune", "remote backup directory is unsafe")
+        allowed = {"items", "receipt.json", "retention.json"}
+        if {entry.name for entry in directory.iterdir()} - allowed:
+            raise AdapterError("unsafe_remote_prune", "unexpected remote backup entry prevents pruning")
+        items = directory / "items"
+        if items.is_symlink() or not items.is_dir():
+            raise AdapterError("unsafe_remote_prune", "remote item directory is unsafe")
+        for path in items.iterdir():
+            if path.is_symlink() or not path.is_file():
+                raise AdapterError("unsafe_remote_prune", "remote item entry is unsafe")
+        for name in ("receipt.json", "retention.json"):
+            path = directory / name
+            if path.is_symlink() or not path.is_file():
+                raise AdapterError("unsafe_remote_prune", "remote metadata entry is unsafe")
 
     def _directory(self, manifest: BackupManifest) -> Path:
         remote_storage_location(manifest)
@@ -300,6 +431,42 @@ def _receipt_bytes(receipt: RemoteRecoveryReceipt) -> bytes:
         "storage_location": receipt.storage_location, "verified": receipt.verified,
     }
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _retention_bytes(record: RemoteRetentionRecord) -> bytes:
+    value = {
+        "backup_id": record.backup_id,
+        "created_at": record.created_at.isoformat(),
+        "host_id": record.host_id,
+        "protected": record.protected,
+        "receipt_hash": record.receipt_hash,
+        "record_hash": record.record_hash,
+        "retention_expires_at": record.retention_expires_at.isoformat(),
+        "schema_version": record.schema_version,
+    }
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _decode_retention(value: object) -> RemoteRetentionRecord:
+    expected = {
+        "backup_id", "created_at", "host_id", "protected", "receipt_hash",
+        "record_hash", "retention_expires_at", "schema_version",
+    }
+    if not isinstance(value, dict) or set(value) != expected:
+        raise ValueError("invalid retention fields")
+    if type(value["protected"]) is not bool:
+        raise ValueError("invalid retention protection")
+    strings = {key: value[key] for key in expected if key != "protected"}
+    if any(not isinstance(item, str) or not item for item in strings.values()):
+        raise ValueError("invalid retention values")
+    if value["schema_version"] != "1.0":
+        raise ValueError("unsupported retention schema")
+    return RemoteRetentionRecord(
+        value["schema_version"], value["backup_id"], value["host_id"],
+        value["receipt_hash"], datetime.fromisoformat(value["created_at"]),
+        datetime.fromisoformat(value["retention_expires_at"]), value["protected"],
+        value["record_hash"],
+    )
 
 
 def encode_remote_receipt(receipt: RemoteRecoveryReceipt) -> bytes:

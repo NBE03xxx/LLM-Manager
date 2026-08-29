@@ -1,14 +1,16 @@
 import tempfile
 import unittest
 import os
+import hashlib
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.domain.enums import ChangeOperation, ValidationStatus
 from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
-from llm_manager.infrastructure.backup import LocalBackupStore
+from llm_manager.infrastructure.backup import BackupRestoreItem, LocalBackupStore
 from llm_manager.infrastructure.remote_backup import (
     DualCopyPrivilegedBackupStore,
     RemoteRecoveryReceipt,
@@ -86,6 +88,7 @@ class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
         self.assertEqual(directory.stat().st_mode & 0o777, 0o700)
         self.assertTrue(all(path.stat().st_mode & 0o777 == 0o600 for path in (directory / "items").iterdir()))
         self.assertEqual((directory / "receipt.json").stat().st_mode & 0o777, 0o600)
+        self.assertEqual((directory / "retention.json").stat().st_mode & 0o777, 0o600)
         self.assertEqual(store.verify(manifest, CancellationToken())[-1].status, ValidationStatus.PASSED)
         restarted = SandboxRemoteRecoveryStore(
             self.root / "remote-root", AesGcmBackupCipher(_RemoteKeys()),
@@ -110,6 +113,65 @@ class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
             SandboxRemoteRecoveryStore(
                 link, AesGcmBackupCipher(_RemoteKeys()), "remote-master-v1", sandbox=True,
             )
+
+    def test_remote_retention_keeps_ten_generations_protected_and_last_copy(self) -> None:
+        remote = SandboxRemoteRecoveryStore(
+            self.root / "remote-retention", AesGcmBackupCipher(_RemoteKeys()),
+            "remote-master-v1", sandbox=True,
+        )
+        manifest = self.local_manifest()
+        restore = self._restore_item()
+        start = datetime(2026, 8, 1, tzinfo=UTC)
+        manifests = []
+        for index in range(12):
+            current = replace(
+                manifest, backup_id=f"retention-{index}", created_at=start + timedelta(days=index),
+                retention_expires_at=start + timedelta(days=index + 30), manifest_hash=f"{index + 1:064x}",
+            )
+            remote.create(current, (restore,), CancellationToken())
+            manifests.append(current)
+        remote.set_protected(manifests[0], True)
+        removed = remote.prune("ssh:gpu-box", now=start + timedelta(days=12))
+        self.assertEqual(removed, ("retention-1",))
+        records = remote.list_retention("ssh:gpu-box")
+        self.assertEqual(len(records), 11)
+        self.assertTrue(next(item for item in records if item.backup_id == "retention-0").protected)
+
+        for record in records:
+            remote.set_protected(next(item for item in manifests if item.backup_id == record.backup_id), record.backup_id == "retention-0")
+        removed = remote.prune("ssh:gpu-box", now=start + timedelta(days=100))
+        self.assertEqual(len(removed), 10)
+        self.assertEqual(tuple(item.backup_id for item in remote.list_retention("ssh:gpu-box")), ("retention-0",))
+
+    def test_remote_retention_tamper_and_unknown_entry_prevent_prune(self) -> None:
+        remote = SandboxRemoteRecoveryStore(
+            self.root / "remote-retention", AesGcmBackupCipher(_RemoteKeys()),
+            "remote-master-v1", sandbox=True,
+        )
+        manifest = self.local_manifest()
+        remote.create(manifest, (self._restore_item(),), CancellationToken())
+        directory = self.root / "remote-retention" / remote_storage_location(manifest).split("/")[-2] / manifest.backup_id
+        retention = directory / "retention.json"
+        original = retention.read_bytes()
+        retention.write_bytes(original[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            remote.list_retention("ssh:gpu-box")
+        retention.write_bytes(original)
+        remote.create(replace(manifest, backup_id="backup-2", manifest_hash="e" * 64), (self._restore_item(),), CancellationToken())
+        (directory.parent / "backup-2" / "unexpected").write_text("unsafe")
+        with self.assertRaises(AdapterError):
+            remote.prune("ssh:gpu-box", now=datetime(2027, 1, 1, tzinfo=UTC), keep_generations=1)
+
+    def local_manifest(self):
+        local = LocalBackupStore(self.root / "manifest-local", (self.root,))
+        return local.create(self.request, CancellationToken())
+
+    def _restore_item(self):
+        stat_result = self.target.stat()
+        return BackupRestoreItem(
+            str(self.target), True, b"before", hashlib.sha256(b"before").hexdigest(),
+            stat_result.st_mode & 0o777, stat_result.st_uid, stat_result.st_gid,
+        )
 
     def _store(self, remote):
         local = LocalBackupStore(self.root / f"backups-{id(remote)}", (self.root,))
