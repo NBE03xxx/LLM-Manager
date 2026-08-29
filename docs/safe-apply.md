@@ -131,6 +131,8 @@ remote helper側保存処理のsandbox modelは、一時rootでのみ起動で�
 
 user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportからsandbox root backendへ接続する故障注入modelだけで、実SSH転送やremote executableは起動しない。
 
+user-only stagingはremote home基準の`.local/state/llm-manager/remote-helper/<request-id>/<request-hash>`へ固定し、directory/private file作成をSSH runner契約へ委譲する。復元itemをindex/hash由来名で先に転送し、`request.json`を最後に転送するため、helperは部分転送を正式requestとして扱わない。helper起動へ渡す値はrequest ID/hashだけで、resultは同じ操作directoryの固定`result.json`からbounded readする。staging cleanupはreceipt永続化後の明示操作とし、切断時の照合材料を先に消さない。
+
 ## 9. 冪等性・競合
 
 - 既に推奨値なら no-op として ChangeSet から除外する。
