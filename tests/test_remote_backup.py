@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import os
 from dataclasses import replace
 from pathlib import Path
 
@@ -11,8 +12,10 @@ from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.remote_backup import (
     DualCopyPrivilegedBackupStore,
     RemoteRecoveryReceipt,
+    SandboxRemoteRecoveryStore,
     remote_storage_location,
 )
+from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 
 
 class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
@@ -69,6 +72,45 @@ class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
                     ValidationStatus.FAILED,
                 )
 
+    def test_sandbox_remote_store_encrypts_reloads_and_detects_tamper(self) -> None:
+        remote = SandboxRemoteRecoveryStore(
+            self.root / "remote-root", AesGcmBackupCipher(_RemoteKeys()),
+            "remote-master-v1", sandbox=True,
+        )
+        store = self._store(remote)
+        manifest = store.create(self.request, CancellationToken())
+        receipt = remote.load(manifest, CancellationToken())
+        directory = self.root / "remote-root" / receipt.storage_location.split("/")[-2] / manifest.backup_id
+        envelope = next((directory / "items").iterdir()).read_bytes()
+        self.assertNotIn(b"before", envelope)
+        self.assertEqual(directory.stat().st_mode & 0o777, 0o700)
+        self.assertTrue(all(path.stat().st_mode & 0o777 == 0o600 for path in (directory / "items").iterdir()))
+        self.assertEqual((directory / "receipt.json").stat().st_mode & 0o777, 0o600)
+        self.assertEqual(store.verify(manifest, CancellationToken())[-1].status, ValidationStatus.PASSED)
+        restarted = SandboxRemoteRecoveryStore(
+            self.root / "remote-root", AesGcmBackupCipher(_RemoteKeys()),
+            "remote-master-v1", sandbox=True,
+        )
+        self.assertEqual(restarted.load(manifest, CancellationToken()), receipt)
+        item_path = next((directory / "items").iterdir())
+        item_path.write_bytes(item_path.read_bytes()[:-1] + b"x")
+        self.assertEqual(store.verify(manifest, CancellationToken())[-1].status, ValidationStatus.FAILED)
+
+    def test_sandbox_remote_store_rejects_production_mode_and_symlink_root(self) -> None:
+        with self.assertRaises(ValueError):
+            SandboxRemoteRecoveryStore(
+                self.root / "remote-root", AesGcmBackupCipher(_RemoteKeys()),
+                "remote-master-v1",
+            )
+        outside = self.root / "outside"
+        outside.mkdir()
+        link = self.root / "remote-link"
+        os.symlink(outside, link)
+        with self.assertRaises(ValueError):
+            SandboxRemoteRecoveryStore(
+                link, AesGcmBackupCipher(_RemoteKeys()), "remote-master-v1", sandbox=True,
+            )
+
     def _store(self, remote):
         local = LocalBackupStore(self.root / f"backups-{id(remote)}", (self.root,))
         return DualCopyPrivilegedBackupStore(local, remote)
@@ -88,17 +130,24 @@ class _RemoteCopy:
         receipt = RemoteRecoveryReceipt(
             "1.0", manifest.backup_id, manifest.plan_id, manifest.change_set_hash,
             manifest.host_id, manifest.host_fingerprint, manifest.manifest_hash,
-            remote_storage_location(manifest),
+            remote_storage_location(manifest), "AES-256-GCM", 1,
             "remote-key-1", "remote_root",
             tuple((item.target, item.sha256) for item in manifest.items), True,
         ).with_hash()
         self.receipt = self.mutate(receipt) if self.mutate else receipt
         return self.receipt
 
-    def load(self, backup_id, cancellation):
+    def load(self, manifest, cancellation):
         if self.receipt is None:
             raise AdapterError("remote_backup_not_found", "remote copy is missing")
         return self.receipt
+
+
+class _RemoteKeys:
+    def get_key(self, key_reference, key_scope):
+        if (key_reference, key_scope) != ("remote-master-v1", "remote_root"):
+            raise AdapterError("invalid_key", "unexpected remote key")
+        return b"r" * 32
 
 
 if __name__ == "__main__":
