@@ -32,12 +32,19 @@ class InteractiveRemoteHelperInvoker(Protocol):
     ) -> None: ...
 
 
+class RemoteHelperReadinessGate(Protocol):
+    """Read-only compatibility check performed before remote staging and invoke."""
+
+    def assert_ready(self, cancellation: CancellationToken) -> None: ...
+
+
 @dataclass(slots=True)
 class OpenSshUserStagingRunner:
     alias: str
     runner: SubprocessRunner
     invoker: InteractiveRemoteHelperInvoker
     runtime_root: Path
+    readiness_gate: RemoteHelperReadinessGate
     control_socket: str | None = None
     timeout_ms: int = 30_000
 
@@ -57,6 +64,7 @@ class OpenSshUserStagingRunner:
 
     def prepare_private_directory(self, relative_path: str) -> None:
         path = _relative_path(relative_path)
+        self.readiness_gate.assert_ready(CancellationToken())
         self._ssh((REMOTE_HELPER, "user-stage-prepare", path), "ssh.staging.prepare")
 
     def upload_private_file(self, relative_path: str, content: bytes) -> None:
@@ -76,6 +84,7 @@ class OpenSshUserStagingRunner:
     ) -> None:
         if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
             raise AdapterError("invalid_remote_invocation", "remote helper identity is invalid")
+        self.readiness_gate.assert_ready(cancellation)
         self.invoker.invoke(
             self.alias, self.control_socket, request_id, request_hash, cancellation
         )

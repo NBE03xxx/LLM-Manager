@@ -128,7 +128,7 @@ Local privileged境界統合test実装: root CoordinatorからLocalPolicyKitInvo
 
 Local deb先行Gate実装: Debian debhelper/dh-python構成、PolicyKit policy、manpage、root-owned固定helper wrapperを追加した。helper wrapperは`python3 -I`で起動し、pip console scriptによる特権導入を禁止する。binary debを一時copyでbuildし、artifact内のroot ownership、0755/0644 mode、isolated shebang、PolicyKit固定path、runtime dependencyを`verify-deb.sh`で検証した。実install/upgrade/remove/purgeとdesktop PolicyKit認証は未実施である。
 
-Helper compatibility診断・Plan Gate実装: `/usr/bin/llm-manager-helper`とroot-owned canonical metadataの固定pathをread-onlyで調べ、root:root ownership、0755/0644 mode、非symlink、package名、package version、protocol versionを全て満たす場合だけhostの`can_elevate`を有効にする。missing、unsafe、invalid、incompatible、probe例外はread-only診断を継続しつつfail-closedにし、Ollama root plannerはcapabilityがなければChangeSet生成を拒否する。local package metadataをdebへ同梱し、remote helperは別artifactへ分離した。remote helper用SSH互換診断接続は未実施である。
+Helper compatibility診断・Plan Gate実装: local/remoteそれぞれのhelperとroot-owned canonical metadataの固定pathをread-onlyで調べ、root:root ownership、0755/0644 mode、非symlink、content hash、package名、package version、protocol versionを全て満たす場合だけ特権境界へ進める。remote probeはsystem OpenSSHの固定`stat`/bounded `cat`へ接続し、user staging開始前とroot helper起動直前に再検証する。missing、unsafe、invalid、incompatible、probe例外はfail-closedにし、不一致時はstaging commandを発行しない。fake runnerまで完了し、実SSH互換診断Gateは未実施である。
 
 Apply時helper再検証実装: 診断・Plan後のhelper差替えや削除を信用せず、root workflowはBackup前とhelper起動直前に互換性を再検証する。Backup前の失敗は永続物を作らず、検証済みBackup後の失敗はBackupを保持して未変更で停止する。いずれもinvoker、pkexec、systemd操作へ到達しないことをsandbox fakeで確認した。
 

@@ -18,7 +18,7 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
             process = _Process(download=b"receipt")
             invoker = _Invoker()
             staging = OpenSshUserStagingRunner(
-                "development", process, invoker, Path(directory) / "runtime",
+                "development", process, invoker, Path(directory) / "runtime", _Gate(),
                 control_socket="/tmp/llm-manager-cm",
             )
             staging.prepare_private_directory(PATH)
@@ -34,13 +34,18 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
             self.assertEqual(upload[-1], f"development:{PATH}/request.json")
             self.assertNotIn("secret backup content", " ".join(upload))
             self.assertEqual(invoker.calls, [("development", "/tmp/llm-manager-cm", "backup-1", "b" * 64)])
+            self.assertEqual(staging.readiness_gate.calls, 2)
             self.assertEqual((Path(directory) / "runtime").stat().st_mode & 0o777, 0o700)
 
     def test_rejects_alias_path_and_invocation_injection(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError):
-                OpenSshUserStagingRunner("-oProxyCommand=bad", _Process(), _Invoker(), Path(directory))
-            staging = OpenSshUserStagingRunner("host", _Process(), _Invoker(), Path(directory))
+                OpenSshUserStagingRunner(
+                    "-oProxyCommand=bad", _Process(), _Invoker(), Path(directory), _Gate()
+                )
+            staging = OpenSshUserStagingRunner(
+                "host", _Process(), _Invoker(), Path(directory), _Gate()
+            )
             for path in ("/absolute", "../escape", ".local/state/llm-manager/other/file", PATH + "\ncommand"):
                 with self.subTest(path=path), self.assertRaises(AdapterError):
                     staging.prepare_private_directory(path)
@@ -54,15 +59,36 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
                 CommandResult(("scp",), None, "", "", True, 1),
             ):
                 with self.subTest(result=result):
-                    staging = OpenSshUserStagingRunner("host", _Process(result=result), _Invoker(), Path(directory))
+                    staging = OpenSshUserStagingRunner(
+                        "host", _Process(result=result), _Invoker(), Path(directory), _Gate()
+                    )
                     with self.assertRaises(AdapterError):
                         staging.upload_private_file(f"{PATH}/item", b"content")
-            missing = OpenSshUserStagingRunner("host", _Process(), _Invoker(), Path(directory))
+            missing = OpenSshUserStagingRunner(
+                "host", _Process(), _Invoker(), Path(directory), _Gate()
+            )
             with self.assertRaises(AdapterError):
                 missing.read_private_file(f"{PATH}/result.json", 10)
-            oversized = OpenSshUserStagingRunner("host", _Process(download=b"too large"), _Invoker(), Path(directory))
+            oversized = OpenSshUserStagingRunner(
+                "host", _Process(download=b"too large"), _Invoker(), Path(directory), _Gate()
+            )
             with self.assertRaises(AdapterError):
                 oversized.read_private_file(f"{PATH}/result.json", 3)
+
+    def test_incompatible_helper_blocks_staging_and_invoke_before_ssh(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            process = _Process()
+            invoker = _Invoker()
+            gate = _Gate(AdapterError("privileged_helper_unavailable", "incompatible"))
+            staging = OpenSshUserStagingRunner(
+                "host", process, invoker, Path(directory), gate
+            )
+            with self.assertRaises(AdapterError):
+                staging.prepare_private_directory(PATH)
+            with self.assertRaises(AdapterError):
+                staging.invoke_recovery_helper("backup-1", "b" * 64, CancellationToken())
+            self.assertEqual(process.requests, [])
+            self.assertEqual(invoker.calls, [])
 
 
 class _Process:
@@ -84,6 +110,17 @@ class _Invoker:
 
     def invoke(self, alias, control_socket, request_id, request_hash, cancellation):
         self.calls.append((alias, control_socket, request_id, request_hash))
+
+
+class _Gate:
+    def __init__(self, error=None):
+        self.error = error
+        self.calls = 0
+
+    def assert_ready(self, cancellation):
+        self.calls += 1
+        if self.error is not None:
+            raise self.error
 
 
 if __name__ == "__main__":

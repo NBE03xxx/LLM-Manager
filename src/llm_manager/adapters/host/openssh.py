@@ -12,7 +12,7 @@ from llm_manager.infrastructure.process import SubprocessRunner
 
 _ALIAS = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_.@:-]{0,254}")
 _READ_COMMANDS = frozenset(
-    {"cat", "curl", "df", "lscpu", "lspci", "nvidia-smi", "rocm-smi", "ollama", "opencode", "systemctl", "uname"}
+    {"cat", "curl", "df", "lscpu", "lspci", "nvidia-smi", "rocm-smi", "ollama", "opencode", "stat", "systemctl", "uname"}
 )
 
 
@@ -82,12 +82,42 @@ class OpenSshHostAdapter:
         return self.runner.run(outer, cancellation)
 
     def stat(self, path: str, cancellation: CancellationToken) -> FileStat:
-        content = self._read_optional(path, 4 * 1024 * 1024, cancellation)
-        if content is None:
+        self._validate_path(path)
+        result = self.execute_readonly(
+            CommandRequest(
+                ("stat", "--printf=%F|%a|%u|%g|%s", "--", path),
+                self.timeout_ms,
+                "ssh.stat",
+            ),
+            cancellation,
+        )
+        if result.timed_out:
+            raise AdapterError("timeout", "SSH stat probe timed out")
+        if result.exit_code != 0:
             return FileStat(path, False)
+        try:
+            kind, mode, uid, gid, size = result.stdout.split("|")
+            parsed_mode = int(mode, 8)
+            parsed_uid = int(uid)
+            parsed_gid = int(gid)
+            parsed_size = int(size)
+        except (TypeError, ValueError) as error:
+            raise AdapterError("parse_failed", "SSH stat returned invalid metadata") from error
+        is_symlink = kind == "symbolic link"
+        content = None
+        if kind == "regular file" and 0 <= parsed_size <= 4 * 1024 * 1024:
+            content = self._read_optional(path, 4 * 1024 * 1024, cancellation)
         import hashlib
 
-        return FileStat(path, True, sha256=hashlib.sha256(content).hexdigest())
+        return FileStat(
+            path,
+            True,
+            sha256=hashlib.sha256(content).hexdigest() if content is not None else None,
+            mode=parsed_mode,
+            uid=parsed_uid,
+            gid=parsed_gid,
+            is_symlink=is_symlink,
+        )
 
     def read_file(self, path: str, max_bytes: int, cancellation: CancellationToken) -> bytes:
         content = self._read_optional(path, max_bytes, cancellation)
@@ -98,8 +128,7 @@ class OpenSshHostAdapter:
     def _read_optional(self, path: str, max_bytes: int, cancellation: CancellationToken) -> bytes | None:
         if max_bytes <= 0:
             raise ValueError("max_bytes must be positive")
-        if not path.startswith("/") or "\n" in path or "\x00" in path:
-            raise ValueError("remote path must be an absolute safe path")
+        self._validate_path(path)
         result = self.execute_readonly(
             CommandRequest(("cat", "--", path), self.timeout_ms, "ssh.read_file"), cancellation
         )
@@ -109,3 +138,8 @@ class OpenSshHostAdapter:
         if len(content) > max_bytes:
             raise ValueError("file exceeds max_bytes")
         return content
+
+    @staticmethod
+    def _validate_path(path: str) -> None:
+        if not path.startswith("/") or any(character in path for character in "\r\n\x00"):
+            raise ValueError("remote path must be an absolute safe path")

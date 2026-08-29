@@ -40,14 +40,14 @@ packaging/remote/build-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
 packaging/remote/verify-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
 ```
 
-remote wrapperは`/usr/bin/python3 -I`で起動し、package内のroot-owned private runtime `/usr/lib/llm-manager-remote-helper`を固定でimportする。artifact Gateはwrapper、canonical metadata、private runtimeのroot ownershipと0755/0644 mode、依存関係、bytecode cache不在、およびlocal helper/PolicyKit/system Python packageの非同梱を検査する。これはsandbox artifact検査だけであり、実SSH先へinstallしない。
+remote wrapperは`/usr/bin/python3 -I`で起動し、package内のroot-owned private runtime `/usr/lib/llm-manager-remote-helper`を固定でimportする。artifact Gateはwrapper、canonical metadata、private runtimeのroot ownershipと0755/0644 mode、依存関係、bytecode cache不在、およびlocal helper/PolicyKit/system Python packageの非同梱を検査する。OpenSSH read-only互換性Gateは固定pathのownership/mode、非symlink、content hash、canonical metadata、package/version/protocolをstaging前とhelper起動直前に確認する。いずれもsandbox/fake検査だけであり、実SSH先へinstall・接続しない。
 
 ## 未完了Gate
 
 - disposableなUbuntu 26.04 / Debian 13環境でのinstall、同一版再install、upgrade、remove、purge
 - 実desktop sessionでのPolicyKit allow/deny/cancel
 - GUI entry point、desktop file、icon、翻訳catalog
-- remote helper packageのdisposable OS install/upgrade/remove/purgeとprotocol互換診断
+- remote helper packageのdisposable OS install/upgrade/remove/purgeと実SSH protocol互換診断
 - release署名、repository配布、SBOMとlicense review
 
 これらを通過するまで一般ユーザー向けdeb releaseとは扱わず、実ホストへinstallしない。

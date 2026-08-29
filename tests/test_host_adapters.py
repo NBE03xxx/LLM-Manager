@@ -81,6 +81,36 @@ class OpenSshHostAdapterTests(unittest.TestCase):
         adapter.execute_readonly(CommandRequest(("uname", "-n"), 1000, "test"), CancellationToken())
         self.assertEqual(runner.requests[0].argv[1:3], ("-S", "/tmp/llm-manager/cm-test"))
 
+    def test_stat_reads_remote_metadata_and_hash_with_fixed_commands(self) -> None:
+        runner = _StatRunner()
+        adapter = OpenSshHostAdapter("gpu-box", runner)  # type: ignore[arg-type]
+        result = adapter.stat("/usr/bin/llm-manager-remote-helper", CancellationToken())
+        self.assertTrue(result.exists)
+        self.assertEqual((result.mode, result.uid, result.gid), (0o755, 0, 0))
+        self.assertFalse(result.is_symlink)
+        self.assertIsNotNone(result.sha256)
+        self.assertIn("stat '--printf=", runner.requests[0].argv[-1])
+        self.assertIn("cat -- /usr/bin/llm-manager-remote-helper", runner.requests[1].argv[-1])
+
+    def test_stat_reports_symlink_without_reading_target(self) -> None:
+        runner = _StatRunner(stat_output="symbolic link|777|0|0|12")
+        adapter = OpenSshHostAdapter("gpu-box", runner)  # type: ignore[arg-type]
+        result = adapter.stat("/usr/bin/llm-manager-remote-helper", CancellationToken())
+        self.assertTrue(result.is_symlink)
+        self.assertIsNone(result.sha256)
+        self.assertEqual(len(runner.requests), 1)
+
+
+class _StatRunner(RecordingRunner):
+    def __init__(self, stat_output="regular file|755|0|0|6"):
+        super().__init__()
+        self.stat_output = stat_output
+
+    def run(self, request, cancellation):
+        self.requests.append(request)
+        output = self.stat_output if " stat " in request.argv[-1] else "helper"
+        return CommandResult(request.argv, 0, output, "", False, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

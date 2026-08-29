@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from enum import StrEnum
@@ -11,6 +12,8 @@ from .helper_protocol import PROTOCOL_VERSION
 
 HELPER_PATH = "/usr/bin/llm-manager-helper"
 METADATA_PATH = "/usr/share/llm-manager/helper-metadata.json"
+REMOTE_HELPER_PATH = "/usr/bin/llm-manager-remote-helper"
+REMOTE_METADATA_PATH = "/usr/share/llm-manager-remote-helper/helper-metadata.json"
 MAX_METADATA_BYTES = 4096
 
 
@@ -38,20 +41,31 @@ class HelperCompatibility:
 class HelperCompatibilityProbe:
     """Read-only verification of an installed local or remote helper package."""
 
-    def __init__(self, expected_package: str, compatible_versions: frozenset[str]) -> None:
+    def __init__(
+        self,
+        expected_package: str,
+        compatible_versions: frozenset[str],
+        *,
+        helper_path: str = HELPER_PATH,
+        metadata_path: str = METADATA_PATH,
+        require_content_hash: bool = False,
+    ) -> None:
         if not expected_package or not compatible_versions:
             raise ValueError("helper package and compatible versions are required")
         self.expected_package = expected_package
         self.compatible_versions = compatible_versions
+        self.helper_path = helper_path
+        self.metadata_path = metadata_path
+        self.require_content_hash = require_content_hash
 
     def inspect(self, host: HostPort, cancellation: CancellationToken) -> HelperCompatibility:
-        helper = host.stat(HELPER_PATH, cancellation)
-        metadata = host.stat(METADATA_PATH, cancellation)
+        helper = host.stat(self.helper_path, cancellation)
+        metadata = host.stat(self.metadata_path, cancellation)
         if not helper.exists or not metadata.exists:
             return HelperCompatibility(HelperCompatibilityStatus.MISSING, reason="helper_not_installed")
         if (
-            helper.path != HELPER_PATH
-            or metadata.path != METADATA_PATH
+            helper.path != self.helper_path
+            or metadata.path != self.metadata_path
             or helper.is_symlink
             or metadata.is_symlink
             or helper.uid != 0
@@ -60,10 +74,13 @@ class HelperCompatibilityProbe:
             or metadata.gid != 0
             or helper.mode != 0o755
             or metadata.mode != 0o644
+            or (self.require_content_hash and (helper.sha256 is None or metadata.sha256 is None))
         ):
             return HelperCompatibility(HelperCompatibilityStatus.UNSAFE, reason="unsafe_helper_metadata")
         try:
-            content = host.read_file(METADATA_PATH, MAX_METADATA_BYTES, cancellation)
+            content = host.read_file(self.metadata_path, MAX_METADATA_BYTES, cancellation)
+            if metadata.sha256 is not None and hashlib.sha256(content).hexdigest() != metadata.sha256:
+                raise ValueError("metadata changed after stat")
             value = json.loads(content.decode("utf-8"))
             if not isinstance(value, dict) or set(value) != {
                 "package", "package_version", "protocol_version", "schema_version"
@@ -113,7 +130,7 @@ class HelperCompatibilityApplyGate:
     def assert_ready(self, cancellation: CancellationToken) -> None:
         try:
             result = self.probe.inspect(self.host, cancellation)
-        except (OSError, ValueError) as error:
+        except (AdapterError, OSError, ValueError) as error:
             raise AdapterError(
                 "privileged_helper_unavailable", "helper compatibility probe failed"
             ) from error
@@ -122,6 +139,19 @@ class HelperCompatibilityApplyGate:
                 "privileged_helper_unavailable",
                 result.reason or result.status.value,
             )
+
+
+def remote_helper_compatibility_probe(
+    compatible_versions: frozenset[str],
+) -> HelperCompatibilityProbe:
+    """Build the strict probe for the separately installed remote package."""
+    return HelperCompatibilityProbe(
+        "llm-manager-remote-helper",
+        compatible_versions,
+        helper_path=REMOTE_HELPER_PATH,
+        metadata_path=REMOTE_METADATA_PATH,
+        require_content_hash=True,
+    )
 
 
 def _text(value: dict[str, object], key: str) -> str:
