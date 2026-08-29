@@ -1,0 +1,5 @@
+llm-manager (0.1.0~dev0) UNRELEASED; urgency=medium
+
+  * Initial Debian packaging scaffold for the local privileged helper gate.
+
+ -- LLM-Manager contributors <noreply@example.invalid>  Sat, 29 Aug 2026 22:00:00 +0900

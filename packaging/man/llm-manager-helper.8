@@ -1,0 +1,25 @@
+.TH LLM-MANAGER-HELPER 8 "2026-08-29" "LLM-Manager" "System Administration"
+.SH NAME
+llm-manager-helper \- apply an approved LLM-Manager system setting request
+.SH SYNOPSIS
+.B llm-manager-helper
+.I operation-id request-sha256
+.SH DESCRIPTION
+.B llm-manager-helper
+is the restricted privileged boundary used by LLM-Manager. It accepts only an
+operation identifier and a canonical request hash. Requests, staged content,
+paths, operations, metadata, expiry, and before hashes are validated internally.
+.PP
+This command is intended to be launched by the installed PolicyKit action or by
+the documented remote sudo flow. It does not accept shell commands, arbitrary
+arguments, or caller-provided target paths.
+.SH FILES
+.TP
+.I /usr/share/polkit-1/actions/io.github.nbe03xxx.llm-manager.policy
+PolicyKit action for local system setting changes.
+.TP
+.I /var/lib/llm-manager/helper-receipts
+Root-only replay receipts.
+.SH SECURITY
+Do not copy or replace this executable outside the package manager. LLM-Manager
+must remain unprivileged; only this helper is elevated for an approved request.

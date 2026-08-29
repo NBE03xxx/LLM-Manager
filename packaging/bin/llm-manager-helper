@@ -1,0 +1,8 @@
+#!/usr/bin/python3 -I
+"""Root-owned isolated entry point installed only by the deb package."""
+
+from llm_manager.infrastructure.helper_cli import main
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

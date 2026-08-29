@@ -1,0 +1,27 @@
+Source: llm-manager
+Section: admin
+Priority: optional
+Maintainer: LLM-Manager contributors <noreply@example.invalid>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ python3-all (>= 3.14),
+ python3-setuptools (>= 77)
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/NBE03xxx/LLM-Manager
+
+Package: llm-manager
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ openssh-client,
+ policykit-1,
+ python3-cryptography (>= 46.0.5),
+ python3-secretstorage (>= 3.5),
+ systemd
+Description: safely manage local and remote Ollama and OpenCode settings
+ LLM-Manager diagnoses Linux hosts and applies explicitly approved settings
+ through a narrowly scoped privileged helper. This development package does
+ not yet include the Phase 5 graphical interface.
