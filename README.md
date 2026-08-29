@@ -29,6 +29,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [診断設計](docs/diagnostics.md)
 - [最適化設計](docs/optimization.md)
 - [安全な設定変更](docs/safe-apply.md)
+- [deb packaging](docs/packaging.md)
 - [GUI 設計](docs/gui.md)
 - [ロードマップ](docs/roadmap.md)
 - [Phase 0 技術調査](docs/phase-0.md)
