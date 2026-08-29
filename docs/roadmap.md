@@ -86,7 +86,7 @@ Remote root journal evidence境界実装: root journalを任意path読込せず�
 
 Dual backup境界実装: local正本の作成・検証済み復元素材からremote recovery copyを作るportと、両copyの検証を集約するStoreを追加した。remote receiptへlocal manifest identity/hash、全item hash、host fingerprint、固定remote保存先、独立`remote_root` key reference、receipt hashを束縛する。remote作成・読込・receipt検証失敗時もlocal正本を保持しつつApply Gateを失敗させる。境界はfake remoteで検証済みであり、SSH転送と実remote helperへの接続は未実装である。
 
-Remote recovery暗号化sandbox backend実装: 検証済みplaintextを独立`remote_root`鍵のAES-256-GCM envelopeとして一時rootへ保存し、0700/0600、固定logical path、symlink/path escape拒否、canonical receipt再読込、receipt/envelope/AAD/plaintext hash改ざん検出を行う。production modeを明示拒否し、実`/var/lib`、SSH、remote helperは操作していない。実transportとroot-owned backendへの接続、remote retentionは未完了である。
+Remote recovery暗号化root backend実装: 検証済みplaintextを独立`remote_root`鍵のAES-256-GCM envelopeとして保存し、0700/0600、owner、固定logical path、symlink/path escape拒否、canonical receipt再読込、receipt/envelope/AAD/plaintext hash改ざん検出を行う。productionはrootかつ`/var/lib/llm-manager/backups`に固定し、alternate rootは明示sandboxだけを許す。実`/var/lib`配置・SSH Gateは未実施である。
 
 Remote recovery helper transport境界実装: user-only stagingとroot-only remote helperの間を、任意argvやshellを持たない`create_recovery_copy`専用Portとprotocol v1 canonical requestで分離した。request/receiptの双方でlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key referenceを照合する。転送切断、remote暗号化失敗、receipt取得失敗、再接続後receipt改ざんはlocal正本を保持してApply Gateをfail-closedにする。sandbox/fakeのみであり、OpenSSH転送、remote helper executable、root key配置は未実装である。
 
@@ -100,7 +100,7 @@ User-only SSH staging具体化: remote userの固定相対root `.local/state/llm
 
 Remote sudo invoker実装: system OpenSSHで固定`sudo -n -v`だけをpasswordless probeし、成功時は限定helperを非対話実行する。probe失敗時は外部端末の`ssh -t`内でsudo認証を行い、user stagingの固定result completionをbounded pollする。helper自身の失敗を認証失敗と誤認して再端末起動せず、cancel/timeout/terminal failureを分離する。fake runner/terminalのみで、実remote sudo認証Gateは未実施である。
 
-Remote retention sandbox実装: immutable receipt hashへ束縛したcanonical retention recordを0600で保存し、hostごと30日かつ直近10世代の未保護copyを古い順に削除する。protected copyと最後の1 copyは自動削除せず、record改ざん、symlink、未知entryがあれば削除前にfail-closedにする。sandbox root backendのみで、実remote helperのretention operationは未実装である。
+Remote retention backend実装: immutable receipt hashへ束縛したcanonical retention recordを0600で保存し、hostごと30日かつ直近10世代の未保護copyを古い順に削除する。protected copyと最後の1 copyは自動削除せず、record改ざん、owner/mode、symlink、未知entryがあれば削除前にfail-closedにする。実remote helperのretention operationとproduction配置Gateは未実施である。
 
 Dual-copy削除後照合core実装: local/remoteを独立にread-only観測し、`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`の表示用状態へ集約する。片側だけ残った場合と観測不能・改ざんはattention requiredとし、自動的に残存copyを追加削除・再作成しない。実際のlocal/remote協調削除commandと再試行UXは未実装である。
 

@@ -129,7 +129,7 @@ remote root journalは通常SSHからroot-only fileを直接読まず、限定he
 
 SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。現段階のport試験はfakeのみで、SSH転送と実remote helper暗号化は未実装である。
 
-remote helper側保存処理のsandbox modelは、一時rootでのみ起動でき、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。これはremote側backendのfault-injection用であり、実`/var/lib`配置やSSH transportを有効化するものではない。
+remote helper側保存backendは、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、root owner、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。productionはrootかつ`/var/lib/llm-manager/backups`だけを許し、alternate rootはfault-injection用sandboxに限定する。実production配置Gateはまだ行わない。
 
 user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportとsandbox root executor/backendによる故障注入modelまでで、実SSH転送やpackaged remote executableは起動しない。
 
@@ -145,7 +145,7 @@ OpenSSH staging runnerはsystem `ssh`/`scp`をshellなしの固定argvで起動�
 
 remote sudo invokerは最初に固定`sudo -n -v`だけでpasswordless可否を調べる。成功時は同じOpenSSH経路で限定helperを非対話実行し、helper failureをそのまま失敗として扱う。probe失敗時だけ外部端末を開き、`ssh -t`内のsudoへ認証入力を委譲する。アプリは端末stdinへ接続せず、固定resultの完成を期限・cancel付きで観測する。これによりhelper実行失敗を認証要求と誤認して二重実行しない。
 
-remote sandbox retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、symlink、非regular fileがあれば一部削除を始めず拒否する。実remote helperへはまだretention operationを公開しない。
+remote retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、owner/mode不一致、symlink、非regular fileがあれば一部削除を始めず拒否する。実remote helperへはまだretention operationを公開しない。
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。
 

@@ -16,6 +16,7 @@ from llm_manager.infrastructure.remote_helper import (
     RemoteRecoveryRequest, encode_remote_request,
 )
 from llm_manager.infrastructure.remote_helper_executor import RemoteRecoveryHelperExecutor
+from llm_manager.infrastructure.remote_keys import RemoteRootKeyProvider
 
 
 NOW = datetime(2026, 8, 30, 6, 0, tzinfo=UTC)
@@ -26,8 +27,11 @@ class RemoteRecoveryHelperExecutorTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.stage = self.root / "stage"
+        keys = RemoteRootKeyProvider(
+            self.root / "keys", sandbox=True, random_bytes=lambda size: b"r" * size
+        )
         self.remote = SandboxRemoteRecoveryStore(
-            self.root / "remote", AesGcmBackupCipher(_Keys()), "remote-master-v1", sandbox=True
+            self.root / "remote", AesGcmBackupCipher(keys), "remote-master-v1", sandbox=True
         )
         self.request = _request()
         self.directory = self.stage / self.request.request_id / self.request.request_hash
@@ -114,13 +118,6 @@ def _request(backup="backup-1", key="remote-master-v1"):
         key, "remote_root", (("/etc/example", digest),), NOW, NOW + timedelta(days=30),
         False, NOW, NOW + timedelta(minutes=5),
     ).with_hash()
-
-
-class _Keys:
-    def get_key(self, key_reference, key_scope):
-        if (key_reference, key_scope) != ("remote-master-v1", "remote_root"):
-            raise AdapterError("invalid_key", "unexpected key")
-        return b"r" * 32
 
 
 if __name__ == "__main__":

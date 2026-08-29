@@ -176,8 +176,8 @@ def _receipt_hash(receipt: RemoteRecoveryReceipt) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-class SandboxRemoteRecoveryStore:
-    """Root-side recovery-copy model for sandbox verification only."""
+class RemoteRootRecoveryStore:
+    """Root-side encrypted recovery store with an explicit sandbox override."""
 
     def __init__(
         self,
@@ -186,19 +186,27 @@ class SandboxRemoteRecoveryStore:
         key_reference: str,
         *,
         sandbox: bool = False,
+        effective_uid: int | None = None,
+        owner_uid: int | None = None,
     ) -> None:
-        if not sandbox:
-            raise ValueError("remote recovery store currently requires sandbox mode")
         if not key_reference:
             raise ValueError("remote recovery key reference is required")
         self.root = root.absolute()
+        self.sandbox = sandbox
+        self.effective_uid = os.geteuid() if effective_uid is None else effective_uid
+        self.owner_uid = (os.getuid() if sandbox else 0) if owner_uid is None else owner_uid
+        if not sandbox and self.root != Path(REMOTE_BACKUP_ROOT):
+            raise ValueError("production remote recovery root is fixed")
+        if not sandbox and self.effective_uid != 0:
+            raise ValueError("production remote recovery store requires root")
         if self.root == Path("/") or self.root.is_symlink():
             raise ValueError("sandbox remote recovery root is unsafe")
         if self.root.exists() and (
             not self.root.is_dir()
             or stat.S_IMODE(self.root.stat(follow_symlinks=False).st_mode) != 0o700
+            or self.root.stat(follow_symlinks=False).st_uid != self.owner_uid
         ):
-            raise ValueError("existing sandbox remote recovery root must be a private directory")
+            raise ValueError("existing remote recovery root must be a private owned directory")
         self.cipher = cipher
         self.key_reference = key_reference
 
@@ -219,6 +227,7 @@ class SandboxRemoteRecoveryStore:
         item_directory.mkdir(mode=0o700, parents=True, exist_ok=False)
         for path in (self.root, directory.parent, directory, item_directory):
             os.chmod(path, 0o700)
+            self._verify_directory_metadata(path)
         for index, recorded in enumerate(manifest.items):
             _cancel(cancellation)
             item = by_target[recorded.target]
@@ -255,6 +264,8 @@ class SandboxRemoteRecoveryStore:
             manifest.protected,
         ).with_hash()
         _atomic_write(directory / "retention.json", _retention_bytes(retention), 0o600)
+        self._verify_file_metadata(directory / "receipt.json", 1024 * 1024)
+        self._verify_file_metadata(directory / "retention.json", 1024 * 1024)
         return receipt
 
     def load(
@@ -263,7 +274,7 @@ class SandboxRemoteRecoveryStore:
         _cancel(cancellation)
         directory = self._directory(manifest)
         path = directory / "receipt.json"
-        if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+        if not self._safe_file(path, 1024 * 1024):
             raise AdapterError("remote_backup_not_found", "remote receipt is missing or unsafe")
         try:
             value = json.loads(path.read_text(encoding="utf-8"))
@@ -285,6 +296,7 @@ class SandboxRemoteRecoveryStore:
         current = self._load_retention(directory, receipt)
         updated = replace(current, protected=protected, record_hash="").with_hash()
         _atomic_write(directory / "retention.json", _retention_bytes(updated), 0o600)
+        self._verify_file_metadata(directory / "retention.json", 1024 * 1024)
         return updated
 
     def list_retention(self, host_id: str) -> tuple[RemoteRetentionRecord, ...]:
@@ -293,10 +305,12 @@ class SandboxRemoteRecoveryStore:
             return ()
         if host_root.is_symlink() or not host_root.is_dir():
             raise AdapterError("invalid_remote_retention", "remote host backup root is unsafe")
+        self._verify_directory_metadata(host_root)
         records: list[RemoteRetentionRecord] = []
         for directory in host_root.iterdir():
             if directory.is_symlink() or not directory.is_dir():
                 raise AdapterError("invalid_remote_retention", "remote backup entry is unsafe")
+            self._verify_directory_metadata(directory)
             receipt = self._load_receipt_unbound(directory)
             record = self._load_retention(directory, receipt)
             if record.host_id != host_id or record.backup_id != directory.name:
@@ -327,7 +341,7 @@ class SandboxRemoteRecoveryStore:
 
     def _load_receipt_unbound(self, directory: Path) -> RemoteRecoveryReceipt:
         path = directory / "receipt.json"
-        if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+        if not self._safe_file(path, 1024 * 1024):
             raise AdapterError("invalid_remote_retention", "remote receipt is missing or unsafe")
         return decode_remote_receipt(path.read_bytes())
 
@@ -335,7 +349,7 @@ class SandboxRemoteRecoveryStore:
         self, directory: Path, receipt: RemoteRecoveryReceipt
     ) -> RemoteRetentionRecord:
         path = directory / "retention.json"
-        if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024 * 1024:
+        if not self._safe_file(path, 1024 * 1024):
             raise AdapterError("invalid_remote_retention", "remote retention record is missing or unsafe")
         try:
             record = _decode_retention(json.loads(path.read_text(encoding="utf-8")))
@@ -367,26 +381,32 @@ class SandboxRemoteRecoveryStore:
         directory.rmdir()
 
     def _validate_backup_directory(self, directory: Path) -> None:
-        if directory.is_symlink() or not directory.is_dir():
-            raise AdapterError("unsafe_remote_prune", "remote backup directory is unsafe")
+        try:
+            self._verify_directory_metadata(directory)
+        except AdapterError as error:
+            raise AdapterError("unsafe_remote_prune", "remote backup directory is unsafe") from error
         allowed = {"items", "receipt.json", "retention.json"}
         if {entry.name for entry in directory.iterdir()} - allowed:
             raise AdapterError("unsafe_remote_prune", "unexpected remote backup entry prevents pruning")
         items = directory / "items"
-        if items.is_symlink() or not items.is_dir():
-            raise AdapterError("unsafe_remote_prune", "remote item directory is unsafe")
+        try:
+            self._verify_directory_metadata(items)
+        except AdapterError as error:
+            raise AdapterError("unsafe_remote_prune", "remote item directory is unsafe") from error
         for path in items.iterdir():
-            if path.is_symlink() or not path.is_file():
+            if not self._safe_file(path, MAX_ENVELOPE_BYTES):
                 raise AdapterError("unsafe_remote_prune", "remote item entry is unsafe")
         for name in ("receipt.json", "retention.json"):
             path = directory / name
-            if path.is_symlink() or not path.is_file():
+            if not self._safe_file(path, 1024 * 1024):
                 raise AdapterError("unsafe_remote_prune", "remote metadata entry is unsafe")
 
     def _directory(self, manifest: BackupManifest) -> Path:
         remote_storage_location(manifest)
         if self.root.is_symlink():
             raise AdapterError("invalid_remote_backup", "remote backup root is a symlink")
+        if self.root.exists():
+            self._verify_directory_metadata(self.root)
         path = self.root / _safe_component(manifest.host_id) / manifest.backup_id
         if not _within(path.resolve(strict=False), self.root.resolve()):
             raise AdapterError("invalid_remote_backup", "remote backup path escaped root")
@@ -407,7 +427,7 @@ class SandboxRemoteRecoveryStore:
             if not item.existed:
                 continue
             path = item_directory / _item_name(index, item.sha256)
-            if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_ENVELOPE_BYTES:
+            if not self._safe_file(path, MAX_ENVELOPE_BYTES):
                 raise AdapterError("invalid_remote_backup", "remote item is missing or unsafe")
             plaintext = self.cipher.decrypt(
                 path.read_bytes(), backup_id=manifest.backup_id,
@@ -417,6 +437,31 @@ class SandboxRemoteRecoveryStore:
             )
             if hashlib.sha256(plaintext).hexdigest() != item.sha256:
                 raise AdapterError("invalid_remote_backup", "remote item hash does not match")
+
+    def _safe_file(self, path: Path, max_bytes: int) -> bool:
+        if path.is_symlink() or not path.is_file():
+            return False
+        metadata = path.stat(follow_symlinks=False)
+        return (
+            stat.S_IMODE(metadata.st_mode) == 0o600
+            and metadata.st_uid == self.owner_uid
+            and metadata.st_size <= max_bytes
+        )
+
+    def _verify_file_metadata(self, path: Path, max_bytes: int) -> None:
+        if not self._safe_file(path, max_bytes):
+            raise AdapterError("invalid_remote_backup", "remote backup file metadata is unsafe")
+
+    def _verify_directory_metadata(self, path: Path) -> None:
+        if path.is_symlink() or not path.is_dir():
+            raise AdapterError("invalid_remote_backup", "remote backup directory is unsafe")
+        metadata = path.stat(follow_symlinks=False)
+        if stat.S_IMODE(metadata.st_mode) != 0o700 or metadata.st_uid != self.owner_uid:
+            raise AdapterError("invalid_remote_backup", "remote backup directory metadata is unsafe")
+
+
+# Backward-compatible name for callers that explicitly pass sandbox=True.
+SandboxRemoteRecoveryStore = RemoteRootRecoveryStore
 
 
 def _receipt_bytes(receipt: RemoteRecoveryReceipt) -> bytes:

@@ -14,6 +14,7 @@ from llm_manager.infrastructure.backup import BackupRestoreItem, LocalBackupStor
 from llm_manager.infrastructure.remote_backup import (
     DualCopyPrivilegedBackupStore,
     RemoteRecoveryReceipt,
+    RemoteRootRecoveryStore,
     SandboxRemoteRecoveryStore,
     remote_storage_location,
 )
@@ -104,6 +105,11 @@ class DualCopyPrivilegedBackupStoreTests(unittest.TestCase):
             SandboxRemoteRecoveryStore(
                 self.root / "remote-root", AesGcmBackupCipher(_RemoteKeys()),
                 "remote-master-v1",
+            )
+        with self.assertRaises(ValueError):
+            RemoteRootRecoveryStore(
+                Path("/var/lib/llm-manager/backups"), AesGcmBackupCipher(_RemoteKeys()),
+                "remote-master-v1", effective_uid=1000,
             )
         outside = self.root / "outside"
         outside.mkdir()
