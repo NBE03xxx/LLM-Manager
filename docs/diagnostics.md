@@ -4,6 +4,8 @@
 
 診断は read-only であり、設定変更、package 操作、service restart、model pull、sudo を行わない。コマンド不在や権限不足は全体失敗にせず、項目単位の状態として返す。各 probe は timeout、取得元、時刻、parser version を持つ。
 
+root変更の候補がある場合も、固定pathのhelper executableとpackage metadataをread-onlyで検査する。root ownership/mode、非symlink、package/version/protocol互換性が全て確認できた場合だけhost capabilityの`can_elevate`を有効にする。helperがmissing/unsafe/invalid/incompatible、またはprobe自体が失敗した場合は診断全体を失敗させず、`privileged_helper_unavailable` limitationを付けてroot Applyだけをfail-closedにする。
+
 ## 2. 診断パイプライン
 
 ```text

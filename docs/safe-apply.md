@@ -35,6 +35,8 @@ Change Planner は選択された Recommendation を具体的な `Change[]` に�
 
 未知 schema、編集で失われるコメント、競合設定、復元不能な操作は自動変更対象にしない。
 
+root Changeを含むPlanは、同じDiagnosticReportで互換helperのread-only検査が成功し`host.capabilities.can_elevate=true`になっている場合だけ生成する。helper状態が変わった場合はApply境界でもrequest/固定path/owner/modeを再検査するため、Plan時のcapabilityだけを権限根拠にはしない。
+
 MVPの自動変更対象ファイルは1 item 16 MiB以下に限定する。上限超過は通常の設定ファイルとして異常とみなしread-onlyにする。これによりitem単位のAESGCM one-shot処理に上限を設ける。
 
 ## 4. Review と承認
