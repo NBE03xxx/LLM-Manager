@@ -25,6 +25,7 @@ class DebianPackagingTests(unittest.TestCase):
             install,
             [
                 "packaging/bin/llm-manager-helper usr/bin",
+                "packaging/helper-metadata.json usr/share/llm-manager",
                 "packaging/polkit/io.github.nbe03xxx.llm-manager.policy usr/share/polkit-1/actions",
             ],
         )
