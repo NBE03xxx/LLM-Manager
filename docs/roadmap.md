@@ -92,9 +92,9 @@ Remote recovery helper transport境界実装: user-only stagingとroot-only remo
 
 Remote recovery helper executor実装: root側でrequest ID/hashからuser stagingを固定導出し、0700 directory、0600 request/item、owner、regular file、16 MiB上限、完全なitem集合、content hashを再検証する。protocol requestへcreated/expires/protectedも束縛し、30日期限を固定してmanifestを再構築後、sandbox remote-root暗号化backendへ接続し、0600 canonical receiptをuser stagingへ公開する。replay result、別key reference、欠落/余剰/改ざんitemを拒否する。sandbox executorのみで、packaged remote helper executableと実root key配置は未実装である。
 
-Remote helper CLI core実装: 固定subcommandは非root userの`user-stage-prepare/remove <derived-path>`と、rootの`invoke-recovery <request-id> <request-hash>`だけとする。root invocationは`SUDO_UID`からuser home/stagingを導出し、executorへ接続する。prepareはprivate directory/itemsを作り、cleanupは既知entryを全検査後だけ削除する。未知command/path、rootによるuser command、非root invoke、UID欠落、未知entryをstable resultで拒否する。sandbox注入のみで、remote helper別deb/wrapperと実配置は未実装である。
+Remote helper CLI core実装: 固定subcommandは非root userの`user-stage-prepare/remove <derived-path>`と、rootの`invoke-recovery <request-id> <request-hash>`だけとする。root invocationは`SUDO_UID`からuser home/stagingを導出し、executorへ接続する。prepareはprivate directory/itemsを作り、cleanupは既知entryを全検査後だけ削除する。未知command/path、rootによるuser command、非root invoke、UID欠落、未知entryをstable resultで拒否する。別deb/wrapperのsandbox artifact Gateまで完了し、実配置は未実施である。
 
-Remote helper production entrypoint実装: root `invoke-recovery`時だけfixed backup/key roots、root key provider、AES-GCM cipher、remote root backendをruntime factoryで構築する。非root/未知commandではbackend/key accessを開始しない。別deb向け`python3 -I` wrapper scaffoldを追加し、local `llm-manager` debへ誤同梱しない静的Gateを追加した。remote helper別debのcontrol/install/artifact検証と実installは未実装である。
+Remote helper production entrypoint実装: root `invoke-recovery`時だけfixed backup/key roots、root key provider、AES-GCM cipher、remote root backendをruntime factoryで構築する。非root/未知commandではbackend/key accessを開始しない。remote helper専用debは`python3 -I` wrapper、root-owned private runtime、canonical metadataだけを収め、local helper/PolicyKit/Secret Service/OpenSSH clientを混在させない。sandbox buildでownership、mode、dependency、isolated import、bytecode cache不在を検証する。実install/upgrade/remove/purgeとremote protocol互換診断は未実施である。
 
 Remote root key provider実装: production key rootを`/var/lib/llm-manager/keys`へ固定し、key referenceごとの32-byte AES keyをO_EXCLで一度だけ生成する。directory 0700、key 0600、root owner、regular file、symlink、長さをloadごとに再検証し、不完全keyを自動置換しない。`remote_root` scopeだけを許し、backup/receipt rootとは分離する。単体テストはalternate sandbox rootのみで、実`/var/lib`への生成・配置Gateは未実施である。
 
@@ -128,7 +128,7 @@ Local privileged境界統合test実装: root CoordinatorからLocalPolicyKitInvo
 
 Local deb先行Gate実装: Debian debhelper/dh-python構成、PolicyKit policy、manpage、root-owned固定helper wrapperを追加した。helper wrapperは`python3 -I`で起動し、pip console scriptによる特権導入を禁止する。binary debを一時copyでbuildし、artifact内のroot ownership、0755/0644 mode、isolated shebang、PolicyKit固定path、runtime dependencyを`verify-deb.sh`で検証した。実install/upgrade/remove/purgeとdesktop PolicyKit認証は未実施である。
 
-Helper compatibility診断・Plan Gate実装: `/usr/bin/llm-manager-helper`とroot-owned canonical metadataの固定pathをread-onlyで調べ、root:root ownership、0755/0644 mode、非symlink、package名、package version、protocol versionを全て満たす場合だけhostの`can_elevate`を有効にする。missing、unsafe、invalid、incompatible、probe例外はread-only診断を継続しつつfail-closedにし、Ollama root plannerはcapabilityがなければChangeSet生成を拒否する。local package metadataをdebへ同梱した。remote helper package分離と実SSH診断接続は未実施である。
+Helper compatibility診断・Plan Gate実装: `/usr/bin/llm-manager-helper`とroot-owned canonical metadataの固定pathをread-onlyで調べ、root:root ownership、0755/0644 mode、非symlink、package名、package version、protocol versionを全て満たす場合だけhostの`can_elevate`を有効にする。missing、unsafe、invalid、incompatible、probe例外はread-only診断を継続しつつfail-closedにし、Ollama root plannerはcapabilityがなければChangeSet生成を拒否する。local package metadataをdebへ同梱し、remote helperは別artifactへ分離した。remote helper用SSH互換診断接続は未実施である。
 
 Apply時helper再検証実装: 診断・Plan後のhelper差替えや削除を信用せず、root workflowはBackup前とhelper起動直前に互換性を再検証する。Backup前の失敗は永続物を作らず、検証済みBackup後の失敗はBackupを保持して未変更で停止する。いずれもinvoker、pkexec、systemd操作へ到達しないことをsandbox fakeで確認した。
 

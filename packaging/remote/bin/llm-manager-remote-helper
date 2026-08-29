@@ -1,6 +1,10 @@
 #!/usr/bin/python3 -I
 """Root-owned isolated entry point for the separately installed remote helper."""
 
+import sys
+
+sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")
+
 from llm_manager.infrastructure.remote_helper_cli import main
 
 
