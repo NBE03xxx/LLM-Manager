@@ -123,6 +123,8 @@ local root変更のrollbackも新しい期限付き宣言requestとして生成�
 
 SSH切断時は操作IDとmanifestを基に再接続後の状態照合を先に行う。`before hash`、`after hash`、それ以外の値をそれぞれ「未適用」「適用済み」「外部変更または不明」と判定する。不明状態を自動再適用・自動復元せず、`RECOVERY_REQUIRED`として対象ごとの安全な手順を表示する。
 
+remote照合はlocal journalのoperation/plan/host/change-set/backup/manifest hash束縛とmanifest自身のintegrityを検証し、再接続したHostPortのhost IDとknown-host fingerprintが一致した後だけread-only `stat`を行う。fingerprint欠落・変更、binding不一致、再切断、cancelでは判定を確定せず、ApplyやRollbackを自動実行しない。
+
 ## 9. 冪等性・競合
 
 - 既に推奨値なら no-op として ChangeSet から除外する。
