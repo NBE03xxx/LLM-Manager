@@ -25,6 +25,11 @@ from llm_manager.infrastructure.remote_retention import (
     decode_remote_retention_result,
     encode_remote_retention_request,
 )
+from llm_manager.infrastructure.remote_deletion import (
+    REMOTE_DELETION_OPERATION, REMOTE_DELETION_PROTOCOL_VERSION,
+    RemoteDeletionRequest, decode_remote_deletion_result,
+    encode_remote_deletion_request,
+)
 
 
 NOW = datetime.now(UTC)
@@ -168,6 +173,31 @@ class RemoteHelperCliTests(unittest.TestCase):
         self.assertEqual(backend.keep_generations, 10)
         self.assertEqual((self.home / relative / "result.json").read_bytes(), result)
 
+    def test_root_deletion_command_uses_only_bound_staged_request(self):
+        request = RemoteDeletionRequest(
+            "1.0", REMOTE_DELETION_PROTOCOL_VERSION, REMOTE_DELETION_OPERATION,
+            "deletion-1", "backup-1", "ssh:gpu-box", "SHA256:" + "a" * 43,
+            "b" * 64, "c" * 64, "remote-master-v1",
+            "/var/lib/llm-manager/backups/host/backup-1",
+            (("/etc/example", "d" * 64),), NOW, NOW + timedelta(minutes=5),
+        ).with_hash()
+        relative = f".local/state/llm-manager/remote-helper/{request.request_id}/{request.request_hash}"
+        code, _ = run_remote_helper(
+            ("user-stage-prepare", relative), effective_uid=self.uid, current_uid=self.uid,
+            home_for_uid=lambda _: self.home,
+        )
+        self.assertEqual(code, 0)
+        self._write(self.home / relative / "request.json", encode_remote_deletion_request(request))
+        backend = _DeletionBackend()
+        code, content = run_remote_helper(
+            ("invoke-deletion", request.request_id, request.request_hash),
+            environ={"SUDO_UID": str(self.uid)}, effective_uid=0, current_uid=0,
+            home_for_uid=lambda _: self.home, backend=backend,
+        )
+        self.assertEqual(code, 0)
+        self.assertEqual(decode_remote_deletion_result(content).backup_id, "backup-1")
+        self.assertEqual(backend.requests, [request])
+
     def test_remote_wrapper_is_isolated_and_not_installed_by_local_package(self):
         project = Path(__file__).resolve().parents[1]
         wrapper = project / "packaging/remote/bin/llm-manager-remote-helper"
@@ -222,6 +252,14 @@ class _RetentionBackend:
     def prune(self, host_id, *, now, keep_generations=10, expected_fingerprint=None):
         self.keep_generations = keep_generations
         return ()
+
+
+class _DeletionBackend:
+    def __init__(self):
+        self.requests = []
+
+    def delete_bound(self, request, cancellation):
+        self.requests.append(request)
 
 
 if __name__ == "__main__":

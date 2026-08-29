@@ -274,8 +274,10 @@ class RemoteRootRecoveryStore:
         _cancel(cancellation)
         directory = self._directory(manifest)
         path = directory / "receipt.json"
+        if not path.exists() and not path.is_symlink():
+            raise AdapterError("remote_backup_not_found", "remote receipt is missing")
         if not self._safe_file(path, 1024 * 1024):
-            raise AdapterError("remote_backup_not_found", "remote receipt is missing or unsafe")
+            raise AdapterError("invalid_remote_backup_receipt", "remote receipt metadata is unsafe")
         try:
             value = json.loads(path.read_text(encoding="utf-8"))
             receipt = _decode_receipt(value)
@@ -310,6 +312,57 @@ class RemoteRootRecoveryStore:
             raise AdapterError("protected_backup", "protected remote backup cannot be deleted")
         directory = self._directory(manifest)
         self._validate_backup_directory(directory)
+        self._remove_backup_directory(directory)
+
+    def delete_bound(self, request, cancellation: CancellationToken) -> None:
+        """Delete only a fully receipt-bound remote-helper request."""
+        _cancel(cancellation)
+        host_root = self.root / _safe_component(request.host_id)
+        if not request.backup_id or "/" in request.backup_id or request.backup_id in {".", ".."}:
+            raise AdapterError("invalid_remote_deletion", "backup ID is unsafe")
+        directory = host_root / request.backup_id
+        if not _within(directory.resolve(strict=False), self.root.resolve()):
+            raise AdapterError("invalid_remote_deletion", "remote deletion path escaped root")
+        receipt_path = directory / "receipt.json"
+        if not receipt_path.exists() and not receipt_path.is_symlink():
+            raise AdapterError("remote_backup_not_found", "remote recovery copy is absent")
+        if not self._safe_file(receipt_path, 1024 * 1024):
+            raise AdapterError("invalid_remote_backup_receipt", "remote receipt metadata is unsafe")
+        try:
+            receipt = _decode_receipt(json.loads(receipt_path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            raise AdapterError("invalid_remote_backup_receipt", "remote receipt is malformed") from error
+        if receipt_path.read_bytes() != _receipt_bytes(receipt):
+            raise AdapterError("invalid_remote_backup_receipt", "remote receipt is not canonical")
+        _validate_receipt_hash(receipt)
+        if (
+            receipt.backup_id != request.backup_id
+            or receipt.host_id != request.host_id
+            or receipt.host_fingerprint != request.host_fingerprint
+            or receipt.local_manifest_hash != request.manifest_hash
+            or receipt.receipt_hash != request.remote_receipt_hash
+            or receipt.key_reference != request.key_reference
+            or receipt.key_scope != "remote_root"
+            or receipt.storage_location != request.storage_location
+            or receipt.item_hashes != request.item_hashes
+        ):
+            raise AdapterError("remote_deletion_binding_mismatch", "remote receipt identity changed")
+        record = self._load_retention(directory, receipt)
+        if record.protected:
+            raise AdapterError("protected_backup", "protected remote backup cannot be deleted")
+        self._validate_backup_directory(directory)
+        for index, (target, digest) in enumerate(receipt.item_hashes):
+            if digest is None:
+                continue
+            path = directory / "items" / _item_name(index, digest)
+            plaintext = self.cipher.decrypt(
+                path.read_bytes(), backup_id=receipt.backup_id,
+                host_fingerprint=receipt.host_fingerprint, target=target,
+                expected_key_reference=receipt.key_reference,
+                expected_key_scope=receipt.key_scope,
+            )
+            if hashlib.sha256(plaintext).hexdigest() != digest:
+                raise AdapterError("invalid_remote_backup", "remote item hash does not match")
         self._remove_backup_directory(directory)
 
     def list_retention(

@@ -153,7 +153,9 @@ remote retentionはreceiptと分離したcanonical recordに`backup ID + host ID
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。
 
-手動のdual-copy削除requestはbackup ID、host ID/fingerprint、manifest hash、5分以下の期限をhashで束縛し、protected backupを開始前に拒否する。local正本を先に失わないようremote copyを先に削除し、remoteが`deleted`または`already_absent`の場合だけlocalへ進む。各copyのoutcome/errorと削除後のread-only照合状態は0600のcanonical immutable resultへ保存する。cancelや片側失敗後に残存copyを補償削除・自動再作成しない。現段階はsandbox/fake storeまでで、remote helper deletion protocolと実SSH実行は未実施である。
+手動のdual-copy削除requestはbackup ID、host ID/fingerprint、manifest hash、5分以下の期限をhashで束縛し、protected backupを開始前に拒否する。local正本を先に失わないようremote copyを先に削除し、remoteが`deleted`または`already_absent`の場合だけlocalへ進む。各copyのoutcome/errorと削除後のread-only照合状態は0600のcanonical immutable resultへ保存する。cancelや片側失敗後に残存copyを補償削除・自動再作成しない。
+
+remote削除protocolはlocal manifest bindingに加え、直前に検証したremote receipt hash、`remote_root` key reference、固定storage location、全item hashをrequest/resultへ束縛する。user stagingへcanonical requestを最後に公開し、root helperには`invoke-deletion <request-id> <request-hash>`以外を渡さない。root backendは保存済みreceiptとretention recordを再読込し、protected、receipt/key/path/item不一致、unsafe metadata、復号またはplaintext hash失敗時は削除しない。helper resultは0600 immutableとし、SSH invokeがtimeoutでも同じidentityのresultを再取得する。fake OpenSSHとsandbox root backendまで完了し、実SSH先では未実行である。
 
 ## 9. 冪等性・競合
 
