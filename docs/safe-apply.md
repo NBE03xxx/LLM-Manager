@@ -125,7 +125,9 @@ SSH切断時は操作IDとmanifestを基に再接続後の状態照合を先に�
 
 remote照合はlocal journalのoperation/plan/host/change-set/backup/manifest hash束縛とmanifest自身のintegrityを検証し、再接続したHostPortのhost IDとknown-host fingerprintが一致した後だけread-only `stat`を行う。fingerprint欠落・変更、binding不一致、再切断、cancelでは判定を確定せず、ApplyやRollbackを自動実行しない。
 
-SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。現段階のport試験はfakeのみで、SSH転送とremote helper暗号化は未実装である。
+SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。現段階のport試験はfakeのみで、SSH転送と実remote helper暗号化は未実装である。
+
+remote helper側保存処理のsandbox modelは、一時rootでのみ起動でき、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。これはremote側backendのfault-injection用であり、実`/var/lib`配置やSSH transportを有効化するものではない。
 
 ## 9. 冪等性・競合
 
