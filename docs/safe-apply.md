@@ -167,6 +167,8 @@ SSH先は互換remote helper debの事前導入を必須とする。診断時に
 
 remote helper互換性probeは`/usr/bin/llm-manager-remote-helper`と`/usr/share/llm-manager-remote-helper/helper-metadata.json`だけをsystem OpenSSHの固定`stat`/bounded `cat`で読む。root ownership、0755/0644、非symlink、content hash、canonical schema、package/version/protocolを検証し、user staging開始前とroot helper起動直前に再実行する。失敗・timeout・metadata差替えは`privileged_helper_unavailable`としてstaging前に停止する。現段階はfake runner統合までで、実SSH先では未実行である。
 
+切断後のroot journal取得は限定helperの`read-journal-evidence <operation-id> <request-hash>`だけを許可する。root側は`/var/lib/llm-manager/journals/evidence`固定のroot:root 0700/0600 regular fileを`O_NOFOLLOW`付きdescriptorでbounded readし、canonical evidenceとidentity bindingを再検証する。OpenSSH側は互換性Gate後の固定passwordless sudo commandだけを使い、timeout・sudo不可・oversize・改ざん時はhost identityやtarget `stat`へ進まない。fake transportからread-only reconcilerまで接続済みだが、実SSH先では未実行である。
+
 local root Applyでも診断時の結果だけを信用しない。Backup開始前と、Backup検証後のhelper呼出し直前に同じ固定path・ownership・mode・package/version・protocol検査を再実行する。最初の検査失敗はBackupを作らず停止し、2回目の検査失敗は検証済みBackupを保持したまま未変更の`APPROVED`へ戻す。どちらもpkexec、file write、daemon-reload、restartを開始しない。
 
 ### SSH接続の対話認証

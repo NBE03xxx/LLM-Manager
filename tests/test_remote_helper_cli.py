@@ -16,6 +16,8 @@ from llm_manager.infrastructure.remote_helper import (
     RemoteRecoveryRequest, encode_remote_request,
 )
 from llm_manager.infrastructure.remote_helper_cli import main, run_remote_helper
+from llm_manager.infrastructure.journal import JournalStatus, JournalTarget
+from llm_manager.infrastructure.remote_journal import RemoteJournalEvidence, encode_remote_journal_evidence
 
 
 NOW = datetime.now(UTC)
@@ -112,6 +114,28 @@ class RemoteHelperCliTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(output.getvalue(), b'{"code":"remote_backend_unavailable","success":false}\n')
 
+    def test_root_journal_command_returns_only_bound_canonical_evidence(self):
+        evidence = RemoteJournalEvidence(
+            "1.0", "operation-1", "plan-1", "ssh:host", "SHA256:" + "f" * 43,
+            "c" * 64, "backup-1", "d" * 64, "a" * 64, None,
+            JournalStatus.APPLYING,
+            (JournalTarget("/etc/example", "b" * 64, "e" * 64),), "f" * 64,
+        ).with_hash()
+        content = encode_remote_journal_evidence(evidence)
+        loader = _JournalLoader(content)
+        code, result = run_remote_helper(
+            ("read-journal-evidence", "operation-1", "a" * 64),
+            effective_uid=0, current_uid=0, journal_loader=loader,
+        )
+        self.assertEqual((code, result), (0, content))
+        self.assertEqual(loader.calls, [("operation-1", "a" * 64)])
+        code, result = run_remote_helper(
+            ("read-journal-evidence", "../bad", "a" * 64),
+            effective_uid=0, current_uid=0, journal_loader=loader,
+        )
+        self.assertEqual(code, 1)
+        self.assertIn(b"invalid_remote_journal_identity", result)
+
     def test_remote_wrapper_is_isolated_and_not_installed_by_local_package(self):
         project = Path(__file__).resolve().parents[1]
         wrapper = project / "packaging/remote/bin/llm-manager-remote-helper"
@@ -142,6 +166,16 @@ class _Keys:
         if (key_reference, key_scope) != ("remote-master-v1", "remote_root"):
             raise AdapterError("invalid_key", "unexpected key")
         return b"r" * 32
+
+
+class _JournalLoader:
+    def __init__(self, content):
+        self.content = content
+        self.calls = []
+
+    def load_journal_evidence(self, operation_id, request_hash, cancellation):
+        self.calls.append((operation_id, request_hash))
+        return self.content
 
 
 if __name__ == "__main__":

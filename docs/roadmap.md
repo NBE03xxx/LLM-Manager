@@ -82,7 +82,7 @@ Safe Apply core実装済み: local sandbox向けBackup Store（16 MiB上限、07
 
 SSH切断後のread-only照合core実装: local journalとBackupManifestのoperation/plan/host/change-set/backup/manifest hash、manifest integrity、再接続先host ID/known-host fingerprintを検証してからremote `stat`でbefore/after/unknownを判定する。binding・identity不一致、再切断、cancelでは自動Apply/rollbackへ進まない。fake HostPortでのみ検証済みで、実SSH切断integrationは引き続き未完了である。
 
-Remote root journal evidence境界実装: root journalを任意path読込せず、限定helperが返す1 MiB以下のcanonical evidenceへoperation/plan/host/fingerprint/change-set/backup/manifest/request/rollback hash、status、targets、remote journal hashを束縛する。evidenceの取得・canonical/hash/binding検証成功後だけhost identityとremote `stat`照合へ進む。改ざん、別operation evidence、取得切断ではremote stateを観測せずfail-closedにする。fake portのみで、実remote helper/SSH result取得は未接続である。
+Remote root journal evidence境界実装: root journalを任意path読込せず、限定helperが返す1 MiB以下のcanonical evidenceへoperation/plan/host/fingerprint/change-set/backup/manifest/request/rollback hash、status、targets、remote journal hashを束縛する。root側は`/var/lib/llm-manager/journals/evidence`固定、0700/0600、root owner、非symlinkをdescriptorで検証する。OpenSSH Portはhelper互換性再検証後、固定`sudo -n -- ... read-journal-evidence <operation-id> <request-hash>`だけを実行し、検証済みevidenceを既存read-only reconcilerへ渡す。改ざん、別operation、切断、timeout、sudo不可ではremote targetを観測せずfail-closedにする。fake runnerまで完了し、実remote helper/SSH Gateは未実施である。
 
 Dual backup境界実装: local正本の作成・検証済み復元素材からremote recovery copyを作るportと、両copyの検証を集約するStoreを追加した。remote receiptへlocal manifest identity/hash、全item hash、host fingerprint、固定remote保存先、独立`remote_root` key reference、receipt hashを束縛する。remote作成・読込・receipt検証失敗時もlocal正本を保持しつつApply Gateを失敗させる。境界はfake remoteで検証済みであり、SSH転送と実remote helperへの接続は未実装である。
 

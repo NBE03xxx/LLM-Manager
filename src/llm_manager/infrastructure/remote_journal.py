@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
+import stat
 from dataclasses import dataclass, replace
+from pathlib import Path
 from typing import Protocol
 
 from llm_manager.application.errors import AdapterError
@@ -13,6 +17,8 @@ from .journal import JournalStatus, JournalTarget, OperationJournal, _digest
 
 
 MAX_REMOTE_JOURNAL_EVIDENCE_BYTES = 1024 * 1024
+REMOTE_JOURNAL_EVIDENCE_ROOT = Path("/var/lib/llm-manager/journals/evidence")
+_IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +52,94 @@ class RemoteRootJournalPort(Protocol):
         request_hash: str,
         cancellation: CancellationToken,
     ) -> bytes: ...
+
+
+class RemoteRootJournalEvidenceStore:
+    """Read immutable, root-owned evidence from one fixed production directory."""
+
+    def __init__(
+        self,
+        root: Path = REMOTE_JOURNAL_EVIDENCE_ROOT,
+        *,
+        sandbox: bool = False,
+        effective_uid: int | None = None,
+        owner_uid: int | None = None,
+    ) -> None:
+        self.root = root.absolute()
+        uid = os.geteuid() if effective_uid is None else effective_uid
+        self.owner_uid = (os.getuid() if sandbox else 0) if owner_uid is None else owner_uid
+        self.owner_gid = os.getgid() if sandbox else 0
+        if not sandbox and self.root != REMOTE_JOURNAL_EVIDENCE_ROOT:
+            raise AdapterError("invalid_remote_journal_root", "remote journal root is fixed")
+        if not sandbox and self.root.resolve(strict=False) != REMOTE_JOURNAL_EVIDENCE_ROOT:
+            raise AdapterError("invalid_remote_journal_root", "remote journal root escaped")
+        if not sandbox and uid != 0:
+            raise AdapterError("root_required", "remote journal evidence requires root")
+        if self.root == Path("/") or self.root.is_symlink():
+            raise AdapterError("invalid_remote_journal_root", "remote journal root is unsafe")
+
+    def load_journal_evidence(
+        self,
+        operation_id: str,
+        request_hash: str,
+        cancellation: CancellationToken,
+    ) -> bytes:
+        if cancellation.cancelled:
+            from llm_manager.application.errors import OperationCancelled
+            raise OperationCancelled("remote journal retrieval cancelled")
+        if not _IDENTIFIER.fullmatch(operation_id):
+            raise AdapterError("invalid_remote_journal_identity", "operation identity is invalid")
+        _digest(request_hash)
+        self._private_directory(self.root)
+        path = self.root / f"{operation_id}.json"
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0)
+        try:
+            descriptor = os.open(path, flags)
+        except OSError as error:
+            raise AdapterError("unsafe_remote_journal", "remote journal evidence is unavailable") from error
+        try:
+            metadata = os.fstat(descriptor)
+            if (
+                not stat.S_ISREG(metadata.st_mode)
+                or stat.S_IMODE(metadata.st_mode) != 0o600
+                or metadata.st_uid != self.owner_uid
+                or metadata.st_gid != self.owner_gid
+            ):
+                raise AdapterError(
+                    "unsafe_remote_journal", "remote journal evidence owner or mode is unsafe"
+                )
+            chunks: list[bytes] = []
+            remaining = MAX_REMOTE_JOURNAL_EVIDENCE_BYTES + 1
+            while remaining:
+                chunk = os.read(descriptor, remaining)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                remaining -= len(chunk)
+            content = b"".join(chunks)
+        finally:
+            os.close(descriptor)
+        if len(content) > MAX_REMOTE_JOURNAL_EVIDENCE_BYTES:
+            raise AdapterError("remote_journal_too_large", "remote journal evidence exceeds 1 MiB")
+        evidence = decode_remote_journal_evidence(content)
+        if evidence.operation_id != operation_id or evidence.request_hash != request_hash:
+            raise AdapterError(
+                "remote_journal_binding_mismatch", "remote journal evidence identity is invalid"
+            )
+        return content
+
+    def _private_directory(self, path: Path) -> None:
+        if path.is_symlink() or not path.is_dir():
+            raise AdapterError("unsafe_remote_journal", "remote journal evidence path is unsafe")
+        metadata = path.stat(follow_symlinks=False)
+        if (
+            metadata.st_uid != self.owner_uid
+            or metadata.st_gid != self.owner_gid
+            or stat.S_IMODE(metadata.st_mode) != 0o700
+        ):
+            raise AdapterError(
+                "unsafe_remote_journal", "remote journal evidence owner or mode is unsafe"
+            )
 
 
 def encode_remote_journal_evidence(evidence: RemoteJournalEvidence) -> bytes:

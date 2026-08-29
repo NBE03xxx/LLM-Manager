@@ -7,7 +7,7 @@ import re
 import stat
 import sys
 from pathlib import Path, PurePosixPath
-from typing import Callable, Mapping
+from typing import Callable, Mapping, Protocol
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import CancellationToken
@@ -17,11 +17,18 @@ from .backup_crypto import AesGcmBackupCipher
 from .remote_keys import RemoteRootKeyProvider
 from .remote_helper_executor import RemoteRecoveryHelperExecutor
 from .backup import _within
+from .remote_journal import RemoteRootJournalEvidenceStore, decode_remote_journal_evidence
 
 
 REMOTE_USER_ROOT = PurePosixPath(".local/state/llm-manager/remote-helper")
 _IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 _DIGEST = re.compile(r"[0-9a-f]{64}")
+
+
+class RemoteJournalEvidenceLoader(Protocol):
+    def load_journal_evidence(
+        self, operation_id: str, request_hash: str, cancellation: CancellationToken
+    ) -> bytes: ...
 
 
 def run_remote_helper(
@@ -32,6 +39,7 @@ def run_remote_helper(
     current_uid: int | None = None,
     home_for_uid: Callable[[int], Path] | None = None,
     backend: SandboxRemoteRecoveryStore | None = None,
+    journal_loader: RemoteJournalEvidenceLoader | None = None,
     cancellation: CancellationToken | None = None,
 ) -> tuple[int, bytes]:
     env = os.environ if environ is None else environ
@@ -65,6 +73,21 @@ def run_remote_helper(
                 staging_root, backend, invoking_uid
             ).execute(request_id, request_hash, token)
             return 0, _result(True, "invoke-recovery")
+        if len(argv) == 3 and argv[0] == "read-journal-evidence":
+            if euid != 0:
+                raise AdapterError("root_required", "remote journal evidence requires root")
+            operation_id, request_hash = argv[1:]
+            if not _IDENTIFIER.fullmatch(operation_id) or not _DIGEST.fullmatch(request_hash):
+                raise AdapterError("invalid_remote_journal_identity", "journal identity is invalid")
+            if journal_loader is None:
+                raise AdapterError("remote_journal_unavailable", "remote journal is unavailable")
+            content = journal_loader.load_journal_evidence(
+                operation_id, request_hash, token
+            )
+            evidence = decode_remote_journal_evidence(content)
+            if evidence.operation_id != operation_id or evidence.request_hash != request_hash:
+                raise AdapterError("remote_journal_binding_mismatch", "journal identity changed")
+            return 0, content
         raise AdapterError("invalid_remote_command", "remote helper command is not allowlisted")
     except OperationCancelled:
         return 2, _result(False, "cancelled")
@@ -79,11 +102,16 @@ def build_production_backend() -> RemoteRootRecoveryStore:
     )
 
 
+def build_production_journal_loader() -> RemoteRootJournalEvidenceStore:
+    return RemoteRootJournalEvidenceStore()
+
+
 def main(
     argv: list[str] | None = None,
     *,
     stdout=None,
     backend_factory: Callable[[], RemoteRootRecoveryStore] = build_production_backend,
+    journal_loader_factory: Callable[[], RemoteJournalEvidenceLoader] = build_production_journal_loader,
     environ: Mapping[str, str] | None = None,
     effective_uid: int | None = None,
     current_uid: int | None = None,
@@ -91,6 +119,7 @@ def main(
 ) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
     backend = None
+    journal_loader = None
     resolved_euid = os.geteuid() if effective_uid is None else effective_uid
     if arguments[:1] == ["invoke-recovery"] and resolved_euid == 0:
         try:
@@ -99,9 +128,17 @@ def main(
             content = _result(False, "remote_backend_unavailable")
             _write_stdout(stdout, content)
             return 1
+    if arguments[:1] == ["read-journal-evidence"] and resolved_euid == 0:
+        try:
+            journal_loader = journal_loader_factory()
+        except (AdapterError, OSError, ValueError):
+            content = _result(False, "remote_journal_unavailable")
+            _write_stdout(stdout, content)
+            return 1
     code, content = run_remote_helper(
         tuple(arguments), environ=environ, effective_uid=effective_uid,
         current_uid=current_uid, home_for_uid=home_for_uid, backend=backend,
+        journal_loader=journal_loader,
     )
     _write_stdout(stdout, content)
     return code
