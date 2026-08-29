@@ -144,6 +144,7 @@ class _Fixture:
             invoker,
             _Validator(validation_passes),
             self.journal,
+            _Readiness(),
         )
 
     def _service(self, argv: tuple[str, ...]) -> int:
@@ -186,6 +187,11 @@ class _CliRunner:
         }
         stdout = json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n"
         return CommandResult(command.argv, 0 if completed else 1, stdout, "", False, 1)
+
+
+class _Readiness:
+    def assert_ready(self, cancellation):
+        return None
 
 
 class _SandboxBackupStore:

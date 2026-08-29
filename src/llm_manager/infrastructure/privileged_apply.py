@@ -27,6 +27,10 @@ class HelperInvoker(Protocol):
     def invoke(self, request: HelperRequest, staged_contents: tuple[tuple[str, bytes], ...], cancellation: CancellationToken) -> tuple[HelperOperationResult, ...]: ...
 
 
+class PrivilegedApplyReadiness(Protocol):
+    def assert_ready(self, cancellation: CancellationToken) -> None: ...
+
+
 class PrivilegedBackupStore(Protocol):
     def create(self, request: BackupRequest, cancellation: CancellationToken) -> BackupManifest: ...
     def verify(self, manifest: BackupManifest, cancellation: CancellationToken) -> tuple[ValidationResult, ...]: ...
@@ -88,9 +92,11 @@ class ApprovedHelperRequestFactory:
 class LocalPrivilegedApplyService:
     factory: ApprovedHelperRequestFactory
     invoker: HelperInvoker
+    readiness: PrivilegedApplyReadiness
 
     def execute(self, plan: OptimizationPlan, approval: ApprovalRecord, operation_id: str, cancellation: CancellationToken) -> tuple[HelperOperationResult, ...]:
         prepared = self.factory.prepare(plan, approval, operation_id)
+        self.readiness.assert_ready(cancellation)
         return self.invoker.invoke(prepared.request, prepared.staged_contents, cancellation)
 
 
@@ -170,6 +176,7 @@ class PrivilegedSafeApplyCoordinator:
         invoker: HelperInvoker,
         validator: RuntimeValidatorPort,
         journal: LocalOperationJournal,
+        readiness: PrivilegedApplyReadiness,
         audit: AuditPort | None = None,
     ) -> None:
         self.backups = backups
@@ -178,6 +185,7 @@ class PrivilegedSafeApplyCoordinator:
         self.invoker = invoker
         self.validator = validator
         self.journal = journal
+        self.readiness = readiness
         self.audit = audit
 
     def execute(self, plan: OptimizationPlan, approval: ApprovalRecord, operation_id: str, cancellation: CancellationToken) -> ApplyOutcome:
@@ -186,6 +194,7 @@ class PrivilegedSafeApplyCoordinator:
         manifest: BackupManifest | None = None
         apply_request: HelperRequest | None = None
         try:
+            self.readiness.assert_ready(cancellation)
             manifest = self.backups.create(BackupRequest(
                 operation_id, plan.plan_id, plan.change_set.host_id, None,
                 plan.change_set, plan.backup_policy,
@@ -193,6 +202,10 @@ class PrivilegedSafeApplyCoordinator:
             checks = self.backups.verify(manifest, cancellation)
             if not _passed(checks):
                 return ApplyOutcome(PlanStatus.APPROVED, manifest, checks, "backup verification failed")
+            try:
+                self.readiness.assert_ready(cancellation)
+            except (AdapterError, OSError, OperationCancelled) as error:
+                return ApplyOutcome(PlanStatus.APPROVED, manifest, checks, str(error))
             prepared = self.apply_factory.prepare(plan, approval, operation_id, manifest=manifest)
             apply_request = prepared.request
             write = prepared.request.operations[0]

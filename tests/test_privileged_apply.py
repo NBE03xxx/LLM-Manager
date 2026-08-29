@@ -57,10 +57,22 @@ class ApprovedHelperRequestFactoryTests(unittest.TestCase):
     def test_service_passes_only_prepared_request_to_invoker(self) -> None:
         current, approval, _ = _approved()
         invoker = _Invoker()
-        results = LocalPrivilegedApplyService(ApprovedHelperRequestFactory(), invoker).execute(current, approval, "operation-1", CancellationToken())
+        readiness = _Readiness(True)
+        results = LocalPrivilegedApplyService(ApprovedHelperRequestFactory(), invoker, readiness).execute(current, approval, "operation-1", CancellationToken())
         self.assertEqual(results, ())
         self.assertEqual(invoker.request.plan_id, current.plan_id)
         self.assertEqual(invoker.contents[0][0], "operation-1:write")
+        self.assertEqual(readiness.calls, 1)
+
+    def test_service_rechecks_helper_before_invocation(self) -> None:
+        current, approval, _ = _approved()
+        invoker = _Invoker()
+        with self.assertRaises(AdapterError) as caught:
+            LocalPrivilegedApplyService(
+                ApprovedHelperRequestFactory(), invoker, _Readiness(False)
+            ).execute(current, approval, "operation-1", CancellationToken())
+        self.assertEqual(caught.exception.code, "privileged_helper_unavailable")
+        self.assertFalse(hasattr(invoker, "request"))
 
     def test_manifest_binding_rejects_another_change_set(self) -> None:
         current, approval, _ = _approved()
@@ -78,6 +90,32 @@ class ApprovedHelperRequestFactoryTests(unittest.TestCase):
 
 
 class PrivilegedSafeApplyCoordinatorTests(unittest.TestCase):
+    def test_helper_change_before_apply_stops_without_invoking_or_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            readiness = _Readiness(True, False)
+            coordinator, backend, backups, journal, current, approval = self._workflow(
+                Path(directory), b"old", readiness=readiness
+            )
+            outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.APPROVED)
+            self.assertIsNotNone(outcome.manifest)
+            self.assertEqual(readiness.calls, 2)
+            self.assertEqual(backups.create_calls, 1)
+            self.assertEqual(backend.requests, [])
+            with self.assertRaises(AdapterError):
+                journal.load("operation-1")
+
+    def test_unready_helper_stops_before_backup(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            coordinator, backend, backups, _, current, approval = self._workflow(
+                Path(directory), b"old", readiness=_Readiness(False)
+            )
+            outcome = coordinator.execute(current, approval, "operation-1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.APPROVED)
+            self.assertIsNone(outcome.manifest)
+            self.assertEqual(backups.create_calls, 0)
+            self.assertEqual(backend.requests, [])
+
     def test_success_binds_backup_approval_request_and_journal(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             coordinator, backend, backups, journal, current, approval = self._workflow(Path(directory), b"old")
@@ -126,7 +164,7 @@ class PrivilegedSafeApplyCoordinatorTests(unittest.TestCase):
                 self.assertEqual(journal.load("operation-1").status, JournalStatus.RECOVERY_REQUIRED)
 
     @staticmethod
-    def _workflow(root: Path, before: bytes | None, validator=None):
+    def _workflow(root: Path, before: bytes | None, validator=None, readiness=None):
         current, approval, _ = _approved()
         change = current.change_set.changes[0]
         operation = ChangeOperation.CREATE_FILE if before is None else ChangeOperation.REPLACE_FILE
@@ -138,7 +176,11 @@ class PrivilegedSafeApplyCoordinatorTests(unittest.TestCase):
         backend = _WorkflowInvoker(before)
         backups = _BackupStore(backend, root)
         journal = LocalOperationJournal(root / "journal", (Path("/etc/systemd/system"),))
-        coordinator = PrivilegedSafeApplyCoordinator(backups, ApprovedHelperRequestFactory(), PrivilegedRollbackRequestFactory(), backend, validator or _RuntimeValidator(True), journal)
+        coordinator = PrivilegedSafeApplyCoordinator(
+            backups, ApprovedHelperRequestFactory(), PrivilegedRollbackRequestFactory(),
+            backend, validator or _RuntimeValidator(True), journal,
+            readiness or _Readiness(True),
+        )
         return coordinator, backend, backups, journal, current, approval
 
 
@@ -153,8 +195,10 @@ class _BackupStore:
     def __init__(self, backend, root):
         self.backend = backend
         self.root = root
+        self.create_calls = 0
 
     def create(self, request, cancellation):
+        self.create_calls += 1
         before = self.backend.content
         item = BackupItem(DROP_IN_PATH, before is not None, "item" if before is not None else None, hashlib.sha256(before).hexdigest() if before is not None else None, 0o644 if before is not None else None, 0 if before is not None else None, 0 if before is not None else None)
         return BackupManifest(request.backup_id, "1.0", request.plan_id, request.change_set.content_hash, request.host_id, request.host_fingerprint, (item,), "d" * 64, str(self.root), request.encryption, complete=True)
@@ -204,6 +248,18 @@ class _RuntimeValidator:
 
     def validate(self, change_set, cancellation):
         return (_validation("runtime", self.passed),)
+
+
+class _Readiness:
+    def __init__(self, *states):
+        self.states = states
+        self.calls = 0
+
+    def assert_ready(self, cancellation):
+        state = self.states[min(self.calls, len(self.states) - 1)]
+        self.calls += 1
+        if not state:
+            raise AdapterError("privileged_helper_unavailable", "helper is not ready")
 
 
 def _validation(check, passed):

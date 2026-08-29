@@ -1,10 +1,12 @@
 import unittest
 from dataclasses import replace
 
+from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken, FileStat
 from llm_manager.infrastructure.helper_compat import (
     HELPER_PATH,
     METADATA_PATH,
+    HelperCompatibilityApplyGate,
     HelperCompatibilityProbe,
     HelperCompatibilityStatus,
 )
@@ -72,6 +74,14 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
                 self.assertEqual(result.status, HelperCompatibilityStatus.INCOMPATIBLE)
                 self.assertFalse(result.root_apply_allowed)
 
+    def test_apply_gate_rechecks_and_fails_closed(self) -> None:
+        HelperCompatibilityApplyGate(self.host, self.probe).assert_ready(CancellationToken())
+        missing = _Host(replace(self.host.helper, exists=False), self.host.metadata, METADATA)
+        for host in (missing, _FailingHost()):
+            with self.subTest(host=host), self.assertRaises(AdapterError) as caught:
+                HelperCompatibilityApplyGate(host, self.probe).assert_ready(CancellationToken())
+            self.assertEqual(caught.exception.code, "privileged_helper_unavailable")
+
 
 class _Host:
     def __init__(self, helper, metadata, content):
@@ -86,6 +96,11 @@ class _Host:
     def read_file(self, path, max_bytes, cancellation):
         self.read_paths.append((path, max_bytes))
         return self.content
+
+
+class _FailingHost:
+    def stat(self, path, cancellation):
+        raise OSError("injected probe failure")
 
 
 if __name__ == "__main__":

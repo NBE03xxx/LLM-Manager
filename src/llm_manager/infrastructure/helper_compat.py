@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 from enum import StrEnum
 
+from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken, HostPort
 
 from .helper_protocol import PROTOCOL_VERSION
@@ -100,6 +101,27 @@ class HelperCompatibilityProbe:
 
     def root_apply_allowed(self, host: HostPort, cancellation: CancellationToken) -> bool:
         return self.inspect(host, cancellation).root_apply_allowed
+
+
+@dataclass(frozen=True, slots=True)
+class HelperCompatibilityApplyGate:
+    """Revalidate the installed helper immediately before privileged execution."""
+
+    host: HostPort
+    probe: HelperCompatibilityProbe
+
+    def assert_ready(self, cancellation: CancellationToken) -> None:
+        try:
+            result = self.probe.inspect(self.host, cancellation)
+        except (OSError, ValueError) as error:
+            raise AdapterError(
+                "privileged_helper_unavailable", "helper compatibility probe failed"
+            ) from error
+        if not result.root_apply_allowed:
+            raise AdapterError(
+                "privileged_helper_unavailable",
+                result.reason or result.status.value,
+            )
 
 
 def _text(value: dict[str, object], key: str) -> str:
