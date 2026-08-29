@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from llm_manager.domain.enums import ReportStatus
 from llm_manager.domain.models import (
@@ -12,7 +12,7 @@ from llm_manager.domain.models import (
 )
 
 from .errors import AdapterError, OperationCancelled
-from .ports import CancellationToken, ClientAdapter, HostPort, OllamaPort, SystemDiagnosticsPort
+from .ports import CancellationToken, ClientAdapter, HostPort, OllamaPort, PrivilegedHelperProbePort, SystemDiagnosticsPort
 
 
 @dataclass(slots=True)
@@ -21,12 +21,32 @@ class DiagnoseHost:
     ollama: OllamaPort
     client: ClientAdapter
     system_probe: SystemDiagnosticsPort | None = None
+    helper_probe: PrivilegedHelperProbePort | None = None
 
     def execute(self, report_id: str, cancellation: CancellationToken) -> DiagnosticReport:
         if cancellation.cancelled:
             raise OperationCancelled("diagnosis cancelled before start")
         started = utc_now()
         host_info: HostInfo = self.host.identify(cancellation)
+        if self.helper_probe is not None:
+            try:
+                can_elevate = self.helper_probe.root_apply_allowed(self.host, cancellation)
+            except (AdapterError, OSError, ValueError):
+                can_elevate = False
+            limitations = tuple(
+                item for item in host_info.capabilities.limitations
+                if item != "privileged_helper_unavailable"
+            )
+            if not can_elevate:
+                limitations += ("privileged_helper_unavailable",)
+            host_info = replace(
+                host_info,
+                capabilities=replace(
+                    host_info.capabilities,
+                    can_elevate=can_elevate,
+                    limitations=limitations,
+                ),
+            )
         ollama_info: OllamaInfo | None = None
         client_info: OpenCodeInfo | None = None
         system_info: SystemInfo | None = None

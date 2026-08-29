@@ -136,6 +136,11 @@ class RuntimeValidatorPort(Protocol):
 
 
 @runtime_checkable
+class PrivilegedHelperProbePort(Protocol):
+    def root_apply_allowed(self, host: HostPort, cancellation: CancellationToken) -> bool: ...
+
+
+@runtime_checkable
 class PrivilegePort(Protocol):
     def capabilities(self) -> HostCapabilities: ...
 

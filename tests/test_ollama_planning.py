@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import replace
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.domain.enums import Confidence, ProbeStatus, ReportStatus, Severity
@@ -16,10 +17,14 @@ from tests.fixtures import host_info
 
 
 def report(version: str = "0.33.2") -> DiagnosticReport:
+    helper_ready_host = replace(
+        host_info(),
+        capabilities=replace(host_info().capabilities, can_elevate=True),
+    )
     return DiagnosticReport(
         "report-ollama-plan",
         "1.0",
-        host_info(),
+        helper_ready_host,
         ReportStatus.COMPLETE,
         ollama=OllamaInfo(
             installed=True,
@@ -100,6 +105,21 @@ class OllamaDropInPlannerTests(unittest.TestCase):
             OllamaDropInPlanner().plan(
                 report("0.34.0"), (recommendation("OLLAMA_FLASH_ATTENTION", True),), None
             )
+
+    def test_missing_compatible_helper_blocks_root_change_plan(self) -> None:
+        current = report()
+        blocked = replace(
+            current,
+            host=replace(
+                current.host,
+                capabilities=replace(current.host.capabilities, can_elevate=False),
+            ),
+        )
+        with self.assertRaises(AdapterError) as caught:
+            OllamaDropInPlanner().plan(
+                blocked, (recommendation("OLLAMA_FLASH_ATTENTION", True),), None
+            )
+        self.assertEqual(caught.exception.code, "privileged_helper_unavailable")
 
 
 if __name__ == "__main__":

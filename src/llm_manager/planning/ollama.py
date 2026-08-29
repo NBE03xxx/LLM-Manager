@@ -44,6 +44,11 @@ class OllamaDropInPlanner:
         recommendations: tuple[Recommendation, ...],
         existing_content: str | None,
     ) -> ChangeSet:
+        if not report.host.capabilities.can_elevate:
+            raise AdapterError(
+                "privileged_helper_unavailable",
+                "compatible privileged helper is required for root changes",
+            )
         info = report.ollama
         if info is None or info.version != self.supported_version:
             raise AdapterError("unsupported_version", "Ollama version is not change-enabled")

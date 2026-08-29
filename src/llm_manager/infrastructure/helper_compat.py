@@ -98,6 +98,9 @@ class HelperCompatibilityProbe:
             )
         return result
 
+    def root_apply_allowed(self, host: HostPort, cancellation: CancellationToken) -> bool:
+        return self.inspect(host, cancellation).root_apply_allowed
+
 
 def _text(value: dict[str, object], key: str) -> str:
     item = value[key]

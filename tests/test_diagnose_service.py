@@ -43,6 +43,36 @@ class DiagnoseHostTests(unittest.TestCase):
             service.execute("report", CancellationToken(cancelled=True))
         self.assertEqual(service.host.calls, [])  # type: ignore[attr-defined]
 
+    def test_helper_readiness_controls_root_apply_capability(self) -> None:
+        for ready in (True, False):
+            with self.subTest(ready=ready):
+                service = self.make_service()
+                service.helper_probe = _HelperProbe(ready)
+                result = service.execute("report", CancellationToken())
+                self.assertEqual(result.host.capabilities.can_elevate, ready)
+                self.assertEqual(
+                    "privileged_helper_unavailable" in result.host.capabilities.limitations,
+                    not ready,
+                )
+
+    def test_helper_probe_failure_fails_closed_without_failing_diagnosis(self) -> None:
+        service = self.make_service()
+        service.helper_probe = _HelperProbe(True, fail=True)
+        result = service.execute("report", CancellationToken())
+        self.assertEqual(result.status, ReportStatus.COMPLETE)
+        self.assertFalse(result.host.capabilities.can_elevate)
+
+
+class _HelperProbe:
+    def __init__(self, ready, fail=False):
+        self.ready = ready
+        self.fail = fail
+
+    def root_apply_allowed(self, host, cancellation):
+        if self.fail:
+            raise OSError("injected helper probe failure")
+        return self.ready
+
 
 if __name__ == "__main__":
     unittest.main()
