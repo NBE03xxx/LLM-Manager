@@ -6,7 +6,8 @@ from dataclasses import dataclass
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken, CommandRequest, HostPort
-from llm_manager.domain.models import ChangeSet, DiagnosticReport, OpenCodeInfo, ValidationResult
+from llm_manager.domain.enums import Severity, ValidationStatus
+from llm_manager.domain.models import ChangeSet, DiagnosticReport, LocalizedMessage, OpenCodeInfo, ValidationResult
 
 _VERSION = re.compile(r"(?:opencode\s+)?v?([0-9]+\.[0-9]+\.[0-9]+(?:[-+][^\s]+)?)", re.IGNORECASE)
 _CONTEXT_KEYS = frozenset({"context", "contextLength", "context_length", "compaction"})
@@ -67,7 +68,29 @@ class OpenCodeReadOnlyAdapter:
         return None, {}, ()
 
     def validate(self, host: HostPort, cancellation: CancellationToken) -> tuple[ValidationResult, ...]:
-        raise AdapterError("not_implemented", "validation belongs to Phase 4")
+        info = self.inspect(host, cancellation)
+        checks = (
+            ("opencode.installed", info.installed, "installed", "installed" if info.installed else "not_installed"),
+            (
+                "opencode.config.parse",
+                info.active_config is not None and not info.parse_warnings,
+                "valid",
+                info.parse_warnings[0] if info.parse_warnings else ("valid" if info.active_config else "not_found"),
+            ),
+        )
+        return tuple(
+            ValidationResult(
+                validation_id=check,
+                scope="opencode",
+                check=check,
+                status=ValidationStatus.PASSED if passed else ValidationStatus.FAILED,
+                expected=expected,
+                actual=actual,
+                severity=Severity.INFO if passed else Severity.HIGH,
+                message=LocalizedMessage(f"validation.{check}.{'passed' if passed else 'failed'}"),
+            )
+            for check, passed, expected, actual in checks
+        )
 
     def plan_changes(
         self, report: DiagnosticReport, setting_values: tuple[tuple[str, object], ...]

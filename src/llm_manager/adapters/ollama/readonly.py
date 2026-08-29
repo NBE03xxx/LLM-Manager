@@ -7,10 +7,11 @@ from urllib.parse import urlsplit
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken, CommandRequest, HostPort
-from llm_manager.domain.enums import ProbeStatus
+from llm_manager.domain.enums import ProbeStatus, Severity, ValidationStatus
 from llm_manager.domain.models import (
     ChangeSet,
     DiagnosticReport,
+    LocalizedMessage,
     OllamaInfo,
     OllamaModelInfo,
     ServiceInfo,
@@ -122,7 +123,23 @@ class OllamaReadOnlyAdapter:
         return host.execute_readonly(CommandRequest(argv, self.timeout_ms, correlation_id), cancellation)
 
     def validate_api(self, host: HostPort, cancellation: CancellationToken) -> tuple[ValidationResult, ...]:
-        raise AdapterError("not_implemented", "validation belongs to Phase 4")
+        version = self._api(host, "/api/version", "ollama.validate.version", cancellation)
+        tags = self._api(host, "/api/tags", "ollama.validate.tags", cancellation)
+        passed = version is not None and tags is not None
+        return (
+            ValidationResult(
+                validation_id="ollama.api.connectivity",
+                scope="ollama",
+                check="ollama.api.connectivity",
+                status=ValidationStatus.PASSED if passed else ValidationStatus.FAILED,
+                expected="reachable",
+                actual="reachable" if passed else "unavailable",
+                severity=Severity.INFO if passed else Severity.HIGH,
+                message=LocalizedMessage(
+                    f"validation.ollama.api.connectivity.{'passed' if passed else 'failed'}"
+                ),
+            ),
+        )
 
     def plan_setting_changes(
         self, report: DiagnosticReport, setting_values: tuple[tuple[str, object], ...]

@@ -210,6 +210,24 @@ class CoordinatorTests(unittest.TestCase):
             self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
             self.assertEqual(target.read_text(encoding="utf-8"), "old")
 
+    def test_runtime_validation_failure_rolls_back(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash, True)
+            coordinator = SafeApplyCoordinator(
+                LocalBackupStore(root / "backups", (root,)),
+                AtomicFileExecutor((root,)),
+                FileValidator(),
+                runtime_validator=_FailRuntimeValidator(),
+            )
+            outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
+            self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
     def test_rollback_failure_requires_recovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -370,6 +388,11 @@ class CoordinatorTests(unittest.TestCase):
 class _FailValidator(FileValidator):
     def validate(self, applied, cancellation):
         return (ValidationResult("fail", "file", "fail", ValidationStatus.FAILED, severity=Severity.HIGH, message=LocalizedMessage("fail")),)
+
+
+class _FailRuntimeValidator:
+    def validate(self, change_set, cancellation):
+        return (ValidationResult("runtime-fail", "runtime", "runtime-fail", ValidationStatus.FAILED),)
 
 
 class _TestKeys:

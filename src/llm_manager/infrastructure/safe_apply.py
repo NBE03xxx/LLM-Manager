@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
-from llm_manager.application.ports import AuditPort, BackupRequest, BackupStorePort, CancellationToken
+from llm_manager.application.ports import AuditPort, BackupRequest, BackupStorePort, CancellationToken, RuntimeValidatorPort
 from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
 from llm_manager.domain.models import ApprovalRecord, BackupManifest, Change, ChangeSet, LocalizedMessage, OptimizationPlan, ValidationResult
 from llm_manager.domain.workflow import PlanStateMachine
@@ -144,12 +144,13 @@ class ApplyOutcome:
 
 
 class SafeApplyCoordinator:
-    def __init__(self, backups: BackupStorePort, executor: AtomicFileExecutor, validator: FileValidator, audit: AuditPort | None = None, journal: LocalOperationJournal | None = None) -> None:
+    def __init__(self, backups: BackupStorePort, executor: AtomicFileExecutor, validator: FileValidator, audit: AuditPort | None = None, journal: LocalOperationJournal | None = None, runtime_validator: RuntimeValidatorPort | None = None) -> None:
         self.backups = backups
         self.executor = executor
         self.validator = validator
         self.audit = audit
         self.journal = journal
+        self.runtime_validator = runtime_validator
 
     def execute(self, plan: OptimizationPlan, approval: ApprovalRecord, backup_id: str, cancellation: CancellationToken) -> ApplyOutcome:
         if plan.change_set is None or not approval.is_valid_for(plan):
@@ -181,6 +182,8 @@ class SafeApplyCoordinator:
                 return self._rollback(machine, manifest, cancellation, (), "journal update failed", plan, operation_id)
             machine = machine.transition_to(PlanStatus.VALIDATING)
             validations = self.validator.validate(applied, cancellation)
+            if self.runtime_validator is not None:
+                validations += self.runtime_validator.validate(plan.change_set, cancellation)
             if _passed(validations):
                 self._audit("apply.committed", plan, (("backup_id", backup_id),))
                 if not self._journal_update(operation_id, JournalStatus.COMMITTED):

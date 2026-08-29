@@ -131,6 +131,11 @@ class BackupStorePort(Protocol):
 
 
 @runtime_checkable
+class RuntimeValidatorPort(Protocol):
+    def validate(self, change_set: ChangeSet, cancellation: CancellationToken) -> tuple[ValidationResult, ...]: ...
+
+
+@runtime_checkable
 class PrivilegePort(Protocol):
     def capabilities(self) -> HostCapabilities: ...
 

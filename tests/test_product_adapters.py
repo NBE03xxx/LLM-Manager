@@ -4,6 +4,7 @@ from llm_manager.adapters.clients.opencode import OpenCodeReadOnlyAdapter, parse
 from llm_manager.adapters.fakes import FakeHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.ports import CancellationToken, CommandResult
+from llm_manager.domain.enums import ValidationStatus
 
 from tests.fixtures import host_info
 
@@ -97,6 +98,29 @@ class OllamaAdapterTests(unittest.TestCase):
         self.assertTrue(info.installed)
         self.assertEqual(info.version, "0.33.2")
 
+    def test_validates_api_version_and_tags_endpoints(self) -> None:
+        version = ("curl", "--silent", "--show-error", "--max-time", "3.0", "http://127.0.0.1:11434/api/version")
+        tags = ("curl", "--silent", "--show-error", "--max-time", "3.0", "http://127.0.0.1:11434/api/tags")
+        host = FakeHostAdapter(
+            host_info(),
+            command_results={
+                version: result(version, '{"version":"0.33.2"}'),
+                tags: result(tags, '{"models":[]}'),
+            },
+        )
+        validations = OllamaReadOnlyAdapter().validate_api(host, CancellationToken())
+        self.assertEqual(validations[0].status, ValidationStatus.PASSED)
+
+    def test_api_validation_fails_on_invalid_response(self) -> None:
+        version = ("curl", "--silent", "--show-error", "--max-time", "3.0", "http://127.0.0.1:11434/api/version")
+        tags = ("curl", "--silent", "--show-error", "--max-time", "3.0", "http://127.0.0.1:11434/api/tags")
+        host = FakeHostAdapter(
+            host_info(),
+            command_results={version: result(version, "not-json"), tags: result(tags, '{"models":[]}')},
+        )
+        validations = OllamaReadOnlyAdapter().validate_api(host, CancellationToken())
+        self.assertEqual(validations[0].status, ValidationStatus.FAILED)
+
 
 class OpenCodeAdapterTests(unittest.TestCase):
     def test_jsonc_preserves_comment_markers_inside_strings(self) -> None:
@@ -144,6 +168,25 @@ class OpenCodeAdapterTests(unittest.TestCase):
         )
         info = OpenCodeReadOnlyAdapter((config,)).inspect(host, CancellationToken())
         self.assertEqual(info.parse_warnings, ("opencode.config.parse_failed",))
+
+    def test_validation_reloads_valid_configuration(self) -> None:
+        config = "/tmp/opencode.jsonc"
+        argv = ("opencode", "--version")
+        host = FakeHostAdapter(
+            host_info(), files={config: b'{"model":"ollama/qwen"}'},
+            command_results={argv: result(argv, "1.18.25")},
+        )
+        validations = OpenCodeReadOnlyAdapter((config,)).validate(host, CancellationToken())
+        self.assertTrue(all(item.status is ValidationStatus.PASSED for item in validations))
+
+    def test_validation_fails_for_malformed_configuration(self) -> None:
+        config = "/tmp/opencode.jsonc"
+        argv = ("opencode", "--version")
+        host = FakeHostAdapter(
+            host_info(), files={config: b"{"}, command_results={argv: result(argv, "1.18.25")}
+        )
+        validations = OpenCodeReadOnlyAdapter((config,)).validate(host, CancellationToken())
+        self.assertTrue(any(item.status is ValidationStatus.FAILED for item in validations))
 
 
 if __name__ == "__main__":
