@@ -28,6 +28,7 @@ class InteractiveRemoteHelperInvoker(Protocol):
         control_socket: str | None,
         request_id: str,
         request_hash: str,
+        cancellation: CancellationToken,
     ) -> None: ...
 
 
@@ -70,10 +71,14 @@ class OpenSshUserStagingRunner:
                 "ssh.staging.upload",
             )
 
-    def invoke_recovery_helper(self, request_id: str, request_hash: str) -> None:
+    def invoke_recovery_helper(
+        self, request_id: str, request_hash: str, cancellation: CancellationToken
+    ) -> None:
         if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
             raise AdapterError("invalid_remote_invocation", "remote helper identity is invalid")
-        self.invoker.invoke(self.alias, self.control_socket, request_id, request_hash)
+        self.invoker.invoke(
+            self.alias, self.control_socket, request_id, request_hash, cancellation
+        )
 
     def read_private_file(self, relative_path: str, max_bytes: int) -> bytes:
         path = _relative_path(relative_path)

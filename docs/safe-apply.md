@@ -137,6 +137,8 @@ user-only stagingはremote home基準の`.local/state/llm-manager/remote-helper/
 
 OpenSSH staging runnerはsystem `ssh`/`scp`をshellなしの固定argvで起動し、ユーザーのOpenSSH alias、Agent、ProxyJump、ControlPathを利用する。upload内容は0700 runtime配下の一時directoryに0600で置き、argvやlogへ含めない。remote pathは固定staging root内の相対pathだけを許す。root helper起動はfile transferから分離したinvokerがpasswordlessまたは外部端末対話sudoを選び、runner自身は`sudo -n`へ短絡しない。
 
+remote sudo invokerは最初に固定`sudo -n -v`だけでpasswordless可否を調べる。成功時は同じOpenSSH経路で限定helperを非対話実行し、helper failureをそのまま失敗として扱う。probe失敗時だけ外部端末を開き、`ssh -t`内のsudoへ認証入力を委譲する。アプリは端末stdinへ接続せず、固定resultの完成を期限・cancel付きで観測する。これによりhelper実行失敗を認証要求と誤認して二重実行しない。
+
 remote sandbox retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、symlink、非regular fileがあれば一部削除を始めず拒否する。実remote helperへはまだretention operationを公開しない。
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。

@@ -93,7 +93,7 @@ class _Runner:
         if self.cancel_after_upload and self.token is not None:
             self.token.cancel()
 
-    def invoke_recovery_helper(self, request_id, request_hash):
+    def invoke_recovery_helper(self, request_id, request_hash, cancellation):
         self.calls.append(("invoke", request_id, request_hash))
 
     def read_private_file(self, relative_path, max_bytes):

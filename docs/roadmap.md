@@ -92,6 +92,8 @@ Remote recovery helper transport境界実装: user-only stagingとroot-only remo
 
 User-only SSH staging具体化: remote userの固定相対root `.local/state/llm-manager/remote-helper`配下へ、request ID/request hashから操作directoryを導出する。既存itemをhash付き固定名で先に0600転送し、canonical requestを最後に公開してからrequest ID/hashだけで限定helperを起動し、固定`result.json`を1 MiB上限で取得する。期限・改ざん・item hash・cancelをhelper起動前にも検査する。system `ssh`/`scp`の固定argv、OpenSSH alias/ControlPath、0600 local一時file、bounded downloadを実装し、root helper起動はpasswordless/外部端末sudo専用invokerへ分離した。fake subprocessまでの検証で、実SSH転送Gateは未実施である。
 
+Remote sudo invoker実装: system OpenSSHで固定`sudo -n -v`だけをpasswordless probeし、成功時は限定helperを非対話実行する。probe失敗時は外部端末の`ssh -t`内でsudo認証を行い、user stagingの固定result completionをbounded pollする。helper自身の失敗を認証失敗と誤認して再端末起動せず、cancel/timeout/terminal failureを分離する。fake runner/terminalのみで、実remote sudo認証Gateは未実施である。
+
 Remote retention sandbox実装: immutable receipt hashへ束縛したcanonical retention recordを0600で保存し、hostごと30日かつ直近10世代の未保護copyを古い順に削除する。protected copyと最後の1 copyは自動削除せず、record改ざん、symlink、未知entryがあれば削除前にfail-closedにする。sandbox root backendのみで、実remote helperのretention operationは未実装である。
 
 Dual-copy削除後照合core実装: local/remoteを独立にread-only観測し、`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`の表示用状態へ集約する。片側だけ残った場合と観測不能・改ざんはattention requiredとし、自動的に残存copyを追加削除・再作成しない。実際のlocal/remote協調削除commandと再試行UXは未実装である。

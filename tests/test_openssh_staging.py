@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
-from llm_manager.application.ports import CommandResult
+from llm_manager.application.ports import CancellationToken, CommandResult
 from llm_manager.infrastructure.openssh_staging import OpenSshUserStagingRunner, REMOTE_HELPER
 
 
@@ -23,7 +23,7 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
             )
             staging.prepare_private_directory(PATH)
             staging.upload_private_file(f"{PATH}/request.json", b"secret backup content")
-            staging.invoke_recovery_helper("backup-1", "b" * 64)
+            staging.invoke_recovery_helper("backup-1", "b" * 64, CancellationToken())
             self.assertEqual(staging.read_private_file(f"{PATH}/result.json", 1024), b"receipt")
             staging.remove_private_tree(PATH)
             prepare = process.requests[0].argv
@@ -45,7 +45,7 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
                 with self.subTest(path=path), self.assertRaises(AdapterError):
                     staging.prepare_private_directory(path)
             with self.assertRaises(AdapterError):
-                staging.invoke_recovery_helper("bad/id", "x" * 64)
+                staging.invoke_recovery_helper("bad/id", "x" * 64, CancellationToken())
 
     def test_transfer_failure_timeout_missing_and_oversize_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -82,7 +82,7 @@ class _Invoker:
     def __init__(self):
         self.calls = []
 
-    def invoke(self, alias, control_socket, request_id, request_hash):
+    def invoke(self, alias, control_socket, request_id, request_hash, cancellation):
         self.calls.append((alias, control_socket, request_id, request_hash))
 
 

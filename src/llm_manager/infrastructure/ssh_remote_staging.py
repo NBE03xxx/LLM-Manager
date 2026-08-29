@@ -22,7 +22,9 @@ class RemoteUserStagingRunner(Protocol):
 
     def prepare_private_directory(self, relative_path: str) -> None: ...
     def upload_private_file(self, relative_path: str, content: bytes) -> None: ...
-    def invoke_recovery_helper(self, request_id: str, request_hash: str) -> None: ...
+    def invoke_recovery_helper(
+        self, request_id: str, request_hash: str, cancellation: CancellationToken
+    ) -> None: ...
     def read_private_file(self, relative_path: str, max_bytes: int) -> bytes: ...
     def remove_private_tree(self, relative_path: str) -> None: ...
 
@@ -64,7 +66,9 @@ class UserOnlySshRecoveryTransport:
             # Request-last publication prevents the helper from observing a partial set.
             self.runner.upload_private_file(f"{base}/request.json", request_content)
             _cancel(cancellation)
-            self.runner.invoke_recovery_helper(request.request_id, request.request_hash)
+            self.runner.invoke_recovery_helper(
+                request.request_id, request.request_hash, cancellation
+            )
             _cancel(cancellation)
             return self.runner.read_private_file(
                 f"{base}/result.json", MAX_REMOTE_RECEIPT_BYTES
