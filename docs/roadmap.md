@@ -76,7 +76,7 @@ Exit: sandbox対象で成功・失敗・復元・復元失敗を安全に再現�
 
 先行実装済み: Ptyxis/GNOME Terminal/x-terminal-emulator検出、argv分離、OpenSSH対話認証ControlMaster broker、0700 runtime directory、一時socket readiness確認、明示終了、timeout/cancel。`192.168.1.253`でパスワードをアプリへ渡さず認証し、Ollama導入済みSSH診断を`complete`まで確認した。
 
-Safe Apply core実装済み: local sandbox向けBackup Store（16 MiB上限、0700/0600、manifest/content hash検証、30日/10世代metadata、manual protection保持）、同一targetのsource-span統合、before hash/path/symlink検査、fsync+atomic rename、file hash Validator、ApprovalRecordに束縛したCoordinator、逆順rollback、`RECOVERY_REQUIRED`終端。実Ollama/OpenCode/systemd/SSH先は変更していない。
+Safe Apply core実装済み: local sandbox向けBackup Store（16 MiB上限、0700/0600、manifest/content hash検証、30日/10世代metadata、manual protection保持）、同一targetのsource-span統合、before hash/path/symlink検査、fsync+atomic rename、file hash/OpenCode JSONC/Ollama専用systemd drop-in Validator、ApprovalRecordに束縛したCoordinator、redacted監査イベント、逆順rollback、`RECOVERY_REQUIRED`終端。実Ollama/OpenCode/systemd/SSH先は変更していない。
 
 残作業: 暗号化envelopeとSecret Service、remote復旧copy、PolicyKit/remote helper、service/API/schema Validator、operation journal、SSH切断reconciliation、audit永続化。これらが完了するまでPhase 4 Exitは未達とする。
 

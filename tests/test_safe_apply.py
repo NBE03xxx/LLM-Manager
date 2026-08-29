@@ -9,10 +9,11 @@ from unittest.mock import patch
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import BackupRequest, CancellationToken
+from llm_manager.adapters.fakes import FakeAuditAdapter
 from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
 from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, LocalizedMessage, ValidationResult
 from llm_manager.infrastructure.backup import LocalBackupStore, MAX_ITEM_BYTES
-from llm_manager.infrastructure.safe_apply import AtomicFileExecutor, FileValidator, SafeApplyCoordinator
+from llm_manager.infrastructure.safe_apply import AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from tests.fixtures import plan
 
 
@@ -114,6 +115,32 @@ class AtomicExecutorTests(unittest.TestCase):
             self.executor.apply(_change_set(link, "old"), CancellationToken())
 
 
+class FileValidatorTests(unittest.TestCase):
+    def test_validates_jsonc_and_rejects_malformed_jsonc(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "opencode.jsonc"
+            target.write_text('{// comment\n"model":"ollama/qwen"}', encoding="utf-8")
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            valid = FileValidator().validate((AppliedFile(str(target), digest, ("opencode.config.parse",)),), CancellationToken())
+            self.assertTrue(all(item.status is ValidationStatus.PASSED for item in valid))
+            target.write_text('{"model":}', encoding="utf-8")
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            invalid = FileValidator().validate((AppliedFile(str(target), digest, ("opencode.config.parse",)),), CancellationToken())
+            self.assertTrue(any(item.status is ValidationStatus.FAILED for item in invalid))
+
+    def test_validates_only_supported_systemd_drop_in_directives(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "90-llm-manager.conf"
+            target.write_text('[Service]\nEnvironment="OLLAMA_HOST=127.0.0.1:11434"\n', encoding="utf-8")
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            valid = FileValidator().validate((AppliedFile(str(target), digest, ("systemd.daemon_reload",)),), CancellationToken())
+            self.assertTrue(all(item.status is ValidationStatus.PASSED for item in valid))
+            target.write_text("[Service]\nExecStart=/bin/false\n", encoding="utf-8")
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            invalid = FileValidator().validate((AppliedFile(str(target), digest, ("systemd.daemon_reload",)),), CancellationToken())
+            self.assertTrue(any(item.status is ValidationStatus.FAILED for item in invalid))
+
+
 class CoordinatorTests(unittest.TestCase):
     def test_success_and_validation_failure_rollback(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -147,6 +174,19 @@ class CoordinatorTests(unittest.TestCase):
             outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
             self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
 
+    def test_rollback_exception_requires_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            store = _RestoreExceptionStore(LocalBackupStore(root / "backups", (root,)))
+            outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
+            self.assertTrue(any(item.check == "rollback.exception" for item in outcome.validations))
+
     def test_invalid_approval_is_rejected_before_backup(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -173,6 +213,21 @@ class CoordinatorTests(unittest.TestCase):
             self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
             self.assertEqual(target.read_text(encoding="utf-8"), "old")
 
+    def test_backup_failure_keeps_target_unchanged_and_is_audited(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            current_plan = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            audit = FakeAuditAdapter()
+            coordinator = SafeApplyCoordinator(_BackupFailStore(), AtomicFileExecutor((root,)), FileValidator(), audit)
+            outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.APPROVED)
+            self.assertEqual(target.read_text(encoding="utf-8"), "old")
+            self.assertEqual([event[0] for event in audit.events], ["apply.approved", "backup.failed"])
+
 
 class _FailValidator(FileValidator):
     def validate(self, applied, cancellation):
@@ -194,6 +249,25 @@ class _RestoreFailStore:
 
     def list_manifests(self, host_id):
         return self.delegate.list_manifests(host_id)
+
+
+class _BackupFailStore:
+    def create(self, request, cancellation):
+        raise AdapterError("injected_backup_failure", "injected backup failure")
+
+    def verify(self, manifest, cancellation):
+        raise AssertionError("verify must not run")
+
+    def restore(self, manifest, cancellation):
+        raise AssertionError("restore must not run")
+
+    def list_manifests(self, host_id):
+        return ()
+
+
+class _RestoreExceptionStore(_RestoreFailStore):
+    def restore(self, manifest, cancellation):
+        raise OSError("injected restore exception")
 
 
 if __name__ == "__main__":
