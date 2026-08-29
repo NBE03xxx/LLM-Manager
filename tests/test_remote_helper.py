@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from dataclasses import replace
@@ -10,18 +11,20 @@ from pathlib import Path
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.domain.enums import ChangeOperation, ValidationStatus
-from llm_manager.domain.models import BackupItem, BackupManifest, Change, ChangeSet, EncryptionInfo
+from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
 from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 from llm_manager.infrastructure.remote_backup import (
     DualCopyPrivilegedBackupStore,
     SandboxRemoteRecoveryStore,
+    decode_remote_receipt,
     encode_remote_receipt,
 )
 from llm_manager.infrastructure.remote_helper import (
     RemoteHelperRecoveryCopyStore,
     decode_remote_request,
 )
+from llm_manager.infrastructure.remote_helper_executor import RemoteRecoveryHelperExecutor
 
 
 class RemoteHelperRecoveryCopyStoreTests(unittest.TestCase):
@@ -97,6 +100,7 @@ class _Transport:
         self.create_request = None
         self.create_content = b""
         self.manifest = None
+        self.stage = backend.root.parent / f"stage-{id(self)}"
 
     def create_recovery_copy(self, request_content, staged_items, cancellation):
         if self.failure == "transfer":
@@ -108,20 +112,26 @@ class _Transport:
         )
         self.create_request = request
         self.create_content = request_content
-        manifest = BackupManifest(
-            request.backup_id, "1.0", request.plan_id, request.change_set_hash,
-            request.host_id, request.host_fingerprint,
-            tuple(
-                BackupItem(item.target, item.existed, None, item.sha256, item.mode, item.uid, item.gid)
-                for item in staged_items
-            ),
-            request.local_manifest_hash, "/fake-local-not-used", EncryptionInfo(enabled=False),
-            complete=True,
-        )
         if self.failure == "encrypt":
             raise AdapterError("remote_encryption_failed", "injected encryption failure")
-        self.receipt = self.backend.create(manifest, staged_items, cancellation)
-        return encode_remote_receipt(self.receipt)
+        directory = self.stage / request.request_id / request.request_hash
+        (directory / "items").mkdir(parents=True)
+        for path in (self.stage, directory.parent, directory, directory / "items"):
+            os.chmod(path, 0o700)
+        request_path = directory / "request.json"
+        request_path.write_bytes(request_content)
+        os.chmod(request_path, 0o600)
+        for index, item in enumerate(staged_items):
+            if item.content is None:
+                continue
+            path = directory / "items" / f"{index:04d}-{item.sha256}.bin"
+            path.write_bytes(item.content)
+            os.chmod(path, 0o600)
+        result = RemoteRecoveryHelperExecutor(
+            self.stage, self.backend, os.getuid(), clock=lambda: datetime.now(UTC)
+        ).execute(request.request_id, request.request_hash, cancellation)
+        self.receipt = decode_remote_receipt(result)
+        return result
 
     def read_recovery_receipt(self, request_content, cancellation):
         if self.failure == "receipt" or self.receipt is None:

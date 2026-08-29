@@ -111,7 +111,8 @@ def _request_content(item_hash=hashlib.sha256(b"before").hexdigest()):
         REMOTE_HELPER_PROTOCOL_VERSION, REMOTE_HELPER_OPERATION, "backup-1", "backup-1",
         "plan-1", "c" * 64, "ssh:gpu-box", "SHA256:" + "a" * 43, "d" * 64,
         "/var/lib/llm-manager/backups/87fe234ee99a458ab8e75e14/backup-1",
-        "remote-master-v1", "remote_root", (("/etc/example", item_hash),), NOW,
+        "remote-master-v1", "remote_root", (("/etc/example", item_hash),),
+        NOW, NOW + timedelta(days=30), False, NOW,
         NOW + timedelta(minutes=5),
     ).with_hash()
     return encode_remote_request(request)

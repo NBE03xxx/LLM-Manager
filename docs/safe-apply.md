@@ -131,7 +131,9 @@ SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検
 
 remote helper側保存処理のsandbox modelは、一時rootでのみ起動でき、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。これはremote側backendのfault-injection用であり、実`/var/lib`配置やSSH transportを有効化するものではない。
 
-user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportからsandbox root backendへ接続する故障注入modelだけで、実SSH転送やremote executableは起動しない。
+user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportとsandbox root executor/backendによる故障注入modelまでで、実SSH転送やpackaged remote executableは起動しない。
+
+root側remote recovery executorはrequest ID/hashからuser staging pathを再導出し、directory 0700、request/item 0600、invoking UID owner、regular file、size、item集合とhashを再検証する。requestはbackup created time、30日固定expiry、protectedも含み、remote retention recordへ同じ値を引き継ぐ。検証済みplaintextだけをremote-root cipherへ渡し、canonical receiptをuser所有0600の固定`result.json`として一度だけ公開する。既存resultはreplayとして拒否する。
 
 user-only stagingはremote home基準の`.local/state/llm-manager/remote-helper/<request-id>/<request-hash>`へ固定し、directory/private file作成をSSH runner契約へ委譲する。復元itemをindex/hash由来名で先に転送し、`request.json`を最後に転送するため、helperは部分転送を正式requestとして扱わない。helper起動へ渡す値はrequest ID/hashだけで、resultは同じ操作directoryの固定`result.json`からbounded readする。staging cleanupはreceipt永続化後の明示操作とし、切断時の照合材料を先に消さない。
 

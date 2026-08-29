@@ -42,6 +42,9 @@ class RemoteRecoveryRequest:
     key_reference: str
     key_scope: str
     item_hashes: tuple[tuple[str, str | None], ...]
+    backup_created_at: datetime
+    retention_expires_at: datetime
+    protected: bool
     requested_at: datetime
     expires_at: datetime
     request_hash: str = ""
@@ -128,6 +131,9 @@ class RemoteHelperRecoveryCopyStore:
             self.key_reference,
             "remote_root",
             tuple((item.target, item.sha256) for item in manifest.items),
+            manifest.created_at,
+            manifest.retention_expires_at or manifest.created_at + timedelta(days=30),
+            manifest.protected,
             now,
             now + timedelta(minutes=5),
         ).with_hash()
@@ -182,6 +188,13 @@ def validate_remote_request(
     lifetime = request.expires_at - request.requested_at
     if lifetime <= timedelta(0) or lifetime > MAX_REMOTE_REQUEST_LIFETIME or now < request.requested_at or now >= request.expires_at:
         raise AdapterError("expired_remote_request", "remote helper request is outside its validity window")
+    if (
+        request.backup_created_at.tzinfo is None
+        or request.retention_expires_at.tzinfo is None
+        or request.retention_expires_at != request.backup_created_at + timedelta(days=30)
+        or type(request.protected) is not bool
+    ):
+        raise AdapterError("invalid_remote_retention", "remote retention metadata is invalid")
     if len({target for target, _ in request.item_hashes}) != len(request.item_hashes):
         raise AdapterError("invalid_remote_items", "remote recovery items must be unique")
     for target, digest in request.item_hashes:
@@ -227,14 +240,17 @@ def _decode_request(value: object) -> RemoteRecoveryRequest:
         "backup_id", "change_set_hash", "expires_at", "host_fingerprint", "host_id",
         "item_hashes", "key_reference", "key_scope", "local_manifest_hash", "operation",
         "plan_id", "protocol_version", "request_hash", "request_id", "requested_at",
-        "storage_location",
+        "storage_location", "backup_created_at", "retention_expires_at", "protected",
     }
-    if not isinstance(value, dict) or set(value) != expected or type(value["protocol_version"]) is not int:
+    if (
+        not isinstance(value, dict) or set(value) != expected
+        or type(value["protocol_version"]) is not int or type(value["protected"]) is not bool
+    ):
         raise ValueError("invalid remote request fields")
     hashes = value["item_hashes"]
     if not isinstance(hashes, list) or any(not isinstance(item, list) or len(item) != 2 for item in hashes):
         raise ValueError("invalid remote item hashes")
-    string_keys = expected - {"protocol_version", "item_hashes"}
+    string_keys = expected - {"protocol_version", "item_hashes", "protected"}
     if any(not isinstance(value[key], str) for key in string_keys):
         raise ValueError("invalid remote request strings")
     return RemoteRecoveryRequest(
@@ -242,6 +258,8 @@ def _decode_request(value: object) -> RemoteRecoveryRequest:
         value["plan_id"], value["change_set_hash"], value["host_id"], value["host_fingerprint"],
         value["local_manifest_hash"], value["storage_location"], value["key_reference"],
         value["key_scope"], tuple((item[0], item[1]) for item in hashes),
+        datetime.fromisoformat(value["backup_created_at"]),
+        datetime.fromisoformat(value["retention_expires_at"]), value["protected"],
         datetime.fromisoformat(value["requested_at"]), datetime.fromisoformat(value["expires_at"]),
         value["request_hash"],
     )
