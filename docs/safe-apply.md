@@ -137,6 +137,8 @@ GUI は root で起動しない。Local は PolicyKit/pkexec による最小help
 
 SSH先は互換remote helper debの事前導入を必須とする。診断時に固定path、package/version、protocol version、root ownership、非writable modeを確認する。欠落・非互換時はroot変更を含むPlanを生成せず、導入手順だけを表示する。LLM-Manager自身はremote helperのinstall/upgradeを行わない。
 
+local root Applyでも診断時の結果だけを信用しない。Backup開始前と、Backup検証後のhelper呼出し直前に同じ固定path・ownership・mode・package/version・protocol検査を再実行する。最初の検査失敗はBackupを作らず停止し、2回目の検査失敗は検証済みBackupを保持したまま未変更の`APPROVED`へ戻す。どちらもpkexec、file write、daemon-reload、restartを開始しない。
+
 ### SSH接続の対話認証
 
 公開鍵認証が使えない場合、Ptyxis、GNOME Terminal、`x-terminal-emulator`の順で外部端末を検出し、端末内のsystem OpenSSHで一時ControlMasterを開始する。passwordは端末/OpenSSHだけが扱い、application process、argv、環境変数、ログ、永続設定へ渡さない。
