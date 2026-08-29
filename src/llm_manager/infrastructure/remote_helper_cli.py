@@ -5,13 +5,16 @@ import os
 import pwd
 import re
 import stat
+import sys
 from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import CancellationToken
 
-from .remote_backup import SandboxRemoteRecoveryStore
+from .remote_backup import REMOTE_BACKUP_ROOT, RemoteRootRecoveryStore, SandboxRemoteRecoveryStore
+from .backup_crypto import AesGcmBackupCipher
+from .remote_keys import RemoteRootKeyProvider
 from .remote_helper_executor import RemoteRecoveryHelperExecutor
 from .backup import _within
 
@@ -67,6 +70,46 @@ def run_remote_helper(
         return 2, _result(False, "cancelled")
     except (AdapterError, OSError, KeyError, ValueError) as error:
         return 1, _result(False, getattr(error, "code", "remote_helper_failed"))
+
+
+def build_production_backend() -> RemoteRootRecoveryStore:
+    keys = RemoteRootKeyProvider()
+    return RemoteRootRecoveryStore(
+        Path(REMOTE_BACKUP_ROOT), AesGcmBackupCipher(keys), "remote-master-v1"
+    )
+
+
+def main(
+    argv: list[str] | None = None,
+    *,
+    stdout=None,
+    backend_factory: Callable[[], RemoteRootRecoveryStore] = build_production_backend,
+    environ: Mapping[str, str] | None = None,
+    effective_uid: int | None = None,
+    current_uid: int | None = None,
+    home_for_uid: Callable[[int], Path] | None = None,
+) -> int:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    backend = None
+    resolved_euid = os.geteuid() if effective_uid is None else effective_uid
+    if arguments[:1] == ["invoke-recovery"] and resolved_euid == 0:
+        try:
+            backend = backend_factory()
+        except (AdapterError, OSError, ValueError):
+            content = _result(False, "remote_backend_unavailable")
+            _write_stdout(stdout, content)
+            return 1
+    code, content = run_remote_helper(
+        tuple(arguments), environ=environ, effective_uid=effective_uid,
+        current_uid=current_uid, home_for_uid=home_for_uid, backend=backend,
+    )
+    _write_stdout(stdout, content)
+    return code
+
+
+def _write_stdout(stdout, content: bytes) -> None:
+    target = sys.stdout.buffer if stdout is None else stdout
+    target.write(content)
 
 
 def _operation_relative(value: str) -> PurePosixPath:

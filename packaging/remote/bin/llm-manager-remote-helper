@@ -1,0 +1,8 @@
+#!/usr/bin/python3 -I
+"""Root-owned isolated entry point for the separately installed remote helper."""
+
+from llm_manager.infrastructure.remote_helper_cli import main
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

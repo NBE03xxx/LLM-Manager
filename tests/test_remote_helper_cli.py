@@ -4,6 +4,7 @@ import hashlib
 import os
 import tempfile
 import unittest
+from io import BytesIO
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from llm_manager.infrastructure.remote_helper import (
     REMOTE_HELPER_OPERATION, REMOTE_HELPER_PROTOCOL_VERSION,
     RemoteRecoveryRequest, encode_remote_request,
 )
-from llm_manager.infrastructure.remote_helper_cli import run_remote_helper
+from llm_manager.infrastructure.remote_helper_cli import main, run_remote_helper
 
 
 NOW = datetime.now(UTC)
@@ -89,6 +90,34 @@ class RemoteHelperCliTests(unittest.TestCase):
         )
         self.assertEqual(code, 1)
         self.assertTrue(directory.exists())
+
+    def test_isolated_main_builds_backend_only_for_root_operation(self):
+        output = BytesIO()
+        factories = []
+        code = main(
+            ["unknown"], stdout=output,
+            backend_factory=lambda: factories.append(True),
+            effective_uid=self.uid, current_uid=self.uid,
+            home_for_uid=lambda _: self.home,
+        )
+        self.assertEqual(code, 1)
+        self.assertEqual(factories, [])
+        output = BytesIO()
+        code = main(
+            ["invoke-recovery", "backup", "a" * 64], stdout=output,
+            backend_factory=lambda: (_ for _ in ()).throw(AdapterError("key_failed", "fail")),
+            environ={"SUDO_UID": str(self.uid)}, effective_uid=0, current_uid=0,
+            home_for_uid=lambda _: self.home,
+        )
+        self.assertEqual(code, 1)
+        self.assertEqual(output.getvalue(), b'{"code":"remote_backend_unavailable","success":false}\n')
+
+    def test_remote_wrapper_is_isolated_and_not_installed_by_local_package(self):
+        project = Path(__file__).resolve().parents[1]
+        wrapper = project / "packaging/remote/bin/llm-manager-remote-helper"
+        self.assertEqual(wrapper.read_text().splitlines()[0], "#!/usr/bin/python3 -I")
+        local_install = (project / "debian/llm-manager.install").read_text()
+        self.assertNotIn("llm-manager-remote-helper", local_install)
 
     @staticmethod
     def _write(path, content):

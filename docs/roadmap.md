@@ -94,6 +94,8 @@ Remote recovery helper executor実装: root側でrequest ID/hashからuser stagi
 
 Remote helper CLI core実装: 固定subcommandは非root userの`user-stage-prepare/remove <derived-path>`と、rootの`invoke-recovery <request-id> <request-hash>`だけとする。root invocationは`SUDO_UID`からuser home/stagingを導出し、executorへ接続する。prepareはprivate directory/itemsを作り、cleanupは既知entryを全検査後だけ削除する。未知command/path、rootによるuser command、非root invoke、UID欠落、未知entryをstable resultで拒否する。sandbox注入のみで、remote helper別deb/wrapperと実配置は未実装である。
 
+Remote helper production entrypoint実装: root `invoke-recovery`時だけfixed backup/key roots、root key provider、AES-GCM cipher、remote root backendをruntime factoryで構築する。非root/未知commandではbackend/key accessを開始しない。別deb向け`python3 -I` wrapper scaffoldを追加し、local `llm-manager` debへ誤同梱しない静的Gateを追加した。remote helper別debのcontrol/install/artifact検証と実installは未実装である。
+
 Remote root key provider実装: production key rootを`/var/lib/llm-manager/keys`へ固定し、key referenceごとの32-byte AES keyをO_EXCLで一度だけ生成する。directory 0700、key 0600、root owner、regular file、symlink、長さをloadごとに再検証し、不完全keyを自動置換しない。`remote_root` scopeだけを許し、backup/receipt rootとは分離する。単体テストはalternate sandbox rootのみで、実`/var/lib`への生成・配置Gateは未実施である。
 
 User-only SSH staging具体化: remote userの固定相対root `.local/state/llm-manager/remote-helper`配下へ、request ID/request hashから操作directoryを導出する。既存itemをhash付き固定名で先に0600転送し、canonical requestを最後に公開してからrequest ID/hashだけで限定helperを起動し、固定`result.json`を1 MiB上限で取得する。期限・改ざん・item hash・cancelをhelper起動前にも検査する。system `ssh`/`scp`の固定argv、OpenSSH alias/ControlPath、0600 local一時file、bounded downloadを実装し、root helper起動はpasswordless/外部端末sudo専用invokerへ分離した。fake subprocessまでの検証で、実SSH転送Gateは未実施である。
