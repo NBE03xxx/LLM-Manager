@@ -8,11 +8,12 @@ from datetime import datetime
 from enum import StrEnum
 from pathlib import Path
 
-from llm_manager.application.errors import AdapterError
-from llm_manager.domain.models import utc_now
+from llm_manager.application.errors import AdapterError, OperationCancelled
+from llm_manager.application.ports import CancellationToken, HostPort
+from llm_manager.domain.models import BackupManifest, utc_now
 from llm_manager.domain.serialization import to_primitive
 
-from .backup import _atomic_write, _within
+from .backup import _atomic_write, _manifest_hash, _within
 
 
 class JournalStatus(StrEnum):
@@ -177,6 +178,84 @@ class LocalOperationJournal:
         if not any(_within(parent, root) for root in self.allowed_roots):
             raise AdapterError("target_not_allowed", "journal target is outside allowed roots")
         return parent / target.name
+
+
+@dataclass(frozen=True, slots=True)
+class RemoteJournalReconciler:
+    """Reconcile an interrupted SSH operation without retrying any mutation."""
+
+    journals: LocalOperationJournal
+
+    def reconcile(
+        self,
+        operation_id: str,
+        manifest: BackupManifest,
+        host: HostPort,
+        cancellation: CancellationToken,
+    ) -> tuple[ReconciliationResult, ...]:
+        if cancellation.cancelled:
+            raise OperationCancelled("remote reconciliation cancelled")
+        journal = self.journals.load(operation_id)
+        if (
+            not manifest.complete
+            or manifest.manifest_hash
+            != _manifest_hash(replace(manifest, manifest_hash=""))
+            or journal.host_id != manifest.host_id
+            or journal.plan_id != manifest.plan_id
+            or journal.change_set_hash != manifest.change_set_hash
+            or journal.backup_id != manifest.backup_id
+            or journal.manifest_hash != manifest.manifest_hash
+        ):
+            raise AdapterError(
+                "recovery_binding_mismatch",
+                "journal and backup manifest do not describe the same operation",
+            )
+        try:
+            identity = host.identify(cancellation)
+        except OperationCancelled:
+            raise
+        except (AdapterError, OSError, ValueError) as error:
+            raise AdapterError(
+                "remote_reconciliation_failed",
+                "remote host identity could not be observed safely",
+            ) from error
+        if (
+            identity.host_id != journal.host_id
+            or manifest.host_fingerprint is None
+            or identity.fingerprint != manifest.host_fingerprint
+        ):
+            raise AdapterError(
+                "recovery_host_mismatch",
+                "reconnected SSH host identity does not match the backup",
+            )
+        results: list[ReconciliationResult] = []
+        try:
+            for item in journal.targets:
+                if cancellation.cancelled:
+                    raise OperationCancelled("remote reconciliation cancelled")
+                observed = host.stat(item.target, cancellation)
+                actual = observed.sha256 if observed.exists else None
+                if (
+                    observed.path != item.target
+                    or observed.is_symlink
+                    or (observed.exists and actual is None)
+                ):
+                    state = ReconciliationState.UNKNOWN
+                elif actual == item.before_hash:
+                    state = ReconciliationState.UNAPPLIED
+                elif actual == item.after_hash:
+                    state = ReconciliationState.APPLIED
+                else:
+                    state = ReconciliationState.UNKNOWN
+                results.append(ReconciliationResult(item.target, state, actual))
+        except OperationCancelled:
+            raise
+        except (AdapterError, OSError, ValueError) as error:
+            raise AdapterError(
+                "remote_reconciliation_failed",
+                "remote state could not be observed safely",
+            ) from error
+        return tuple(results)
 
 
 def _hash(journal: OperationJournal) -> str:
