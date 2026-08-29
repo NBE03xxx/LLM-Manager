@@ -75,6 +75,7 @@ class ApprovalTests(unittest.TestCase):
             report_hash=item.report_hash,
             change_set_hash=item.change_set.content_hash,  # type: ignore[union-attr]
             actor="tester",
+            backup_policy_hash=item.backup_policy.content_hash,
             expires_at=datetime.now(UTC) + timedelta(minutes=1),
         )
         self.assertTrue(approval.is_valid_for(item))
@@ -87,6 +88,7 @@ class ApprovalTests(unittest.TestCase):
             report_hash=item.report_hash,
             change_set_hash="changes-hash",
             actor="tester",
+            backup_policy_hash=item.backup_policy.content_hash,
             expires_at=datetime.now(UTC) - timedelta(seconds=1),
         )
         self.assertFalse(approval.is_valid_for(item))

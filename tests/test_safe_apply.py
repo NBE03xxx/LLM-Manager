@@ -11,9 +11,10 @@ from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.adapters.fakes import FakeAuditAdapter
 from llm_manager.domain.enums import ChangeOperation, PlanStatus, Severity, ValidationStatus
-from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, LocalizedMessage, ValidationResult
+from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, EncryptionInfo, LocalizedMessage, ValidationResult
 from llm_manager.infrastructure.backup import LocalBackupStore, MAX_ITEM_BYTES
 from llm_manager.infrastructure.audit import LocalAuditLog
+from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 from llm_manager.infrastructure.journal import JournalStatus, LocalOperationJournal, ReconciliationState
 from llm_manager.infrastructure.safe_apply import AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from tests.fixtures import plan
@@ -103,6 +104,29 @@ class LocalBackupStoreTests(unittest.TestCase):
         restarted = LocalBackupStore(self.base / "backups", (self.targets,))
         self.assertEqual(restarted.list_manifests("host-1"), ())
 
+    def test_encrypted_backup_verify_reload_and_restore(self) -> None:
+        target = self.targets / "config"
+        target.write_text("secret config", encoding="utf-8")
+        encryption = EncryptionInfo(True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service")
+        cipher = AesGcmBackupCipher(_TestKeys())
+        store = LocalBackupStore(self.base / "encrypted", (self.targets,), cipher)
+        manifest = store.create(BackupRequest("b1", "p1", "host-1", "SHA256:host", _change_set(target, "secret config"), encryption), CancellationToken())
+        stored = (Path(manifest.storage_location) / manifest.items[0].content_ref).read_bytes()  # type: ignore[arg-type]
+        self.assertNotIn(b"secret config", stored)
+        restarted = LocalBackupStore(self.base / "encrypted", (self.targets,), cipher)
+        loaded = restarted.list_manifests("host-1")[0]
+        self.assertTrue(all(item.status is ValidationStatus.PASSED for item in restarted.verify(loaded, CancellationToken())))
+        target.write_text("changed", encoding="utf-8")
+        self.assertTrue(all(item.status is ValidationStatus.PASSED for item in restarted.restore(loaded, CancellationToken())))
+        self.assertEqual(target.read_text(encoding="utf-8"), "secret config")
+
+    def test_encryption_never_silently_falls_back_without_key_provider(self) -> None:
+        target = self.targets / "config"
+        target.write_text("secret config", encoding="utf-8")
+        encryption = EncryptionInfo(True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service")
+        with self.assertRaisesRegex(AdapterError, "requires a key provider"):
+            self.store.create(BackupRequest("b1", "p1", "host-1", None, _change_set(target, "secret config"), encryption), CancellationToken())
+
 
 class AtomicExecutorTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -173,7 +197,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             store = LocalBackupStore(root / "backups", (root,))
             coordinator = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), FileValidator())
             outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -193,7 +217,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             store = _RestoreFailStore(LocalBackupStore(root / "backups", (root,)))
             outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
             self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
@@ -205,7 +229,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             store = _RestoreExceptionStore(LocalBackupStore(root / "backups", (root,)))
             outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), _FailValidator()).execute(current_plan, approval, "b1", CancellationToken())
             self.assertEqual(outcome.status, PlanStatus.RECOVERY_REQUIRED)
@@ -218,10 +242,23 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", "wrong-plan", current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", "wrong-plan", current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
             with self.assertRaises(AdapterError):
                 coordinator.execute(current_plan, approval, "b1", CancellationToken())
+
+    def test_backup_policy_change_invalidates_approval(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            original = replace(plan(), change_set=changes)
+            approval = ApprovalRecord("a", original.plan_id, original.report_hash, changes.content_hash, "tester", original.backup_policy.content_hash)
+            encrypted = replace(original, backup_policy=EncryptionInfo(True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service"))
+            coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
+            with self.assertRaises(AdapterError):
+                coordinator.execute(encrypted, approval, "b1", CancellationToken())
 
     def test_atomic_write_failure_rolls_back(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -230,7 +267,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             coordinator = SafeApplyCoordinator(LocalBackupStore(root / "backups", (root,)), AtomicFileExecutor((root,)), FileValidator())
             with patch("llm_manager.infrastructure.safe_apply._atomic_write", side_effect=OSError("injected write failure")):
                 outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -244,7 +281,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             audit = FakeAuditAdapter()
             coordinator = SafeApplyCoordinator(_BackupFailStore(), AtomicFileExecutor((root,)), FileValidator(), audit)
             outcome = coordinator.execute(current_plan, approval, "b1", CancellationToken())
@@ -259,7 +296,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             journal = LocalOperationJournal(root / "journal", (root,))
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),
@@ -279,7 +316,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             journal = LocalOperationJournal(root / "journal", (root,))
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),
@@ -299,7 +336,7 @@ class CoordinatorTests(unittest.TestCase):
             target.write_text("old", encoding="utf-8")
             changes = _change_set(target, "old")
             current_plan = replace(plan(), change_set=changes)
-            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester")
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", current_plan.backup_policy.content_hash)
             audit = LocalAuditLog(root / "audit")
             coordinator = SafeApplyCoordinator(
                 LocalBackupStore(root / "backups", (root,)),
@@ -314,10 +351,30 @@ class CoordinatorTests(unittest.TestCase):
                 ["apply.approved", "backup.verified", "apply.committed"],
             )
 
+    def test_encrypted_policy_runs_end_to_end(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "config"
+            target.write_text("old", encoding="utf-8")
+            changes = _change_set(target, "old")
+            policy = EncryptionInfo(True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service")
+            current_plan = replace(plan(), change_set=changes, backup_policy=policy)
+            approval = ApprovalRecord("a", current_plan.plan_id, current_plan.report_hash, changes.content_hash, "tester", policy.content_hash)
+            store = LocalBackupStore(root / "backups", (root,), AesGcmBackupCipher(_TestKeys()))
+            outcome = SafeApplyCoordinator(store, AtomicFileExecutor((root,)), FileValidator()).execute(current_plan, approval, "b1", CancellationToken())
+            self.assertEqual(outcome.status, PlanStatus.COMMITTED)
+            self.assertTrue(outcome.manifest.encryption.enabled)  # type: ignore[union-attr]
+            self.assertEqual(target.read_text(encoding="utf-8"), "new")
+
 
 class _FailValidator(FileValidator):
     def validate(self, applied, cancellation):
         return (ValidationResult("fail", "file", "fail", ValidationStatus.FAILED, severity=Severity.HIGH, message=LocalizedMessage("fail")),)
+
+
+class _TestKeys:
+    def get_key(self, key_reference, key_scope):
+        return b"k" * 32
 
 
 class _RestoreFailStore:

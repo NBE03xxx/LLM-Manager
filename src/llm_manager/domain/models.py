@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Generic, TypeVar
@@ -350,6 +352,33 @@ class ChangeSet:
 
 
 @dataclass(frozen=True, slots=True)
+class EncryptionInfo:
+    enabled: bool
+    scheme: str | None = None
+    envelope_version: int | None = None
+    key_reference: str | None = None
+    key_scope: str | None = None
+
+    def __post_init__(self) -> None:
+        values = (self.scheme, self.envelope_version, self.key_reference, self.key_scope)
+        if not self.enabled and any(value is not None for value in values):
+            raise InvariantViolation("disabled encryption must not contain key or algorithm metadata")
+        if self.enabled and (
+            self.scheme != "AES-256-GCM"
+            or self.envelope_version != 1
+            or not self.key_reference
+            or self.key_scope not in {"local_secret_service", "remote_root"}
+        ):
+            raise InvariantViolation("enabled encryption requires the supported envelope and key scope")
+
+    @property
+    def content_hash(self) -> str:
+        payload = (self.enabled, self.scheme, self.envelope_version, self.key_reference, self.key_scope)
+        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
+
+
+@dataclass(frozen=True, slots=True)
 class OptimizationPlan:
     plan_id: str
     report_id: str
@@ -362,6 +391,7 @@ class OptimizationPlan:
     status: PlanStatus = PlanStatus.DRAFT
     created_at: datetime = field(default_factory=utc_now)
     expires_at: datetime | None = None
+    backup_policy: EncryptionInfo = EncryptionInfo(enabled=False)
 
 
 @dataclass(frozen=True, slots=True)
@@ -371,6 +401,7 @@ class ApprovalRecord:
     report_hash: str
     change_set_hash: str
     actor: str
+    backup_policy_hash: str = ""
     approved_at: datetime = field(default_factory=utc_now)
     expires_at: datetime | None = None
 
@@ -381,6 +412,7 @@ class ApprovalRecord:
             and self.plan_id == plan.plan_id
             and self.report_hash == plan.report_hash
             and self.change_set_hash == plan.change_set.content_hash
+            and self.backup_policy_hash == plan.backup_policy.content_hash
             and (self.expires_at is None or current < self.expires_at)
         )
 
@@ -414,15 +446,6 @@ class BackupItem:
     selinux_context: str | None = None
     service_state: str | None = None
     storage_location: str | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class EncryptionInfo:
-    enabled: bool
-    scheme: str | None = None
-    envelope_version: int | None = None
-    key_reference: str | None = None
-    key_scope: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -159,7 +159,7 @@ class SafeApplyCoordinator:
         manifest: BackupManifest | None = None
         operation_id = backup_id
         try:
-            manifest = self.backups.create(BackupRequest(backup_id, plan.plan_id, plan.change_set.host_id, None, plan.change_set), cancellation)
+            manifest = self.backups.create(BackupRequest(backup_id, plan.plan_id, plan.change_set.host_id, None, plan.change_set, plan.backup_policy), cancellation)
             backup_checks = self.backups.verify(manifest, cancellation)
             if not _passed(backup_checks):
                 self._audit("backup.failed", plan, (("backup_id", backup_id),))

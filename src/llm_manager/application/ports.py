@@ -6,6 +6,7 @@ from typing import Protocol, runtime_checkable
 
 from llm_manager.domain.models import (
     BackupManifest,
+    EncryptionInfo,
     ChangeSet,
     DiagnosticReport,
     HostCapabilities,
@@ -73,6 +74,7 @@ class BackupRequest:
     host_id: str
     host_fingerprint: str | None
     change_set: ChangeSet
+    encryption: EncryptionInfo = EncryptionInfo(enabled=False)
 
 
 @runtime_checkable

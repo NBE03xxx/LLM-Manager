@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、user-level atomic apply、file Validator、rollback Coordinatorと外部端末SSH対話認証まで実装済みです。PySide6 GUI、特権helper、remote backup、暗号化された一般配布用Backup Storeはまだ実装していません。
+Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、user-level atomic apply、Validator、journal/audit、rollback Coordinatorと外部端末SSH対話認証まで実装済みです。PySide6 GUI、Secret Service鍵provider、特権helper、remote backupはまだ実装していません。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 

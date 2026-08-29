@@ -22,16 +22,18 @@ from llm_manager.domain.models import (
 )
 from llm_manager.domain.serialization import to_primitive
 from llm_manager.domain.serialization import validate_schema_version
+from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, MAX_ENVELOPE_BYTES
 
 MAX_ITEM_BYTES = 16 * 1024 * 1024
 MAX_MANIFEST_BYTES = 1024 * 1024
 
 
 class LocalBackupStore:
-    def __init__(self, root: Path, allowed_roots: tuple[Path, ...]) -> None:
+    def __init__(self, root: Path, allowed_roots: tuple[Path, ...], cipher: AesGcmBackupCipher | None = None) -> None:
         self.root = root.resolve()
         self.allowed_roots = tuple(path.resolve() for path in allowed_roots)
         self._manifests: dict[tuple[str, str], BackupManifest] = {}
+        self.cipher = cipher
 
     def create(self, request: BackupRequest, cancellation: CancellationToken) -> BackupManifest:
         _cancel(cancellation)
@@ -64,9 +66,10 @@ class LocalBackupStore:
                     raise AdapterError("item_too_large", f"backup target exceeds 16 MiB: {target}")
                 content = target.read_bytes()
                 digest = hashlib.sha256(content).hexdigest()
-                content_name = f"{index:04d}-{digest}.bin"
+                stored_content = self._encode_content(content, request.encryption, request.backup_id, request.host_fingerprint, str(target))
+                content_name = f"{index:04d}-{digest}.{'enc' if request.encryption.enabled else 'bin'}"
                 content_path = item_dir / content_name
-                _atomic_write(content_path, content, 0o600)
+                _atomic_write(content_path, stored_content, 0o600)
                 items.append(
                     BackupItem(
                         target=str(target),
@@ -89,7 +92,7 @@ class LocalBackupStore:
                 items=tuple(items),
                 manifest_hash="",
                 storage_location=str(backup_dir),
-                encryption=EncryptionInfo(enabled=False),
+                encryption=request.encryption,
                 created_at=created,
                 retention_expires_at=created + timedelta(days=30),
                 complete=True,
@@ -143,8 +146,15 @@ class LocalBackupStore:
             if item.content_ref and not Path(item.content_ref).is_absolute():
                 content_path = (base / item.content_ref).resolve()
                 if _within(content_path, base) and content_path.is_file() and not content_path.is_symlink():
-                    actual = hashlib.sha256(content_path.read_bytes()).hexdigest()
-                    valid = actual == item.sha256
+                    try:
+                        limit = MAX_ENVELOPE_BYTES if manifest.encryption.enabled else MAX_ITEM_BYTES
+                        if content_path.stat().st_size > limit:
+                            raise AdapterError("item_too_large", "stored backup item exceeds its format limit")
+                        content = self._decode_content(content_path.read_bytes(), manifest.encryption, manifest.backup_id, manifest.host_fingerprint, item.target)
+                        actual = hashlib.sha256(content).hexdigest()
+                        valid = actual == item.sha256
+                    except AdapterError:
+                        valid = False
             results.append(_result(f"backup.item.{index}", valid, item.sha256, actual))
         return tuple(results)
 
@@ -165,7 +175,8 @@ class LocalBackupStore:
                 if item.existed:
                     if item.content_ref is None:
                         raise AdapterError("invalid_manifest", "existing backup item has no content")
-                    content = (base / item.content_ref).read_bytes()
+                    stored_content = (base / item.content_ref).read_bytes()
+                    content = self._decode_content(stored_content, manifest.encryption, manifest.backup_id, manifest.host_fingerprint, item.target)
                     _atomic_write(target, content, item.mode or 0o600)
                     if item.uid is not None and item.gid is not None:
                         os.chown(target, item.uid, item.gid, follow_symlinks=False)
@@ -230,6 +241,34 @@ class LocalBackupStore:
         if not any(_within(resolved_parent, root) for root in self.allowed_roots):
             raise AdapterError("target_not_allowed", f"target is outside sandbox roots: {target}")
         return resolved_parent / target.name
+
+    def _encode_content(self, content: bytes, encryption: EncryptionInfo, backup_id: str, host_fingerprint: str | None, target: str) -> bytes:
+        if not encryption.enabled:
+            return content
+        if self.cipher is None:
+            raise AdapterError("encryption_unavailable", "encrypted backup requires a key provider")
+        return self.cipher.encrypt(
+            content,
+            backup_id=backup_id,
+            host_fingerprint=host_fingerprint,
+            target=target,
+            key_reference=encryption.key_reference or "",
+            key_scope=encryption.key_scope or "",
+        )
+
+    def _decode_content(self, content: bytes, encryption: EncryptionInfo, backup_id: str, host_fingerprint: str | None, target: str) -> bytes:
+        if not encryption.enabled:
+            return content
+        if self.cipher is None:
+            raise AdapterError("encryption_unavailable", "encrypted backup requires a key provider")
+        return self.cipher.decrypt(
+            content,
+            backup_id=backup_id,
+            host_fingerprint=host_fingerprint,
+            target=target,
+            expected_key_reference=encryption.key_reference or "",
+            expected_key_scope=encryption.key_scope or "",
+        )
 
     def _load_host_manifests(self, host_id: str) -> None:
         host_directory = self.root / _safe_component(host_id)
