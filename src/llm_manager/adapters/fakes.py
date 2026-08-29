@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from llm_manager.application.ports import (
     AuditPort,
@@ -139,6 +139,15 @@ class FakeBackupStore(BackupStorePort):
     def list_manifests(self, host_id: str) -> tuple[BackupManifest, ...]:
         self.calls.append("list_manifests")
         return tuple(item for item in self.manifests if item.host_id == host_id)
+
+    def set_protected(self, host_id: str, backup_id: str, protected: bool) -> BackupManifest:
+        self.calls.append("set_protected")
+        for index, item in enumerate(self.manifests):
+            if item.host_id == host_id and item.backup_id == backup_id:
+                updated = replace(item, protected=protected)
+                self.manifests[index] = updated
+                return updated
+        raise AdapterError("backup_not_found", "fake backup manifest was not found")
 
 
 @dataclass(slots=True)

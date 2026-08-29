@@ -125,6 +125,8 @@ class BackupStorePort(Protocol):
 
     def list_manifests(self, host_id: str) -> tuple[BackupManifest, ...]: ...
 
+    def set_protected(self, host_id: str, backup_id: str, protected: bool) -> BackupManifest: ...
+
 
 @runtime_checkable
 class PrivilegePort(Protocol):

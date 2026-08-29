@@ -11,6 +11,7 @@ from pathlib import Path
 from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.domain.enums import Severity, ValidationStatus
+from llm_manager.domain.errors import InvariantViolation
 from llm_manager.domain.models import (
     BackupItem,
     BackupManifest,
@@ -20,8 +21,10 @@ from llm_manager.domain.models import (
     utc_now,
 )
 from llm_manager.domain.serialization import to_primitive
+from llm_manager.domain.serialization import validate_schema_version
 
 MAX_ITEM_BYTES = 16 * 1024 * 1024
+MAX_MANIFEST_BYTES = 1024 * 1024
 
 
 class LocalBackupStore:
@@ -175,6 +178,7 @@ class LocalBackupStore:
         return tuple(results)
 
     def list_manifests(self, host_id: str) -> tuple[BackupManifest, ...]:
+        self._load_host_manifests(host_id)
         return tuple(
             sorted(
                 (item for item in self._manifests.values() if item.host_id == host_id),
@@ -182,6 +186,19 @@ class LocalBackupStore:
                 reverse=True,
             )
         )
+
+    def set_protected(self, host_id: str, backup_id: str, protected: bool) -> BackupManifest:
+        self._load_host_manifests(host_id)
+        key = (host_id, backup_id)
+        try:
+            current = self._manifests[key]
+        except KeyError as error:
+            raise AdapterError("backup_not_found", "backup manifest was not found") from error
+        updated = replace(current, protected=protected, manifest_hash="")
+        updated = replace(updated, manifest_hash=_manifest_hash(updated))
+        _atomic_write(Path(updated.storage_location) / "manifest.json", _manifest_bytes(updated), 0o600)
+        self._manifests[key] = updated
+        return updated
 
     def prune(self, host_id: str, now: datetime | None = None, keep_generations: int = 10) -> tuple[str, ...]:
         """Remove expired/excess unprotected backups while retaining one recovery point."""
@@ -214,6 +231,26 @@ class LocalBackupStore:
             raise AdapterError("target_not_allowed", f"target is outside sandbox roots: {target}")
         return resolved_parent / target.name
 
+    def _load_host_manifests(self, host_id: str) -> None:
+        host_directory = self.root / _safe_component(host_id)
+        if not host_directory.exists():
+            return
+        if host_directory.is_symlink() or not host_directory.is_dir():
+            raise AdapterError("invalid_backup_store", "host backup location is unsafe")
+        loaded: dict[tuple[str, str], BackupManifest] = {}
+        for backup_directory in host_directory.iterdir():
+            if backup_directory.is_symlink() or not backup_directory.is_dir():
+                continue
+            try:
+                manifest = _read_manifest(backup_directory / "manifest.json", backup_directory, host_id)
+            except AdapterError:
+                continue
+            loaded[(host_id, manifest.backup_id)] = manifest
+        for key in tuple(self._manifests):
+            if key[0] == host_id:
+                self._manifests.pop(key)
+        self._manifests.update(loaded)
+
 
 def _manifest_hash(manifest: BackupManifest) -> str:
     primitive = to_primitive(replace(manifest, manifest_hash=""))
@@ -223,6 +260,123 @@ def _manifest_hash(manifest: BackupManifest) -> str:
 
 def _manifest_bytes(manifest: BackupManifest) -> bytes:
     return json.dumps(to_primitive(manifest), ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _read_manifest(path: Path, backup_directory: Path, expected_host_id: str) -> BackupManifest:
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_MANIFEST_BYTES:
+        raise AdapterError("invalid_manifest", "manifest file is missing or unsafe")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise AdapterError("invalid_manifest", "manifest is not valid UTF-8 JSON") from error
+    if not isinstance(value, dict):
+        raise AdapterError("invalid_manifest", "manifest root must be an object")
+    try:
+        schema_version = _text(value, "schema_version")
+        validate_schema_version(schema_version)
+        items_value = value["items"]
+        encryption_value = value["encryption"]
+        if not isinstance(items_value, list) or not isinstance(encryption_value, dict):
+            raise ValueError("invalid nested manifest values")
+        items = tuple(_backup_item(item) for item in items_value)
+        encryption = EncryptionInfo(
+            enabled=_boolean(encryption_value, "enabled"),
+            scheme=_optional_text(encryption_value, "scheme"),
+            envelope_version=_optional_integer(encryption_value, "envelope_version"),
+            key_reference=_optional_text(encryption_value, "key_reference"),
+            key_scope=_optional_text(encryption_value, "key_scope"),
+        )
+        manifest = BackupManifest(
+            backup_id=_text(value, "backup_id"),
+            schema_version=schema_version,
+            plan_id=_text(value, "plan_id"),
+            host_id=_text(value, "host_id"),
+            host_fingerprint=_optional_text(value, "host_fingerprint"),
+            items=items,
+            manifest_hash=_text(value, "manifest_hash"),
+            storage_location=_text(value, "storage_location"),
+            encryption=encryption,
+            protected=_boolean(value, "protected"),
+            created_at=_timestamp(value, "created_at"),
+            retention_expires_at=_optional_timestamp(value, "retention_expires_at"),
+            complete=_boolean(value, "complete"),
+        )
+    except (KeyError, TypeError, ValueError, InvariantViolation) as error:
+        raise AdapterError("invalid_manifest", "manifest fields are invalid") from error
+    if (
+        manifest.host_id != expected_host_id
+        or manifest.backup_id != backup_directory.name
+        or Path(manifest.storage_location).resolve() != backup_directory.resolve()
+        or not manifest.complete
+        or _manifest_hash(replace(manifest, manifest_hash="")) != manifest.manifest_hash
+        or _manifest_bytes(manifest) != path.read_bytes()
+    ):
+        raise AdapterError("invalid_manifest", "manifest identity or integrity check failed")
+    return manifest
+
+
+def _backup_item(value: object) -> BackupItem:
+    if not isinstance(value, dict):
+        raise ValueError("backup item must be an object")
+    return BackupItem(
+        target=_text(value, "target"),
+        existed=_boolean(value, "existed"),
+        content_ref=_optional_text(value, "content_ref"),
+        sha256=_optional_text(value, "sha256"),
+        mode=_optional_integer(value, "mode"),
+        uid=_optional_integer(value, "uid"),
+        gid=_optional_integer(value, "gid"),
+        selinux_context=_optional_text(value, "selinux_context"),
+        service_state=_optional_text(value, "service_state"),
+        storage_location=_optional_text(value, "storage_location"),
+    )
+
+
+def _text(value: dict[str, object], key: str) -> str:
+    item = value[key]
+    if not isinstance(item, str) or not item:
+        raise ValueError(f"{key} must be non-empty text")
+    return item
+
+
+def _optional_text(value: dict[str, object], key: str) -> str | None:
+    item = value[key]
+    if item is not None and not isinstance(item, str):
+        raise ValueError(f"{key} must be text or null")
+    return item
+
+
+def _boolean(value: dict[str, object], key: str) -> bool:
+    item = value[key]
+    if type(item) is not bool:
+        raise ValueError(f"{key} must be boolean")
+    return item
+
+
+def _optional_integer(value: dict[str, object], key: str) -> int | None:
+    item = value[key]
+    if item is not None and type(item) is not int:
+        raise ValueError(f"{key} must be integer or null")
+    return item
+
+
+def _timestamp(value: dict[str, object], key: str) -> datetime:
+    result = datetime.fromisoformat(_text(value, key))
+    if result.tzinfo is None:
+        raise ValueError(f"{key} must include a timezone")
+    return result
+
+
+def _optional_timestamp(value: dict[str, object], key: str) -> datetime | None:
+    item = value[key]
+    if item is None:
+        return None
+    if not isinstance(item, str):
+        raise ValueError(f"{key} must be timestamp or null")
+    result = datetime.fromisoformat(item)
+    if result.tzinfo is None:
+        raise ValueError(f"{key} must include a timezone")
+    return result
 
 
 def _safe_component(value: str) -> str:

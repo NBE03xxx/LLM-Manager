@@ -59,6 +59,7 @@ class PortContractTests(unittest.TestCase):
         )
         self.assertEqual(len(backup.list_manifests("host-1")), 1)
         self.assertEqual(len(backup.list_manifests("other")), 0)
+        self.assertTrue(backup.set_protected("host-1", "backup-1", True).protected)
 
 
 if __name__ == "__main__":

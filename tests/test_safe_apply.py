@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch
 
@@ -72,12 +72,34 @@ class LocalBackupStoreTests(unittest.TestCase):
         target = self.targets / "config"
         target.write_text("old", encoding="utf-8")
         first = self.store.create(BackupRequest("b1", "p1", "host-1", None, _change_set(target, "old")), CancellationToken())
-        self.store._manifests[("host-1", "b1")] = replace(first, protected=True, retention_expires_at=datetime.now(UTC) - timedelta(days=1))
+        self.store.set_protected("host-1", "b1", True)
         second = self.store.create(BackupRequest("b2", "p1", "host-1", None, _change_set(target, "old")), CancellationToken())
-        self.store._manifests[("host-1", "b2")] = replace(second, retention_expires_at=datetime.now(UTC) - timedelta(days=1))
-        removed = self.store.prune("host-1")
+        removed = self.store.prune("host-1", now=second.created_at + timedelta(days=31))
         self.assertEqual(removed, ("b2",))
         self.assertEqual(self.store.list_manifests("host-1")[0].backup_id, "b1")
+
+    def test_manifests_and_protection_survive_store_restart(self) -> None:
+        target = self.targets / "config"
+        target.write_text("old", encoding="utf-8")
+        self.store.create(BackupRequest("b1", "p1", "host-1", None, _change_set(target, "old")), CancellationToken())
+        restarted = LocalBackupStore(self.base / "backups", (self.targets,))
+        loaded = restarted.list_manifests("host-1")
+        self.assertEqual([item.backup_id for item in loaded], ["b1"])
+        protected = restarted.set_protected("host-1", "b1", True)
+        self.assertTrue(protected.protected)
+        restarted_again = LocalBackupStore(self.base / "backups", (self.targets,))
+        self.assertTrue(restarted_again.list_manifests("host-1")[0].protected)
+        self.assertTrue(all(item.status is ValidationStatus.PASSED for item in restarted_again.verify(protected, CancellationToken())))
+
+    def test_restart_listing_ignores_tampered_or_wrong_host_manifest(self) -> None:
+        target = self.targets / "config"
+        target.write_text("old", encoding="utf-8")
+        manifest = self.store.create(BackupRequest("b1", "p1", "host-1", None, _change_set(target, "old")), CancellationToken())
+        manifest_path = Path(manifest.storage_location) / "manifest.json"
+        payload = manifest_path.read_text(encoding="utf-8").replace('"host_id":"host-1"', '"host_id":"other"')
+        manifest_path.write_text(payload, encoding="utf-8")
+        restarted = LocalBackupStore(self.base / "backups", (self.targets,))
+        self.assertEqual(restarted.list_manifests("host-1"), ())
 
 
 class AtomicExecutorTests(unittest.TestCase):
@@ -250,6 +272,9 @@ class _RestoreFailStore:
     def list_manifests(self, host_id):
         return self.delegate.list_manifests(host_id)
 
+    def set_protected(self, host_id, backup_id, protected):
+        return self.delegate.set_protected(host_id, backup_id, protected)
+
 
 class _BackupFailStore:
     def create(self, request, cancellation):
@@ -263,6 +288,9 @@ class _BackupFailStore:
 
     def list_manifests(self, host_id):
         return ()
+
+    def set_protected(self, host_id, backup_id, protected):
+        raise AdapterError("backup_not_found", "no backups")
 
 
 class _RestoreExceptionStore(_RestoreFailStore):
