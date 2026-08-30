@@ -100,9 +100,9 @@ class RemoteDeletionAttemptStore:
             raise AdapterError("invalid_remote_deletion_cleanup", "cleanup marker changed")
         return False
 
-    def cleanup_pending_for_result(self, result) -> bool:
+    def request_for_result(self, result) -> RemoteDeletionRequest | None:
         if not self.root.exists() and not self.root.is_symlink():
-            return False
+            return None
         self._root_metadata()
         matches = []
         for path in self.root.iterdir():
@@ -126,7 +126,11 @@ class RemoteDeletionAttemptStore:
                 matches.append(request)
         if len(matches) > 1:
             raise AdapterError("remote_deletion_attempt_collision", "multiple attempts match result")
-        return self.cleanup_pending(matches[0]) if matches else False
+        return matches[0] if matches else None
+
+    def cleanup_pending_for_result(self, result) -> bool:
+        request = self.request_for_result(result)
+        return self.cleanup_pending(request) if request is not None else False
 
     def _prepare_root(self):
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -262,6 +266,24 @@ class OpenSshRemoteDeletionPort:
         request = self.attempts.load(self.request_id_factory(manifest))
         self._validate_manifest(request, manifest)
         return self.attempts.cleanup_pending(request)
+
+    def retry_staging_cleanup(self, result, cancellation):
+        request = self.attempts.request_for_result(result)
+        if request is None:
+            raise AdapterError("remote_deletion_attempt_not_found", "attempt is missing")
+        if cancellation.cancelled:
+            raise OperationCancelled("remote deletion cleanup cancelled")
+        self._read_result(request)
+        if cancellation.cancelled:
+            raise OperationCancelled("remote deletion cleanup cancelled")
+        if self.attempts.cleanup_pending(request):
+            base = f"{REMOTE_USER_STAGING_ROOT}/{request.request_id}/{request.request_hash}"
+            self.staging.remove_private_tree(base)
+            self.attempts.mark_cleaned(request)
+        return not self.attempts.cleanup_pending(request)
+
+    def staging_cleanup_pending(self, result):
+        return self.attempts.cleanup_pending_for_result(result)
 
     def _read_result(self, request):
         base = f"{REMOTE_USER_STAGING_ROOT}/{request.request_id}/{request.request_hash}"

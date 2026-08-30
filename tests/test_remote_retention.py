@@ -206,8 +206,10 @@ class OpenSshRemoteRetentionTests(unittest.TestCase):
             restarted = OpenSshRemoteRetentionPort(
                 staging, second_invoker, attempts, results, clock=lambda: NOW
             )
-            restarted.prune("retention-cleanup", "ssh:host", FINGERPRINT,
-                            CancellationToken())
+            self.assertTrue(restarted.retry_staging_cleanup(
+                "retention-cleanup", "ssh:host", FINGERPRINT,
+                CancellationToken(),
+            ))
             self.assertEqual(second_invoker.calls, [])
             self.assertFalse(restarted.cleanup_pending("retention-cleanup"))
 

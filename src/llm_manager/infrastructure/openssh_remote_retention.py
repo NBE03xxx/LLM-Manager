@@ -315,6 +315,24 @@ class OpenSshRemoteRetentionPort:
             return False
         return self.attempts.cleanup_pending(self.attempts.load(request_id))
 
+    def retry_staging_cleanup(
+        self, request_id: str, host_id: str, host_fingerprint: str,
+        cancellation: CancellationToken,
+    ) -> bool:
+        if self.attempts is None or self.results is None:
+            raise AdapterError("remote_retention_recovery_unavailable", "stores are required")
+        request = self.attempts.load(request_id)
+        self._binding(request, host_id, host_fingerprint)
+        result = self.results.load(request_id)
+        self._result_binding(request, result)
+        if cancellation.cancelled:
+            raise OperationCancelled("remote retention cleanup cancelled")
+        if self.attempts.cleanup_pending(request):
+            base = f"{REMOTE_USER_STAGING_ROOT}/{request.request_id}/{request.request_hash}"
+            self.staging.remove_private_tree(base)
+            self.attempts.mark_cleaned(request)
+        return not self.attempts.cleanup_pending(request)
+
     @staticmethod
     def _binding(request, host_id, fingerprint):
         if request.host_id != host_id or request.host_fingerprint != fingerprint:
