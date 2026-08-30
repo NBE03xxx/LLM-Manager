@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import stat
+from dataclasses import dataclass
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
@@ -14,6 +15,12 @@ from .backup import (
 from .backup_deletion import (
     BackupDeletionRequest, BackupDeletionResult, validate_backup_deletion_result,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class BackupManifestEvidenceEntry:
+    request_hash: str
+    manifest: BackupManifest
 
 
 class BackupManifestEvidenceStore:
@@ -49,6 +56,26 @@ class BackupManifestEvidenceStore:
         manifest = self._load(deletion_result.request_hash)
         self._result_binding(deletion_result, manifest)
         return manifest
+
+    def list_entries(self) -> tuple[BackupManifestEvidenceEntry, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        self._root_metadata()
+        entries = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("unsafe_manifest_evidence", "unexpected evidence entry")
+            request_hash = path.stem
+            if self._path(request_hash) != path:
+                raise AdapterError("invalid_manifest_evidence", "evidence identity is invalid")
+            entries.append(BackupManifestEvidenceEntry(
+                request_hash, self._load(request_hash)
+            ))
+        return tuple(sorted(
+            entries,
+            key=lambda item: (item.manifest.created_at, item.request_hash),
+            reverse=True,
+        ))
 
     def _load(self, request_hash: str) -> BackupManifest:
         self._root_metadata()
