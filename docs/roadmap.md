@@ -1,6 +1,6 @@
 # ロードマップ
 
-Phase 4のbackup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、0700/0600 immutable canonical storeで再読込検証できる。executorからの保存接続とproduction配置は未実装である。
+Phase 4のbackup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、executorの`completed`/`partial`/`failed`全終了経路から0700/0600 immutable canonical storeへ保存する。保存失敗時はstable errorに生成済みexecutionと原因codeを保持し、削除済み状態を隠さない。再起動後のhost/fingerprint単位strict一覧とproduction配置は未実装である。
 
 ## Phase 0: 設計確定（完了）
 

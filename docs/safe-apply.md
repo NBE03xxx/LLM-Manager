@@ -1,6 +1,6 @@
 # 安全な設定変更設計
 
-backup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、0700/0600 immutable canonical storeで再読込時のcanonical形式、mode、owner、symlink、filename identity、内容hashを検証する。executorからの保存接続とproduction配置は未実装である。
+backup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、executorの`completed`/`partial`/`failed`全終了経路で0700/0600 immutable canonical storeへ返却前に保存する。再読込時はcanonical形式、mode、owner、symlink、filename identity、内容hashを検証する。保存失敗は削除を巻き戻したと推測せず、stable `evidence_retention_execution_persistence_failed`に生成済みexecutionと原因codeを保持してread-only再照合へ渡す。自動再削除は行わない。再起動後のstrict一覧とproduction配置は未実装である。
 
 ## 1. 基本ワークフロー
 

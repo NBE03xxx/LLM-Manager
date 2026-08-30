@@ -15,6 +15,7 @@ from llm_manager.infrastructure.backup_deletion import (
     new_backup_deletion_request,
 )
 from llm_manager.infrastructure.backup_evidence_retention import (
+    BackupEvidenceRetentionExecutionPersistenceError,
     BackupEvidenceRetentionExecutionStore, BackupEvidenceRetentionExecutor,
     BackupEvidenceRetentionPlanner,
     EvidenceRetentionDisposition, EvidenceRetentionExecutionState,
@@ -45,6 +46,9 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         self.deletions = BackupDeletionResultStore(self.root / "deletions")
         self.reconciliations = BackupReconciliationResultStore(
             self.root / "reconciliations"
+        )
+        self.executions = BackupEvidenceRetentionExecutionStore(
+            self.root / "executions"
         )
 
     def tearDown(self):
@@ -148,7 +152,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         ))
         execution = BackupEvidenceRetentionExecutor(
             BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
-            self.evidence, self.deletions, self.reconciliations,
+            self.evidence, self.deletions, self.reconciliations, self.executions,
         ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                   CancellationToken())
         self.assertEqual(execution.state, EvidenceRetentionExecutionState.COMPLETED)
@@ -170,16 +174,13 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
             with self.assertRaises(AdapterError):
                 load()
 
-        store = BackupEvidenceRetentionExecutionStore(self.root / "executions")
-        self.assertEqual(store.save(execution), execution)
-        self.assertEqual(store.load(execution.execution_hash), execution)
+        self.assertEqual(self.executions.load(execution.execution_hash), execution)
         with self.assertRaisesRegex(AdapterError, "immutable"):
-            store.save(execution)
+            self.executions.save(execution)
 
     def test_execution_store_rejects_tamper_filename_and_unsafe_metadata(self):
         execution = self._execution("stored")
         store = BackupEvidenceRetentionExecutionStore(self.root / "executions")
-        store.save(execution)
         path = self.root / "executions" / f"{execution.execution_hash}.json"
         content = path.read_bytes()
         path.write_bytes(content.replace(b"backup-stored", b"backup-changed"))
@@ -210,7 +211,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         execution = BackupEvidenceRetentionExecutor(
             BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
             _FailingManifestDelete(self.evidence), self.deletions,
-            self.reconciliations,
+            self.reconciliations, self.executions,
         ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                   CancellationToken())
         self.assertEqual(execution.state, EvidenceRetentionExecutionState.PARTIAL)
@@ -220,6 +221,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         self.assertEqual(self.evidence.load(deletion), manifest)
         with self.assertRaises(AdapterError):
             self.reconciliations.load(reconciliation.reconciliation_id)
+        self.assertEqual(self.executions.load(execution.execution_hash), execution)
 
     def test_executor_reports_failed_when_first_reference_cannot_be_removed(self):
         manifest = self._manifest("failed")
@@ -234,7 +236,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         execution = BackupEvidenceRetentionExecutor(
             BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
             self.evidence, self.deletions,
-            _FailingReconciliationDelete(self.reconciliations),
+            _FailingReconciliationDelete(self.reconciliations), self.executions,
         ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                   CancellationToken())
         self.assertEqual(execution.state, EvidenceRetentionExecutionState.FAILED)
@@ -248,6 +250,62 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         )
         self.assertEqual(self.evidence.load(deletion), manifest)
         self.assertEqual(self.deletions.load(deletion.request_id), deletion)
+        self.assertEqual(self.executions.load(execution.execution_hash), execution)
+
+    def test_executor_exposes_completed_execution_when_store_save_fails(self):
+        manifest = self._manifest("save-failed")
+        request = new_backup_deletion_request("delete-save-failed", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(
+            request, manifest, NOW - timedelta(days=31)
+        ))
+        with self.assertRaises(BackupEvidenceRetentionExecutionPersistenceError) as raised:
+            BackupEvidenceRetentionExecutor(
+                BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+                self.evidence, self.deletions, self.reconciliations,
+                _FailingExecutionStore(),
+            ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                      CancellationToken())
+        self.assertEqual(
+            raised.exception.code,
+            "evidence_retention_execution_persistence_failed",
+        )
+        self.assertEqual(raised.exception.cause_code, "execution_save_failed")
+        self.assertEqual(
+            raised.exception.execution.state,
+            EvidenceRetentionExecutionState.COMPLETED,
+        )
+        self.assertEqual(raised.exception.execution.deletion_result_hash,
+                         deletion.result_hash)
+        with self.assertRaises(AdapterError):
+            self.deletions.load(deletion.request_id)
+
+    def test_executor_exposes_partial_execution_when_store_save_fails(self):
+        manifest = self._manifest("partial-save-failed")
+        request = new_backup_deletion_request(
+            "delete-partial-save-failed", manifest, now=NOW
+        )
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(
+            request, manifest, NOW - timedelta(days=31)
+        ))
+        reconciliation = self.reconciliations.save(_reconciliation(
+            "reconcile-partial-save-failed", deletion, manifest
+        ))
+        with self.assertRaises(BackupEvidenceRetentionExecutionPersistenceError) as raised:
+            BackupEvidenceRetentionExecutor(
+                BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+                _FailingManifestDelete(self.evidence), self.deletions,
+                self.reconciliations, _FailingExecutionStore(),
+            ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                      CancellationToken())
+        execution = raised.exception.execution
+        self.assertEqual(execution.state, EvidenceRetentionExecutionState.PARTIAL)
+        self.assertEqual(execution.removed_kinds, ("reconciliation",))
+        self.assertEqual(execution.remaining_kinds, ("manifest", "deletion"))
+        with self.assertRaises(AdapterError):
+            self.reconciliations.load(reconciliation.reconciliation_id)
+        self.assertEqual(self.deletions.load(deletion.request_id), deletion)
 
     def test_executor_rejects_non_candidate_without_deleting(self):
         manifest = self._manifest("keep")
@@ -258,6 +316,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
             BackupEvidenceRetentionExecutor(
                 BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
                 self.evidence, self.deletions, self.reconciliations,
+                self.executions,
             ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                       CancellationToken())
         self.assertEqual(self.deletions.load(deletion.request_id), deletion)
@@ -281,7 +340,7 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         self.deletions.save(_result(request, manifest, NOW - timedelta(days=31)))
         return BackupEvidenceRetentionExecutor(
             BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
-            self.evidence, self.deletions, self.reconciliations,
+            self.evidence, self.deletions, self.reconciliations, self.executions,
         ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                   CancellationToken())
 
@@ -329,3 +388,8 @@ class _FailingReconciliationDelete:
 
     def delete(self, result):
         raise AdapterError("reconciliation_delete_failed", "injected")
+
+
+class _FailingExecutionStore:
+    def save(self, execution):
+        raise AdapterError("execution_save_failed", "injected")

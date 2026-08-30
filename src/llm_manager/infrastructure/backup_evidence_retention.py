@@ -226,6 +226,22 @@ class BackupEvidenceRetentionExecutionStore:
             )
 
 
+class BackupEvidenceRetentionExecutionPersistenceError(AdapterError):
+    """Expose the terminal execution when its immutable evidence could not be saved."""
+
+    def __init__(
+        self,
+        execution: BackupEvidenceRetentionExecution,
+        cause_code: str,
+    ) -> None:
+        super().__init__(
+            "evidence_retention_execution_persistence_failed",
+            "evidence retention finished but execution evidence could not be persisted",
+        )
+        self.execution = execution
+        self.cause_code = cause_code
+
+
 class BackupEvidenceRetentionExecutor:
     """Delete only a freshly revalidated candidate, stopping after the first failure."""
 
@@ -235,11 +251,13 @@ class BackupEvidenceRetentionExecutor:
         manifests: BackupManifestEvidenceStore,
         deletions: BackupDeletionResultStore,
         reconciliations: BackupReconciliationResultStore,
+        executions: BackupEvidenceRetentionExecutionStore,
     ) -> None:
         self.planner = planner
         self.manifests = manifests
         self.deletions = deletions
         self.reconciliations = reconciliations
+        self.executions = executions
 
     def execute(
         self, request_hash: str, host_id: str, host_fingerprint: str,
@@ -286,7 +304,7 @@ class BackupEvidenceRetentionExecutor:
                 removed.append(kind)
             except (AdapterError, OperationCancelled, OSError, ValueError) as error:
                 remaining = tuple(item[0] for item in operations[index:])
-                return BackupEvidenceRetentionExecution(
+                execution = BackupEvidenceRetentionExecution(
                     "1.0", request_hash, record.backup_id, host_id, host_fingerprint,
                     deletion.result_hash,
                     tuple(item.result_hash for item in reconciliation_results),
@@ -296,12 +314,25 @@ class BackupEvidenceRetentionExecutor:
                     getattr(error, "code", "evidence_retention_failed"),
                     now,
                 ).with_hash()
-        return BackupEvidenceRetentionExecution(
+                return self._persist(execution)
+        execution = BackupEvidenceRetentionExecution(
             "1.0", request_hash, record.backup_id, host_id, host_fingerprint,
             deletion.result_hash,
             tuple(item.result_hash for item in reconciliation_results),
             EvidenceRetentionExecutionState.COMPLETED, tuple(removed), (), None, now,
         ).with_hash()
+        return self._persist(execution)
+
+    def _persist(
+        self, execution: BackupEvidenceRetentionExecution,
+    ) -> BackupEvidenceRetentionExecution:
+        try:
+            return self.executions.save(execution)
+        except (AdapterError, OSError, ValueError) as error:
+            raise BackupEvidenceRetentionExecutionPersistenceError(
+                execution,
+                getattr(error, "code", "evidence_retention_execution_store_failed"),
+            ) from error
 
 
 def _execution_bytes(execution: BackupEvidenceRetentionExecution) -> bytes:
