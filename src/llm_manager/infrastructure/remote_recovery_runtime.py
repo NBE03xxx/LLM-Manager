@@ -8,7 +8,7 @@ from typing import Mapping
 
 from llm_manager.application.errors import AdapterError
 
-from .remote_helper import RemoteRecoveryAttemptStore
+from .remote_helper import RemoteRecoveryAttemptStore, RemoteRecoveryReceiptStore
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,6 +17,7 @@ class RemoteRecoveryRuntime:
 
     state_root: Path
     attempts: RemoteRecoveryAttemptStore
+    receipts: RemoteRecoveryReceiptStore
 
     @classmethod
     def for_current_user(
@@ -44,7 +45,11 @@ class RemoteRecoveryRuntime:
         state_root = application_root / "remote-recovery"
         state_root.mkdir(mode=0o700, exist_ok=True)
         _private_directory(state_root)
-        return cls(state_root, RemoteRecoveryAttemptStore(state_root / "attempts"))
+        return cls(
+            state_root,
+            RemoteRecoveryAttemptStore(state_root / "attempts"),
+            RemoteRecoveryReceiptStore(state_root / "receipts"),
+        )
 
 
 def _private_directory(path: Path) -> None:

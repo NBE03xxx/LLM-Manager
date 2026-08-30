@@ -139,7 +139,7 @@ SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検
 
 disposable SSH先の2プロセスGateでは、第1プロセスがhelper実行後にstagingを残して終了し、第2プロセスがlocal manifestとattemptを再読込して同一request/receipt hashを検証した。第2プロセスはsudo/helperを再実行せず、receipt回収後にuser stagingだけを明示cleanupした。転送中の実ネットワーク切断は別Gateとして残す。
 
-remote retention/deletionのroot起動もrecoveryと同じ外部端末sudo境界を使う。operationは`invoke-recovery`、`invoke-retention`、`invoke-deletion`の固定allowlistに限定し、operation取り違えは端末起動前に拒否する。実retention Gateでは3件を10世代未満として削除せず、result永続化後だけstagingをcleanupした。recovery receiptは後続deletionにも必要なため、recovery staging cleanupとは独立したlocal immutable receipt storeへ保存するまで自動cleanupへ接続しない。
+remote retention/deletionのroot起動もrecoveryと同じ外部端末sudo境界を使う。operationは`invoke-recovery`、`invoke-retention`、`invoke-deletion`の固定allowlistに限定し、operation取り違えは端末起動前に拒否する。実retention Gateでは3件を10世代未満として削除せず、result永続化後だけstagingをcleanupした。recovery receiptは`$XDG_STATE_HOME/llm-manager/remote-recovery/receipts`へmanifest hash名で0700/0600 immutable保存する。staging cleanup後もreceipt hashとmanifest/fingerprint/item/key/path bindingを再検証して後続deletionへ渡し、欠落時だけ保存済みrequest identityによるremote回収を試みる。
 
 remote helper側保存backendは、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、root owner、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。productionはrootかつ`/var/lib/llm-manager/backups`だけを許し、alternate rootはfault-injection用sandboxに限定する。実production配置Gateはまだ行わない。
 

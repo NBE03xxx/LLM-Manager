@@ -24,6 +24,7 @@ class RemoteRecoveryRuntimeTests(unittest.TestCase):
         expected = xdg / "llm-manager/remote-recovery"
         self.assertEqual(runtime.state_root, expected)
         self.assertEqual(runtime.attempts.root, expected / "attempts")
+        self.assertEqual(runtime.receipts.root, expected / "receipts")
         self.assertEqual((xdg / "llm-manager").stat().st_mode & 0o777, 0o700)
         self.assertEqual(expected.stat().st_mode & 0o777, 0o700)
 

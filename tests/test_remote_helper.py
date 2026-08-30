@@ -23,6 +23,7 @@ from llm_manager.infrastructure.remote_backup import (
 from llm_manager.infrastructure.remote_helper import (
     RemoteHelperRecoveryCopyStore,
     RemoteRecoveryAttemptStore,
+    RemoteRecoveryReceiptStore,
     decode_remote_request,
 )
 from llm_manager.infrastructure.remote_helper_executor import RemoteRecoveryHelperExecutor
@@ -192,6 +193,34 @@ class RemoteHelperRecoveryCopyStoreTests(unittest.TestCase):
             attempts.list_for_host(
                 manifest.host_id, "SHA256:" + "b" * 43
             )
+
+    def test_persisted_receipt_survives_staging_cleanup_and_restart(self) -> None:
+        attempts = RemoteRecoveryAttemptStore(self.root / "attempts")
+        receipts = RemoteRecoveryReceiptStore(self.root / "receipts")
+        transport = _Transport(self.backend)
+        manifest = self.local.create(self.request, CancellationToken())
+        first = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts, receipts=receipts
+        )
+        created = first.create(
+            manifest, self.local.restore_items(manifest, CancellationToken()),
+            CancellationToken(),
+        )
+        transport.receipt = None
+        restarted = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts, receipts=receipts
+        )
+        self.assertEqual(restarted.load(manifest, CancellationToken()), created)
+
+        path = receipts.root / f"{manifest.manifest_hash}.json"
+        original = path.read_bytes()
+        path.write_bytes(original[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            restarted.load(manifest, CancellationToken())
+        path.write_bytes(original)
+        os.chmod(path, 0o644)
+        with self.assertRaisesRegex(AdapterError, "metadata"):
+            restarted.load(manifest, CancellationToken())
 
 
 class _Transport:

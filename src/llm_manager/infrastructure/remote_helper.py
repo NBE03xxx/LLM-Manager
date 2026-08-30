@@ -19,7 +19,9 @@ from .backup import BackupRestoreItem, _safe_component
 from .backup import _atomic_write
 from .remote_backup import (
     RemoteRecoveryReceipt,
+    _validate_receipt,
     decode_remote_receipt,
+    encode_remote_receipt,
     remote_storage_location,
 )
 
@@ -198,6 +200,73 @@ class RemoteRecoveryAttemptStore:
         _digest(manifest_hash)
         return self.root / f"{manifest_hash}.json"
 
+
+class RemoteRecoveryReceiptStore:
+    """Immutable verified receipt retained after user staging cleanup."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root.absolute()
+        if self.root == Path("/") or self.root.is_symlink():
+            raise ValueError("unsafe remote recovery receipt root")
+
+    def save(
+        self, manifest: BackupManifest, receipt: RemoteRecoveryReceipt
+    ) -> RemoteRecoveryReceipt:
+        _validate_receipt(manifest, receipt)
+        self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(self.root, 0o700)
+        self._root()
+        path = self._path(manifest.manifest_hash)
+        content = encode_remote_receipt(receipt)
+        if path.exists() or path.is_symlink():
+            current = self.load(manifest)
+            if current != receipt:
+                raise AdapterError(
+                    "remote_recovery_receipt_collision",
+                    "remote recovery receipt identity was reused",
+                )
+            return current
+        _atomic_write(path, content, 0o600)
+        return self.load(manifest)
+
+    def load(self, manifest: BackupManifest) -> RemoteRecoveryReceipt:
+        self._root()
+        path = self._path(manifest.manifest_hash)
+        if not path.exists() and not path.is_symlink():
+            raise AdapterError(
+                "remote_recovery_receipt_not_found", "recovery receipt is missing"
+            )
+        RemoteRecoveryAttemptStore._file(path)
+        try:
+            receipt = decode_remote_receipt(path.read_bytes())
+            _validate_receipt(manifest, receipt)
+        except AdapterError:
+            raise
+        except (OSError, ValueError) as error:
+            raise AdapterError(
+                "invalid_remote_recovery_receipt", "stored recovery receipt is invalid"
+            ) from error
+        return receipt
+
+    def _root(self) -> None:
+        if not self.root.exists() and not self.root.is_symlink():
+            raise AdapterError(
+                "remote_recovery_receipt_not_found", "recovery receipt is missing"
+            )
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError(
+                "unsafe_remote_recovery_receipt", "recovery receipt root is unsafe"
+            )
+        metadata = self.root.stat(follow_symlinks=False)
+        if metadata.st_uid != os.getuid() or stat.S_IMODE(metadata.st_mode) != 0o700:
+            raise AdapterError(
+                "unsafe_remote_recovery_receipt", "recovery receipt root metadata is unsafe"
+            )
+
+    def _path(self, manifest_hash: str) -> Path:
+        _digest(manifest_hash)
+        return self.root / f"{manifest_hash}.json"
+
     def read_recovery_receipt(
         self,
         request_content: bytes,
@@ -214,6 +283,7 @@ class RemoteHelperRecoveryCopyStore:
         key_reference: str,
         *,
         attempts: RemoteRecoveryAttemptStore | None = None,
+        receipts: RemoteRecoveryReceiptStore | None = None,
         clock=utc_now,
     ) -> None:
         if not key_reference or not _IDENTIFIER.fullmatch(key_reference):
@@ -221,6 +291,7 @@ class RemoteHelperRecoveryCopyStore:
         self.transport = transport
         self.key_reference = key_reference
         self.attempts = attempts
+        self.receipts = receipts
         self.clock = clock
         self._requests: dict[tuple[str, str, str], RemoteRecoveryRequest] = {}
 
@@ -245,11 +316,17 @@ class RemoteHelperRecoveryCopyStore:
             self.transport.create_recovery_copy(content, items, cancellation)
         )
         _validate_response(request, receipt)
-        return receipt
+        return self.receipts.save(manifest, receipt) if self.receipts is not None else receipt
 
     def load(
         self, manifest: BackupManifest, cancellation: CancellationToken
     ) -> RemoteRecoveryReceipt:
+        if self.receipts is not None:
+            try:
+                return self.receipts.load(manifest)
+            except AdapterError as error:
+                if error.code != "remote_recovery_receipt_not_found":
+                    raise
         request = self._requests.get(self._identity(manifest))
         if request is None and self.attempts is not None:
             request = self.attempts.load(manifest)
@@ -264,7 +341,7 @@ class RemoteHelperRecoveryCopyStore:
             self.transport.read_recovery_receipt(content, cancellation)
         )
         _validate_response(request, receipt)
-        return receipt
+        return self.receipts.save(manifest, receipt) if self.receipts is not None else receipt
 
     @staticmethod
     def _identity(manifest: BackupManifest) -> tuple[str, str, str]:

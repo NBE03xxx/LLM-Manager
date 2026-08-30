@@ -12,6 +12,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `OpenSshRemoteSudoInvokerTests`、`OpenSshRemoteRetentionTests`、`OpenSshRemoteDeletionTests`は外部端末sudoで許可する3つの固定operation、retention/deletion取り違え拒否、passwordless互換を検証する。実remote retention Gateは削除0、残存3、`completed` result永続化、cleanup完了を確認した。
 
+`RemoteHelperRecoveryCopyStoreTests`はlocal immutable receipt保存、staging消失後の再起動load、manifest binding、canonical改ざん、unsafe metadataを検証する。`RemoteRecoveryRuntimeTests`はreceipt rootをattempt rootと分離した固定XDG配置へ束縛する。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |
