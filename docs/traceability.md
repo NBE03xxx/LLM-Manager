@@ -4,6 +4,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `BackupEvidenceRetentionCleanupServiceTests`は、再起動後strict executionに束縛した明示的cleanup requestだけをdispatchし、requestをmutation前に0700/0600 immutable storeへ保存することを検証する。改ざん、期限切れ、binding変更、`completed`、cancel、cleanup ID衝突、保存済みrequest改ざんをcleanup Port呼出し前に拒否する。cleanup executorの残存suffix再照合、成功、cancel、途中失敗の停止とimmutable execution保存も検証し、orphan自動判定・自動削除は行わない。
 
+`BackupInventoryServiceTests`はlatest evidence retention executionと残存kindを再起動後repositoryから表示し、未完了executionをattentionへ反映する一方、dual-delete/retry mutation authorityへ使用せずread-only refreshだけを提示することを検証する。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |

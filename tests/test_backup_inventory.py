@@ -15,6 +15,10 @@ from llm_manager.infrastructure.backup_deletion import (
     CopyDeleteOutcome,
 )
 from llm_manager.infrastructure.backup_evidence import BackupEvidenceRepository
+from llm_manager.infrastructure.backup_evidence_retention import (
+    BackupEvidenceRetentionExecution, BackupEvidenceRetentionExecutionStore,
+    EvidenceRetentionExecutionState,
+)
 from llm_manager.infrastructure.backup_inventory import (
     BackupInventoryService, BackupListAction, LocalRetentionResult,
     LocalRetentionResultStore, LocalRetentionRunner, RetentionRunEvidence,
@@ -132,6 +136,24 @@ class BackupInventoryServiceTests(unittest.TestCase):
             self.assertNotIn(BackupListAction.RETRY_LOCAL_DELETE, item.allowed_actions)
             self.assertNotIn(BackupListAction.RETRY_REMOTE_DELETE, item.allowed_actions)
 
+    def test_displays_latest_evidence_retention_execution_without_mutation(self):
+        failed = BackupEvidenceRetentionExecution(
+            "1.0", "d" * 64, self.manifest.backup_id, self.manifest.host_id,
+            FINGERPRINT, "e" * 64, (), EvidenceRetentionExecutionState.FAILED,
+            (), ("manifest", "deletion"), "cleanup_failed", NOW,
+        ).with_hash()
+        item = BackupInventoryService(
+            _Local(()), _Remote(())
+        ).list_for_host(
+            "ssh:host", FINGERPRINT, CancellationToken(),
+            evidence_retention_executions=(failed,),
+        )[0]
+        self.assertEqual(item.evidence_retention_execution, failed)
+        self.assertEqual(item.evidence_missing_kinds, ("manifest", "deletion"))
+        self.assertTrue(item.requires_attention)
+        self.assertNotIn(BackupListAction.START_DUAL_DELETE, item.allowed_actions)
+        self.assertIn(BackupListAction.REFRESH_INVENTORY, item.allowed_actions)
+
     def test_retention_evidence_is_displayed_and_partial_requires_reconciliation(self):
         result = RemoteRetentionResult(
             "1.0", "retention-1", "a" * 64, "ssh:host", FINGERPRINT,
@@ -196,6 +218,12 @@ class BackupInventoryServiceTests(unittest.TestCase):
         reconciliation_store = BackupReconciliationResultStore(root / "reconciliations")
         retention_attempts = RemoteRetentionAttemptStore(root / "retention-attempts")
         deletion_attempts = RemoteDeletionAttemptStore(root / "deletion-attempts")
+        execution_store = BackupEvidenceRetentionExecutionStore(root / "executions")
+        execution = execution_store.save(BackupEvidenceRetentionExecution(
+            "1.0", "d" * 64, self.manifest.backup_id, self.manifest.host_id,
+            FINGERPRINT, "e" * 64, (), EvidenceRetentionExecutionState.FAILED,
+            (), ("manifest", "deletion"), "cleanup_failed", NOW,
+        ).with_hash())
         local_store.save(LocalRetentionResult(
             "1.0", "local-retention", "ssh:host", NOW,
             RemoteRetentionState.COMPLETED, (), ("backup-1",), None,
@@ -234,18 +262,23 @@ class BackupInventoryServiceTests(unittest.TestCase):
             remote_retention_attempts=retention_attempts,
             remote_deletion_attempts=deletion_attempts,
             reconciliation_results=reconciliation_store,
+            evidence_retention_executions=execution_store,
         )
         item = BackupInventoryService(
             _Local((self.manifest,)), _Remote((self.record,))
         ).list_persisted_for_host(
             "ssh:host", FINGERPRINT, CancellationToken(), repository,
         )[0]
-        self.assertIn(BackupListAction.RETRY_REMOTE_DELETE, item.allowed_actions)
+        self.assertNotIn(BackupListAction.RETRY_REMOTE_DELETE, item.allowed_actions)
+        self.assertIn(BackupListAction.REFRESH_INVENTORY, item.allowed_actions)
         self.assertIn(BackupListAction.RETRY_STAGING_CLEANUP, item.allowed_actions)
         self.assertIn(
             BackupListAction.RETRY_RETENTION_STAGING_CLEANUP, item.allowed_actions
         )
         self.assertEqual(item.reconciliation_result, reconciliation)
+        self.assertEqual(item.evidence_retention_execution, execution)
+        self.assertEqual(item.evidence_missing_kinds, ("manifest", "deletion"))
+        self.assertTrue(item.requires_attention)
 
     def test_repository_rejects_unknown_persistent_entry(self):
         root = Path(self.temp.name) / "evidence"

@@ -3,6 +3,7 @@ from __future__ import annotations
 from llm_manager.application.errors import AdapterError
 
 from .backup_deletion import BackupDeletionResultStore, BackupDeletionView
+from .backup_evidence_retention import BackupEvidenceRetentionExecutionStore
 from .backup_inventory import (
     BackupInventoryEvidence, LocalRetentionResultStore, RetentionRunEvidence,
 )
@@ -25,6 +26,7 @@ class BackupEvidenceRepository:
         remote_retention_attempts: RemoteRetentionAttemptStore | None = None,
         remote_deletion_attempts: RemoteDeletionAttemptStore | None = None,
         reconciliation_results: BackupReconciliationResultStore | None = None,
+        evidence_retention_executions: BackupEvidenceRetentionExecutionStore | None = None,
     ) -> None:
         self.local_retention = local_retention
         self.remote_retention = remote_retention
@@ -32,6 +34,7 @@ class BackupEvidenceRepository:
         self.remote_retention_attempts = remote_retention_attempts
         self.remote_deletion_attempts = remote_deletion_attempts
         self.reconciliation_results = reconciliation_results
+        self.evidence_retention_executions = evidence_retention_executions
 
     def load_for_host(
         self, host_id: str, host_fingerprint: str
@@ -83,4 +86,7 @@ class BackupEvidenceRepository:
             ),
             tuple(views),
             tuple(reconciliations),
+            self.evidence_retention_executions.list_for_host(
+                host_id, host_fingerprint
+            ) if self.evidence_retention_executions is not None else (),
         )

@@ -19,6 +19,10 @@ from llm_manager.domain.serialization import to_primitive
 from .backup_deletion import (
     BackupDeletionView, CopyDeleteOutcome, validate_backup_deletion_result,
 )
+from .backup_evidence_retention import (
+    BackupEvidenceRetentionExecution, EvidenceRetentionExecutionState,
+    validate_backup_evidence_retention_execution,
+)
 from .backup import _atomic_write
 from .backup_reconciliation import (
     BackupReconciliationResult, CopyPresence, DualCopyState,
@@ -53,6 +57,7 @@ class BackupInventoryEvidence:
     retention: RetentionRunEvidence
     deletion_views: tuple[BackupDeletionView, ...]
     reconciliation_results: tuple[BackupReconciliationResult, ...] = ()
+    evidence_retention_executions: tuple[BackupEvidenceRetentionExecution, ...] = ()
 
 
 class BackupEvidencePort(Protocol):
@@ -200,6 +205,8 @@ class BackupInventoryItem:
     deletion_view: BackupDeletionView | None
     reconciliation_result: BackupReconciliationResult | None
     allowed_actions: tuple[BackupListAction, ...]
+    evidence_retention_execution: BackupEvidenceRetentionExecution | None = None
+    evidence_missing_kinds: tuple[str, ...] = ()
 
 
 class LocalBackupInventoryPort(Protocol):
@@ -229,6 +236,9 @@ class BackupInventoryService:
         deletion_views: Iterable[BackupDeletionView] = (),
         retention: RetentionRunEvidence | None = None,
         reconciliation_results: Iterable[BackupReconciliationResult] = (),
+        evidence_retention_executions: Iterable[
+            BackupEvidenceRetentionExecution
+        ] = (),
     ) -> tuple[BackupInventoryItem, ...]:
         if cancellation.cancelled:
             raise OperationCancelled("backup inventory cancelled")
@@ -240,9 +250,15 @@ class BackupInventoryService:
         reconciliations = self._reconciliations(
             host_id, host_fingerprint, views, reconciliation_results
         )
+        executions = self._retention_executions(
+            host_id, host_fingerprint, evidence_retention_executions
+        )
         evidence = retention or RetentionRunEvidence()
         self._validate_retention(host_id, host_fingerprint, evidence)
-        identifiers = set(local_values) | set(remote_values) | set(views) | set(reconciliations)
+        identifiers = (
+            set(local_values) | set(remote_values) | set(views)
+            | set(reconciliations) | set(executions)
+        )
         if evidence.local_result is not None:
             identifiers.update(evidence.local_result.removed_backup_ids)
             identifiers.update(evidence.local_result.remaining_backup_ids)
@@ -265,6 +281,7 @@ class BackupInventoryService:
             manifest = local_values.get(backup_id)
             record = remote_values.get(backup_id)
             view = views.get(backup_id)
+            execution = executions.get(backup_id)
             protected = bool(
                 (manifest is not None and manifest.protected)
                 or (record is not None and record.protected)
@@ -298,12 +315,28 @@ class BackupInventoryService:
                     RemoteRetentionState.PARTIAL, RemoteRetentionState.FAILED,
                     RemoteRetentionState.UNKNOWN,
                 }
+                or (
+                    execution is not None
+                    and execution.state is not EvidenceRetentionExecutionState.COMPLETED
+                )
             )
             actions = _actions(
                 DualCopyState.UNKNOWN if live_unknown else state,
                 protected, view, local_state, remote_state,
                 evidence.remote_staging_cleanup_pending and remote_state is not None,
             )
+            if (execution is not None
+                    and execution.state is not EvidenceRetentionExecutionState.COMPLETED):
+                mutation_actions = {
+                    BackupListAction.START_DUAL_DELETE,
+                    BackupListAction.RETRY_REMOTE_DELETE,
+                    BackupListAction.RETRY_LOCAL_DELETE,
+                }
+                actions = tuple(
+                    action for action in actions if action not in mutation_actions
+                )
+                if BackupListAction.REFRESH_INVENTORY not in actions:
+                    actions += (BackupListAction.REFRESH_INVENTORY,)
             items.append(BackupInventoryItem(
                 backup_id, host_id,
                 manifest.created_at if manifest is not None else (
@@ -316,6 +349,7 @@ class BackupInventoryService:
                 bool(evidence.local_result is not None and
                      backup_id in evidence.local_result.removed_backup_ids), remote_removed,
                 local_state, remote_state, view, reconciliation, actions,
+                execution, execution.remaining_kinds if execution is not None else (),
             ))
         return tuple(sorted(items, key=lambda item: (
             item.created_at is not None, item.created_at or datetime.min,
@@ -333,6 +367,7 @@ class BackupInventoryService:
             host_id, host_fingerprint, cancellation,
             deletion_views=loaded.deletion_views, retention=loaded.retention,
             reconciliation_results=loaded.reconciliation_results,
+            evidence_retention_executions=loaded.evidence_retention_executions,
         )
 
     def _local(self, host_id):
@@ -384,6 +419,24 @@ class BackupInventoryService:
                 )
             result[value.backup_id] = value
         return result
+
+    @staticmethod
+    def _retention_executions(host_id, fingerprint, executions):
+        latest = {}
+        for execution in executions:
+            validate_backup_evidence_retention_execution(execution)
+            if (execution.host_id != host_id
+                    or execution.host_fingerprint != fingerprint):
+                raise AdapterError(
+                    "backup_inventory_binding_mismatch",
+                    "evidence retention execution changed identity",
+                )
+            current = latest.get(execution.backup_id)
+            if current is None or (
+                execution.completed_at, execution.execution_hash
+            ) > (current.completed_at, current.execution_hash):
+                latest[execution.backup_id] = execution
+        return latest
 
     @staticmethod
     def _validate_retention(host_id, fingerprint, evidence):

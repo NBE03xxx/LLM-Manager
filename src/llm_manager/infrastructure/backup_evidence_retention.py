@@ -383,6 +383,12 @@ def _execution_bytes(execution: BackupEvidenceRetentionExecution) -> bytes:
     ).encode("utf-8")
 
 
+def validate_backup_evidence_retention_execution(
+    execution: BackupEvidenceRetentionExecution,
+) -> None:
+    _validate_execution(execution)
+
+
 def _validate_execution(execution: BackupEvidenceRetentionExecution) -> None:
     text_fields = (
         execution.schema_version, execution.request_hash, execution.backup_id,
