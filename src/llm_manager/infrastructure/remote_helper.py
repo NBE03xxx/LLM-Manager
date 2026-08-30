@@ -86,6 +86,7 @@ class RemoteHelperRecoveryCopyStore:
         self.transport = transport
         self.key_reference = key_reference
         self.clock = clock
+        self._requests: dict[tuple[str, str, str], RemoteRecoveryRequest] = {}
 
     def create(
         self,
@@ -96,6 +97,10 @@ class RemoteHelperRecoveryCopyStore:
         request = self._request(manifest)
         _validate_staged_items(request, items)
         content = encode_remote_request(request)
+        # Preserve the exact staging identity before transport. If the helper
+        # completes but receipt download disconnects, verify() can reconnect to
+        # the same immutable result instead of minting a different request hash.
+        self._requests[self._identity(manifest)] = request
         _cancel(cancellation)
         receipt = decode_remote_receipt(
             self.transport.create_recovery_copy(content, items, cancellation)
@@ -106,7 +111,12 @@ class RemoteHelperRecoveryCopyStore:
     def load(
         self, manifest: BackupManifest, cancellation: CancellationToken
     ) -> RemoteRecoveryReceipt:
-        request = self._request(manifest)
+        request = self._requests.get(self._identity(manifest))
+        if request is None:
+            raise AdapterError(
+                "remote_request_identity_unavailable",
+                "remote recovery request identity is unavailable",
+            )
         content = encode_remote_request(request)
         _cancel(cancellation)
         receipt = decode_remote_receipt(
@@ -114,6 +124,10 @@ class RemoteHelperRecoveryCopyStore:
         )
         _validate_response(request, receipt)
         return receipt
+
+    @staticmethod
+    def _identity(manifest: BackupManifest) -> tuple[str, str, str]:
+        return manifest.host_id, manifest.backup_id, manifest.manifest_hash
 
     def _request(self, manifest: BackupManifest) -> RemoteRecoveryRequest:
         now = self.clock()

@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper core、root変更専用Safe Apply workflow、local/remote helperの分離deb sandbox build/artifact Gate、remote helperのOpenSSH read-only互換性Gateとroot journal evidence取得、外部端末SSH対話認証、remote recovery copyの限定transport Port・user staging・限定retention operation、local/remote協調削除、限定remote deletion protocol、切断後result回収、retention/deletion cleanup再試行、再起動後の永続evidence自動再読込を含むbackup一覧状態集約、cleanup-only action service、片側削除失敗後のread-only再照合永続化と限定action service、削除後再照合用manifest evidence、evidence retention planとsandbox executor、全terminal executionのimmutable canonical保存と再起動後strict列挙、明示的cleanup requestによる残存evidence cleanup、結果保存、backup一覧表示、XDG user-state runtime配置まで実装済みです。保存失敗時も生成済みexecutionを専用stable errorで上位へ公開し、削除済み状態を隠しません。PySide6 GUI、deb実install/desktop integration Gate、実SSH remote helper実行はまだ実装していません。
+Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper core、root変更専用Safe Apply workflow、local/remote helperの分離deb sandbox build/artifact Gate、remote helperのOpenSSH compatibility Gate、外部端末SSH対話sudo、実root-owned暗号化recovery copyとreceipt回収、root journal evidence取得、限定retention/deletion operation、backup evidence retentionと明示cleanup境界まで実装済みです。保存失敗時も生成済みexecutionを専用stable errorで上位へ公開し、削除済み状態を隠しません。PySide6 GUIと残るdesktop/disconnect/deb lifecycle integration Gateは未完了です。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
@@ -40,6 +40,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [Secret Service desktop validation](docs/validation/secret-service-desktop-2026-08-30.md)
 - [PolicyKit desktop validation](docs/validation/policykit-desktop-2026-08-30.md)
 - [SSH remote helper read-only validation](docs/validation/ssh-remote-helper-readonly-2026-08-30.md)
+- [SSH remote helper positive validation](docs/validation/ssh-remote-helper-positive-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)
 - [SSH AI server read-only validation](docs/validation/ssh-ai-server-readonly-2026-08-29.md)
 - [ADR](docs/adr/README.md)

@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
@@ -91,6 +91,30 @@ class RemoteHelperRecoveryCopyStoreTests(unittest.TestCase):
         with self.assertRaises(AdapterError):
             remote.load(manifest, CancellationToken())
 
+    def test_receipt_reload_reuses_the_created_request_identity(self) -> None:
+        ticks = iter((datetime.now(UTC), datetime.now(UTC) + timedelta(seconds=1)))
+        transport = _Transport(self.backend)
+        remote = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", clock=lambda: next(ticks)
+        )
+        manifest = self.local.create(self.request, CancellationToken())
+        items = self.local.restore_items(manifest, CancellationToken())
+        created = remote.create(manifest, items, CancellationToken())
+        loaded = remote.load(manifest, CancellationToken())
+        self.assertEqual(loaded, created)
+        self.assertEqual(
+            json.loads(transport.create_content)["request_hash"],
+            json.loads(transport.read_content)["request_hash"],
+        )
+
+    def test_receipt_reload_without_created_request_fails_closed(self) -> None:
+        manifest = self.local.create(self.request, CancellationToken())
+        with self.assertRaises(AdapterError) as caught:
+            RemoteHelperRecoveryCopyStore(
+                _Transport(self.backend), "remote-master-v1"
+            ).load(manifest, CancellationToken())
+        self.assertEqual(caught.exception.code, "remote_request_identity_unavailable")
+
 
 class _Transport:
     def __init__(self, backend, *, failure=None):
@@ -99,6 +123,7 @@ class _Transport:
         self.receipt = None
         self.create_request = None
         self.create_content = b""
+        self.read_content = b""
         self.manifest = None
         self.stage = backend.root.parent / f"stage-{id(self)}"
 
@@ -134,6 +159,7 @@ class _Transport:
         return result
 
     def read_recovery_receipt(self, request_content, cancellation):
+        self.read_content = request_content
         if self.failure == "receipt" or self.receipt is None:
             raise AdapterError("remote_receipt_unavailable", "injected receipt retrieval failure")
         return encode_remote_receipt(self.receipt)

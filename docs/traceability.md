@@ -8,7 +8,7 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `BackupEvidenceRetentionRuntimeTests`はexecution/request storeをabsolute XDG stateまたはhome fallbackの固定subdirectoryへ配置し、0700 application/runtime root、相対XDG、root path、symlink、unsafe modeをsandboxで検証する。
 
-実OpenSSH negative transport Gateでは`development`とAI serverにproduction adapterでread-only接続し、remote helper未導入をfixed helper/metadata `stat`だけで判定した。`HelperCompatibilityProbeTests`は欠落時にmetadata read、staging、sudo、helper起動へ進まないことを検証する。positive helper/transport Gateはdisposable SSH先へのdeb事前導入待ちである。
+実OpenSSH negative transport Gateでは`development`とAI serverにproduction adapterでread-only接続し、remote helper未導入をfixed helper/metadata `stat`だけで判定した。positive transport Gateではdisposable `llm-manager-gate`へ事前導入済みdebを使い、compatibility再検証、user staging、外部端末sudo、root-owned AES-GCM recovery copy、canonical receipt再取得、staging cleanupまで成功した。実行中に検出したreceipt再取得のrequest identity再生成を回帰test化し、作成時identityを再利用、再起動後にidentityがなければstable errorでfail closedとした。
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
@@ -28,7 +28,7 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 | FR-I18N-01..02 | ADR-0006, gui | ja/en/fallback/key completeness/layout | Phase 5 |
 | AC-09/10 | ADR-0003, architecture | `ArchitectureTests`（domain依存境界）、Phase 5でQt event-loop | Phase 1完了/5 |
 | AC-13/14 | allowlist, ADR-0004/0005 | unknown version denial、`LocalOperationJournalTests`（before/after/unknown）、remote統合待ち | Phase 4一部完了 |
-| SSH helper prerequisite | ADR-0008, version matrix | `HelperCompatibilityProbeTests`, `OpenSshHostAdapterTests`, `OpenSshUserStagingRunnerTests`, `DiagnoseHostTests`, `OllamaDropInPlannerTests`（local/remote fixed path、absent、symlink、root owner/mode、content hash、canonical package/version/protocol metadata、system OpenSSH固定stat/cat、staging前・invoke直前再検証、fail-closed capability/Plan Gate）、実SSH互換診断待ち | Phase 4一部完了 |
+| SSH helper prerequisite | ADR-0008, version matrix | `HelperCompatibilityProbeTests`, `OpenSshHostAdapterTests`, `OpenSshUserStagingRunnerTests`, `DiagnoseHostTests`, `OllamaDropInPlannerTests`（local/remote fixed path、absent、symlink、root owner/mode、content hash、canonical package/version/protocol metadata、system OpenSSH固定stat/cat、staging前・invoke直前再検証、fail-closed capability/Plan Gate）、実SSH positive compatibility/user staging/external-terminal sudo/recovery receipt Gate完了 | Phase 4一部完了 |
 | Backup crypto/recovery | ADR-0009, threat model | `BackupCryptoTests`, `SecretServiceKeyProviderTests`, `SecretStorageBackendTests`, `RemoteRootKeyProviderTests`, `BackupSettingsTests`, `LocalBackupStoreTests`, `DualCopyPrivilegedBackupStoreTests`, `CoordinatorTests`（AES-GCM/AAD/nonce/tamper/key scope/size、local Secret Service key create-reuse、binding欠落時stable unavailable、remote root key O_EXCL create-reuse/0700/0600/owner/symlink/size/root/path、remote recovery production固定path/root/ownerとsandbox統合、cancel/build default/user persistence/plaintext acknowledgement/restore/approval invalidation）、desktop negative availability Gate完了、positive keyring Gate・実remote key/backend配置待ち | Phase 4一部完了 |
 | Endpoint confinement | ADR-0010, setting allowlist | loopback allow、external/redirect/userinfo deny | Phase 3/4 |
 | OpenCode safe edit | ADR-0011, setting allowlist | scalar span、comment、escape、byte-diff fixtures | Phase 3/4 |

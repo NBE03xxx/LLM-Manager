@@ -135,7 +135,7 @@ remote照合はlocal journalのoperation/plan/host/change-set/backup/manifest ha
 
 remote root journalは通常SSHからroot-only fileを直接読まず、限定helperのread-only operationが返すcanonical evidenceだけを取得する。evidenceはoperation/plan/host/fingerprint/change-set/backup/manifest/request/rollback request、status、targets、remote journal hashを持ち、local journal/manifestとの全bindingを確認する。取得失敗・非canonical・hash改ざん・binding不一致時はhost identity確認やtarget `stat`へ進まず、状態を推測しない。
 
-SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。現段階のport試験はfakeのみで、SSH転送と実remote helper暗号化は未実装である。
+SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。disposable SSH先のpositive Gateで実remote helper暗号化とreceipt再取得まで確認した。作成時request identityはtransport開始前に保持して同一processの再取得へ使い、再起動後にidentityがなければ推測せずfail closedとする。
 
 remote helper側保存backendは、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、root owner、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。productionはrootかつ`/var/lib/llm-manager/backups`だけを許し、alternate rootはfault-injection用sandboxに限定する。実production配置Gateはまだ行わない。
 
@@ -183,7 +183,7 @@ GUI は root で起動しない。Local は PolicyKit/pkexec による最小help
 
 SSH先は互換remote helper debの事前導入を必須とする。診断時に固定path、package/version、protocol version、root ownership、非writable modeを確認する。欠落・非互換時はroot変更を含むPlanを生成せず、導入手順だけを表示する。LLM-Manager自身はremote helperのinstall/upgradeを行わない。
 
-remote helper互換性probeは`/usr/bin/llm-manager-remote-helper`と`/usr/share/llm-manager-remote-helper/helper-metadata.json`だけをsystem OpenSSHの固定`stat`/bounded `cat`で読む。root ownership、0755/0644、非symlink、content hash、canonical schema、package/version/protocolを検証し、user staging開始前とroot helper起動直前に再実行する。失敗・timeout・metadata差替えは`privileged_helper_unavailable`としてstaging前に停止する。現段階はfake runner統合までで、実SSH先では未実行である。
+remote helper互換性probeは`/usr/bin/llm-manager-remote-helper`と`/usr/share/llm-manager-remote-helper/helper-metadata.json`だけをsystem OpenSSHの固定`stat`/bounded `cat`で読む。root ownership、0755/0644、非symlink、content hash、canonical schema、package/version/protocolを検証し、user staging開始前とroot helper起動直前に再実行する。失敗・timeout・metadata差替えは`privileged_helper_unavailable`としてstaging前に停止する。disposable `llm-manager-gate`で事前導入済み0.1.0~dev0のpositive compatibility、user staging、外部端末sudo、暗号化copy、receipt回収、cleanupを確認済みである。
 
 切断後のroot journal取得は限定helperの`read-journal-evidence <operation-id> <request-hash>`だけを許可する。root側は`/var/lib/llm-manager/journals/evidence`固定のroot:root 0700/0600 regular fileを`O_NOFOLLOW`付きdescriptorでbounded readし、canonical evidenceとidentity bindingを再検証する。OpenSSH側は互換性Gate後の固定passwordless sudo commandだけを使い、timeout・sudo不可・oversize・改ざん時はhost identityやtarget `stat`へ進まない。fake transportからread-only reconcilerまで接続済みだが、実SSH先では未実行である。
 
