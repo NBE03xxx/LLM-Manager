@@ -19,7 +19,10 @@ from llm_manager.infrastructure.backup_inventory import (
     BackupInventoryService, BackupListAction, LocalRetentionResult,
     LocalRetentionResultStore, LocalRetentionRunner, RetentionRunEvidence,
 )
-from llm_manager.infrastructure.backup_reconciliation import CopyPresence, DualCopyState
+from llm_manager.infrastructure.backup_reconciliation import (
+    BackupReconciliationResult, BackupReconciliationResultStore,
+    CopyPresence, DualCopyState,
+)
 from llm_manager.infrastructure.remote_backup import RemoteRetentionRecord
 from llm_manager.infrastructure.remote_retention import (
     REMOTE_RETENTION_OPERATION, REMOTE_RETENTION_PROTOCOL_VERSION,
@@ -190,6 +193,7 @@ class BackupInventoryServiceTests(unittest.TestCase):
         local_store = LocalRetentionResultStore(root / "local-retention")
         remote_store = RemoteRetentionResultStore(root / "remote-retention")
         deletion_store = BackupDeletionResultStore(root / "deletions")
+        reconciliation_store = BackupReconciliationResultStore(root / "reconciliations")
         retention_attempts = RemoteRetentionAttemptStore(root / "retention-attempts")
         deletion_attempts = RemoteDeletionAttemptStore(root / "deletion-attempts")
         local_store.save(LocalRetentionResult(
@@ -212,6 +216,12 @@ class BackupInventoryServiceTests(unittest.TestCase):
             CopyDeleteOutcome.NOT_ATTEMPTED, DualCopyState.BOTH_AVAILABLE,
         )
         deletion_store.save(deletion_view.result)
+        reconciliation = reconciliation_store.save(BackupReconciliationResult(
+            "1.0", "reconcile", deletion_view.result.result_hash,
+            self.manifest.backup_id, self.manifest.host_id, FINGERPRINT,
+            self.manifest.manifest_hash, NOW, CopyPresence.PRESENT,
+            CopyPresence.PRESENT, DualCopyState.BOTH_AVAILABLE, False,
+        ).with_hash())
         deletion_attempts.save(RemoteDeletionRequest(
             "1.0", REMOTE_DELETION_PROTOCOL_VERSION, REMOTE_DELETION_OPERATION,
             "remote-delete", self.manifest.backup_id, self.manifest.host_id,
@@ -223,6 +233,7 @@ class BackupInventoryServiceTests(unittest.TestCase):
             local_store, remote_store, deletion_store,
             remote_retention_attempts=retention_attempts,
             remote_deletion_attempts=deletion_attempts,
+            reconciliation_results=reconciliation_store,
         )
         item = BackupInventoryService(
             _Local((self.manifest,)), _Remote((self.record,))
@@ -234,6 +245,7 @@ class BackupInventoryServiceTests(unittest.TestCase):
         self.assertIn(
             BackupListAction.RETRY_RETENTION_STAGING_CLEANUP, item.allowed_actions
         )
+        self.assertEqual(item.reconciliation_result, reconciliation)
 
     def test_repository_rejects_unknown_persistent_entry(self):
         root = Path(self.temp.name) / "evidence"
@@ -249,6 +261,28 @@ class BackupInventoryServiceTests(unittest.TestCase):
         )
         with self.assertRaises(AdapterError):
             repository.load_for_host("ssh:host", FINGERPRINT)
+
+    def test_persisted_reconciliation_restores_display_but_not_mutation_authority(self):
+        view = _view(
+            self.manifest, CopyDeleteOutcome.FAILED,
+            CopyDeleteOutcome.NOT_ATTEMPTED, DualCopyState.BOTH_AVAILABLE,
+        )
+        reconciliation = BackupReconciliationResult(
+            "1.0", "reconcile-1", view.result.result_hash,
+            self.manifest.backup_id, self.manifest.host_id, FINGERPRINT,
+            self.manifest.manifest_hash, NOW, CopyPresence.PRESENT,
+            CopyPresence.ABSENT, DualCopyState.LOCAL_ONLY, True,
+        ).with_hash()
+        item = BackupInventoryService(
+            _Local(error=True), _Remote(error=True)
+        ).list_for_host(
+            "ssh:host", FINGERPRINT, CancellationToken(),
+            deletion_views=(view,), reconciliation_results=(reconciliation,),
+        )[0]
+        self.assertEqual(item.state, DualCopyState.LOCAL_ONLY)
+        self.assertEqual(item.reconciliation_result, reconciliation)
+        self.assertIn(BackupListAction.RECONCILE_COPIES, item.allowed_actions)
+        self.assertNotIn(BackupListAction.RETRY_REMOTE_DELETE, item.allowed_actions)
 
 
 class _Local:

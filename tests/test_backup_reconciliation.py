@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from datetime import UTC, datetime
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
@@ -9,13 +10,21 @@ from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.domain.enums import ChangeOperation
 from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
 from llm_manager.infrastructure.backup import LocalBackupStore
+from llm_manager.infrastructure.backup_deletion import (
+    BackupDeletionResult, CopyDeleteOutcome,
+)
 from llm_manager.infrastructure.backup_reconciliation import (
+    BackupReconciliationResultStore,
+    BackupReconciliationRunner,
     CopyPresence,
     DualCopyDeletionReconciler,
     DualCopyState,
     LocalBackupCopyObserver,
     RemoteBackupCopyObserver,
 )
+
+
+NOW = datetime(2026, 8, 30, 12, tzinfo=UTC)
 
 
 class DualCopyDeletionReconcilerTests(unittest.TestCase):
@@ -70,6 +79,49 @@ class DualCopyDeletionReconcilerTests(unittest.TestCase):
         self.assertEqual(remote.calls, 0)
         factory.close()
 
+    def test_runner_persists_result_bound_to_deletion_and_manifest(self) -> None:
+        factory = _ManifestFactory()
+        deletion = _deletion(factory.manifest)
+        store = BackupReconciliationResultStore(Path(factory.temp.name) / "reconciliation")
+        local = _Observer(CopyPresence.PRESENT)
+        remote = _Observer(CopyPresence.ABSENT)
+        result = BackupReconciliationRunner(
+            DualCopyDeletionReconciler(local, remote), store, clock=lambda: NOW
+        ).reconcile("reconcile-1", deletion, factory.manifest, CancellationToken())
+        self.assertEqual(result.source_deletion_result_hash, deletion.result_hash)
+        self.assertEqual(result.state, DualCopyState.LOCAL_ONLY)
+        self.assertEqual(store.load("reconcile-1"), result)
+        self.assertEqual(store.list_for_host(
+            factory.manifest.host_id, factory.manifest.host_fingerprint
+        ), (result,))
+        self.assertEqual((local.calls, remote.calls), (1, 1))
+        path = Path(factory.temp.name) / "reconciliation/reconcile-1.json"
+        path.write_bytes(path.read_bytes()[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            store.load("reconcile-1")
+        factory.close()
+
+    def test_runner_rejects_changed_deletion_binding_before_observation(self) -> None:
+        factory = _ManifestFactory()
+        deletion = _deletion(factory.manifest)
+        changed = BackupDeletionResult(
+            deletion.schema_version, deletion.request_id, deletion.request_hash,
+            deletion.backup_id, deletion.host_id, deletion.host_fingerprint,
+            "d" * 64, deletion.remote_outcome, deletion.local_outcome,
+            deletion.remote_error, deletion.local_error, deletion.local_presence,
+            deletion.remote_presence, deletion.state, deletion.requires_attention,
+            deletion.completed_at,
+        ).with_hash()
+        local = _Observer(CopyPresence.PRESENT)
+        with self.assertRaises(AdapterError):
+            BackupReconciliationRunner(
+                DualCopyDeletionReconciler(local, _Observer(CopyPresence.PRESENT)),
+                BackupReconciliationResultStore(Path(factory.temp.name) / "reconciliation"),
+                clock=lambda: NOW,
+            ).reconcile("reconcile-1", changed, factory.manifest, CancellationToken())
+        self.assertEqual(local.calls, 0)
+        factory.close()
+
 
 class _Observer:
     def __init__(self, presence, cancel=None):
@@ -110,6 +162,16 @@ class _ManifestFactory:
 
     def close(self):
         self.temp.cleanup()
+
+
+def _deletion(manifest):
+    return BackupDeletionResult(
+        "1.0", "delete-1", "b" * 64, manifest.backup_id, manifest.host_id,
+        manifest.host_fingerprint, manifest.manifest_hash,
+        CopyDeleteOutcome.FAILED, CopyDeleteOutcome.NOT_ATTEMPTED,
+        "remote_failed", None, CopyPresence.PRESENT, CopyPresence.PRESENT,
+        DualCopyState.BOTH_AVAILABLE, True, NOW,
+    ).with_hash()
 
 
 if __name__ == "__main__":

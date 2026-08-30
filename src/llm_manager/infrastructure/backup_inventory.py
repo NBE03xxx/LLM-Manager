@@ -20,7 +20,10 @@ from .backup_deletion import (
     BackupDeletionView, CopyDeleteOutcome, validate_backup_deletion_result,
 )
 from .backup import _atomic_write
-from .backup_reconciliation import CopyPresence, DualCopyState
+from .backup_reconciliation import (
+    BackupReconciliationResult, CopyPresence, DualCopyState,
+    validate_backup_reconciliation_result,
+)
 from .remote_backup import RemoteRetentionRecord
 from .remote_retention import (
     RemoteRetentionResult, RemoteRetentionState, encode_remote_retention_result,
@@ -48,6 +51,7 @@ class RetentionRunEvidence:
 class BackupInventoryEvidence:
     retention: RetentionRunEvidence
     deletion_views: tuple[BackupDeletionView, ...]
+    reconciliation_results: tuple[BackupReconciliationResult, ...] = ()
 
 
 class BackupEvidencePort(Protocol):
@@ -193,6 +197,7 @@ class BackupInventoryItem:
     local_retention_state: RemoteRetentionState | None
     remote_retention_state: RemoteRetentionState | None
     deletion_view: BackupDeletionView | None
+    reconciliation_result: BackupReconciliationResult | None
     allowed_actions: tuple[BackupListAction, ...]
 
 
@@ -222,6 +227,7 @@ class BackupInventoryService:
         *,
         deletion_views: Iterable[BackupDeletionView] = (),
         retention: RetentionRunEvidence | None = None,
+        reconciliation_results: Iterable[BackupReconciliationResult] = (),
     ) -> tuple[BackupInventoryItem, ...]:
         if cancellation.cancelled:
             raise OperationCancelled("backup inventory cancelled")
@@ -230,9 +236,12 @@ class BackupInventoryService:
             raise OperationCancelled("backup inventory cancelled")
         remote_values, remote_unknown = self._remote(host_id, host_fingerprint)
         views = self._views(host_id, host_fingerprint, deletion_views)
+        reconciliations = self._reconciliations(
+            host_id, host_fingerprint, views, reconciliation_results
+        )
         evidence = retention or RetentionRunEvidence()
         self._validate_retention(host_id, host_fingerprint, evidence)
-        identifiers = set(local_values) | set(remote_values) | set(views)
+        identifiers = set(local_values) | set(remote_values) | set(views) | set(reconciliations)
         if evidence.local_result is not None:
             identifiers.update(evidence.local_result.removed_backup_ids)
             identifiers.update(evidence.local_result.remaining_backup_ids)
@@ -247,6 +256,10 @@ class BackupInventoryService:
             remote = CopyPresence.UNKNOWN if remote_unknown else (
                 CopyPresence.PRESENT if backup_id in remote_values else CopyPresence.ABSENT
             )
+            reconciliation = reconciliations.get(backup_id)
+            live_unknown = local_unknown or remote_unknown
+            if live_unknown and reconciliation is not None:
+                local, remote = reconciliation.local, reconciliation.remote
             state = _state(local, remote)
             manifest = local_values.get(backup_id)
             record = remote_values.get(backup_id)
@@ -286,7 +299,8 @@ class BackupInventoryService:
                 }
             )
             actions = _actions(
-                state, protected, view, local_state, remote_state,
+                DualCopyState.UNKNOWN if live_unknown else state,
+                protected, view, local_state, remote_state,
                 evidence.remote_staging_cleanup_pending and remote_state is not None,
             )
             items.append(BackupInventoryItem(
@@ -300,7 +314,7 @@ class BackupInventoryService:
                 protected, local, remote, state, attention,
                 bool(evidence.local_result is not None and
                      backup_id in evidence.local_result.removed_backup_ids), remote_removed,
-                local_state, remote_state, view, actions,
+                local_state, remote_state, view, reconciliation, actions,
             ))
         return tuple(sorted(items, key=lambda item: (
             item.created_at is not None, item.created_at or datetime.min,
@@ -317,6 +331,7 @@ class BackupInventoryService:
         return self.list_for_host(
             host_id, host_fingerprint, cancellation,
             deletion_views=loaded.deletion_views, retention=loaded.retention,
+            reconciliation_results=loaded.reconciliation_results,
         )
 
     def _local(self, host_id):
@@ -351,6 +366,22 @@ class BackupInventoryService:
                     or view.result.backup_id in result):
                 raise AdapterError("backup_inventory_binding_mismatch", "deletion view changed identity")
             result[view.result.backup_id] = view
+        return result
+
+    @staticmethod
+    def _reconciliations(host_id, fingerprint, views, reconciliation_results):
+        result = {}
+        for value in reconciliation_results:
+            validate_backup_reconciliation_result(value)
+            view = views.get(value.backup_id)
+            if (value.host_id != host_id or value.host_fingerprint != fingerprint
+                    or value.backup_id in result or view is None
+                    or value.source_deletion_result_hash != view.result.result_hash
+                    or value.manifest_hash != view.result.manifest_hash):
+                raise AdapterError(
+                    "backup_inventory_binding_mismatch", "reconciliation changed identity"
+                )
+            result[value.backup_id] = value
         return result
 
     @staticmethod

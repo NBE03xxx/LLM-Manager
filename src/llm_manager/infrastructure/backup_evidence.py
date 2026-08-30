@@ -6,6 +6,7 @@ from .backup_deletion import BackupDeletionResultStore, BackupDeletionView
 from .backup_inventory import (
     BackupInventoryEvidence, LocalRetentionResultStore, RetentionRunEvidence,
 )
+from .backup_reconciliation import BackupReconciliationResultStore
 from .openssh_remote_deletion import RemoteDeletionAttemptStore
 from .openssh_remote_retention import (
     RemoteRetentionAttemptStore, RemoteRetentionResultStore,
@@ -23,12 +24,14 @@ class BackupEvidenceRepository:
         *,
         remote_retention_attempts: RemoteRetentionAttemptStore | None = None,
         remote_deletion_attempts: RemoteDeletionAttemptStore | None = None,
+        reconciliation_results: BackupReconciliationResultStore | None = None,
     ) -> None:
         self.local_retention = local_retention
         self.remote_retention = remote_retention
         self.deletion_results = deletion_results
         self.remote_retention_attempts = remote_retention_attempts
         self.remote_deletion_attempts = remote_deletion_attempts
+        self.reconciliation_results = reconciliation_results
 
     def load_for_host(
         self, host_id: str, host_fingerprint: str
@@ -60,9 +63,24 @@ class BackupEvidenceRepository:
             )
             views.append(BackupDeletionView(result, pending))
         views.sort(key=lambda item: item.result.completed_at, reverse=True)
+        reconciliations = []
+        if self.reconciliation_results is not None:
+            current = {view.result.backup_id: view.result for view in views}
+            seen = set()
+            for result in self.reconciliation_results.list_for_host(
+                host_id, host_fingerprint
+            ):
+                source = current.get(result.backup_id)
+                if (source is not None
+                        and result.source_deletion_result_hash == source.result_hash
+                        and result.manifest_hash == source.manifest_hash
+                        and result.backup_id not in seen):
+                    reconciliations.append(result)
+                    seen.add(result.backup_id)
         return BackupInventoryEvidence(
             RetentionRunEvidence(
                 local[0] if local else None, remote_result, retention_pending,
             ),
             tuple(views),
+            tuple(reconciliations),
         )
