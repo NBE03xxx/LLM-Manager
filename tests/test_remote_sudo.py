@@ -54,6 +54,34 @@ class OpenSshRemoteSudoInvokerTests(unittest.TestCase):
         self.assertFalse(any("password" in item.lower() for item in argv))
         self.assertEqual(completion.calls, 2)
 
+    def test_fixed_retention_and_deletion_operations_are_allowlisted(self) -> None:
+        for operation in ("invoke-retention", "invoke-deletion"):
+            with self.subTest(operation=operation):
+                runner = _Runner(CommandResult(("ssh",), 0, "", "", False, 1))
+                invoker = OpenSshRemoteSudoInvoker(
+                    runner,
+                    TerminalSpec("/usr/bin/ptyxis", "ptyxis"),
+                    _Completion(),
+                    operation=operation,
+                )
+                invoker.invoke(
+                    "development", None, "operation-1", "a" * 64,
+                    CancellationToken(),
+                )
+                self.assertIn(operation, runner.requests[1].argv[-1])
+
+        invalid = OpenSshRemoteSudoInvoker(
+            _Runner(CommandResult(("ssh",), 0, "", "", False, 1)),
+            TerminalSpec("/usr/bin/ptyxis", "ptyxis"),
+            _Completion(),
+            operation="invoke-anything",
+        )
+        with self.assertRaises(AdapterError):
+            invalid.invoke(
+                "development", None, "operation-1", "a" * 64,
+                CancellationToken(),
+            )
+
     def test_cancel_timeout_launch_failure_and_injection_fail_closed(self) -> None:
         cancelled = CancellationToken(cancelled=True)
         with self.assertRaises(OperationCancelled):

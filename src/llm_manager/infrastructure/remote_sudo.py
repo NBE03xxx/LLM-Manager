@@ -18,6 +18,7 @@ from .ssh_auth import TerminalSpec
 _ALIAS = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_.@:-]{0,254}")
 _IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 _DIGEST = re.compile(r"[0-9a-f]{64}")
+_OPERATIONS = frozenset({"invoke-recovery", "invoke-retention", "invoke-deletion"})
 
 
 class RemoteHelperCompletionProbe(Protocol):
@@ -31,6 +32,7 @@ class OpenSshRemoteSudoInvoker:
     runner: SubprocessRunner
     terminal: TerminalSpec
     completion: RemoteHelperCompletionProbe
+    operation: str = "invoke-recovery"
     timeout_seconds: int = 120
     poll_seconds: float = 0.25
     clock: Callable[[], float] = monotonic
@@ -45,10 +47,14 @@ class OpenSshRemoteSudoInvoker:
         cancellation: CancellationToken,
     ) -> None:
         _validate(alias, control_socket, request_id, request_hash)
+        if self.operation not in _OPERATIONS:
+            raise AdapterError(
+                "invalid_remote_invocation", "remote helper operation is not allowlisted"
+            )
         if cancellation.cancelled:
             raise OperationCancelled("remote helper invocation cancelled")
         socket = ("-S", control_socket) if control_socket else ()
-        fixed_helper = (REMOTE_HELPER, "invoke-recovery", request_id, request_hash)
+        fixed_helper = (REMOTE_HELPER, self.operation, request_id, request_hash)
         probe = self.runner.run(
             CommandRequest(
                 ("ssh", *socket, "-o", "BatchMode=yes", "--", alias, "sudo -n -v"),

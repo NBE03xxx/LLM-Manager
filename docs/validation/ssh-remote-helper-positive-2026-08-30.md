@@ -34,3 +34,15 @@ request identity永続化後、別backup `restart-receipt-gate-20260830`で2プ�
 ## Remaining Gate
 
 転送中の実ネットワーク切断、remote retention/deletion、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。Gate専用root backupはdisposable VM上の検証証跡として保持する。
+
+## Remote Retention Gate
+
+固定`invoke-retention` operationを外部端末sudo境界へ接続し、実root backendの保持評価を行った。3件のGate用backupは10世代未満のため削除されず、canonical resultをlocal immutable storeへ回収した後にuser stagingをcleanupした。
+
+- state: `completed`
+- removed backup IDs: なし
+- remaining backup IDs: `restart-receipt-gate-20260830`、`positive-gate-20260830-02`、`positive-gate-20260830`
+- result hash: `048d24d261e5db14e90ede1b059fee41ce73354f5e95bc60360add437daaa724`
+- cleanup pending: `false`
+
+remote deletion実Gateの前に、recovery staging cleanup後も検証済みreceiptを後続処理へ渡せるlocal immutable receipt storeを実装する。

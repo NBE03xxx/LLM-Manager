@@ -138,6 +138,22 @@ class OpenSshRemoteRetentionTests(unittest.TestCase):
             + "a" * 64,
         )
 
+    def test_root_invoker_delegates_only_fixed_interactive_retention(self) -> None:
+        runner, gate, authorization = _Runner(
+            CommandResult(("ssh",), 0, "", "", False, 1)
+        ), _Gate(), _Authorization("invoke-retention")
+        invoker = OpenSshRemoteRetentionInvoker(
+            "development", runner, gate, authorization=authorization
+        )
+        invoker.invoke("retention-1", "a" * 64, CancellationToken())
+        self.assertEqual(gate.calls, 1)
+        self.assertEqual(authorization.calls[0][2:], ("retention-1", "a" * 64))
+        self.assertEqual(runner.requests, [])
+
+        invoker.authorization = _Authorization("invoke-deletion")
+        with self.assertRaises(AdapterError):
+            invoker.invoke("retention-1", "a" * 64, CancellationToken())
+
     def test_transport_recovers_persisted_result_after_ambiguous_invoke_failure(self) -> None:
         staging = _Staging()
         invoker = _Invoker(
@@ -332,6 +348,15 @@ class _Gate:
 
     def assert_ready(self, cancellation):
         self.calls += 1
+
+
+class _Authorization:
+    def __init__(self, operation):
+        self.operation = operation
+        self.calls = []
+
+    def invoke(self, alias, control_socket, request_id, request_hash, cancellation):
+        self.calls.append((alias, control_socket, request_id, request_hash))
 
 
 if __name__ == "__main__":

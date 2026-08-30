@@ -15,6 +15,7 @@ from llm_manager.domain.models import BackupManifest, utc_now
 
 from .openssh_staging import REMOTE_HELPER, RemoteHelperReadinessGate
 from .process import SubprocessRunner
+from .remote_sudo import OpenSshRemoteSudoInvoker
 from .remote_backup import RemoteRecoveryCopyPort, _validate_receipt
 from .remote_deletion import (
     MAX_REMOTE_DELETION_BYTES, RemoteDeletionOutcome,
@@ -170,6 +171,7 @@ class OpenSshRemoteDeletionInvoker:
     readiness_gate: RemoteHelperReadinessGate
     control_socket: str | None = None
     timeout_ms: int = 30_000
+    authorization: OpenSshRemoteSudoInvoker | None = None
 
     def __post_init__(self):
         if self.alias.startswith("-") or not _ALIAS.fullmatch(self.alias):
@@ -186,6 +188,16 @@ class OpenSshRemoteDeletionInvoker:
         if cancellation.cancelled:
             raise OperationCancelled("remote deletion cancelled")
         self.readiness_gate.assert_ready(cancellation)
+        if self.authorization is not None:
+            if self.authorization.operation != "invoke-deletion":
+                raise AdapterError(
+                    "invalid_remote_deletion_identity",
+                    "deletion authorization operation is invalid",
+                )
+            self.authorization.invoke(
+                self.alias, self.control_socket, request_id, request_hash, cancellation
+            )
+            return
         socket = ("-S", self.control_socket) if self.control_socket else ()
         command = shlex.join(("sudo", "-n", "--", REMOTE_HELPER,
                               "invoke-deletion", request_id, request_hash))
