@@ -14,6 +14,7 @@ from llm_manager.infrastructure.backup_evidence_retention import (
     EvidenceRetentionExecutionState,
 )
 from llm_manager.infrastructure.backup_evidence_retention_cleanup import (
+    BackupEvidenceRetentionCleanupExecutor,
     BackupEvidenceRetentionCleanupRequestStore, BackupEvidenceRetentionCleanupService,
     new_backup_evidence_retention_cleanup_request,
 )
@@ -75,6 +76,63 @@ class BackupEvidenceRetentionCleanupServiceTests(unittest.TestCase):
         with self.assertRaises(AdapterError):
             self.requests.load("cleanup-store")
 
+    def test_cleanup_executor_deletes_only_bound_suffix_and_persists_result(self):
+        deletion = _Deletion("b" * 64)
+        deletions = _Deletions(deletion)
+        manifests = _Manifests()
+        reconciliations = _Reconciliations(())
+        executor = BackupEvidenceRetentionCleanupExecutor(
+            manifests, deletions, reconciliations, self.store,
+            completed_at=lambda: NOW + timedelta(seconds=1),
+        )
+        request = new_backup_evidence_retention_cleanup_request(
+            "cleanup-execute", self.execution, now=NOW
+        )
+        result = executor.resume(self.execution, request, CancellationToken())
+        self.assertEqual(result.state, EvidenceRetentionExecutionState.COMPLETED)
+        self.assertEqual(result.request_hash, request.request_hash)
+        self.assertEqual(result.removed_kinds, ("manifest", "deletion"))
+        self.assertEqual(manifests.deleted, [deletion])
+        self.assertEqual(deletions.deleted, [deletion])
+        self.assertEqual(self.store.load(result.execution_hash), result)
+
+    def test_cleanup_executor_persists_cancel_without_deleting(self):
+        deletion = _Deletion("b" * 64)
+        deletions = _Deletions(deletion)
+        manifests = _Manifests()
+        executor = BackupEvidenceRetentionCleanupExecutor(
+            manifests, deletions, _Reconciliations(()), self.store,
+            completed_at=lambda: NOW + timedelta(seconds=1),
+        )
+        request = new_backup_evidence_retention_cleanup_request(
+            "cleanup-cancel", self.execution, now=NOW
+        )
+        token = CancellationToken()
+        token.cancel()
+        result = executor.resume(self.execution, request, token)
+        self.assertEqual(result.state, EvidenceRetentionExecutionState.FAILED)
+        self.assertEqual(result.error_code, "evidence_retention_cleanup_failed")
+        self.assertEqual(manifests.deleted, [])
+        self.assertEqual(deletions.deleted, [])
+
+    def test_cleanup_executor_stops_and_persists_partial_failure(self):
+        deletion = _Deletion("b" * 64)
+        deletions = _Deletions(deletion, fail_delete=True)
+        manifests = _Manifests()
+        executor = BackupEvidenceRetentionCleanupExecutor(
+            manifests, deletions, _Reconciliations(()), self.store,
+            completed_at=lambda: NOW + timedelta(seconds=1),
+        )
+        request = new_backup_evidence_retention_cleanup_request(
+            "cleanup-partial", self.execution, now=NOW
+        )
+        result = executor.resume(self.execution, request, CancellationToken())
+        self.assertEqual(result.state, EvidenceRetentionExecutionState.PARTIAL)
+        self.assertEqual(result.removed_kinds, ("manifest",))
+        self.assertEqual(result.remaining_kinds, ("deletion",))
+        self.assertEqual(result.error_code, "cleanup_delete_failed")
+        self.assertEqual(manifests.deleted, [deletion])
+
     def test_rejects_tamper_expiry_binding_complete_and_cancel(self):
         request = new_backup_evidence_retention_cleanup_request(
             "cleanup-1", self.execution, now=NOW
@@ -111,3 +169,45 @@ class _Cleanup:
     def resume(self, execution, request, cancellation):
         self.calls.append((execution, request))
         return "resumed"
+
+
+class _Deletion:
+    def __init__(self, result_hash):
+        self.result_hash = result_hash
+
+
+class _Deletions:
+    def __init__(self, deletion, *, fail_delete=False):
+        self.deletion = deletion
+        self.deleted = []
+        self.fail_delete = fail_delete
+
+    def list_for_host(self, host_id, fingerprint):
+        return (self.deletion,)
+
+    def delete(self, deletion):
+        if self.fail_delete:
+            raise AdapterError("cleanup_delete_failed", "injected")
+        self.deleted.append(deletion)
+
+
+class _Manifests:
+    def __init__(self):
+        self.deleted = []
+
+    def load(self, deletion):
+        return object()
+
+    def delete(self, deletion):
+        self.deleted.append(deletion)
+
+
+class _Reconciliations:
+    def __init__(self, results):
+        self.results = results
+
+    def list_for_deletion_result(self, result_hash, host_id, fingerprint):
+        return self.results
+
+    def delete(self, result):
+        raise AssertionError("unexpected reconciliation deletion")

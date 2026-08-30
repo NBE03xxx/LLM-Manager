@@ -8,18 +8,23 @@ import stat
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.serialization import to_primitive
+from llm_manager.domain.models import utc_now
 
 from .backup_evidence_retention import (
     BackupEvidenceRetentionExecution,
+    BackupEvidenceRetentionExecutionPersistenceError,
     BackupEvidenceRetentionExecutionStore,
     EvidenceRetentionExecutionState,
 )
 from .backup import _atomic_write
+from .backup_deletion import BackupDeletionResultStore
+from .backup_manifest_evidence import BackupManifestEvidenceStore
+from .backup_reconciliation import BackupReconciliationResultStore
 
 
 _IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
@@ -136,6 +141,129 @@ class BackupEvidenceRetentionCleanupRequestStore:
                 "unsafe_evidence_retention_cleanup_request",
                 "cleanup request root metadata is unsafe",
             )
+
+
+class BackupEvidenceRetentionCleanupExecutor:
+    """Delete only the still-present suffix bound by a persisted cleanup request."""
+
+    def __init__(
+        self,
+        manifests: BackupManifestEvidenceStore,
+        deletions: BackupDeletionResultStore,
+        reconciliations: BackupReconciliationResultStore,
+        executions: BackupEvidenceRetentionExecutionStore,
+        completed_at: Callable[[], datetime] = utc_now,
+    ) -> None:
+        self.manifests = manifests
+        self.deletions = deletions
+        self.reconciliations = reconciliations
+        self.executions = executions
+        self.completed_at = completed_at
+
+    def resume(
+        self,
+        execution: BackupEvidenceRetentionExecution,
+        request: BackupEvidenceRetentionCleanupRequest,
+        cancellation: CancellationToken,
+    ) -> BackupEvidenceRetentionExecution:
+        _validate_request(request, None)
+        if (
+            request.source_execution_hash != execution.execution_hash
+            or request.source_request_hash != execution.request_hash
+            or request.backup_id != execution.backup_id
+            or request.host_id != execution.host_id
+            or request.host_fingerprint != execution.host_fingerprint
+            or request.remaining_kinds != execution.remaining_kinds
+            or execution.state is EvidenceRetentionExecutionState.COMPLETED
+        ):
+            raise AdapterError(
+                "evidence_retention_cleanup_binding_mismatch",
+                "cleanup request changed source execution",
+            )
+        deletion = next((
+            result for result in self.deletions.list_for_host(
+                execution.host_id, execution.host_fingerprint
+            )
+            if result.result_hash == execution.deletion_result_hash
+        ), None)
+        needs_deletion = "deletion" in execution.remaining_kinds
+        if needs_deletion != (deletion is not None):
+            raise AdapterError(
+                "evidence_retention_cleanup_binding_mismatch",
+                "deletion evidence presence changed",
+            )
+        removed_reconciliations = execution.removed_kinds.count("reconciliation")
+        expected_reconciliation_hashes = execution.reconciliation_result_hashes[
+            removed_reconciliations:
+        ]
+        current_reconciliations = self.reconciliations.list_for_deletion_result(
+            execution.deletion_result_hash,
+            execution.host_id,
+            execution.host_fingerprint,
+        )
+        if tuple(item.result_hash for item in current_reconciliations) != (
+            expected_reconciliation_hashes
+        ):
+            raise AdapterError(
+                "evidence_retention_cleanup_binding_mismatch",
+                "reconciliation evidence changed",
+            )
+        operations = [
+            *(("reconciliation", item, self.reconciliations.delete)
+              for item in current_reconciliations),
+        ]
+        if "manifest" in execution.remaining_kinds:
+            if deletion is None:
+                raise AdapterError(
+                    "evidence_retention_cleanup_binding_mismatch",
+                    "manifest binding source is missing",
+                )
+            self.manifests.load(deletion)
+            operations.append(("manifest", deletion, self.manifests.delete))
+        if deletion is not None:
+            operations.append(("deletion", deletion, self.deletions.delete))
+        if tuple(item[0] for item in operations) != execution.remaining_kinds:
+            raise AdapterError(
+                "evidence_retention_cleanup_binding_mismatch",
+                "remaining evidence order changed",
+            )
+        removed = []
+        for index, (kind, value, delete) in enumerate(operations):
+            try:
+                if cancellation.cancelled:
+                    raise OperationCancelled("evidence retention cleanup cancelled")
+                delete(value)
+                removed.append(kind)
+            except (AdapterError, OperationCancelled, OSError, ValueError) as error:
+                return self._persist(BackupEvidenceRetentionExecution(
+                    "1.0", request.request_hash, execution.backup_id,
+                    execution.host_id, execution.host_fingerprint,
+                    execution.deletion_result_hash,
+                    execution.reconciliation_result_hashes,
+                    EvidenceRetentionExecutionState.PARTIAL if removed
+                    else EvidenceRetentionExecutionState.FAILED,
+                    tuple(removed), tuple(item[0] for item in operations[index:]),
+                    getattr(error, "code", "evidence_retention_cleanup_failed"),
+                    self.completed_at(),
+                ).with_hash())
+        return self._persist(BackupEvidenceRetentionExecution(
+            "1.0", request.request_hash, execution.backup_id,
+            execution.host_id, execution.host_fingerprint,
+            execution.deletion_result_hash, execution.reconciliation_result_hashes,
+            EvidenceRetentionExecutionState.COMPLETED, tuple(removed), (), None,
+            self.completed_at(),
+        ).with_hash())
+
+    def _persist(
+        self, execution: BackupEvidenceRetentionExecution,
+    ) -> BackupEvidenceRetentionExecution:
+        try:
+            return self.executions.save(execution)
+        except (AdapterError, OSError, ValueError) as error:
+            raise BackupEvidenceRetentionExecutionPersistenceError(
+                execution,
+                getattr(error, "code", "evidence_retention_execution_store_failed"),
+            ) from error
 
 
 class BackupEvidenceRetentionCleanupService:

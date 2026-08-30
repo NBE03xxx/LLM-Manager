@@ -2,7 +2,9 @@
 
 backup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、executorの`completed`/`partial`/`failed`全終了経路で0700/0600 immutable canonical storeへ返却前に保存する。再読込時はcanonical形式、mode、owner、symlink、filename identity、内容hashを検証する。再起動後の列挙は全entryをstrict検査し、未知entry、host fingerprint変更、同一requestの重複executionがあれば部分的な一覧を返さない。保存失敗は削除を巻き戻したと推測せず、stable `evidence_retention_execution_persistence_failed`に生成済みexecutionと原因codeを保持してread-only再照合へ渡す。自動再削除は行わない。
 
-`partial`/`failed`からcleanup Portへ進めるのは明示的な5分期限requestだけとする。requestはcleanup ID、source execution/request hash、backup、host/fingerprint、残存kindを自己hashで束縛する。serviceはexecution store全体のstrict列挙後にsourceと全bindingを再検証し、requestを0700/0600 immutable canonical storeへ保存して再読込できた後だけPortを呼ぶ。cleanup IDの再利用は同一内容だけを許し、別内容との衝突、`completed`、改ざん、期限切れ、cancelではPortを呼ばない。現段階は認可・request永続化・dispatch境界までであり、残存evidenceのcleanup実処理とcleanup結果永続化、production配置は未実装である。
+`partial`/`failed`からcleanup Portへ進めるのは明示的な5分期限requestだけとする。requestはcleanup ID、source execution/request hash、backup、host/fingerprint、残存kindを自己hashで束縛する。serviceはexecution store全体のstrict列挙後にsourceと全bindingを再検証し、requestを0700/0600 immutable canonical storeへ保存して再読込できた後だけPortを呼ぶ。cleanup IDの再利用は同一内容だけを許し、別内容との衝突、`completed`、改ざん、期限切れ、cancelではPortを呼ばない。
+
+cleanup executorはsource executionが示す未削除suffixと、現在のdeletion result hash、manifest binding、reconciliation hash順を削除前に再照合する。参照逆順を維持し、失敗またはcancelで後続を止め、`completed`/`partial`/`failed`をcleanup request hashに束縛した新しいexecutionとしてimmutable保存する。source executionやorphanを自動的に再分類せず、さらに再開する場合も別の明示的cleanup requestを要求する。production配置とbackup一覧への表示統合は未実装である。
 
 ## 1. 基本ワークフロー
 
