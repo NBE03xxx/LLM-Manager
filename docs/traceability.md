@@ -1,6 +1,6 @@
 # Phase 0 Traceability Matrix
 
-Phase 4追跡注記: backup evidence retention executionのcanonical自己hash、request/host/deletion/reconciliation binding、immutable 0700/0600保存、改ざん・filename・metadata拒否を`BackupEvidenceRetentionPlannerTests`で検証済み。executorの`completed`/`partial`/`failed`全終了経路を保存へ接続し、保存失敗と途中削除後の保存失敗ではstable persistence errorから生成済みexecutionを取得できることを故障注入で検証する。再起動後のstrict一覧は未完了。
+Phase 4追跡注記: backup evidence retention executionのcanonical自己hash、request/host/deletion/reconciliation binding、immutable 0700/0600保存、改ざん・filename・metadata拒否を`BackupEvidenceRetentionPlannerTests`で検証済み。executorの`completed`/`partial`/`failed`全終了経路を保存へ接続し、保存失敗と途中削除後の保存失敗ではstable persistence errorから生成済みexecutionを取得できることを故障注入で検証する。再起動後のhost/fingerprint単位strict一覧、未知entry、fingerprint変更、同一request重複の拒否も同test classで検証する。
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|

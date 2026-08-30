@@ -207,6 +207,47 @@ class BackupEvidenceRetentionExecutionStore:
             )
         return execution
 
+    def list_for_host(
+        self, host_id: str, host_fingerprint: str,
+    ) -> tuple[BackupEvidenceRetentionExecution, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        self._root_metadata()
+        executions = []
+        request_hashes = set()
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError(
+                    "unsafe_evidence_retention_execution",
+                    "unexpected execution entry",
+                )
+            execution_hash = path.stem
+            if self._path(execution_hash) != path:
+                raise AdapterError(
+                    "invalid_evidence_retention_execution",
+                    "execution identity is invalid",
+                )
+            execution = self.load(execution_hash)
+            if execution.host_id != host_id:
+                continue
+            if execution.host_fingerprint != host_fingerprint:
+                raise AdapterError(
+                    "evidence_retention_execution_binding_mismatch",
+                    "host fingerprint changed",
+                )
+            if execution.request_hash in request_hashes:
+                raise AdapterError(
+                    "evidence_retention_execution_binding_mismatch",
+                    "request has multiple executions",
+                )
+            request_hashes.add(execution.request_hash)
+            executions.append(execution)
+        return tuple(sorted(
+            executions,
+            key=lambda item: (item.completed_at, item.execution_hash),
+            reverse=True,
+        ))
+
     def _path(self, execution_hash: str) -> Path:
         if not isinstance(execution_hash, str) or not _DIGEST.fullmatch(execution_hash):
             raise AdapterError(

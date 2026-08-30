@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -197,6 +198,46 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         path.rename(path.with_name(f"{wrong_hash}.json"))
         with self.assertRaisesRegex(AdapterError, "filename"):
             store.load(wrong_hash)
+
+    def test_execution_store_strictly_lists_after_restart(self):
+        first = self._execution("restart-first")
+        second = self._execution("restart-second")
+        restarted = BackupEvidenceRetentionExecutionStore(self.root / "executions")
+        self.assertEqual(
+            restarted.list_for_host("ssh:host", FINGERPRINT),
+            tuple(sorted(
+                (first, second),
+                key=lambda item: (item.completed_at, item.execution_hash),
+                reverse=True,
+            )),
+        )
+        self.assertEqual(
+            restarted.list_for_host("ssh:other", FINGERPRINT), ()
+        )
+
+    def test_execution_store_strict_listing_rejects_unknown_and_fingerprint(self):
+        execution = self._execution("strict")
+        unexpected = self.root / "executions/unexpected"
+        unexpected.write_text("unsafe")
+        with self.assertRaisesRegex(AdapterError, "unexpected"):
+            self.executions.list_for_host("ssh:host", FINGERPRINT)
+        unexpected.unlink()
+        changed = replace(
+            execution, host_fingerprint="SHA256:" + "b" * 43,
+            execution_hash="",
+        ).with_hash()
+        self.executions.save(changed)
+        with self.assertRaisesRegex(AdapterError, "fingerprint"):
+            self.executions.list_for_host("ssh:host", FINGERPRINT)
+
+    def test_execution_store_strict_listing_rejects_duplicate_request(self):
+        execution = self._execution("duplicate")
+        duplicate = replace(
+            execution, completed_at=NOW + timedelta(seconds=1), execution_hash="",
+        ).with_hash()
+        self.executions.save(duplicate)
+        with self.assertRaisesRegex(AdapterError, "multiple"):
+            self.executions.list_for_host("ssh:host", FINGERPRINT)
 
     def test_executor_stops_after_partial_failure_and_preserves_root_result(self):
         manifest = self._manifest("partial")
