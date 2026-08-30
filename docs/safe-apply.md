@@ -157,6 +157,8 @@ local/remote削除後は両copyを独立に再観測する。検証済みで存�
 
 remote削除protocolはlocal manifest bindingに加え、直前に検証したremote receipt hash、`remote_root` key reference、固定storage location、全item hashをrequest/resultへ束縛する。user stagingへcanonical requestを最後に公開し、root helperには`invoke-deletion <request-id> <request-hash>`以外を渡さない。root backendは保存済みreceiptとretention recordを再読込し、protected、receipt/key/path/item不一致、unsafe metadata、復号またはplaintext hash失敗時は削除しない。helper resultは0600 immutableとし、SSH invokeがtimeoutでも同じidentityのresultを再取得する。fake OpenSSHとsandbox root backendまで完了し、実SSH先では未実行である。
 
+remote deletion requestはroot helper起動前にlocalの0700 storeへ0600 immutable attemptとして保存する。invoke後に接続が切れてresultを読めない場合はremote outcomeを`unknown`としてlocal正本とuser stagingを保持する。再起動後は保存済みattemptから同一request ID/hashのresultだけをbounded readし、root helperを再実行しない。検証済みresultにより協調削除を完了しlocal resultを保存した後だけuser stagingをcleanupする。cleanup失敗は削除結果を書き換えず`staging_cleanup_pending`として表示し、再試行はcleanupだけに限定する。
+
 ## 9. 冪等性・競合
 
 - 既に推奨値なら no-op として ChangeSet から除外する。

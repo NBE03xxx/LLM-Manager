@@ -171,7 +171,7 @@ def encode_remote_deletion_request(request: RemoteDeletionRequest) -> bytes:
 
 
 def decode_remote_deletion_request(content: bytes, *, expected_hash: str,
-                                   now: datetime) -> RemoteDeletionRequest:
+                                   now: datetime | None) -> RemoteDeletionRequest:
     value = _load(content)
     expected = {"backup_id", "created_at", "expires_at", "host_fingerprint", "host_id",
                 "item_hashes", "key_reference", "manifest_hash", "operation",
@@ -244,9 +244,10 @@ def _validate_request(request, expected_hash, now):
     if any(not target or (digest is not None and not _DIGEST.fullmatch(digest))
            for target, digest in request.item_hashes):
         raise AdapterError("invalid_remote_deletion", "deletion item identity is invalid")
-    if (any(item.tzinfo is None for item in (request.created_at, request.expires_at, now))
-            or not request.created_at <= now <= request.expires_at
-            or request.expires_at - request.created_at > timedelta(minutes=5)):
+    timestamps = (request.created_at, request.expires_at) + (() if now is None else (now,))
+    if (any(item.tzinfo is None for item in timestamps)
+            or request.expires_at - request.created_at > timedelta(minutes=5)
+            or (now is not None and not request.created_at <= now <= request.expires_at)):
         raise AdapterError("expired_remote_deletion", "deletion request is expired")
     if request.request_hash != hashlib.sha256(_bytes(replace(request, request_hash=""))).hexdigest():
         raise AdapterError("remote_deletion_hash_mismatch", "deletion request was modified")

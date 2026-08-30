@@ -15,6 +15,7 @@ from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 from llm_manager.infrastructure.openssh_remote_deletion import (
     OpenSshRemoteDeletionInvoker, OpenSshRemoteDeletionPort,
+    RemoteDeletionAttemptStore,
 )
 from llm_manager.infrastructure.remote_backup import SandboxRemoteRecoveryStore
 from llm_manager.infrastructure.remote_deletion import (
@@ -114,7 +115,9 @@ class OpenSshRemoteDeletionTests(unittest.TestCase):
         staging = _Staging()
         invoker = _Invoker(staging)
         port = OpenSshRemoteDeletionPort(
-            staging, invoker, factory.remote, lambda _: "delete-remote-4",
+            staging, invoker, factory.remote,
+            RemoteDeletionAttemptStore(factory.root / "attempts"),
+            lambda _: "delete-remote-4",
             clock=lambda: NOW,
         )
         port.delete(factory.manifest, CancellationToken())
@@ -130,7 +133,9 @@ class OpenSshRemoteDeletionTests(unittest.TestCase):
         staging = _Staging()
         invoker = _Invoker(staging, error=AdapterError("remote_deletion_timeout", "x"))
         port = OpenSshRemoteDeletionPort(
-            staging, invoker, factory.remote, lambda _: "delete-remote-5",
+            staging, invoker, factory.remote,
+            RemoteDeletionAttemptStore(factory.root / "attempts"),
+            lambda _: "delete-remote-5",
             clock=lambda: NOW,
         )
         port.delete(factory.manifest, CancellationToken())
@@ -159,6 +164,7 @@ class _Factory:
     def __init__(self, protected=False):
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
+        self.root = root
         target = root / "target"
         target.write_bytes(b"before")
         changes = ChangeSet(
@@ -211,6 +217,9 @@ class _Staging:
 
     def read_private_file(self, path, max_bytes):
         return self.result
+
+    def remove_private_tree(self, path):
+        self.removed = path
 
 
 class _Invoker:

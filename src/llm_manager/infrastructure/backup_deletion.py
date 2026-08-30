@@ -85,6 +85,20 @@ class BackupDeletePort(Protocol):
     def delete(self, manifest: BackupManifest, cancellation: CancellationToken) -> None: ...
 
 
+class BackupDeletionCleanupPort(Protocol):
+    def cleanup(self, request: BackupDeletionRequest, manifest: BackupManifest,
+                cancellation: CancellationToken) -> None: ...
+
+    def cleanup_pending(self, request: BackupDeletionRequest,
+                        manifest: BackupManifest) -> bool: ...
+
+
+@dataclass(frozen=True, slots=True)
+class BackupDeletionView:
+    result: BackupDeletionResult
+    staging_cleanup_pending: bool
+
+
 class BackupDeletionResultStore:
     def __init__(self, root: Path) -> None:
         self.root = root.absolute()
@@ -143,6 +157,7 @@ class CoordinatedBackupDeletion:
         remote: BackupDeletePort,
         reconciler: DualCopyDeletionReconciler,
         results: BackupDeletionResultStore,
+        cleanup: BackupDeletionCleanupPort | None = None,
         *,
         clock=utc_now,
     ) -> None:
@@ -150,6 +165,7 @@ class CoordinatedBackupDeletion:
         self.remote = remote
         self.reconciler = reconciler
         self.results = results
+        self.cleanup = cleanup
         self.clock = clock
 
     def delete(
@@ -191,7 +207,13 @@ class CoordinatedBackupDeletion:
             reconciliation.local, reconciliation.remote, reconciliation.state,
             attention, self.clock(),
         ).with_hash()
-        return self.results.save(result)
+        saved = self.results.save(result)
+        if self.cleanup is not None and remote_outcome is not CopyDeleteOutcome.UNKNOWN:
+            try:
+                self.cleanup.cleanup(request, manifest, cancellation)
+            except (AdapterError, OperationCancelled, OSError, ValueError):
+                pass
+        return saved
 
     @staticmethod
     def _delete_copy(port, manifest, cancellation, *, remote):
@@ -223,6 +245,37 @@ class CoordinatedBackupDeletion:
                 manifest.backup_id, manifest.host_id, CopyPresence.UNKNOWN,
                 CopyPresence.UNKNOWN, DualCopyState.UNKNOWN, True,
             )
+
+
+class BackupDeletionRecoveryService:
+    """Reload immutable deletion state and retry only staging cleanup."""
+
+    def __init__(self, results: BackupDeletionResultStore,
+                 cleanup: BackupDeletionCleanupPort | None = None) -> None:
+        self.results = results
+        self.cleanup = cleanup
+
+    def load(self, request: BackupDeletionRequest,
+             manifest: BackupManifest) -> BackupDeletionView:
+        _validate_request(request, manifest, request.created_at)
+        result = self.results.load(request.request_id)
+        if (
+            result.request_hash, result.backup_id, result.host_id,
+            result.host_fingerprint, result.manifest_hash,
+        ) != (
+            request.request_hash, request.backup_id, request.host_id,
+            request.host_fingerprint, request.manifest_hash,
+        ):
+            raise AdapterError("deletion_result_binding_mismatch", "deletion result changed identity")
+        pending = self.cleanup.cleanup_pending(request, manifest) if self.cleanup else False
+        return BackupDeletionView(result, pending)
+
+    def retry_cleanup(self, request: BackupDeletionRequest, manifest: BackupManifest,
+                      cancellation: CancellationToken) -> BackupDeletionView:
+        self.load(request, manifest)
+        if self.cleanup is not None:
+            self.cleanup.cleanup(request, manifest, cancellation)
+        return self.load(request, manifest)
 
 
 def new_backup_deletion_request(
