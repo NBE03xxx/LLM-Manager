@@ -20,4 +20,17 @@ Gate専用root backupはdisposable VM上の検証証跡として保持した。�
 
 ## Remaining Gate
 
-実SSH切断後のreceipt/result回収、remote retention/deletion、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。再起動をまたぐrecovery request identityの永続化はproduction compositionへ接続するまでfail closedを維持する。
+## Restart Receipt Recovery Gate
+
+request identity永続化後、別backup `restart-receipt-gate-20260830`で2プロセスGateを実施した。第1プロセスは外部端末sudoでhelperを1回だけ起動し、local manifest、immutable attempt、remote staging receiptを残して終了した。第2プロセスはそれらをディスクから再読込し、helperを再起動せずreceiptを取得・検証してstagingをcleanupした。
+
+- request hash: `f01bc5e878dc68aaa55a9435c7cddf359bdedd7c60adbd95713c372d6c87c8ef`
+- receipt hash: `a6da8fdd47a8b0bbaee5e80bfa605bcb901d202f5bf3fade3ed21335dff71b2d`
+- process間identity一致: 成功
+- helper再実行: なし
+- receipt検証: 成功
+- user staging cleanup: 成功（operation親directoryが空であることをread-only確認）
+
+## Remaining Gate
+
+転送中の実ネットワーク切断、remote retention/deletion、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。Gate専用root backupはdisposable VM上の検証証跡として保持する。

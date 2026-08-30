@@ -137,6 +137,8 @@ remote root journalは通常SSHからroot-only fileを直接読まず、限定he
 
 SSH向けBackup Store境界はlocal正本を先に作成・検証し、その検証済み復元素材だけをremote copy portへ渡す。remote receiptはbackup/plan/change-set/host/fingerprint/local manifest hash、全item hash、固定root配下の保存先、`remote_root` key scope、localとは異なるkey reference、receipt hashを束縛する。remote作成失敗やreceipt不一致でもlocal正本は保持するが、remote検証結果をfailedとしてApplyを開始しない。disposable SSH先のpositive Gateで実remote helper暗号化とreceipt再取得まで確認した。作成時request identityはtransport開始前に`$XDG_STATE_HOME/llm-manager/remote-recovery/attempts`の0700/0600 immutable canonical storeへ保存する。再起動後はmanifest hashをfilename identityとして全bindingを再検証し、同じstaging receiptだけをread-only回収する。identity欠落、改ざん、衝突、未知entry、symlink、owner/mode不一致は推測やhelper再実行をせずfail closedとする。
 
+disposable SSH先の2プロセスGateでは、第1プロセスがhelper実行後にstagingを残して終了し、第2プロセスがlocal manifestとattemptを再読込して同一request/receipt hashを検証した。第2プロセスはsudo/helperを再実行せず、receipt回収後にuser stagingだけを明示cleanupした。転送中の実ネットワーク切断は別Gateとして残す。
+
 remote helper側保存backendは、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、root owner、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。productionはrootかつ`/var/lib/llm-manager/backups`だけを許し、alternate rootはfault-injection用sandboxに限定する。実production配置Gateはまだ行わない。
 
 user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportとsandbox root executor/backendによる故障注入modelまでで、実SSH転送やpackaged remote executableは起動しない。

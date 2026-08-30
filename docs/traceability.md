@@ -8,7 +8,7 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `BackupEvidenceRetentionRuntimeTests`はexecution/request storeをabsolute XDG stateまたはhome fallbackの固定subdirectoryへ配置し、0700 application/runtime root、相対XDG、root path、symlink、unsafe modeをsandboxで検証する。
 
-実OpenSSH negative transport Gateでは`development`とAI serverにproduction adapterでread-only接続し、remote helper未導入をfixed helper/metadata `stat`だけで判定した。positive transport Gateではdisposable `llm-manager-gate`へ事前導入済みdebを使い、compatibility再検証、user staging、外部端末sudo、root-owned AES-GCM recovery copy、canonical receipt再取得、staging cleanupまで成功した。`RemoteHelperRecoveryCopyStoreTests`と`RemoteRecoveryRuntimeTests`は、request identityのmutation前immutable保存、XDG固定配置、再起動後の同一receipt回収、manifest/fingerprint binding、改ざん、衝突、未知entry、owner/mode/symlink拒否を検証する。
+実OpenSSH negative transport Gateでは`development`とAI serverにproduction adapterでread-only接続し、remote helper未導入をfixed helper/metadata `stat`だけで判定した。positive transport Gateではdisposable `llm-manager-gate`へ事前導入済みdebを使い、compatibility再検証、user staging、外部端末sudo、root-owned AES-GCM recovery copy、canonical receipt再取得、staging cleanupまで成功した。`RemoteHelperRecoveryCopyStoreTests`と`RemoteRecoveryRuntimeTests`は、request identityのmutation前immutable保存、XDG固定配置、再起動後の同一receipt回収、manifest/fingerprint binding、改ざん、衝突、未知entry、owner/mode/symlink拒否を検証する。さらに実2プロセスGateで、helper実行側終了後に新プロセスがhelperを再実行せず同一hash receiptを回収・検証・cleanupできることを確認した。
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
