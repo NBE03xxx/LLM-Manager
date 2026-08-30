@@ -11,7 +11,7 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行�
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新の実装commit: `3cc6aac Execute backup evidence retention safely`（この文書のcommitが後続する場合あり）
+- 最新の実装commit: `c17644a Persist backup evidence retention executions`（この文書のcommitが後続する場合あり）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
 ## 確定済み要件
@@ -62,7 +62,11 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行�
   - reconciliation→manifest evidence→deletion resultの参照逆順削除
   - 各削除後にdirectory fsync
   - 途中故障・cancelは`PARTIAL`/`FAILED`として停止し、自動再試行しない
-- 最新の全単体テストは305件成功
+- backup evidence retention execution store
+  - request、backup、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛
+  - canonical JSON、immutable、0700/0600、owner/mode、symlink、size、filename identityを再読込時に検証
+  - 改ざん、unsafe metadata、filename不一致、重複保存を拒否
+- 最新の全単体テストは306件成功
 
 ## `142e5a2`以降の実装commit
 
@@ -94,22 +98,24 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行�
 - `a72d35d Preserve manifest evidence before deletion`
 - `1a4cfbf Plan backup evidence retention safely`
 - `3cc6aac Execute backup evidence retention safely`
+- `c17644a Persist backup evidence retention executions`
 
 ## 次の推奨作業（Phase 4 Safe Apply Core）
 
-1. `BackupEvidenceRetentionExecution`をcanonicalかつ改ざん検知可能なimmutable storeへ保存する
-2. executionをplan/request hash、backup ID、host identity/fingerprint、各削除対象hashへ厳格に束縛する
-3. 再起動後に`COMPLETED`/`PARTIAL`/`FAILED`をread-onlyで再照合する
-4. `PARTIAL`/`FAILED`からの再開は明示的cleanup requestだけに限定し、orphanの自動再判定・自動削除を禁止する
-5. execution保存失敗、途中削除、再読込時改ざん、既消去対象、cancelをsandboxで故障注入する
-6. local/remote証跡の片側欠落を表示用状態へ反映する
-7. README、roadmap、traceability、safe-applyを同期する
+1. `BackupEvidenceRetentionExecutor`から`BackupEvidenceRetentionExecutionStore`への保存を接続する
+2. `COMPLETED`/`PARTIAL`/`FAILED`の全終了経路で、返却前にexecution evidenceを永続化する
+3. execution保存失敗時は削除済み状態を隠さず、stable errorとread-only再照合可能な境界を定義する
+4. 再起動後にexecutionをhost/fingerprint単位でstrict列挙し、改ざんや未知entryを拒否する
+5. 保存失敗、途中削除後の保存失敗、cancel、既存execution衝突をsandboxで故障注入する
+6. `PARTIAL`/`FAILED`からの再開は明示的cleanup requestだけに限定し、orphanの自動再判定・自動削除を禁止する
+7. local/remote証跡の片側欠落を表示用状態へ反映し、README、roadmap、traceability、safe-applyを同期する
 
-まず小さなcommitとして「immutable execution result store＋再読込検証」を実装し、その後に明示的cleanup再開境界へ進めてください。仕様をmaterially変更しない範囲では質問せず、安全側の仮定で進めてください。
+まず小さなcommitとして「executor→execution store保存接続＋保存失敗の故障注入」を実装し、その後に再起動後のstrict一覧・明示的cleanup再開境界へ進めてください。仕様をmaterially変更しない範囲では質問せず、安全側の仮定で進めてください。
 
 ## 現在の重要な未完了Gate
 
-- backup evidence retention executionの永続化と再開境界
+- backup evidence retention executorからexecution storeへの保存接続
+- executionの再起動後strict一覧と明示的cleanup再開境界
 - Secret Service実desktop Gate
 - 実SSH transportとremote helperの実機integration Gate
 - remote root-owned backend、remote key生成・配置、retentionの実機Gate
@@ -122,7 +128,8 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行�
 
 ## 注意点
 
-- `BackupEvidenceRetentionExecutor`はsandbox coreで、production配置と実行結果永続化は未実装
+- `BackupEvidenceRetentionExecutionStore`は実装済みだが、executorからの保存接続とproduction配置は未実装
+- execution storeは内容を永続化できるが、現時点のexecutorはexecutionを返すだけで自動保存しない
 - evidence削除は候補を実行直前に再検証し、参照逆順で行う
 - `PARTIAL`/`FAILED`後に自動再削除しない
 - journal/backup reconciliationはread-onlyで、自動再Apply/rollbackしない
