@@ -22,6 +22,7 @@ from llm_manager.infrastructure.remote_backup import (
 )
 from llm_manager.infrastructure.remote_helper import (
     RemoteHelperRecoveryCopyStore,
+    RemoteRecoveryAttemptStore,
     decode_remote_request,
 )
 from llm_manager.infrastructure.remote_helper_executor import RemoteRecoveryHelperExecutor
@@ -115,6 +116,83 @@ class RemoteHelperRecoveryCopyStoreTests(unittest.TestCase):
             ).load(manifest, CancellationToken())
         self.assertEqual(caught.exception.code, "remote_request_identity_unavailable")
 
+    def test_restart_recovers_same_receipt_after_ambiguous_download_failure(self) -> None:
+        attempts = RemoteRecoveryAttemptStore(self.root / "attempts")
+        transport = _Transport(self.backend, failure="receipt_download")
+        manifest = self.local.create(self.request, CancellationToken())
+        items = self.local.restore_items(manifest, CancellationToken())
+        first = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts
+        )
+        with self.assertRaises(AdapterError):
+            first.create(manifest, items, CancellationToken())
+        transport.failure = None
+        restarted = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts
+        )
+        receipt = restarted.load(manifest, CancellationToken())
+        self.assertTrue(receipt.verified)
+        self.assertEqual(
+            json.loads(transport.create_content)["request_hash"],
+            json.loads(transport.read_content)["request_hash"],
+        )
+
+    def test_attempt_store_rejects_tamper_collision_and_unsafe_entries(self) -> None:
+        attempts = RemoteRecoveryAttemptStore(self.root / "attempts")
+        transport = _Transport(self.backend)
+        remote = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts
+        )
+        manifest = self.local.create(self.request, CancellationToken())
+        items = self.local.restore_items(manifest, CancellationToken())
+        remote.create(manifest, items, CancellationToken())
+        request = attempts.load(manifest)
+        self.assertEqual(
+            attempts.list_for_host(manifest.host_id, manifest.host_fingerprint),
+            (request,),
+        )
+
+        with self.assertRaises(AdapterError) as caught:
+            attempts.save(replace(
+                request,
+                requested_at=request.requested_at + timedelta(seconds=1),
+                expires_at=request.expires_at + timedelta(seconds=1),
+                request_hash="",
+            ).with_hash())
+        self.assertEqual(caught.exception.code, "remote_recovery_attempt_collision")
+
+        path = attempts.root / f"{manifest.manifest_hash}.json"
+        original = path.read_bytes()
+        path.write_bytes(original[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            attempts.load(manifest)
+        path.write_bytes(original)
+        os.chmod(path, 0o644)
+        with self.assertRaisesRegex(AdapterError, "metadata"):
+            attempts.load(manifest)
+        os.chmod(path, 0o600)
+        (attempts.root / "unknown").write_bytes(b"x")
+        with self.assertRaisesRegex(AdapterError, "unexpected"):
+            attempts.list_for_host(manifest.host_id, manifest.host_fingerprint)
+
+    def test_attempt_store_rejects_manifest_and_fingerprint_mismatch(self) -> None:
+        attempts = RemoteRecoveryAttemptStore(self.root / "attempts")
+        transport = _Transport(self.backend)
+        remote = RemoteHelperRecoveryCopyStore(
+            transport, "remote-master-v1", attempts=attempts
+        )
+        manifest = self.local.create(self.request, CancellationToken())
+        remote.create(
+            manifest, self.local.restore_items(manifest, CancellationToken()),
+            CancellationToken(),
+        )
+        with self.assertRaisesRegex(AdapterError, "manifest"):
+            attempts.load(replace(manifest, plan_id="changed"))
+        with self.assertRaisesRegex(AdapterError, "fingerprint"):
+            attempts.list_for_host(
+                manifest.host_id, "SHA256:" + "b" * 43
+            )
+
 
 class _Transport:
     def __init__(self, backend, *, failure=None):
@@ -156,6 +234,10 @@ class _Transport:
             self.stage, self.backend, os.getuid(), clock=lambda: datetime.now(UTC)
         ).execute(request.request_id, request.request_hash, cancellation)
         self.receipt = decode_remote_receipt(result)
+        if self.failure == "receipt_download":
+            raise AdapterError(
+                "remote_staging_read_failed", "injected receipt download failure"
+            )
         return result
 
     def read_recovery_receipt(self, request_content, cancellation):

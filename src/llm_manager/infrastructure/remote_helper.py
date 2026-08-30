@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import stat
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Protocol
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
@@ -13,6 +16,7 @@ from llm_manager.domain.models import BackupManifest, utc_now
 from llm_manager.domain.serialization import to_primitive
 
 from .backup import BackupRestoreItem, _safe_component
+from .backup import _atomic_write
 from .remote_backup import (
     RemoteRecoveryReceipt,
     decode_remote_receipt,
@@ -64,6 +68,136 @@ class RemoteRecoveryTransport(Protocol):
         cancellation: CancellationToken,
     ) -> bytes: ...
 
+
+class RemoteRecoveryAttemptStore:
+    """Immutable local request identity used for read-only receipt recovery."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root.absolute()
+        if self.root == Path("/") or self.root.is_symlink():
+            raise ValueError("unsafe remote recovery attempt root")
+
+    def save(self, request: RemoteRecoveryRequest) -> RemoteRecoveryRequest:
+        self._prepare()
+        path = self._path(request.local_manifest_hash)
+        content = encode_remote_request(request)
+        if path.exists() or path.is_symlink():
+            current = self.load_by_manifest_hash(request.local_manifest_hash)
+            if current != request:
+                raise AdapterError(
+                    "remote_recovery_attempt_collision",
+                    "remote recovery attempt identity was reused",
+                )
+            return current
+        _atomic_write(path, content, 0o600)
+        return self.load_by_manifest_hash(request.local_manifest_hash)
+
+    def load(self, manifest: BackupManifest) -> RemoteRecoveryRequest:
+        request = self.load_by_manifest_hash(manifest.manifest_hash)
+        _validate_manifest_binding(request, manifest)
+        return request
+
+    def load_by_manifest_hash(self, manifest_hash: str) -> RemoteRecoveryRequest:
+        self._root()
+        path = self._path(manifest_hash)
+        self._file(path)
+        content = path.read_bytes()
+        try:
+            value = json.loads(content.decode("utf-8"))
+            expected_hash = value["request_hash"]
+        except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError) as error:
+            raise AdapterError(
+                "invalid_remote_recovery_attempt", "recovery attempt is malformed"
+            ) from error
+        if not isinstance(expected_hash, str):
+            raise AdapterError(
+                "invalid_remote_recovery_attempt", "recovery attempt hash is invalid"
+            )
+        request = decode_remote_request(
+            content, expected_hash=expected_hash, now=_requested_at(value)
+        )
+        if request.local_manifest_hash != manifest_hash:
+            raise AdapterError(
+                "remote_recovery_attempt_binding_mismatch",
+                "recovery attempt filename identity changed",
+            )
+        return request
+
+    def list_for_host(
+        self, host_id: str, host_fingerprint: str
+    ) -> tuple[RemoteRecoveryRequest, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        self._root()
+        requests = []
+        identities = set()
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError(
+                    "unsafe_remote_recovery_attempt", "unexpected recovery attempt entry"
+                )
+            request = self.load_by_manifest_hash(path.stem)
+            if request.host_id == host_id:
+                if request.host_fingerprint != host_fingerprint:
+                    raise AdapterError(
+                        "remote_recovery_attempt_binding_mismatch",
+                        "recovery attempt host fingerprint changed",
+                    )
+                identity = request.backup_id, request.local_manifest_hash
+                if identity in identities:
+                    raise AdapterError(
+                        "remote_recovery_attempt_collision",
+                        "duplicate recovery attempt identity",
+                    )
+                identities.add(identity)
+                requests.append(request)
+        return tuple(sorted(requests, key=lambda item: item.requested_at))
+
+    def _prepare(self) -> None:
+        self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(self.root, 0o700)
+        self._root()
+
+    def _root(self) -> None:
+        if not self.root.exists() and not self.root.is_symlink():
+            raise AdapterError(
+                "remote_recovery_attempt_not_found", "recovery attempt is missing"
+            )
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError(
+                "unsafe_remote_recovery_attempt", "recovery attempt root is unsafe"
+            )
+        metadata = self.root.stat(follow_symlinks=False)
+        if metadata.st_uid != os.getuid() or stat.S_IMODE(metadata.st_mode) != 0o700:
+            raise AdapterError(
+                "unsafe_remote_recovery_attempt", "recovery attempt root metadata is unsafe"
+            )
+
+    @staticmethod
+    def _file(path: Path) -> None:
+        if not path.exists() and not path.is_symlink():
+            raise AdapterError(
+                "remote_recovery_attempt_not_found", "recovery attempt is missing"
+            )
+        if path.is_symlink() or not path.is_file():
+            raise AdapterError(
+                "unsafe_remote_recovery_attempt", "recovery attempt file is unsafe"
+            )
+        metadata = path.stat(follow_symlinks=False)
+        if (
+            metadata.st_uid != os.getuid()
+            or stat.S_IMODE(metadata.st_mode) != 0o600
+            or metadata.st_size > MAX_REMOTE_REQUEST_BYTES
+        ):
+            raise AdapterError(
+                "unsafe_remote_recovery_attempt",
+                "recovery attempt file metadata is unsafe",
+            )
+
+    def _path(self, manifest_hash: str) -> Path:
+        _digest(manifest_hash)
+        return self.root / f"{manifest_hash}.json"
+
     def read_recovery_receipt(
         self,
         request_content: bytes,
@@ -79,12 +213,14 @@ class RemoteHelperRecoveryCopyStore:
         transport: RemoteRecoveryTransport,
         key_reference: str,
         *,
+        attempts: RemoteRecoveryAttemptStore | None = None,
         clock=utc_now,
     ) -> None:
         if not key_reference or not _IDENTIFIER.fullmatch(key_reference):
             raise ValueError("remote key reference must be a safe identifier")
         self.transport = transport
         self.key_reference = key_reference
+        self.attempts = attempts
         self.clock = clock
         self._requests: dict[tuple[str, str, str], RemoteRecoveryRequest] = {}
 
@@ -100,6 +236,9 @@ class RemoteHelperRecoveryCopyStore:
         # Preserve the exact staging identity before transport. If the helper
         # completes but receipt download disconnects, verify() can reconnect to
         # the same immutable result instead of minting a different request hash.
+        if self.attempts is not None:
+            request = self.attempts.save(request)
+            content = encode_remote_request(request)
         self._requests[self._identity(manifest)] = request
         _cancel(cancellation)
         receipt = decode_remote_receipt(
@@ -112,6 +251,8 @@ class RemoteHelperRecoveryCopyStore:
         self, manifest: BackupManifest, cancellation: CancellationToken
     ) -> RemoteRecoveryReceipt:
         request = self._requests.get(self._identity(manifest))
+        if request is None and self.attempts is not None:
+            request = self.attempts.load(manifest)
         if request is None:
             raise AdapterError(
                 "remote_request_identity_unavailable",
@@ -230,6 +371,55 @@ def _validate_response(request: RemoteRecoveryRequest, receipt: RemoteRecoveryRe
         or receipt.item_hashes != request.item_hashes
     ):
         raise AdapterError("remote_response_binding_mismatch", "remote receipt does not match its request")
+
+
+def _validate_manifest_binding(
+    request: RemoteRecoveryRequest, manifest: BackupManifest
+) -> None:
+    expected = (
+        manifest.backup_id,
+        manifest.plan_id,
+        manifest.change_set_hash,
+        manifest.host_id,
+        manifest.host_fingerprint,
+        manifest.manifest_hash,
+        remote_storage_location(manifest),
+        tuple((item.target, item.sha256) for item in manifest.items),
+        manifest.created_at,
+        manifest.retention_expires_at,
+        manifest.protected,
+    )
+    actual = (
+        request.backup_id,
+        request.plan_id,
+        request.change_set_hash,
+        request.host_id,
+        request.host_fingerprint,
+        request.local_manifest_hash,
+        request.storage_location,
+        request.item_hashes,
+        request.backup_created_at,
+        request.retention_expires_at,
+        request.protected,
+    )
+    if actual != expected:
+        raise AdapterError(
+            "remote_recovery_attempt_binding_mismatch",
+            "recovery attempt does not match its manifest",
+        )
+
+
+def _requested_at(value: object) -> datetime:
+    if not isinstance(value, dict) or not isinstance(value.get("requested_at"), str):
+        raise AdapterError(
+            "invalid_remote_recovery_attempt", "recovery attempt time is invalid"
+        )
+    try:
+        return datetime.fromisoformat(value["requested_at"])
+    except ValueError as error:
+        raise AdapterError(
+            "invalid_remote_recovery_attempt", "recovery attempt time is invalid"
+        ) from error
 
 
 def _validate_staged_items(
