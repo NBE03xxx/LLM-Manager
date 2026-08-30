@@ -157,6 +157,29 @@ class RemoteRetentionResultStore:
         RemoteRetentionAttemptStore._file(path)
         return decode_remote_retention_result(path.read_bytes())
 
+    def list_for_host(
+        self, host_id: str, host_fingerprint: str
+    ) -> tuple[RemoteRetentionResult, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError("unsafe_remote_retention_result", "result root is unsafe")
+        metadata = self.root.stat(follow_symlinks=False)
+        if stat.S_IMODE(metadata.st_mode) != 0o700 or metadata.st_uid != os.getuid():
+            raise AdapterError(
+                "unsafe_remote_retention_result", "result root metadata is unsafe"
+            )
+        results = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("unsafe_remote_retention_result", "unexpected result entry")
+            result = self.load(path.stem)
+            if result.host_id == host_id:
+                if result.host_fingerprint != host_fingerprint:
+                    raise AdapterError("remote_retention_binding_mismatch", "host fingerprint changed")
+                results.append(result)
+        return tuple(sorted(results, key=lambda item: item.evaluated_at, reverse=True))
+
     def _path(self, request_id):
         if not _IDENTIFIER.fullmatch(request_id):
             raise AdapterError("invalid_remote_retention_identity", "retention ID is invalid")

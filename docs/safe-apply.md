@@ -159,7 +159,7 @@ remote削除protocolはlocal manifest bindingに加え、直前に検証したre
 
 remote deletion requestはroot helper起動前にlocalの0700 storeへ0600 immutable attemptとして保存する。invoke後に接続が切れてresultを読めない場合はremote outcomeを`unknown`としてlocal正本とuser stagingを保持する。再起動後は保存済みattemptから同一request ID/hashのresultだけをbounded readし、root helperを再実行しない。検証済みresultにより協調削除を完了しlocal resultを保存した後だけuser stagingをcleanupする。cleanup失敗は削除結果を書き換えず`staging_cleanup_pending`として表示し、再試行はcleanupだけに限定する。
 
-backup一覧はlocal manifest、remote retention record、直近local/remote retention evidence、検証済み削除resultをcopyごとにread-only集約する。local retention resultも削除前後の一覧差分、host、評価時刻、removed/remaining、partial/failed/unknown、errorをhashで束縛し、0700 directory内の0600 immutable fileへ保存する。再読込時はcanonical形式、hash、owner、mode、sizeを検証する。変更再試行はimmutable evidenceから安全に限定できる場合だけ提示し、protected、remote-only、copy観測不能ではread-only再照合へ戻す。
+backup一覧はlocal manifest、remote retention record、直近local/remote retention evidence、検証済み削除resultをcopyごとにread-only集約する。local retention resultも削除前後の一覧差分、host、評価時刻、removed/remaining、partial/failed/unknown、errorをhashで束縛し、0700 directory内の0600 immutable fileへ保存する。永続evidence repositoryは再起動後に各private storeを安全に列挙し、host/fingerprintへ束縛された最新retention result、backupごとの最新deletion result、対応するattempt cleanup markerを自動ロードする。未知entry、symlink、owner/mode、canonical hash、binding不一致があれば一覧をfail-closedに停止する。変更再試行はimmutable evidenceから安全に限定できる場合だけ提示し、retention/deletion staging cleanupは元の変更操作から分離してcleanupだけを提示する。protected、remote-only、copy観測不能ではread-only再照合へ戻す。
 
 ## 9. 冪等性・競合
 

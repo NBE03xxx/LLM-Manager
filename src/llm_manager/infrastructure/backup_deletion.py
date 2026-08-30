@@ -135,6 +135,23 @@ class BackupDeletionResultStore:
         _validate_result(result)
         return result
 
+    def list_for_host(
+        self, host_id: str, host_fingerprint: str
+    ) -> tuple[BackupDeletionResult, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        self._root_metadata()
+        results = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("unsafe_deletion_result", "unexpected deletion result entry")
+            result = self.load(path.stem)
+            if result.host_id == host_id:
+                if result.host_fingerprint != host_fingerprint:
+                    raise AdapterError("deletion_result_binding_mismatch", "host fingerprint changed")
+                results.append(result)
+        return tuple(sorted(results, key=lambda item: item.completed_at, reverse=True))
+
     def _path(self, request_id: str) -> Path:
         if not _IDENTIFIER.fullmatch(request_id):
             raise AdapterError("invalid_deletion_identity", "deletion request ID is invalid")

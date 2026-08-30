@@ -100,6 +100,34 @@ class RemoteDeletionAttemptStore:
             raise AdapterError("invalid_remote_deletion_cleanup", "cleanup marker changed")
         return False
 
+    def cleanup_pending_for_result(self, result) -> bool:
+        if not self.root.exists() and not self.root.is_symlink():
+            return False
+        self._root_metadata()
+        matches = []
+        for path in self.root.iterdir():
+            if path.suffix == ".cleaned":
+                self._private_file(path)
+                if self._cleaned_path(path.stem) != path:
+                    raise AdapterError(
+                        "unsafe_remote_deletion_attempt", "cleanup marker identity is invalid"
+                    )
+                continue
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("unsafe_remote_deletion_attempt", "unexpected attempt entry")
+            request = self.load(path.stem)
+            if (
+                request.backup_id, request.host_id, request.host_fingerprint,
+                request.manifest_hash,
+            ) == (
+                result.backup_id, result.host_id, result.host_fingerprint,
+                result.manifest_hash,
+            ):
+                matches.append(request)
+        if len(matches) > 1:
+            raise AdapterError("remote_deletion_attempt_collision", "multiple attempts match result")
+        return self.cleanup_pending(matches[0]) if matches else False
+
     def _prepare_root(self):
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(self.root, 0o700)

@@ -11,8 +11,10 @@ from llm_manager.domain.enums import ChangeOperation
 from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
 from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.backup_deletion import (
-    BackupDeletionResult, BackupDeletionView, CopyDeleteOutcome,
+    BackupDeletionResult, BackupDeletionResultStore, BackupDeletionView,
+    CopyDeleteOutcome,
 )
+from llm_manager.infrastructure.backup_evidence import BackupEvidenceRepository
 from llm_manager.infrastructure.backup_inventory import (
     BackupInventoryService, BackupListAction, LocalRetentionResult,
     LocalRetentionResultStore, LocalRetentionRunner, RetentionRunEvidence,
@@ -20,7 +22,16 @@ from llm_manager.infrastructure.backup_inventory import (
 from llm_manager.infrastructure.backup_reconciliation import CopyPresence, DualCopyState
 from llm_manager.infrastructure.remote_backup import RemoteRetentionRecord
 from llm_manager.infrastructure.remote_retention import (
-    RemoteRetentionResult, RemoteRetentionState,
+    REMOTE_RETENTION_OPERATION, REMOTE_RETENTION_PROTOCOL_VERSION,
+    RemoteRetentionRequest, RemoteRetentionResult, RemoteRetentionState,
+)
+from llm_manager.infrastructure.openssh_remote_retention import (
+    RemoteRetentionAttemptStore, RemoteRetentionResultStore,
+)
+from llm_manager.infrastructure.openssh_remote_deletion import RemoteDeletionAttemptStore
+from llm_manager.infrastructure.remote_deletion import (
+    REMOTE_DELETION_OPERATION, REMOTE_DELETION_PROTOCOL_VERSION,
+    RemoteDeletionRequest,
 )
 
 
@@ -173,6 +184,71 @@ class BackupInventoryServiceTests(unittest.TestCase):
         path.write_bytes(path.read_bytes()[:-1] + b" ")
         with self.assertRaises(AdapterError):
             store.load("local-retention-2")
+
+    def test_restart_repository_loads_latest_evidence_and_cleanup_status(self):
+        root = Path(self.temp.name) / "evidence"
+        local_store = LocalRetentionResultStore(root / "local-retention")
+        remote_store = RemoteRetentionResultStore(root / "remote-retention")
+        deletion_store = BackupDeletionResultStore(root / "deletions")
+        retention_attempts = RemoteRetentionAttemptStore(root / "retention-attempts")
+        deletion_attempts = RemoteDeletionAttemptStore(root / "deletion-attempts")
+        local_store.save(LocalRetentionResult(
+            "1.0", "local-retention", "ssh:host", NOW,
+            RemoteRetentionState.COMPLETED, (), ("backup-1",), None,
+        ).with_hash())
+        remote_request = RemoteRetentionRequest(
+            "1.0", REMOTE_RETENTION_PROTOCOL_VERSION, REMOTE_RETENTION_OPERATION,
+            "remote-retention", "ssh:host", FINGERPRINT, NOW, NOW,
+            NOW + timedelta(minutes=5),
+        ).with_hash()
+        retention_attempts.save(remote_request)
+        remote_store.save(RemoteRetentionResult(
+            "1.0", remote_request.request_id, remote_request.request_hash,
+            "ssh:host", FINGERPRINT, NOW, RemoteRetentionState.COMPLETED,
+            (), ("backup-1",), None,
+        ).with_hash())
+        deletion_view = _view(
+            self.manifest, CopyDeleteOutcome.FAILED,
+            CopyDeleteOutcome.NOT_ATTEMPTED, DualCopyState.BOTH_AVAILABLE,
+        )
+        deletion_store.save(deletion_view.result)
+        deletion_attempts.save(RemoteDeletionRequest(
+            "1.0", REMOTE_DELETION_PROTOCOL_VERSION, REMOTE_DELETION_OPERATION,
+            "remote-delete", self.manifest.backup_id, self.manifest.host_id,
+            FINGERPRINT, self.manifest.manifest_hash, "b" * 64,
+            "remote-master-v1", "/var/lib/llm-manager/backups/host/backup-1",
+            (("/etc/example", "c" * 64),), NOW, NOW + timedelta(minutes=5),
+        ).with_hash())
+        repository = BackupEvidenceRepository(
+            local_store, remote_store, deletion_store,
+            remote_retention_attempts=retention_attempts,
+            remote_deletion_attempts=deletion_attempts,
+        )
+        item = BackupInventoryService(
+            _Local((self.manifest,)), _Remote((self.record,))
+        ).list_persisted_for_host(
+            "ssh:host", FINGERPRINT, CancellationToken(), repository,
+        )[0]
+        self.assertIn(BackupListAction.RETRY_REMOTE_DELETE, item.allowed_actions)
+        self.assertIn(BackupListAction.RETRY_STAGING_CLEANUP, item.allowed_actions)
+        self.assertIn(
+            BackupListAction.RETRY_RETENTION_STAGING_CLEANUP, item.allowed_actions
+        )
+
+    def test_repository_rejects_unknown_persistent_entry(self):
+        root = Path(self.temp.name) / "evidence"
+        store = LocalRetentionResultStore(root / "local-retention")
+        store.save(LocalRetentionResult(
+            "1.0", "local-retention", "ssh:host", NOW,
+            RemoteRetentionState.COMPLETED, (), (), None,
+        ).with_hash())
+        (root / "local-retention/unexpected").write_text("unsafe")
+        repository = BackupEvidenceRepository(
+            store, RemoteRetentionResultStore(root / "remote-retention"),
+            BackupDeletionResultStore(root / "deletions"),
+        )
+        with self.assertRaises(AdapterError):
+            repository.load_for_host("ssh:host", FINGERPRINT)
 
 
 class _Local:

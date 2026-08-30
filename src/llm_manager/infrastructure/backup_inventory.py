@@ -33,6 +33,7 @@ class BackupListAction(StrEnum):
     RECOVER_REMOTE_RESULT = "recover_remote_result"
     RETRY_LOCAL_DELETE = "retry_local_delete"
     RETRY_STAGING_CLEANUP = "retry_staging_cleanup"
+    RETRY_RETENTION_STAGING_CLEANUP = "retry_retention_staging_cleanup"
     RECONCILE_COPIES = "reconcile_copies"
 
 
@@ -40,6 +41,17 @@ class BackupListAction(StrEnum):
 class RetentionRunEvidence:
     local_result: "LocalRetentionResult | None" = None
     remote_result: RemoteRetentionResult | None = None
+    remote_staging_cleanup_pending: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class BackupInventoryEvidence:
+    retention: RetentionRunEvidence
+    deletion_views: tuple[BackupDeletionView, ...]
+
+
+class BackupEvidencePort(Protocol):
+    def load_for_host(self, host_id: str, host_fingerprint: str) -> BackupInventoryEvidence: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +103,19 @@ class LocalRetentionResultStore:
             raise AdapterError("invalid_local_retention_result", "retention result is not canonical")
         _validate_local_retention(result)
         return result
+
+    def list_for_host(self, host_id: str) -> tuple[LocalRetentionResult, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        self._root_metadata()
+        results = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("unsafe_local_retention_result", "unexpected retention result entry")
+            result = self.load(path.stem)
+            if result.host_id == host_id:
+                results.append(result)
+        return tuple(sorted(results, key=lambda item: item.evaluated_at, reverse=True))
 
     def _path(self, request_id):
         if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", request_id):
@@ -260,7 +285,10 @@ class BackupInventoryService:
                     RemoteRetentionState.UNKNOWN,
                 }
             )
-            actions = _actions(state, protected, view, local_state, remote_state)
+            actions = _actions(
+                state, protected, view, local_state, remote_state,
+                evidence.remote_staging_cleanup_pending and remote_state is not None,
+            )
             items.append(BackupInventoryItem(
                 backup_id, host_id,
                 manifest.created_at if manifest is not None else (
@@ -278,6 +306,18 @@ class BackupInventoryService:
             item.created_at is not None, item.created_at or datetime.min,
             item.backup_id,
         ), reverse=True))
+
+    def list_persisted_for_host(
+        self, host_id: str, host_fingerprint: str,
+        cancellation: CancellationToken, evidence: BackupEvidencePort,
+    ) -> tuple[BackupInventoryItem, ...]:
+        if cancellation.cancelled:
+            raise OperationCancelled("backup inventory cancelled")
+        loaded = evidence.load_for_host(host_id, host_fingerprint)
+        return self.list_for_host(
+            host_id, host_fingerprint, cancellation,
+            deletion_views=loaded.deletion_views, retention=loaded.retention,
+        )
 
     def _local(self, host_id):
         try:
@@ -327,7 +367,8 @@ class BackupInventoryService:
                 raise AdapterError("backup_inventory_binding_mismatch", "retention host changed")
 
 
-def _actions(state, protected, view, local_retention_state, remote_retention_state):
+def _actions(state, protected, view, local_retention_state, remote_retention_state,
+             retention_cleanup_pending):
     actions: list[BackupListAction] = []
     if state is DualCopyState.UNKNOWN or remote_retention_state in {
         RemoteRetentionState.PARTIAL, RemoteRetentionState.FAILED,
@@ -339,6 +380,8 @@ def _actions(state, protected, view, local_retention_state, remote_retention_sta
         actions.append(BackupListAction.RECONCILE_COPIES)
     if view is not None and view.staging_cleanup_pending:
         actions.append(BackupListAction.RETRY_STAGING_CLEANUP)
+    if retention_cleanup_pending:
+        actions.append(BackupListAction.RETRY_RETENTION_STAGING_CLEANUP)
     if protected:
         return tuple(actions)
     if view is None:
