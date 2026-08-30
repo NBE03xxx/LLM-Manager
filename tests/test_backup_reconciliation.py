@@ -120,6 +120,13 @@ class DualCopyDeletionReconcilerTests(unittest.TestCase):
                 clock=lambda: NOW,
             ).reconcile("reconcile-1", changed, factory.manifest, CancellationToken())
         self.assertEqual(local.calls, 0)
+        with self.assertRaises(AdapterError):
+            BackupReconciliationRunner(
+                DualCopyDeletionReconciler(local, _Observer(CopyPresence.PRESENT)),
+                BackupReconciliationResultStore(Path(factory.temp.name) / "reconciliation"),
+                clock=lambda: NOW,
+            ).reconcile("../unsafe", deletion, factory.manifest, CancellationToken())
+        self.assertEqual(local.calls, 0)
         factory.close()
 
 

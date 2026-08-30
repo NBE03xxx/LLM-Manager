@@ -149,7 +149,7 @@ class BackupInventoryServiceTests(unittest.TestCase):
         self.assertTrue(item.remote_retention_removed)
         self.assertEqual(item.local_retention_state, RemoteRetentionState.COMPLETED)
         self.assertEqual(item.remote_retention_state, RemoteRetentionState.PARTIAL)
-        self.assertIn(BackupListAction.RECONCILE_COPIES, item.allowed_actions)
+        self.assertIn(BackupListAction.REFRESH_INVENTORY, item.allowed_actions)
 
     def test_rejects_cross_host_operation_evidence(self):
         result = RemoteRetentionResult(

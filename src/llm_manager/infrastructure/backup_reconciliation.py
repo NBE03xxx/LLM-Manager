@@ -229,6 +229,10 @@ class BackupReconciliationRunner:
     ) -> BackupReconciliationResult:
         from .backup_deletion import validate_backup_deletion_result
 
+        if not isinstance(reconciliation_id, str) or not _IDENTIFIER.fullmatch(
+            reconciliation_id
+        ):
+            raise AdapterError("invalid_reconciliation_result", "result ID is invalid")
         validate_backup_deletion_result(deletion_result)
         if manifest.host_fingerprint is None or (
             deletion_result.backup_id, deletion_result.host_id,

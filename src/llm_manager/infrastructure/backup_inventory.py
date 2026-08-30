@@ -38,6 +38,7 @@ class BackupListAction(StrEnum):
     RETRY_STAGING_CLEANUP = "retry_staging_cleanup"
     RETRY_RETENTION_STAGING_CLEANUP = "retry_retention_staging_cleanup"
     RECONCILE_COPIES = "reconcile_copies"
+    REFRESH_INVENTORY = "refresh_inventory"
 
 
 @dataclass(frozen=True, slots=True)
@@ -401,14 +402,19 @@ class BackupInventoryService:
 def _actions(state, protected, view, local_retention_state, remote_retention_state,
              retention_cleanup_pending):
     actions: list[BackupListAction] = []
-    if state is DualCopyState.UNKNOWN or remote_retention_state in {
+    if state is DualCopyState.UNKNOWN:
+        actions.append(
+            BackupListAction.RECONCILE_COPIES
+            if view is not None else BackupListAction.REFRESH_INVENTORY
+        )
+    if remote_retention_state in {
         RemoteRetentionState.PARTIAL, RemoteRetentionState.FAILED,
         RemoteRetentionState.UNKNOWN,
     } or local_retention_state in {
         RemoteRetentionState.PARTIAL, RemoteRetentionState.FAILED,
         RemoteRetentionState.UNKNOWN,
     }:
-        actions.append(BackupListAction.RECONCILE_COPIES)
+        actions.append(BackupListAction.REFRESH_INVENTORY)
     if view is not None and view.staging_cleanup_pending:
         actions.append(BackupListAction.RETRY_STAGING_CLEANUP)
     if retention_cleanup_pending:
