@@ -16,6 +16,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 実remote deletion Gateは専用copyに対し、永続receiptからのrequest生成、root receipt/envelope/key/path/item再検証、`deleted` canonical result、staging cleanup、local正本保持、別retention requestによる対象不在を確認した。既存3件は変更していない。
 
+実remote deb lifecycle Gateはdisposable Ubuntu 26.04で同一版reinstall、remove、purge、再installを行い、最新private runtime hash、root ownership/mode、package不在時の`missing` fail closed、再install後の`ready`、dpkg管理外backup/key保持を確認した。Debian 13差異は未確認である。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |

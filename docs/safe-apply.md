@@ -151,7 +151,7 @@ root側remote recovery executorはrequest ID/hashからuser staging pathを再�
 
 remote helper CLIは`user-stage-prepare`、`user-stage-remove`、`invoke-recovery`の固定subcommandだけを受ける。前二者は実効UIDと実UIDが一致する非root userだけが使え、固定home-relative operation path以外を拒否する。`invoke-recovery`はrootかつ有効な`SUDO_UID`を必須とし、user homeをOS account情報から導出する。cleanupはrequest/result/items以外のentryやunsafe metadataがあれば何も削除しない。
 
-production entrypointはroot `invoke-recovery`の場合だけroot key provider、AES-GCM cipher、固定remote backup backendを構築する。user staging commandや未知commandではroot backend/key storeを初期化しない。entrypoint wrapperは`python3 -I`で起動し、remote helper別debのroot-owned private runtimeだけを固定pathからimportする。remote artifactはlocal helperやPolicyKit actionを含めず、Secret Serviceにも依存しない。local GUI packageにもremote helper wrapperを同梱しない。sandbox artifact Gateは完了したが、実installとSSH起動は未実施である。
+production entrypointはroot `invoke-recovery`の場合だけroot key provider、AES-GCM cipher、固定remote backup backendを構築する。user staging commandや未知commandではroot backend/key storeを初期化しない。entrypoint wrapperは`python3 -I`で起動し、remote helper別debのroot-owned private runtimeだけを固定pathからimportする。remote artifactはlocal helperやPolicyKit actionを含めず、Secret Serviceにも依存しない。local GUI packageにもremote helper wrapperを同梱しない。disposable Ubuntu 26.04で実install、SSH起動、reinstall/remove/purge/reinstallを確認済みである。
 
 remote復旧鍵providerは`/var/lib/llm-manager/keys/<key-reference>.key`を固定root-only storeとし、backup content/receiptとは別directoryに置く。初回は32-byte random keyをO_EXCL、0600で生成し、directory fsync後に再読込検証する。以後は0700 root directory、0600 root regular file、非symlink、正確な32-byte長を毎回確認する。不完全・unsafeな既存keyを削除・再生成して過去backupを復号不能にせず、明示的な復旧対応を要求する。
 
