@@ -159,6 +159,8 @@ remote削除protocolはlocal manifest bindingに加え、直前に検証したre
 
 remote deletion requestはroot helper起動前にlocalの0700 storeへ0600 immutable attemptとして保存する。invoke後に接続が切れてresultを読めない場合はremote outcomeを`unknown`としてlocal正本とuser stagingを保持する。再起動後は保存済みattemptから同一request ID/hashのresultだけをbounded readし、root helperを再実行しない。検証済みresultにより協調削除を完了しlocal resultを保存した後だけuser stagingをcleanupする。cleanup失敗は削除結果を書き換えず`staging_cleanup_pending`として表示し、再試行はcleanupだけに限定する。
 
+backup一覧はlocal manifest、remote retention record、直近local/remote retention evidence、検証済み削除resultをcopyごとにread-only集約する。local retention resultも削除前後の一覧差分、host、評価時刻、removed/remaining、partial/failed/unknown、errorをhashで束縛する。変更再試行はimmutable evidenceから安全に限定できる場合だけ提示する。remote outcome不明は同一result回収、remote失敗かつ両copy存在はremote-first協調削除の新規承認、remote削除済みかつlocal失敗はlocal削除、cleanup pendingはcleanupだけを許す。protected、remote-only、copy観測不能では変更を許さずread-only再照合へ戻す。
+
 ## 9. 冪等性・競合
 
 - 既に推奨値なら no-op として ChangeSet から除外する。

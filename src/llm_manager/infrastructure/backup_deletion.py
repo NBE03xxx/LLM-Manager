@@ -291,6 +291,11 @@ def new_backup_deletion_request(
     ).with_hash()
 
 
+def validate_backup_deletion_result(result: BackupDeletionResult) -> None:
+    """Validate immutable deletion evidence before presenting it outside its store."""
+    _validate_result(result)
+
+
 def _validate_request(
     request: BackupDeletionRequest, manifest: BackupManifest, now: datetime
 ) -> None:
