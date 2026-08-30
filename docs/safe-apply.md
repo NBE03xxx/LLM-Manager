@@ -191,6 +191,8 @@ SSH先は互換remote helper debの事前導入を必須とする。診断時に
 
 remote helper互換性probeは`/usr/bin/llm-manager-remote-helper`と`/usr/share/llm-manager-remote-helper/helper-metadata.json`だけをsystem OpenSSHの固定`stat`/bounded `cat`で読む。root ownership、0755/0644、非symlink、content hash、canonical schema、package/version/protocolを検証し、user staging開始前とroot helper起動直前に再実行する。失敗・timeout・metadata差替えは`privileged_helper_unavailable`としてstaging前に停止する。disposable `llm-manager-gate`で事前導入済み0.1.0~dev0のpositive compatibility、user staging、外部端末sudo、暗号化copy、receipt回収、cleanupを確認済みである。
 
+user stagingはitemを先に転送し、完全なitem集合が揃った後でだけcanonical requestを最後に公開する。disposable `llm-manager-gate`への16 MiB転送中に専用ControlMasterを終了する実Gateでは、transportは`remote_staging_failed`で停止し、request/resultは未公開、root helperは未起動、local正本は検証可能なまま保持された。再接続後は固定`user-stage-remove`だけで不完全なuser stagingをcleanupし、Applyやremote backup作成を自動再試行しない。
+
 切断後のroot journal取得は限定helperの`read-journal-evidence <operation-id> <request-hash>`だけを許可する。root側は`/var/lib/llm-manager/journals/evidence`固定のroot:root 0700/0600 regular fileを`O_NOFOLLOW`付きdescriptorでbounded readし、canonical evidenceとidentity bindingを再検証する。OpenSSH側は互換性Gate後の固定passwordless sudo commandだけを使い、timeout・sudo不可・oversize・改ざん時はhost identityやtarget `stat`へ進まない。fake transportからread-only reconcilerまで接続済みだが、実SSH先では未実行である。
 
 local root Applyでも診断時の結果だけを信用しない。Backup開始前と、Backup検証後のhelper呼出し直前に同じ固定path・ownership・mode・package/version・protocol検査を再実行する。最初の検査失敗はBackupを作らず停止し、2回目の検査失敗は検証済みBackupを保持したまま未変更の`APPROVED`へ戻す。どちらもpkexec、file write、daemon-reload、restartを開始しない。
