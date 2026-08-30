@@ -141,6 +141,8 @@ disposable SSH先の2プロセスGateでは、第1プロセスがhelper実行後
 
 remote retention/deletionのroot起動もrecoveryと同じ外部端末sudo境界を使う。operationは`invoke-recovery`、`invoke-retention`、`invoke-deletion`の固定allowlistに限定し、operation取り違えは端末起動前に拒否する。実retention Gateでは3件を10世代未満として削除せず、result永続化後だけstagingをcleanupした。recovery receiptは`$XDG_STATE_HOME/llm-manager/remote-recovery/receipts`へmanifest hash名で0700/0600 immutable保存する。staging cleanup後もreceipt hashとmanifest/fingerprint/item/key/path bindingを再検証して後続deletionへ渡し、欠落時だけ保存済みrequest identityによるremote回収を試みる。
 
+実deletion Gateでは専用remote copyだけを対象とし、recovery staging cleanup後の別プロセスがlocal receiptからrequestを作成した。root helperのreceipt/暗号化内容/key/path/item再検証後に`deleted` resultを回収し、deletion stagingをcleanupした。local正本は保持し、別retention requestで対象不在と既存3件の保持を確認した。
+
 remote helper側保存backendは、復元素材を独立した`remote_root`鍵でAES-256-GCM envelopeへ暗号化する。directory 0700、envelope/receipt 0600、root owner、固定logical path、symlink/path escape拒否を適用し、receipt再読込ごとにcanonical形式、receipt hash、復号、AAD、plaintext item hashを再検証する。productionはrootかつ`/var/lib/llm-manager/backups`だけを許し、alternate rootはfault-injection用sandboxに限定する。実production配置Gateはまだ行わない。
 
 user側からremote helperへ渡す境界は`create_recovery_copy`だけを許す専用transport Portとし、shell、argv、任意保存先をschemaに含めない。canonical protocol v1 requestはlocal manifest hash、backup/plan/change-set/host/fingerprint、全item hash、固定保存先、`remote_root` key reference、期限とrequest hashを束縛する。取得したcanonical receiptはreceipt hashを検証した上で同じ値をrequestと再照合する。現段階ではfake transportとsandbox root executor/backendによる故障注入modelまでで、実SSH転送やpackaged remote executableは起動しない。

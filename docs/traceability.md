@@ -14,6 +14,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `RemoteHelperRecoveryCopyStoreTests`はlocal immutable receipt保存、staging消失後の再起動load、manifest binding、canonical改ざん、unsafe metadataを検証する。`RemoteRecoveryRuntimeTests`はreceipt rootをattempt rootと分離した固定XDG配置へ束縛する。
 
+実remote deletion Gateは専用copyに対し、永続receiptからのrequest生成、root receipt/envelope/key/path/item再検証、`deleted` canonical result、staging cleanup、local正本保持、別retention requestによる対象不在を確認した。既存3件は変更していない。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |

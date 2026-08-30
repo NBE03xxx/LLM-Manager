@@ -18,8 +18,6 @@ Phase 4のdisposable SSH target `llm-manager-gate`（Ubuntu 26.04、host `Ubuntu
 
 Gate専用root backupはdisposable VM上の検証証跡として保持した。最初の失敗試行で残ったuser stagingはallowlist済み`user-stage-remove`で明示cleanupした。
 
-## Remaining Gate
-
 ## Restart Receipt Recovery Gate
 
 request identity永続化後、別backup `restart-receipt-gate-20260830`で2プロセスGateを実施した。第1プロセスは外部端末sudoでhelperを1回だけ起動し、local manifest、immutable attempt、remote staging receiptを残して終了した。第2プロセスはそれらをディスクから再読込し、helperを再起動せずreceiptを取得・検証してstagingをcleanupした。
@@ -31,10 +29,6 @@ request identity永続化後、別backup `restart-receipt-gate-20260830`で2プ�
 - receipt検証: 成功
 - user staging cleanup: 成功（operation親directoryが空であることをread-only確認）
 
-## Remaining Gate
-
-転送中の実ネットワーク切断、remote retention/deletion、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。Gate専用root backupはdisposable VM上の検証証跡として保持する。
-
 ## Remote Retention Gate
 
 固定`invoke-retention` operationを外部端末sudo境界へ接続し、実root backendの保持評価を行った。3件のGate用backupは10世代未満のため削除されず、canonical resultをlocal immutable storeへ回収した後にuser stagingをcleanupした。
@@ -45,4 +39,19 @@ request identity永続化後、別backup `restart-receipt-gate-20260830`で2プ�
 - result hash: `048d24d261e5db14e90ede1b059fee41ce73354f5e95bc60360add437daaa724`
 - cleanup pending: `false`
 
-remote deletion実Gateの前に、recovery staging cleanup後も検証済みreceiptを後続処理へ渡せるlocal immutable receipt storeを実装する。
+## Remote Deletion Gate
+
+local immutable receipt store実装後、専用backup `deletion-gate-20260830`を作成した。receipt hash `0cb34c14ae9b878caecef9324d9cee079615efa27037af8703ecc049f268739b`を保存してrecovery stagingをcleanupし、第1プロセスを終了した。
+
+第2プロセスはlocal manifestとreceiptだけを再読込し、固定`invoke-deletion` requestを作成した。root helperは保存済みroot receipt、暗号化内容、host/fingerprint、manifest、key、path、item hashを再検証して対象1件だけを削除した。
+
+- deletion outcome: `deleted`
+- deletion result hash: `dd40b71d4dad0559bb1f5738012a04f095524cbfd9e7eedb2210ec0b51537299`
+- deletion staging cleanup pending: `false`
+- local authoritative backup: 保持
+
+別identityのretention評価では削除0、残存は元の3件だけで、`deletion-gate-20260830`が含まれないことを確認した。照合result hashは`0a5aab2754424afb81a5669230beb23d18daa4e5fd5231792112d9a140f69dd2`である。
+
+## Remaining Gate
+
+転送中の実ネットワーク切断、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。既存3件のGate専用root backupはdisposable VM上の検証証跡として保持する。
