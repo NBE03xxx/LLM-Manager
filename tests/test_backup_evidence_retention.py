@@ -15,10 +15,14 @@ from llm_manager.infrastructure.backup_deletion import (
     new_backup_deletion_request,
 )
 from llm_manager.infrastructure.backup_evidence_retention import (
-    BackupEvidenceRetentionPlanner, EvidenceRetentionDisposition,
+    BackupEvidenceRetentionExecutor, BackupEvidenceRetentionPlanner,
+    EvidenceRetentionDisposition, EvidenceRetentionExecutionState,
 )
 from llm_manager.infrastructure.backup_manifest_evidence import BackupManifestEvidenceStore
-from llm_manager.infrastructure.backup_reconciliation import CopyPresence, DualCopyState
+from llm_manager.infrastructure.backup_reconciliation import (
+    BackupReconciliationResult, BackupReconciliationResultStore,
+    CopyPresence, DualCopyState,
+)
 
 
 NOW = datetime(2026, 8, 30, 12, tzinfo=UTC)
@@ -38,6 +42,9 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         self.backups = LocalBackupStore(self.root / "backups", (self.root,))
         self.evidence = BackupManifestEvidenceStore(self.root / "evidence")
         self.deletions = BackupDeletionResultStore(self.root / "deletions")
+        self.reconciliations = BackupReconciliationResultStore(
+            self.root / "reconciliations"
+        )
 
     def tearDown(self):
         self.temp.cleanup()
@@ -128,6 +135,99 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         with self.assertRaises(AdapterError):
             planner.plan_for_host("ssh:host", FINGERPRINT, NOW, keep_generations=9)
 
+    def test_executor_removes_only_revalidated_candidate_in_reference_order(self):
+        manifest = self._manifest("execute")
+        request = new_backup_deletion_request("delete-execute", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(
+            request, manifest, NOW - timedelta(days=31)
+        ))
+        reconciliation = self.reconciliations.save(_reconciliation(
+            "reconcile-execute", deletion, manifest
+        ))
+        execution = BackupEvidenceRetentionExecutor(
+            BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+            self.evidence, self.deletions, self.reconciliations,
+        ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                  CancellationToken())
+        self.assertEqual(execution.state, EvidenceRetentionExecutionState.COMPLETED)
+        self.assertEqual(
+            execution.removed_kinds,
+            ("reconciliation", "manifest", "deletion"),
+        )
+        for load in (
+            lambda: self.reconciliations.load(reconciliation.reconciliation_id),
+            lambda: self.evidence.load(deletion),
+            lambda: self.deletions.load(deletion.request_id),
+        ):
+            with self.assertRaises(AdapterError):
+                load()
+
+    def test_executor_stops_after_partial_failure_and_preserves_root_result(self):
+        manifest = self._manifest("partial")
+        request = new_backup_deletion_request("delete-partial", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(
+            request, manifest, NOW - timedelta(days=31)
+        ))
+        reconciliation = self.reconciliations.save(_reconciliation(
+            "reconcile-partial", deletion, manifest
+        ))
+        execution = BackupEvidenceRetentionExecutor(
+            BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+            _FailingManifestDelete(self.evidence), self.deletions,
+            self.reconciliations,
+        ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                  CancellationToken())
+        self.assertEqual(execution.state, EvidenceRetentionExecutionState.PARTIAL)
+        self.assertEqual(execution.removed_kinds, ("reconciliation",))
+        self.assertEqual(execution.remaining_kinds, ("manifest", "deletion"))
+        self.assertEqual(self.deletions.load(deletion.request_id), deletion)
+        self.assertEqual(self.evidence.load(deletion), manifest)
+        with self.assertRaises(AdapterError):
+            self.reconciliations.load(reconciliation.reconciliation_id)
+
+    def test_executor_reports_failed_when_first_reference_cannot_be_removed(self):
+        manifest = self._manifest("failed")
+        request = new_backup_deletion_request("delete-failed", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(
+            request, manifest, NOW - timedelta(days=31)
+        ))
+        reconciliation = self.reconciliations.save(_reconciliation(
+            "reconcile-failed", deletion, manifest
+        ))
+        execution = BackupEvidenceRetentionExecutor(
+            BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+            self.evidence, self.deletions,
+            _FailingReconciliationDelete(self.reconciliations),
+        ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                  CancellationToken())
+        self.assertEqual(execution.state, EvidenceRetentionExecutionState.FAILED)
+        self.assertEqual(execution.removed_kinds, ())
+        self.assertEqual(
+            execution.remaining_kinds,
+            ("reconciliation", "manifest", "deletion"),
+        )
+        self.assertEqual(
+            self.reconciliations.load(reconciliation.reconciliation_id), reconciliation
+        )
+        self.assertEqual(self.evidence.load(deletion), manifest)
+        self.assertEqual(self.deletions.load(deletion.request_id), deletion)
+
+    def test_executor_rejects_non_candidate_without_deleting(self):
+        manifest = self._manifest("keep")
+        request = new_backup_deletion_request("delete-keep", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        deletion = self.deletions.save(_result(request, manifest, NOW))
+        with self.assertRaises(AdapterError):
+            BackupEvidenceRetentionExecutor(
+                BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+                self.evidence, self.deletions, self.reconciliations,
+            ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                      CancellationToken())
+        self.assertEqual(self.deletions.load(deletion.request_id), deletion)
+
     def _manifest(self, identity, *, protected=False):
         backup_id = f"backup-{identity}"
         manifest = self.backups.create(BackupRequest(
@@ -153,3 +253,34 @@ def _result(request, manifest, completed_at, *, recovery=False):
         DualCopyState.BOTH_AVAILABLE if recovery else DualCopyState.BOTH_DELETED,
         recovery, completed_at,
     ).with_hash()
+
+
+def _reconciliation(identity, deletion, manifest):
+    return BackupReconciliationResult(
+        "1.0", identity, deletion.result_hash, manifest.backup_id,
+        manifest.host_id, FINGERPRINT, manifest.manifest_hash, NOW,
+        CopyPresence.ABSENT, CopyPresence.ABSENT, DualCopyState.BOTH_DELETED,
+        False,
+    ).with_hash()
+
+
+class _FailingManifestDelete:
+    def __init__(self, delegate):
+        self.delegate = delegate
+
+    def load(self, result):
+        return self.delegate.load(result)
+
+    def delete(self, result):
+        raise AdapterError("manifest_delete_failed", "injected")
+
+
+class _FailingReconciliationDelete:
+    def __init__(self, delegate):
+        self.delegate = delegate
+
+    def list_for_deletion_result(self, source_hash, host_id, fingerprint):
+        return self.delegate.list_for_deletion_result(source_hash, host_id, fingerprint)
+
+    def delete(self, result):
+        raise AdapterError("reconciliation_delete_failed", "injected")

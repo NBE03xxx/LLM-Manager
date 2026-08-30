@@ -4,11 +4,12 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
 
-from llm_manager.application.errors import AdapterError
+from llm_manager.application.errors import AdapterError, OperationCancelled
+from llm_manager.application.ports import CancellationToken
 
 from .backup_deletion import BackupDeletionResultStore
 from .backup_manifest_evidence import BackupManifestEvidenceStore
-from .backup_reconciliation import DualCopyState
+from .backup_reconciliation import BackupReconciliationResultStore, DualCopyState
 
 
 class EvidenceRetentionDisposition(StrEnum):
@@ -113,3 +114,92 @@ class BackupEvidenceRetentionPlanner:
             ),
             reverse=True,
         ))
+
+
+class EvidenceRetentionExecutionState(StrEnum):
+    COMPLETED = "completed"
+    PARTIAL = "partial"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True, slots=True)
+class BackupEvidenceRetentionExecution:
+    request_hash: str
+    backup_id: str
+    state: EvidenceRetentionExecutionState
+    removed_kinds: tuple[str, ...]
+    remaining_kinds: tuple[str, ...]
+    error_code: str | None
+
+
+class BackupEvidenceRetentionExecutor:
+    """Delete only a freshly revalidated candidate, stopping after the first failure."""
+
+    def __init__(
+        self,
+        planner: BackupEvidenceRetentionPlanner,
+        manifests: BackupManifestEvidenceStore,
+        deletions: BackupDeletionResultStore,
+        reconciliations: BackupReconciliationResultStore,
+    ) -> None:
+        self.planner = planner
+        self.manifests = manifests
+        self.deletions = deletions
+        self.reconciliations = reconciliations
+
+    def execute(
+        self, request_hash: str, host_id: str, host_fingerprint: str,
+        now: datetime, cancellation: CancellationToken,
+    ) -> BackupEvidenceRetentionExecution:
+        if cancellation.cancelled:
+            raise OperationCancelled("evidence retention cancelled")
+        plan = self.planner.plan_for_host(host_id, host_fingerprint, now)
+        record = next((item for item in plan if item.request_hash == request_hash), None)
+        if record is None or record.disposition is not EvidenceRetentionDisposition.CANDIDATE:
+            raise AdapterError("evidence_retention_not_candidate", "evidence is not removable")
+        if record.deletion_request_id is None:
+            raise AdapterError("evidence_retention_binding_mismatch", "deletion result is missing")
+        deletion = self.deletions.load(record.deletion_request_id)
+        manifest = self.manifests.load(deletion)
+        if (manifest.backup_id, manifest.host_id, manifest.host_fingerprint) != (
+            record.backup_id, host_id, host_fingerprint,
+        ):
+            raise AdapterError("evidence_retention_binding_mismatch", "manifest changed identity")
+        reconciliation_results = self.reconciliations.list_for_deletion_result(
+            deletion.result_hash, host_id, host_fingerprint
+        )
+        if any(
+            (result.backup_id, result.manifest_hash) != (
+                deletion.backup_id, deletion.manifest_hash
+            )
+            for result in reconciliation_results
+        ):
+            raise AdapterError(
+                "evidence_retention_binding_mismatch", "reconciliation changed identity"
+            )
+        operations = [
+            *(("reconciliation", result, self.reconciliations.delete)
+              for result in reconciliation_results),
+            ("manifest", deletion, self.manifests.delete),
+            ("deletion", deletion, self.deletions.delete),
+        ]
+        removed = []
+        for index, (kind, value, delete) in enumerate(operations):
+            try:
+                if cancellation.cancelled:
+                    raise OperationCancelled("evidence retention cancelled")
+                delete(value)
+                removed.append(kind)
+            except (AdapterError, OperationCancelled, OSError, ValueError) as error:
+                remaining = tuple(item[0] for item in operations[index:])
+                return BackupEvidenceRetentionExecution(
+                    request_hash, record.backup_id,
+                    EvidenceRetentionExecutionState.PARTIAL if removed
+                    else EvidenceRetentionExecutionState.FAILED,
+                    tuple(removed), remaining,
+                    getattr(error, "code", "evidence_retention_failed"),
+                )
+        return BackupEvidenceRetentionExecution(
+            request_hash, record.backup_id, EvidenceRetentionExecutionState.COMPLETED,
+            tuple(removed), (), None,
+        )

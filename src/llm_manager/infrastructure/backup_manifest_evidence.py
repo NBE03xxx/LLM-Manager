@@ -9,7 +9,7 @@ from llm_manager.application.errors import AdapterError
 from llm_manager.domain.models import BackupManifest
 
 from .backup import (
-    MAX_MANIFEST_BYTES, _atomic_write, _manifest_bytes,
+    MAX_MANIFEST_BYTES, _atomic_write, _fsync_directory, _manifest_bytes,
     decode_backup_manifest_evidence,
 )
 from .backup_deletion import (
@@ -76,6 +76,12 @@ class BackupManifestEvidenceStore:
             key=lambda item: (item.manifest.created_at, item.request_hash),
             reverse=True,
         ))
+
+    def delete(self, deletion_result: BackupDeletionResult) -> None:
+        self.load(deletion_result)
+        path = self._path(deletion_result.request_hash)
+        path.unlink()
+        _fsync_directory(self.root)
 
     def _load(self, request_hash: str) -> BackupManifest:
         self._root_metadata()

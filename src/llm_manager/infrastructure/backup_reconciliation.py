@@ -17,7 +17,7 @@ from llm_manager.domain.enums import ValidationStatus
 from llm_manager.domain.models import BackupManifest
 from llm_manager.domain.serialization import to_primitive
 
-from .backup import _atomic_write
+from .backup import _atomic_write, _fsync_directory
 
 
 MAX_RECONCILIATION_RESULT_BYTES = 1024 * 1024
@@ -120,6 +120,23 @@ class BackupReconciliationResultStore:
                     raise AdapterError("reconciliation_binding_mismatch", "fingerprint changed")
                 results.append(result)
         return tuple(sorted(results, key=lambda item: item.observed_at, reverse=True))
+
+    def list_for_deletion_result(
+        self, source_result_hash: str, host_id: str, host_fingerprint: str,
+    ) -> tuple[BackupReconciliationResult, ...]:
+        if not _DIGEST.fullmatch(source_result_hash):
+            raise AdapterError("invalid_reconciliation_result", "source hash is invalid")
+        return tuple(
+            result for result in self.list_for_host(host_id, host_fingerprint)
+            if result.source_deletion_result_hash == source_result_hash
+        )
+
+    def delete(self, result: BackupReconciliationResult) -> None:
+        current = self.load(result.reconciliation_id)
+        if current != result:
+            raise AdapterError("reconciliation_binding_mismatch", "result changed identity")
+        self._path(result.reconciliation_id).unlink()
+        _fsync_directory(self.root)
 
     def _path(self, reconciliation_id: str) -> Path:
         if not _IDENTIFIER.fullmatch(reconciliation_id):

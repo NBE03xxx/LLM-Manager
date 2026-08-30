@@ -16,7 +16,7 @@ from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.models import BackupManifest, utc_now
 from llm_manager.domain.serialization import to_primitive
 
-from .backup import _atomic_write, _manifest_hash
+from .backup import _atomic_write, _fsync_directory, _manifest_hash
 from .backup_reconciliation import (
     BackupCopyReconciliation,
     CopyPresence,
@@ -157,6 +157,13 @@ class BackupDeletionResultStore:
                     raise AdapterError("deletion_result_binding_mismatch", "host fingerprint changed")
                 results.append(result)
         return tuple(sorted(results, key=lambda item: item.completed_at, reverse=True))
+
+    def delete(self, result: BackupDeletionResult) -> None:
+        current = self.load(result.request_id)
+        if current != result:
+            raise AdapterError("deletion_result_binding_mismatch", "result changed identity")
+        self._path(result.request_id).unlink()
+        _fsync_directory(self.root)
 
     def _path(self, request_id: str) -> Path:
         if not _IDENTIFIER.fullmatch(request_id):
