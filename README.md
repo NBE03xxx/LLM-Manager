@@ -39,6 +39,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [Local read-only validation](docs/validation/local-readonly-2026-08-29.md)
 - [Secret Service desktop validation](docs/validation/secret-service-desktop-2026-08-30.md)
 - [PolicyKit desktop validation](docs/validation/policykit-desktop-2026-08-30.md)
+- [SSH remote helper read-only validation](docs/validation/ssh-remote-helper-readonly-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)
 - [SSH AI server read-only validation](docs/validation/ssh-ai-server-readonly-2026-08-29.md)
 - [ADR](docs/adr/README.md)

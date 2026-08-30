@@ -8,6 +8,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `BackupEvidenceRetentionRuntimeTests`はexecution/request storeをabsolute XDG stateまたはhome fallbackの固定subdirectoryへ配置し、0700 application/runtime root、相対XDG、root path、symlink、unsafe modeをsandboxで検証する。
 
+実OpenSSH negative transport Gateでは`development`とAI serverにproduction adapterでread-only接続し、remote helper未導入をfixed helper/metadata `stat`だけで判定した。`HelperCompatibilityProbeTests`は欠落時にmetadata read、staging、sudo、helper起動へ進まないことを検証する。positive helper/transport Gateはdisposable SSH先へのdeb事前導入待ちである。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |

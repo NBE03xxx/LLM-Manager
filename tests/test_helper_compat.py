@@ -131,6 +131,17 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
         )
         self.assertTrue(all("BatchMode=yes" in request.argv for request in runner.requests))
 
+    def test_remote_missing_helper_stops_after_stat_without_read(self) -> None:
+        runner = _RemoteProbeRunner(missing=True)
+        host = OpenSshHostAdapter("development", runner)
+        result = remote_helper_compatibility_probe(
+            frozenset({"0.1.0~dev0"})
+        ).inspect(host, CancellationToken())
+        self.assertEqual(result.status, HelperCompatibilityStatus.MISSING)
+        self.assertEqual(result.reason, "helper_not_installed")
+        self.assertEqual(len(runner.requests), 2)
+        self.assertTrue(all(" stat " in request.argv[-1] for request in runner.requests))
+
 
 class _Host:
     def __init__(self, helper, metadata, content):
@@ -153,14 +164,17 @@ class _FailingHost:
 
 
 class _RemoteProbeRunner:
-    def __init__(self):
+    def __init__(self, *, missing=False):
         self.requests = []
+        self.missing = missing
         self.metadata = b'{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}\n'
 
     def run(self, request, cancellation):
         self.requests.append(request)
         remote = request.argv[-1]
         if " stat " in remote:
+            if self.missing:
+                return CommandResult(request.argv, 1, "", "missing", False, 1)
             mode = "755" if REMOTE_HELPER_PATH in remote else "644"
             size = 6 if REMOTE_HELPER_PATH in remote else len(self.metadata)
             output = f"regular file|{mode}|0|0|{size}"
