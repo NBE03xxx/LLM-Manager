@@ -1,7 +1,11 @@
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from llm_manager.application.errors import AdapterError
-from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider
+from llm_manager.infrastructure.secret_service import (
+    SecretServiceKeyProvider, SecretStorageBackend,
+)
 
 
 class _Backend:
@@ -61,6 +65,64 @@ class SecretServiceKeyProviderTests(unittest.TestCase):
         with self.assertRaisesRegex(AdapterError, "cancelled"):
             provider.get_key("local-master-v1", "local_secret_service")
         self.assertNotIn("local-master-v1", backend.values)
+
+
+class SecretStorageBackendTests(unittest.TestCase):
+    def test_missing_binding_is_stable_unavailable(self) -> None:
+        original_import = __import__
+
+        def importing(name, *args, **kwargs):
+            if name == "secretstorage":
+                raise ImportError("injected")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=importing):
+            with self.assertRaises(AdapterError) as raised:
+                SecretStorageBackend()
+        self.assertEqual(raised.exception.code, "secret_service_unavailable")
+
+    def test_backend_initializes_stores_and_loads_through_binding(self) -> None:
+        items = []
+        collection = _Collection(items)
+        module = SimpleNamespace(
+            dbus_init=lambda: object(),
+            check_service_availability=lambda connection: True,
+            get_default_collection=lambda connection: collection,
+            search_items=lambda connection, attributes: tuple(
+                item for item in items if item.attributes == attributes
+            ),
+        )
+        with patch.dict("sys.modules", {"secretstorage": module}):
+            backend = SecretStorageBackend()
+            self.assertIsNone(backend.load("desktop-gate"))
+            backend.store("desktop-gate", b"k" * 32)
+            self.assertEqual(backend.load("desktop-gate"), b"k" * 32)
+            with self.assertRaises(AdapterError) as raised:
+                backend.store("desktop-gate", b"x" * 32)
+        self.assertEqual(raised.exception.code, "key_already_exists")
+
+
+class _Collection:
+    def __init__(self, items):
+        self.items = items
+
+    def is_locked(self):
+        return False
+
+    def create_item(self, label, attributes, secret, **kwargs):
+        self.items.append(_Item(attributes, secret))
+
+
+class _Item:
+    def __init__(self, attributes, secret):
+        self.attributes = attributes
+        self.secret = secret
+
+    def is_locked(self):
+        return False
+
+    def get_secret(self):
+        return self.secret
 
 
 if __name__ == "__main__":
