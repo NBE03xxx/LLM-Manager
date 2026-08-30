@@ -14,7 +14,7 @@ from llm_manager.infrastructure.backup_evidence_retention import (
     EvidenceRetentionExecutionState,
 )
 from llm_manager.infrastructure.backup_evidence_retention_cleanup import (
-    BackupEvidenceRetentionCleanupService,
+    BackupEvidenceRetentionCleanupRequestStore, BackupEvidenceRetentionCleanupService,
     new_backup_evidence_retention_cleanup_request,
 )
 
@@ -36,9 +36,12 @@ class BackupEvidenceRetentionCleanupServiceTests(unittest.TestCase):
             "manifest_delete_failed", NOW,
         ).with_hash())
         self.cleanup = _Cleanup()
+        self.requests = BackupEvidenceRetentionCleanupRequestStore(
+            Path(self.temp.name) / "requests"
+        )
         self.service = BackupEvidenceRetentionCleanupService(
             BackupEvidenceRetentionExecutionStore(Path(self.temp.name) / "executions"),
-            self.cleanup,
+            self.requests, self.cleanup,
         )
 
     def tearDown(self):
@@ -52,6 +55,25 @@ class BackupEvidenceRetentionCleanupServiceTests(unittest.TestCase):
             self.service.execute(request, NOW, CancellationToken()), "resumed"
         )
         self.assertEqual(self.cleanup.calls, [(self.execution, request)])
+        self.assertEqual(self.requests.load("cleanup-1"), request)
+
+    def test_request_store_is_immutable_and_rejects_tamper_and_collision(self):
+        request = new_backup_evidence_retention_cleanup_request(
+            "cleanup-store", self.execution, now=NOW
+        )
+        self.assertEqual(self.requests.save(request), request)
+        self.assertEqual(self.requests.save(request), request)
+        with self.assertRaisesRegex(AdapterError, "reused"):
+            self.requests.save(replace(
+                request, created_at=request.created_at + timedelta(seconds=1),
+                expires_at=request.expires_at + timedelta(seconds=1),
+                request_hash="",
+            ).with_hash())
+        path = Path(self.temp.name) / "requests/cleanup-store.json"
+        content = path.read_bytes()
+        path.write_bytes(content[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            self.requests.load("cleanup-store")
 
     def test_rejects_tamper_expiry_binding_complete_and_cancel(self):
         request = new_backup_evidence_retention_cleanup_request(

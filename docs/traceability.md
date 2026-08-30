@@ -2,7 +2,7 @@
 
 Phase 4追跡注記: backup evidence retention executionのcanonical自己hash、request/host/deletion/reconciliation binding、immutable 0700/0600保存、改ざん・filename・metadata拒否を`BackupEvidenceRetentionPlannerTests`で検証済み。executorの`completed`/`partial`/`failed`全終了経路を保存へ接続し、保存失敗と途中削除後の保存失敗ではstable persistence errorから生成済みexecutionを取得できることを故障注入で検証する。再起動後のhost/fingerprint単位strict一覧、未知entry、fingerprint変更、同一request重複の拒否も同test classで検証する。
 
-`BackupEvidenceRetentionCleanupServiceTests`は、再起動後strict executionに束縛した明示的cleanup requestだけをdispatchし、改ざん、期限切れ、binding変更、`completed`、cancelをcleanup Port呼出し前に拒否することを検証する。orphan自動判定・自動削除とcleanup実処理は含めない。
+`BackupEvidenceRetentionCleanupServiceTests`は、再起動後strict executionに束縛した明示的cleanup requestだけをdispatchし、requestをmutation前に0700/0600 immutable storeへ保存することを検証する。改ざん、期限切れ、binding変更、`completed`、cancel、cleanup ID衝突、保存済みrequest改ざんをcleanup Port呼出し前に拒否する。orphan自動判定・自動削除とcleanup実処理は含めない。
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|

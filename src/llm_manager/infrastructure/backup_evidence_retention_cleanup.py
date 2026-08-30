@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import stat
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Protocol
 
 from llm_manager.application.errors import AdapterError, OperationCancelled
@@ -16,11 +19,13 @@ from .backup_evidence_retention import (
     BackupEvidenceRetentionExecutionStore,
     EvidenceRetentionExecutionState,
 )
+from .backup import _atomic_write
 
 
 _IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 _DIGEST = re.compile(r"[0-9a-f]{64}")
 _FINGERPRINT = re.compile(r"SHA256:[A-Za-z0-9+/]{43}")
+MAX_EVIDENCE_RETENTION_CLEANUP_REQUEST_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,15 +56,99 @@ class BackupEvidenceRetentionCleanupPort(Protocol):
     ) -> object: ...
 
 
+class BackupEvidenceRetentionCleanupRequestStore:
+    """Persist an immutable cleanup request before any resumed deletion."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root.absolute()
+        if self.root == Path("/") or self.root.is_symlink():
+            raise ValueError("unsafe evidence retention cleanup request root")
+
+    def save(
+        self, request: BackupEvidenceRetentionCleanupRequest,
+    ) -> BackupEvidenceRetentionCleanupRequest:
+        _validate_request(request, None)
+        self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(self.root, 0o700)
+        self._root_metadata()
+        path = self._path(request.cleanup_id)
+        if path.exists() or path.is_symlink():
+            current = self.load(request.cleanup_id)
+            if current != request:
+                raise AdapterError(
+                    "evidence_retention_cleanup_request_collision",
+                    "cleanup identity was reused",
+                )
+            return current
+        _atomic_write(path, _bytes(request), 0o600)
+        return self.load(request.cleanup_id)
+
+    def load(self, cleanup_id: str) -> BackupEvidenceRetentionCleanupRequest:
+        self._root_metadata()
+        path = self._path(cleanup_id)
+        if path.is_symlink() or not path.is_file():
+            raise AdapterError(
+                "evidence_retention_cleanup_request_not_found",
+                "cleanup request is missing",
+            )
+        metadata = path.stat(follow_symlinks=False)
+        if (
+            stat.S_IMODE(metadata.st_mode) != 0o600
+            or metadata.st_uid != os.getuid()
+            or metadata.st_size > MAX_EVIDENCE_RETENTION_CLEANUP_REQUEST_BYTES
+        ):
+            raise AdapterError(
+                "unsafe_evidence_retention_cleanup_request",
+                "cleanup request metadata is unsafe",
+            )
+        content = path.read_bytes()
+        request = _decode_request(content)
+        if content != _bytes(request):
+            raise AdapterError(
+                "invalid_evidence_retention_cleanup_request",
+                "cleanup request is not canonical",
+            )
+        _validate_request(request, None)
+        if request.cleanup_id != cleanup_id:
+            raise AdapterError(
+                "evidence_retention_cleanup_binding_mismatch",
+                "cleanup filename changed identity",
+            )
+        return request
+
+    def _path(self, cleanup_id: str) -> Path:
+        if not isinstance(cleanup_id, str) or not _IDENTIFIER.fullmatch(cleanup_id):
+            raise AdapterError(
+                "invalid_evidence_retention_cleanup_request",
+                "cleanup ID is invalid",
+            )
+        return self.root / f"{cleanup_id}.json"
+
+    def _root_metadata(self) -> None:
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError(
+                "unsafe_evidence_retention_cleanup_request",
+                "cleanup request root is unsafe",
+            )
+        metadata = self.root.stat(follow_symlinks=False)
+        if stat.S_IMODE(metadata.st_mode) != 0o700 or metadata.st_uid != os.getuid():
+            raise AdapterError(
+                "unsafe_evidence_retention_cleanup_request",
+                "cleanup request root metadata is unsafe",
+            )
+
+
 class BackupEvidenceRetentionCleanupService:
     """Authorize cleanup only from an explicit request bound to strict evidence."""
 
     def __init__(
         self,
         executions: BackupEvidenceRetentionExecutionStore,
+        requests: BackupEvidenceRetentionCleanupRequestStore,
         cleanup: BackupEvidenceRetentionCleanupPort,
     ) -> None:
         self.executions = executions
+        self.requests = requests
         self.cleanup = cleanup
 
     def execute(
@@ -103,7 +192,10 @@ class BackupEvidenceRetentionCleanupService:
             )
         if cancellation.cancelled:
             raise OperationCancelled("evidence retention cleanup cancelled")
-        return self.cleanup.resume(source, request, cancellation)
+        persisted = self.requests.save(request)
+        if cancellation.cancelled:
+            raise OperationCancelled("evidence retention cleanup cancelled")
+        return self.cleanup.resume(source, persisted, cancellation)
 
 
 def new_backup_evidence_retention_cleanup_request(
@@ -133,11 +225,11 @@ def _bytes(request: BackupEvidenceRetentionCleanupRequest) -> bytes:
 
 
 def _validate_request(
-    request: BackupEvidenceRetentionCleanupRequest, now: datetime,
+    request: BackupEvidenceRetentionCleanupRequest, now: datetime | None,
 ) -> None:
     if (
         not isinstance(request, BackupEvidenceRetentionCleanupRequest)
-        or now.tzinfo is None
+        or (now is not None and now.tzinfo is None)
         or request.schema_version != "1.0"
         or not _IDENTIFIER.fullmatch(request.cleanup_id)
         or not _DIGEST.fullmatch(request.source_execution_hash)
@@ -149,8 +241,8 @@ def _validate_request(
         or request.created_at.tzinfo is None
         or request.expires_at.tzinfo is None
         or request.expires_at != request.created_at + timedelta(minutes=5)
-        or now < request.created_at
-        or now > request.expires_at
+        or (now is not None and now < request.created_at)
+        or (now is not None and now > request.expires_at)
         or not request.remaining_kinds
         or any(
             kind not in {"reconciliation", "manifest", "deletion"}
@@ -164,3 +256,28 @@ def _validate_request(
             "invalid_evidence_retention_cleanup_request",
             "cleanup request is invalid",
         )
+
+
+def _decode_request(content: bytes) -> BackupEvidenceRetentionCleanupRequest:
+    try:
+        value = json.loads(content)
+        required = {
+            "backup_id", "cleanup_id", "created_at", "expires_at",
+            "host_fingerprint", "host_id", "remaining_kinds", "request_hash",
+            "schema_version", "source_execution_hash", "source_request_hash",
+        }
+        if not isinstance(value, dict) or set(value) != required:
+            raise ValueError("unexpected fields")
+        return BackupEvidenceRetentionCleanupRequest(
+            value["schema_version"], value["cleanup_id"],
+            value["source_execution_hash"], value["source_request_hash"],
+            value["backup_id"], value["host_id"], value["host_fingerprint"],
+            tuple(value["remaining_kinds"]),
+            datetime.fromisoformat(value["created_at"]),
+            datetime.fromisoformat(value["expires_at"]), value["request_hash"],
+        )
+    except (KeyError, TypeError, ValueError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise AdapterError(
+            "invalid_evidence_retention_cleanup_request",
+            "cleanup request cannot be decoded",
+        ) from error
