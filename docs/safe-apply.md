@@ -4,7 +4,9 @@ backup evidence retention executionはrequest、host/fingerprint、deletion/reco
 
 `partial`/`failed`からcleanup Portへ進めるのは明示的な5分期限requestだけとする。requestはcleanup ID、source execution/request hash、backup、host/fingerprint、残存kindを自己hashで束縛する。serviceはexecution store全体のstrict列挙後にsourceと全bindingを再検証し、requestを0700/0600 immutable canonical storeへ保存して再読込できた後だけPortを呼ぶ。cleanup IDの再利用は同一内容だけを許し、別内容との衝突、`completed`、改ざん、期限切れ、cancelではPortを呼ばない。
 
-cleanup executorはsource executionが示す未削除suffixと、現在のdeletion result hash、manifest binding、reconciliation hash順を削除前に再照合する。参照逆順を維持し、失敗またはcancelで後続を止め、`completed`/`partial`/`failed`をcleanup request hashに束縛した新しいexecutionとしてimmutable保存する。source executionやorphanを自動的に再分類せず、さらに再開する場合も別の明示的cleanup requestを要求する。backup一覧はstrict storeからbackup IDごとの最新executionを読み、未完了状態と残存kindをattention表示するが、これをdual-delete/retry権限には使わずread-only refreshへ限定する。production配置は未実装である。
+cleanup executorはsource executionが示す未削除suffixと、現在のdeletion result hash、manifest binding、reconciliation hash順を削除前に再照合する。参照逆順を維持し、失敗またはcancelで後続を止め、`completed`/`partial`/`failed`をcleanup request hashに束縛した新しいexecutionとしてimmutable保存する。source executionやorphanを自動的に再分類せず、さらに再開する場合も別の明示的cleanup requestを要求する。backup一覧はstrict storeからbackup IDごとの最新executionを読み、未完了状態と残存kindをattention表示するが、これをdual-delete/retry権限には使わずread-only refreshへ限定する。GUI wiringと実desktop起動Gateは未実施である。
+
+production user-state compositionはexecutionとcleanup requestを`$XDG_STATE_HOME/llm-manager/backup-evidence-retention/{executions,cleanup-requests}`へ固定する。`XDG_STATE_HOME`が相対値なら`$HOME/.local/state`へフォールバックし、root pathを拒否する。既存`llm-manager`または専用state rootがsymlink、非directory、別owner、0700以外なら自動修復せず停止する。新規rootは0700で作成・再検証してからstoreを公開する。実desktop起動Gateは未実施である。
 
 ## 1. 基本ワークフロー
 

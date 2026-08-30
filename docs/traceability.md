@@ -6,6 +6,8 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 `BackupInventoryServiceTests`はlatest evidence retention executionと残存kindを再起動後repositoryから表示し、未完了executionをattentionへ反映する一方、dual-delete/retry mutation authorityへ使用せずread-only refreshだけを提示することを検証する。
 
+`BackupEvidenceRetentionRuntimeTests`はexecution/request storeをabsolute XDG stateまたはhome fallbackの固定subdirectoryへ配置し、0700 application/runtime root、相対XDG、root path、symlink、unsafe modeをsandboxで検証する。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |
