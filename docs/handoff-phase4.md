@@ -4,36 +4,38 @@
 
 ---
 
-LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行してください。
+LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreを続行してください。
 
 ## 作業場所
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新の実装commit: `c17644a Persist backup evidence retention executions`（この文書のcommitが後続する場合あり）
+- 最新の実装commit: `363a5b4 Validate remote journal reconciliation`（この引き継ぎ文書のcommitが後続する）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
 ## 確定済み要件
 
 - 正式対象: Ubuntu 26.04、Debian 13
-- Python検証基準: 3.14.4
-- Ollama検証基準: 0.33.2
-- OpenCode検証基準: 1.18.25
-- UI言語: localeに基づく日本語・英語
-- root必須systemd drop-in変更までMVP対象。GUI全体はrootにせず必要操作のみ昇格
-- SSHはOpenSSH、`~/.ssh/config`、Agent、ProxyJump等を利用
-- 秘密鍵・SSHパスワードを独自保存しない。対話認証は外部端末とControlMasterを利用
-- バックアップはローカル正本＋SSH先復元用コピー
-- 保持は30日かつホストごと直近10世代、手動保護は削除しない
-- 一般配布は暗号化既定ON、開発モードは既定OFF
+- Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25を検証基準とする
+- UIはlocaleに基づく日本語・英語
+- root必須systemd drop-in変更までMVP対象。GUI全体はrootにしない
+- SSHはsystem OpenSSH、`~/.ssh/config`、Agent、ProxyJump等を利用
+- 秘密鍵・passwordを独自保存しない。対話認証は外部端末とControlMasterを利用
+- backupはlocal正本＋SSH先復元用copy
+- 保持は30日かつhostごと直近10世代、manual protectionは削除しない
+- 一般配布は暗号化既定ON、開発モード既定OFF
 
-## 実機情報
+## 実機情報と禁止事項
 
-- SSH alias `development`: 192.168.1.201、Ubuntu 26.04、OpenCode 1.18.18、Ollamaなし
+- `development`: 192.168.1.201、Ubuntu 26.04、OpenCode 1.18.18、Ollamaなし
 - AI server: `yoshimi@192.168.1.253`、Ubuntu 26.04、Ollama 0.33.2 active、OpenCodeなし
-- 実機のOllama/OpenCode/systemd/SSH設定を無断で変更しない
-- パスワードをチャットで尋ねない
+- disposable VM `llm-manager-gate`: Ubuntu 26.04、user `user`、remote helper 0.1.0~dev0導入済み
+- Gate専用sudoers、root journal evidence、user `/tmp` artifactはcleanup済み。通常の`sudo -n`は拒否状態
+- Ollama、OpenCode、systemd、SSH設定を無断変更しない
+- passwordをチャットで尋ねず、argv/stdin/logへ渡さない。sudo認証は外部端末だけで行う
+- main workstationへdebやdependencyを無断installしない
+- disposable OSでもmaterialなPolicyKit/sudoers/systemd変更は先に承認を得る
 
 ## 完了済み
 
@@ -41,111 +43,121 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreの実装を続行�
 - LocalBackupStore、AES-GCM、Secret Service provider abstraction
 - AtomicFileExecutor、FileValidator、SafeApplyCoordinator
 - rollback、`RECOVERY_REQUIRED`、operation journal、hash-chain audit
-- Ollama/OpenCode Validator、local helper protocol、PolicyKit境界
-- root専用Backup→Apply→Validate→Rollbackとhelper compatibility Gate
-- SSH切断後のread-only照合core
-- local正本＋remote recovery copyのdual backup Apply Gate
-- remote request/receiptのcanonical schemaとidentity/hash/fingerprint/key reference束縛
-- user-only SSH staging、system OpenSSH runner、private staging、固定helper identity
-- 転送切断、暗号化失敗、receipt取得失敗、改ざんのsandbox/fake故障注入
-- remote root-owned暗号化backend、専用key provider、production entrypoint
-- remote helper専用Debian package境界とcompatibility Gate
-- remote root journalのread-only取得とreconciliation接続
-- remote retention（30日＋ホストごと直近10世代、protected除外）
-- remote helper経由のcanonical一覧・削除request/receipt
-- dual-copy deletion coordination、片側失敗の保持・再照合・表示状態
-- 中断後のread-only recovery evidence。自動再削除はstaging cleanupだけに限定
-- deletion result、manifest/recovery evidence、reconciliation resultの永続化と改ざん検証
-- orphan判定はread-onlyで、自動変更しない
-- backup evidence retention planner/executor
-  - 実行直前に候補を再検証
-  - reconciliation→manifest evidence→deletion resultの参照逆順削除
-  - 各削除後にdirectory fsync
-  - 途中故障・cancelは`PARTIAL`/`FAILED`として停止し、自動再試行しない
-- backup evidence retention execution store
-  - request、backup、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛
-  - canonical JSON、immutable、0700/0600、owner/mode、symlink、size、filename identityを再読込時に検証
-  - 改ざん、unsafe metadata、filename不一致、重複保存を拒否
-- 最新の全単体テストは306件成功
+- Ollama/OpenCode runtime Validator
+- local helper protocol、PolicyKit境界、root専用Backup→Apply→Validate→Rollback
+- local/remote helper分離deb、helper compatibility Gate
+- local正本＋remote encrypted recovery copyのdual backup Apply Gate
+- remote request/receipt canonical schemaとidentity/hash/fingerprint/key binding
+- user-only SSH staging、request-last publication、固定helper identity
+- remote root AES-GCM backend、root key provider、production entrypoint
+- remote retention、canonical deletion、dual-copy deletion coordination
+- deletion/manifest/reconciliation evidenceのimmutable永続化と改ざん検証
+- backup evidence retention planner/executor/execution store
+  - 実行直前candidate再検証、参照逆順削除、各削除後directory fsync
+  - 全終了経路のexecution保存、保存失敗時も生成済みexecutionを公開
+  - restart後host/fingerprint単位strict一覧、未知entry・改ざん・重複拒否
+- `PARTIAL`/`FAILED`再開はimmutableな明示cleanup requestだけ
+- inventory表示はread-onlyで、自動orphan再判定・自動削除を行わない
+- remote request/receiptのlocal immutable保存とrestart回収
 
-## `142e5a2`以降の実装commit
+## 完了済み実機Gate
 
-- `0ec0491 Add remote recovery helper transport boundary`
-- `8050f1b Add user-only SSH recovery staging`
-- `8cb6467 Add sandbox remote backup retention`
-- `6033524 Reconcile dual-copy deletion outcomes`
-- `c88a74b Verify remote root journal before reconciliation`
-- `ae7df68 Add system OpenSSH staging runner`
-- `96f0fe0 Add remote sudo helper invocation`
-- `29c4aec Execute remote recovery requests safely`
-- `760119b Add remote recovery helper CLI core`
-- `fa999a0 Add remote root backup key provider`
-- `e68de83 Enable fixed remote root backup backend`
-- `eb8979e Add remote helper production entrypoint`
-- `f81ed6d Package remote recovery helper separately`
-- `7d46cf9 Gate remote staging on helper compatibility`
-- `51898ad Fetch remote root journal evidence safely`
-- `d4917a4 Expose remote retention through helper`
-- `c69518f Coordinate dual backup deletion safely`
-- `e4ac007 Connect remote backup deletion helper`
-- `12f7dc8 Recover interrupted backup deletion safely`
-- `23ff276 Aggregate backup retention status safely`
-- `6dd7bc6 Persist retention recovery evidence`
-- `7f580cb Reload persistent backup evidence safely`
-- `288d308 Limit backup retries to staging cleanup`
-- `2e46a29 Persist read-only backup reconciliation`
-- `7a272f0 Dispatch read-only backup reconciliation`
-- `a72d35d Preserve manifest evidence before deletion`
-- `1a4cfbf Plan backup evidence retention safely`
-- `3cc6aac Execute backup evidence retention safely`
-- `c17644a Persist backup evidence retention executions`
+- Secret Service desktop negative Gate
+  - GNOME/Wayland/session bus/keyring daemonあり
+  - source checkoutのsystem Pythonに`secretstorage`なし
+  - stable `secret_service_unavailable`、secret mutationなし
+- PolicyKit desktop negative Gate
+  - authority到達可能、action/helper未install、mutationなし
+- remote helper未導入hostのnegative compatibility Gate
+- `llm-manager-gate` positive recovery transport
+  - compatibility、user staging、外部端末sudo、root key/AES-GCM copy、receipt、cleanup
+- 別processでhelperを再実行しないrestart receipt recovery
+- 実remote retention（3件残存、削除0）
+- 実remote deletion（専用copyのみ削除、local正本保持、既存3件不変）
+- remote helper deb reinstall/remove/purge/reinstall
+  - package不在時`missing`、dpkg管理外root backup/key保持
+- 実SSH転送切断
+  - 16 MiB転送中に専用ControlMaster終了
+  - `remote_staging_failed`、request/result未公開、root helper 0回
+  - local正本検証成功、user staging cleanup
+- 実remote root journal evidence取得とread-only reconciliation
+  - production compatibility Gateと`OpenSshRemoteJournalPort`
+  - canonical evidence 928 bytesのbinding検証
+  - remote targetを`unapplied`と照合、Apply/rollbackなし
+  - Gate artifact全cleanup、cleanup後`remote_journal_failed`と`sudo -n`拒否
+- 実Gateで発見したevidence `status` binding漏れを修正。不一致はtarget観測前にfail closed
+- 最新の全単体テストは338件成功
 
-## 次の推奨作業（Phase 4 Safe Apply Core）
+## `c17644a`以降のcommit
 
-1. `BackupEvidenceRetentionExecutor`から`BackupEvidenceRetentionExecutionStore`への保存を接続する
-2. `COMPLETED`/`PARTIAL`/`FAILED`の全終了経路で、返却前にexecution evidenceを永続化する
-3. execution保存失敗時は削除済み状態を隠さず、stable errorとread-only再照合可能な境界を定義する
-4. 再起動後にexecutionをhost/fingerprint単位でstrict列挙し、改ざんや未知entryを拒否する
-5. 保存失敗、途中削除後の保存失敗、cancel、既存execution衝突をsandboxで故障注入する
-6. `PARTIAL`/`FAILED`からの再開は明示的cleanup requestだけに限定し、orphanの自動再判定・自動削除を禁止する
-7. local/remote証跡の片側欠落を表示用状態へ反映し、README、roadmap、traceability、safe-applyを同期する
+- `939f113 Update Phase 4 execution handoff`
+- `a6abb51 Persist evidence retention executor outcomes`
+- `01d519f Reload retention executions strictly`
+- `36d39e8 Gate retention cleanup with explicit requests`
+- `f4e47cf Persist retention cleanup requests`
+- `2d307e0 Execute explicit retention cleanup safely`
+- `ae1b352 Display retention execution evidence safely`
+- `da0a2e8 Compose retention evidence user state`
+- `3393056 Record Secret Service desktop availability gate`
+- `e874891 Record PolicyKit desktop availability gate`
+- `c6ec6b2 Validate remote helper absence safely`
+- `33ce298 Validate positive remote recovery transport`
+- `b4a5283 Persist remote recovery request identity`
+- `1b7684f Record restart receipt recovery gate`
+- `42a31f9 Authorize remote retention interactively`
+- `a469803 Persist verified remote recovery receipts`
+- `6f20287 Validate remote deletion transport`
+- `69fc4a9 Validate remote helper deb lifecycle`
+- `4f2b012 Validate live SSH transfer disconnect`
+- `363a5b4 Validate remote journal reconciliation`
 
-まず小さなcommitとして「executor→execution store保存接続＋保存失敗の故障注入」を実装し、その後に再起動後のstrict一覧・明示的cleanup再開境界へ進めてください。仕様をmaterially変更しない範囲では質問せず、安全側の仮定で進めてください。
+## 次の推奨作業（Phase 4）
 
-## 現在の重要な未完了Gate
+残る大きなGateはdesktop positiveとDebian 13/local package lifecycleである。
 
-- backup evidence retention executorからexecution storeへの保存接続
-- executionの再起動後strict一覧と明示的cleanup再開境界
-- Secret Service実desktop Gate
-- 実SSH transportとremote helperの実機integration Gate
-- remote root-owned backend、remote key生成・配置、retentionの実機Gate
-- remote root journal取得と実SSH切断integration
-- PolicyKit実desktop認証
-- debの実install/upgrade/remove/purge
-- Debian 13実機差異確認
-- 実PolicyKit/systemd操作を行うdisposable OS Gate
+1. local `llm-manager` debのbuild/artifactとinstall/upgrade/remove/purge手順をread-only確認
+2. main workstationを変更せず実行できるdisposable desktop OSの有無を確認
+3. 利用可能ならlocal deb lifecycleを実施
+4. deb導入後のSecret Service positive Gate
+   - `python3-secretstorage`、default collectionへのGate専用key create/reload/delete
+   - 暗号化のsilent fallbackなし
+5. PolicyKit positive Gate
+   - action/helper owner/mode/package検証
+   - active desktop sessionで認証成功・dismiss/deny
+   - systemd操作はGate専用unit/pathのみ。Ollama/OpenCodeには触れない
+6. Debian 13でremote/local package、OpenSSH、PolicyKit、Secret Service差異を確認
+
+disposable desktop OSがなければmain workstationへのinstallを仮定せず、必要条件と構築手順を提示して止める。
+
+## 重要な未完了Gate
+
+- Secret Service実desktop positive
+- PolicyKit実desktop positive認証、dismiss、deny
+- local `llm-manager` deb install/upgrade/remove/purge
+- Debian 13実機差異
+- Gate専用path/unitを使う実PolicyKit/systemd操作
 - GUI Phase 5
 
-## 注意点
+## 安全境界
 
-- `BackupEvidenceRetentionExecutionStore`は実装済みだが、executorからの保存接続とproduction配置は未実装
-- execution storeは内容を永続化できるが、現時点のexecutorはexecutionを返すだけで自動保存しない
-- evidence削除は候補を実行直前に再検証し、参照逆順で行う
-- `PARTIAL`/`FAILED`後に自動再削除しない
-- journal/backup reconciliationはread-onlyで、自動再Apply/rollbackしない
-- HelperReceiptStoreの`executing` receiptは自動再実行しない
-- local正本はremote側失敗時も保持する
-- 実機のOllama、OpenCode、systemd、SSH設定を変更しない
+- evidence削除は実行直前再検証＋参照逆順。`PARTIAL`/`FAILED`後は自動再削除しない
+- journal/backup reconciliationはread-onlyで、自動Apply/rollbackしない
+- `executing` receiptを自動再実行しない
+- local正本はremote失敗時も保持する
+- staging cleanup以外のmutation retryは明示requestなしに行わない
+- remote journal取得は固定`read-journal-evidence <operation-id> <request-hash>`だけ
+- remote evidenceはstatusを含めlocal journalへbindingする
+- passwordless read権限がない場合、sudo timestamp共有へ依存しない
 
 ## 制約
 
-- 作業開始時と完了報告時に、現在および次の作業がPhaseの何であるかを明示する
-- 最初にREADME、docs、`git status`、直近差分、関連ソースとテストを確認する
-- ファイル編集は`apply_patch`を使う
-- 仮想環境作成、`pip install`は行わない
-- 実Ollama、OpenCode、systemd、SSH先を変更しない
-- テストはsandbox/fakeだけで行い、既存変更を尊重する
-- 実装後は必ず次を実行する:
+- 開始時と完了時に現在・次の作業が何Phaseか明示する
+- 最初にREADME、roadmap、traceability、safe-apply、validation、`git status`、直近差分、関連source/testを確認
+- 編集は`apply_patch`
+- venv作成、`pip install`禁止
+- 実Ollama/OpenCode/systemd/SSH設定を変更しない
+- sandbox/fakeを実機より先に使い、既存変更を尊重する
+- 実装後は必ず実行:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -156,9 +168,20 @@ git diff --check
 ```
 
 - 成功件数を報告する
-- まとまりごとにcommitし、`origin/main`へpushする
-- 仕様をmaterially変更する判断だけユーザーへ質問する
+- まとまりごとにcommitし`origin/main`へpushする
+- 仕様または実system policyのmaterialな変更だけ質問する
 
-まず`README.md`、`docs/roadmap.md`、`docs/traceability.md`、`docs/safe-apply.md`、`src/llm_manager/infrastructure/backup_evidence_retention.py`、`src/llm_manager/infrastructure/backup_deletion.py`、`src/llm_manager/infrastructure/backup_manifest_evidence.py`、`src/llm_manager/infrastructure/backup_reconciliation.py`、`tests/test_backup_evidence_retention.py`を確認してから作業を開始してください。
+まず次を確認してください。
+
+- `README.md`
+- `docs/roadmap.md`
+- `docs/traceability.md`
+- `docs/safe-apply.md`
+- `docs/packaging.md`
+- `docs/validation/secret-service-desktop-2026-08-30.md`
+- `docs/validation/policykit-desktop-2026-08-30.md`
+- `docs/validation/remote-helper-deb-lifecycle-2026-08-30.md`
+- `packaging/`
+- Secret Service、PolicyKit、local packagingの関連source/test
 
 ---
