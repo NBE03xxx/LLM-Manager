@@ -105,6 +105,19 @@ class LocalPolicyKitInvokerTests(unittest.TestCase):
                 )
             self.assertEqual(raised.exception.code, "privilege_denied")
 
+    def test_maps_uninstalled_helper_or_action_to_launch_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            content = b"safe"
+            request = _request(content)
+            runner = _Runner(CommandResult((PKEXEC,), 127, "", "", False, 1))
+            with self.assertRaises(AdapterError) as raised:
+                LocalPolicyKitInvoker(
+                    HelperStagingStore(Path(directory) / "stage"), runner
+                ).invoke(
+                    request, (("write-1", content),), CancellationToken()
+                )
+            self.assertEqual(raised.exception.code, "helper_launch_failed")
+
 
 if __name__ == "__main__":
     unittest.main()
