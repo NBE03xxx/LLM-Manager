@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper core、root変更専用Safe Apply workflow、local/remote helperの分離deb sandbox build/artifact Gate、remote helperのOpenSSH compatibility Gate、外部端末SSH対話sudo、実root-owned暗号化recovery copy、recovery request/receiptのimmutable user-state保存と再起動後回収、実remote retention/deletion、root journal evidence取得、backup evidence retentionと明示cleanup境界まで実装済みです。保存失敗時も生成済みexecutionを専用stable errorで上位へ公開し、削除済み状態を隠しません。実SSH転送切断時のrequest-last fail-closedとlocal正本保持も確認済みです。PySide6 GUIと残るdesktop/remote journal/Debian 13 integration Gateは未完了です。
+Phase 0〜3を完了し、現在は **Phase 4（Safe Apply Core）を実装中**です。local sandbox向けBackup Store、AES-GCM暗号化、Secret Service鍵provider、user-level atomic apply、実行後Validator、journal/audit、rollback Coordinator、限定特権helper core、root変更専用Safe Apply workflow、local/remote helperの分離deb sandbox build/artifact Gate、remote helperのOpenSSH compatibility Gate、外部端末SSH対話sudo、実root-owned暗号化recovery copy、recovery request/receiptのimmutable user-state保存と再起動後回収、実remote retention/deletion、root journal evidence取得、backup evidence retentionと明示cleanup境界まで実装済みです。保存失敗時も生成済みexecutionを専用stable errorで上位へ公開し、削除済み状態を隠しません。実SSH転送切断時のrequest-last fail-closed、local正本保持、root journal evidence取得後のread-only照合も確認済みです。PySide6 GUIと残るdesktop/Debian 13 integration Gateは未完了です。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
@@ -43,6 +43,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [SSH remote helper positive validation](docs/validation/ssh-remote-helper-positive-2026-08-30.md)
 - [Remote helper deb lifecycle validation](docs/validation/remote-helper-deb-lifecycle-2026-08-30.md)
 - [SSH transfer disconnect validation](docs/validation/ssh-transfer-disconnect-2026-08-30.md)
+- [SSH remote journal reconciliation validation](docs/validation/ssh-remote-journal-reconciliation-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)
 - [SSH AI server read-only validation](docs/validation/ssh-ai-server-readonly-2026-08-29.md)
 - [ADR](docs/adr/README.md)

@@ -166,6 +166,31 @@ class OpenSshRemoteJournalPortTests(unittest.TestCase):
             )
             self.assertEqual(result[0].state, ReconciliationState.UNAPPLIED)
 
+            changed_status = encode_remote_journal_evidence(
+                replace(
+                    RemoteJournalEvidence(
+                        "1.0", journal.operation_id, journal.plan_id, journal.host_id,
+                        current_manifest.host_fingerprint, journal.change_set_hash,
+                        journal.backup_id, journal.manifest_hash, journal.request_hash,
+                        journal.rollback_request_hash, JournalStatus.COMMITTED,
+                        journal.targets, "f" * 64,
+                    ),
+                    evidence_hash="",
+                ).with_hash()
+            )
+            changed_port = OpenSshRemoteJournalPort(
+                "host",
+                _Runner(CommandResult(("ssh",), 0, changed_status.decode(), "", False, 1)),
+                _Gate(),
+            )
+            with self.assertRaises(AdapterError) as caught:
+                RemoteJournalReconciler(local, changed_port).reconcile(
+                    "operation-1", current_manifest,
+                    _Host(current_manifest.host_fingerprint, "b" * 64),
+                    CancellationToken(),
+                )
+            self.assertEqual(caught.exception.code, "remote_journal_unverified")
+
 
 def _evidence() -> bytes:
     return encode_remote_journal_evidence(

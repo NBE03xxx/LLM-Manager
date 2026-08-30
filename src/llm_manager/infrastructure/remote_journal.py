@@ -199,6 +199,7 @@ def validate_evidence_binding(
         or evidence.manifest_hash != journal.manifest_hash
         or evidence.request_hash != journal.request_hash
         or evidence.rollback_request_hash != journal.rollback_request_hash
+        or evidence.status != journal.status
         or evidence.targets != journal.targets
     ):
         raise AdapterError(

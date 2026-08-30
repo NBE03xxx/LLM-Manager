@@ -23,4 +23,4 @@ item-first/request-lastのため、不完全な転送はroot operationとして�
 
 ## Remaining Gate
 
-変更実行後に接続が失われた場合のremote root journal evidence取得と、targetのread-only reconciliationを実SSHで確認する。Debian 13でのtransport差異も別Gateで確認する。
+remote root journal evidence取得とtargetのread-only reconciliationは後続Gateで完了した。Debian 13でのtransport差異は別Gateで確認する。

@@ -54,4 +54,4 @@ local immutable receipt store実装後、専用backup `deletion-gate-20260830`�
 
 ## Remaining Gate
 
-転送中の実ネットワーク切断、root journal取得、deb install/upgrade/remove/purgeは別Gateで検証する。既存3件のGate専用root backupはdisposable VM上の検証証跡として保持する。
+転送中の実ネットワーク切断、root journal取得、remote helper deb install/upgrade/remove/purgeは後続Gateで完了した。既存3件のGate専用root backupはdisposable VM上の検証証跡として保持する。Debian 13差異とlocal package lifecycleは別Gateである。
