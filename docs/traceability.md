@@ -1,5 +1,7 @@
 # Phase 0 Traceability Matrix
 
+Phase 4追跡注記: backup evidence retention executionのcanonical自己hash、request/host/deletion/reconciliation binding、immutable 0700/0600保存、改ざん・filename・metadata拒否を`BackupEvidenceRetentionPlannerTests`で検証済み。executorからの保存接続は未完了。
+
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
 | FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |

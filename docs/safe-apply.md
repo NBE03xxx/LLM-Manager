@@ -1,5 +1,7 @@
 # 安全な設定変更設計
 
+backup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、0700/0600 immutable canonical storeで再読込時のcanonical形式、mode、owner、symlink、filename identity、内容hashを検証する。executorからの保存接続とproduction配置は未実装である。
+
 ## 1. 基本ワークフロー
 
 ```mermaid

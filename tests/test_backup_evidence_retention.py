@@ -15,7 +15,8 @@ from llm_manager.infrastructure.backup_deletion import (
     new_backup_deletion_request,
 )
 from llm_manager.infrastructure.backup_evidence_retention import (
-    BackupEvidenceRetentionExecutor, BackupEvidenceRetentionPlanner,
+    BackupEvidenceRetentionExecutionStore, BackupEvidenceRetentionExecutor,
+    BackupEvidenceRetentionPlanner,
     EvidenceRetentionDisposition, EvidenceRetentionExecutionState,
 )
 from llm_manager.infrastructure.backup_manifest_evidence import BackupManifestEvidenceStore
@@ -151,6 +152,12 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
                   CancellationToken())
         self.assertEqual(execution.state, EvidenceRetentionExecutionState.COMPLETED)
+        self.assertEqual(execution.host_id, "ssh:host")
+        self.assertEqual(execution.host_fingerprint, FINGERPRINT)
+        self.assertEqual(execution.deletion_result_hash, deletion.result_hash)
+        self.assertEqual(
+            execution.reconciliation_result_hashes, (reconciliation.result_hash,)
+        )
         self.assertEqual(
             execution.removed_kinds,
             ("reconciliation", "manifest", "deletion"),
@@ -162,6 +169,33 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
         ):
             with self.assertRaises(AdapterError):
                 load()
+
+        store = BackupEvidenceRetentionExecutionStore(self.root / "executions")
+        self.assertEqual(store.save(execution), execution)
+        self.assertEqual(store.load(execution.execution_hash), execution)
+        with self.assertRaisesRegex(AdapterError, "immutable"):
+            store.save(execution)
+
+    def test_execution_store_rejects_tamper_filename_and_unsafe_metadata(self):
+        execution = self._execution("stored")
+        store = BackupEvidenceRetentionExecutionStore(self.root / "executions")
+        store.save(execution)
+        path = self.root / "executions" / f"{execution.execution_hash}.json"
+        content = path.read_bytes()
+        path.write_bytes(content.replace(b"backup-stored", b"backup-changed"))
+        with self.assertRaises(AdapterError):
+            store.load(execution.execution_hash)
+
+        path.write_bytes(content)
+        path.chmod(0o644)
+        with self.assertRaisesRegex(AdapterError, "metadata"):
+            store.load(execution.execution_hash)
+
+        path.chmod(0o600)
+        wrong_hash = "f" * 64
+        path.rename(path.with_name(f"{wrong_hash}.json"))
+        with self.assertRaisesRegex(AdapterError, "filename"):
+            store.load(wrong_hash)
 
     def test_executor_stops_after_partial_failure_and_preserves_root_result(self):
         manifest = self._manifest("partial")
@@ -239,6 +273,17 @@ class BackupEvidenceRetentionPlannerTests(unittest.TestCase):
             self.backups.set_protected("ssh:host", backup_id, True)
             if protected else manifest
         )
+
+    def _execution(self, identity):
+        manifest = self._manifest(identity)
+        request = new_backup_deletion_request(f"delete-{identity}", manifest, now=NOW)
+        self.evidence.save(request, manifest)
+        self.deletions.save(_result(request, manifest, NOW - timedelta(days=31)))
+        return BackupEvidenceRetentionExecutor(
+            BackupEvidenceRetentionPlanner(self.evidence, self.deletions),
+            self.evidence, self.deletions, self.reconciliations,
+        ).execute(request.request_hash, "ssh:host", FINGERPRINT, NOW,
+                  CancellationToken())
 
 
 def _result(request, manifest, completed_at, *, recovery=False):
