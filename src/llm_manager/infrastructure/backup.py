@@ -357,8 +357,26 @@ def _read_manifest(path: Path, backup_directory: Path, expected_host_id: str) ->
     if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_MANIFEST_BYTES:
         raise AdapterError("invalid_manifest", "manifest file is missing or unsafe")
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        content = path.read_bytes()
+    except OSError as error:
+        raise AdapterError("invalid_manifest", "manifest cannot be read") from error
+    manifest = decode_backup_manifest_evidence(content)
+    if (
+        manifest.host_id != expected_host_id
+        or manifest.backup_id != backup_directory.name
+        or Path(manifest.storage_location).resolve() != backup_directory.resolve()
+    ):
+        raise AdapterError("invalid_manifest", "manifest identity or integrity check failed")
+    return manifest
+
+
+def decode_backup_manifest_evidence(content: bytes) -> BackupManifest:
+    """Decode canonical manifest identity without requiring its backup directory to exist."""
+    if not isinstance(content, bytes) or len(content) > MAX_MANIFEST_BYTES:
+        raise AdapterError("invalid_manifest", "manifest exceeds size limit")
+    try:
+        value = json.loads(content.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise AdapterError("invalid_manifest", "manifest is not valid UTF-8 JSON") from error
     if not isinstance(value, dict):
         raise AdapterError("invalid_manifest", "manifest root must be an object")
@@ -396,12 +414,9 @@ def _read_manifest(path: Path, backup_directory: Path, expected_host_id: str) ->
     except (KeyError, TypeError, ValueError, InvariantViolation) as error:
         raise AdapterError("invalid_manifest", "manifest fields are invalid") from error
     if (
-        manifest.host_id != expected_host_id
-        or manifest.backup_id != backup_directory.name
-        or Path(manifest.storage_location).resolve() != backup_directory.resolve()
-        or not manifest.complete
+        not manifest.complete
         or _manifest_hash(replace(manifest, manifest_hash="")) != manifest.manifest_hash
-        or _manifest_bytes(manifest) != path.read_bytes()
+        or _manifest_bytes(manifest) != content
     ):
         raise AdapterError("invalid_manifest", "manifest identity or integrity check failed")
     return manifest

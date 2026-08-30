@@ -12,7 +12,9 @@ from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
 from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.backup_deletion import (
     BackupDeletionResult, BackupDeletionResultStore, CopyDeleteOutcome,
+    new_backup_deletion_request,
 )
+from llm_manager.infrastructure.backup_manifest_evidence import BackupManifestEvidenceStore
 from llm_manager.infrastructure.backup_inventory import BackupListAction
 from llm_manager.infrastructure.backup_reconciliation import (
     BackupReconciliationResult, CopyPresence, DualCopyState,
@@ -43,16 +45,19 @@ class BackupReconciliationActionServiceTests(unittest.TestCase):
             EncryptionInfo(enabled=False),
         ), CancellationToken())
         self.deletions = BackupDeletionResultStore(root / "deletions")
+        self.request = new_backup_deletion_request("delete-1", self.manifest, now=NOW)
         self.deletion = self.deletions.save(BackupDeletionResult(
-            "1.0", "delete-1", "b" * 64, self.manifest.backup_id,
+            "1.0", "delete-1", self.request.request_hash, self.manifest.backup_id,
             self.manifest.host_id, FINGERPRINT, self.manifest.manifest_hash,
             CopyDeleteOutcome.FAILED, CopyDeleteOutcome.NOT_ATTEMPTED,
             "remote_failed", None, CopyPresence.PRESENT, CopyPresence.PRESENT,
             DualCopyState.BOTH_AVAILABLE, True, NOW,
         ).with_hash())
+        self.evidence = BackupManifestEvidenceStore(root / "manifest-evidence")
+        self.evidence.save(self.request, self.manifest)
         self.runner = _Runner()
         self.service = BackupReconciliationActionService(
-            self.manifests, self.deletions, self.runner
+            self.manifests, self.deletions, self.runner, self.evidence
         )
 
     def tearDown(self):
@@ -85,12 +90,6 @@ class BackupReconciliationActionServiceTests(unittest.TestCase):
                 BackupListAction.RECONCILE_COPIES, "reconcile-1", "backup-1",
                 "ssh:host", "SHA256:" + "z" * 43, CancellationToken(),
             )
-        self.manifests.delete(self.manifest, CancellationToken())
-        with self.assertRaises(AdapterError):
-            self.service.execute(
-                BackupListAction.RECONCILE_COPIES, "reconcile-1", "backup-1",
-                "ssh:host", FINGERPRINT, CancellationToken(),
-            )
         token = CancellationToken()
         token.cancel()
         with self.assertRaises(OperationCancelled):
@@ -99,6 +98,24 @@ class BackupReconciliationActionServiceTests(unittest.TestCase):
                 "ssh:host", FINGERPRINT, token,
             )
         self.assertEqual(self.runner.calls, [])
+
+    def test_uses_immutable_manifest_evidence_after_local_copy_is_deleted(self):
+        self.manifests.delete(self.manifest, CancellationToken())
+        result = self.service.execute(
+            BackupListAction.RECONCILE_COPIES, "reconcile-after-delete", "backup-1",
+            "ssh:host", FINGERPRINT, CancellationToken(),
+        )
+        self.assertEqual(result.reconciliation_id, "reconcile-after-delete")
+        self.assertEqual(self.runner.calls[0][2], self.manifest)
+        evidence_path = Path(self.temp.name) / (
+            f"manifest-evidence/{self.request.request_hash}.json"
+        )
+        evidence_path.write_bytes(evidence_path.read_bytes()[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            self.service.execute(
+                BackupListAction.RECONCILE_COPIES, "reconcile-tampered", "backup-1",
+                "ssh:host", FINGERPRINT, CancellationToken(),
+            )
 
 
 class _Runner:

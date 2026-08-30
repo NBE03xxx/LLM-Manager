@@ -93,6 +93,12 @@ class BackupDeletionCleanupPort(Protocol):
                         manifest: BackupManifest) -> bool: ...
 
 
+class BackupManifestEvidencePort(Protocol):
+    def save(
+        self, request: BackupDeletionRequest, manifest: BackupManifest
+    ) -> BackupManifest: ...
+
+
 @dataclass(frozen=True, slots=True)
 class BackupDeletionView:
     result: BackupDeletionResult
@@ -175,6 +181,7 @@ class CoordinatedBackupDeletion:
         reconciler: DualCopyDeletionReconciler,
         results: BackupDeletionResultStore,
         cleanup: BackupDeletionCleanupPort | None = None,
+        manifest_evidence: BackupManifestEvidencePort | None = None,
         *,
         clock=utc_now,
     ) -> None:
@@ -183,6 +190,7 @@ class CoordinatedBackupDeletion:
         self.reconciler = reconciler
         self.results = results
         self.cleanup = cleanup
+        self.manifest_evidence = manifest_evidence
         self.clock = clock
 
     def delete(
@@ -193,6 +201,10 @@ class CoordinatedBackupDeletion:
     ) -> BackupDeletionResult:
         now = self.clock()
         _validate_request(request, manifest, now)
+        if cancellation.cancelled:
+            raise OperationCancelled("backup deletion cancelled")
+        if self.manifest_evidence is not None:
+            self.manifest_evidence.save(request, manifest)
         if cancellation.cancelled:
             raise OperationCancelled("backup deletion cancelled")
         remote_outcome, remote_error = self._delete_copy(

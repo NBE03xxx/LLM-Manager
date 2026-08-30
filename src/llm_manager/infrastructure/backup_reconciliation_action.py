@@ -8,6 +8,7 @@ from llm_manager.domain.models import BackupManifest
 
 from .backup_deletion import BackupDeletionResultStore
 from .backup_inventory import BackupListAction
+from .backup_manifest_evidence import BackupManifestEvidenceStore
 from .backup_reconciliation import BackupReconciliationResult, BackupReconciliationRunner
 
 
@@ -23,10 +24,12 @@ class BackupReconciliationActionService:
         manifests: ReconciliationManifestPort,
         deletion_results: BackupDeletionResultStore,
         runner: BackupReconciliationRunner,
+        manifest_evidence: BackupManifestEvidenceStore | None = None,
     ) -> None:
         self.manifests = manifests
         self.deletion_results = deletion_results
         self.runner = runner
+        self.manifest_evidence = manifest_evidence
 
     def execute(
         self,
@@ -61,6 +64,8 @@ class BackupReconciliationActionService:
         manifest = next(
             (value for value in manifests if value.backup_id == backup_id), None
         )
+        if manifest is None and self.manifest_evidence is not None:
+            manifest = self.manifest_evidence.load(deletion)
         if manifest is None:
             raise AdapterError("reconciliation_manifest_not_found", "manifest is unavailable")
         if (manifest.host_fingerprint != host_fingerprint
