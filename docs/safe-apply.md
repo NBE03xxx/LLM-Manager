@@ -149,7 +149,7 @@ remote sudo invokerは最初に固定`sudo -n -v`だけでpasswordless可否を�
 
 remote retentionはreceiptと分離したcanonical recordに`backup ID + host ID + receipt hash + created/expires + protected`を束縛する。hostごとに作成時刻の新しい順で数え、30日超過または11世代目以降の未保護copyを古い順に削除する。ただしprotected copyと対象hostの最後の1 copyは残す。削除対象directoryに未知entry、owner/mode不一致、symlink、非regular fileがあれば一部削除を始めず拒否する。
 
-限定`invoke-retention <request-id> <request-hash>` operationはuser stagingのcanonical requestをroot側で再読込し、host ID/fingerprint、request hash、5分以下の期限と現在時刻を検証する。保持世代数や任意pathはrequestに含めず10世代へ固定する。全receiptのhost fingerprintを削除前に照合し、canonical resultへroot評価時刻、removed/remaining backup ID、`completed/partial/failed/unknown`を束縛する。削除途中失敗後はread-only再一覧だけを行い、再一覧も不可能ならunknownとして自動再削除しない。resultはuser stagingへ0600 immutable保存するため、SSH timeout等でinvoke結果が曖昧でも同じrequest identityから再読込・検証する。OpenSSHはhelper互換性再検証後の固定passwordless sudoだけを使う。fake統合まで完了し、実SSH先では未実行である。
+限定`invoke-retention <request-id> <request-hash>` operationはuser stagingのcanonical requestをroot側で再読込し、host ID/fingerprint、request hash、5分以下の期限と現在時刻を検証する。保持世代数や任意pathはrequestに含めず10世代へ固定する。全receiptのhost fingerprintを削除前に照合し、canonical resultへroot評価時刻、removed/remaining backup ID、`completed/partial/failed/unknown`を束縛する。requestはinvoke前にlocal private immutable attemptへ保存する。remote resultをlocal private immutable storeへ回収した後だけstagingをcleanupし、切断・再起動時は同一identity resultを取得してpruneを再実行しない。cleanup失敗はpendingとしてcleanupだけを再試行する。fake統合まで完了し、実SSH先では未実行である。
 
 local/remote削除後は両copyを独立に再観測する。検証済みで存在するcopyを`present`、保存先が明確に存在しない場合だけ`absent`、改ざん・権限・切断等を`unknown`とし、組合せを`both_available`、`local_only`、`remote_only`、`both_deleted`、`unknown`として表示する。片側失敗時に整合性を作る目的で残存copyを自動削除せず、再試行または保護判断をユーザーReviewへ戻す。
 
@@ -159,7 +159,7 @@ remote削除protocolはlocal manifest bindingに加え、直前に検証したre
 
 remote deletion requestはroot helper起動前にlocalの0700 storeへ0600 immutable attemptとして保存する。invoke後に接続が切れてresultを読めない場合はremote outcomeを`unknown`としてlocal正本とuser stagingを保持する。再起動後は保存済みattemptから同一request ID/hashのresultだけをbounded readし、root helperを再実行しない。検証済みresultにより協調削除を完了しlocal resultを保存した後だけuser stagingをcleanupする。cleanup失敗は削除結果を書き換えず`staging_cleanup_pending`として表示し、再試行はcleanupだけに限定する。
 
-backup一覧はlocal manifest、remote retention record、直近local/remote retention evidence、検証済み削除resultをcopyごとにread-only集約する。local retention resultも削除前後の一覧差分、host、評価時刻、removed/remaining、partial/failed/unknown、errorをhashで束縛する。変更再試行はimmutable evidenceから安全に限定できる場合だけ提示する。remote outcome不明は同一result回収、remote失敗かつ両copy存在はremote-first協調削除の新規承認、remote削除済みかつlocal失敗はlocal削除、cleanup pendingはcleanupだけを許す。protected、remote-only、copy観測不能では変更を許さずread-only再照合へ戻す。
+backup一覧はlocal manifest、remote retention record、直近local/remote retention evidence、検証済み削除resultをcopyごとにread-only集約する。local retention resultも削除前後の一覧差分、host、評価時刻、removed/remaining、partial/failed/unknown、errorをhashで束縛し、0700 directory内の0600 immutable fileへ保存する。再読込時はcanonical形式、hash、owner、mode、sizeを検証する。変更再試行はimmutable evidenceから安全に限定できる場合だけ提示し、protected、remote-only、copy観測不能ではread-only再照合へ戻す。
 
 ## 9. 冪等性・競合
 

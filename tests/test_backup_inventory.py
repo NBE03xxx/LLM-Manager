@@ -15,7 +15,7 @@ from llm_manager.infrastructure.backup_deletion import (
 )
 from llm_manager.infrastructure.backup_inventory import (
     BackupInventoryService, BackupListAction, LocalRetentionResult,
-    LocalRetentionRunner, RetentionRunEvidence,
+    LocalRetentionResultStore, LocalRetentionRunner, RetentionRunEvidence,
 )
 from llm_manager.infrastructure.backup_reconciliation import CopyPresence, DualCopyState
 from llm_manager.infrastructure.remote_backup import RemoteRetentionRecord
@@ -150,12 +150,29 @@ class BackupInventoryServiceTests(unittest.TestCase):
 
     def test_local_retention_runner_reconciles_backend_result(self):
         backend = _LocalRetentionBackend((self.manifest,))
-        result = LocalRetentionRunner(backend).prune(
+        store = LocalRetentionResultStore(Path(self.temp.name) / "retention-results")
+        result = LocalRetentionRunner(backend, store).prune(
             "local-retention-1", "ssh:host", NOW
         )
         self.assertEqual(result.state, RemoteRetentionState.COMPLETED)
         self.assertEqual(result.removed_backup_ids, ("backup-1",))
         self.assertEqual(result.remaining_backup_ids, ())
+        self.assertEqual(store.load("local-retention-1"), result)
+        self.assertEqual((Path(self.temp.name) / "retention-results").stat().st_mode & 0o777, 0o700)
+        with self.assertRaises(AdapterError):
+            store.save(result)
+
+    def test_local_retention_store_rejects_tamper(self):
+        store = LocalRetentionResultStore(Path(self.temp.name) / "retention-results")
+        result = LocalRetentionResult(
+            "1.0", "local-retention-2", "ssh:host", NOW,
+            RemoteRetentionState.COMPLETED, (), ("backup-1",), None,
+        ).with_hash()
+        store.save(result)
+        path = Path(self.temp.name) / "retention-results/local-retention-2.json"
+        path.write_bytes(path.read_bytes()[:-1] + b" ")
+        with self.assertRaises(AdapterError):
+            store.load("local-retention-2")
 
 
 class _Local:

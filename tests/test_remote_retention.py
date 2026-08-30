@@ -11,6 +11,8 @@ from llm_manager.application.ports import CancellationToken, CommandResult
 from llm_manager.infrastructure.openssh_remote_retention import (
     OpenSshRemoteRetentionInvoker,
     OpenSshRemoteRetentionPort,
+    RemoteRetentionAttemptStore,
+    RemoteRetentionResultStore,
 )
 from llm_manager.infrastructure.remote_backup import RemoteRetentionRecord
 from llm_manager.infrastructure.remote_retention import (
@@ -146,6 +148,69 @@ class OpenSshRemoteRetentionTests(unittest.TestCase):
         ).prune("retention-1", "ssh:host", FINGERPRINT, CancellationToken())
         self.assertEqual(result.state, RemoteRetentionState.COMPLETED)
 
+    def test_restart_recovers_same_identity_without_replaying_prune_then_cleans(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            staging = _Staging(fail_reads=1)
+            attempts = RemoteRetentionAttemptStore(root / "attempts")
+            results = RemoteRetentionResultStore(root / "results")
+            first_invoker = _Invoker(staging)
+            first = OpenSshRemoteRetentionPort(
+                staging, first_invoker, attempts, results, clock=lambda: NOW
+            )
+            with self.assertRaises(AdapterError):
+                first.prune("retention-restart", "ssh:host", FINGERPRINT,
+                            CancellationToken())
+            self.assertEqual(len(first_invoker.calls), 1)
+            self.assertFalse(staging.removed)
+
+            second_invoker = _Invoker(staging)
+            recovered = OpenSshRemoteRetentionPort(
+                staging, second_invoker, attempts, results, clock=lambda: NOW
+            ).prune("retention-restart", "ssh:host", FINGERPRINT,
+                    CancellationToken())
+            self.assertEqual(recovered.state, RemoteRetentionState.COMPLETED)
+            self.assertEqual(second_invoker.calls, [])
+            self.assertTrue(staging.removed)
+            self.assertFalse(attempts.cleanup_pending(attempts.load("retention-restart")))
+            self.assertEqual(results.load("retention-restart"), recovered)
+
+    def test_local_result_store_rejects_tamper(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = RemoteRetentionResultStore(Path(directory) / "results")
+            result = RemoteRetentionResult(
+                "1.0", "retention-store", "a" * 64, "ssh:host", FINGERPRINT,
+                NOW, RemoteRetentionState.COMPLETED, (), (), None,
+            ).with_hash()
+            store.save(result)
+            path = Path(directory) / "results/retention-store.json"
+            path.write_bytes(path.read_bytes()[:-1] + b" ")
+            with self.assertRaises(AdapterError):
+                store.load("retention-store")
+
+    def test_cleanup_failure_is_pending_and_retry_does_not_reinvoke_helper(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            staging = _Staging(fail_removes=1)
+            attempts = RemoteRetentionAttemptStore(root / "attempts")
+            results = RemoteRetentionResultStore(root / "results")
+            first_invoker = _Invoker(staging)
+            port = OpenSshRemoteRetentionPort(
+                staging, first_invoker, attempts, results, clock=lambda: NOW
+            )
+            port.prune("retention-cleanup", "ssh:host", FINGERPRINT,
+                       CancellationToken())
+            self.assertTrue(port.cleanup_pending("retention-cleanup"))
+
+            second_invoker = _Invoker(staging)
+            restarted = OpenSshRemoteRetentionPort(
+                staging, second_invoker, attempts, results, clock=lambda: NOW
+            )
+            restarted.prune("retention-cleanup", "ssh:host", FINGERPRINT,
+                            CancellationToken())
+            self.assertEqual(second_invoker.calls, [])
+            self.assertFalse(restarted.cleanup_pending("retention-cleanup"))
+
 
 def _request(request_id: str = "retention-1") -> RemoteRetentionRequest:
     return RemoteRetentionRequest(
@@ -198,9 +263,12 @@ class _Backend:
 
 
 class _Staging:
-    def __init__(self):
+    def __init__(self, fail_reads=0, fail_removes=0):
         self.uploads = []
         self.result = b""
+        self.fail_reads = fail_reads
+        self.removed = False
+        self.fail_removes = fail_removes
 
     def prepare_private_directory(self, path):
         self.path = path
@@ -209,10 +277,16 @@ class _Staging:
         self.uploads.append((path, content))
 
     def read_private_file(self, path, max_bytes):
+        if self.fail_reads:
+            self.fail_reads -= 1
+            raise AdapterError("remote_staging_read_failed", "injected")
         return self.result
 
     def remove_private_tree(self, path):
-        pass
+        if self.fail_removes:
+            self.fail_removes -= 1
+            raise AdapterError("remote_staging_failed", "injected cleanup failure")
+        self.removed = True
 
     def invoke_recovery_helper(self, request_id, request_hash, cancellation):
         raise AssertionError("recovery helper must not be used")

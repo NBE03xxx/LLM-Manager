@@ -199,7 +199,7 @@ def encode_remote_retention_request(request: RemoteRetentionRequest) -> bytes:
 
 
 def decode_remote_retention_request(
-    content: bytes, *, expected_hash: str, now: datetime
+    content: bytes, *, expected_hash: str, now: datetime | None
 ) -> RemoteRetentionRequest:
     value = _load(content)
     expected = {
@@ -260,7 +260,7 @@ def decode_remote_retention_result(content: bytes) -> RemoteRetentionResult:
     return result
 
 
-def _validate_request(request: RemoteRetentionRequest, expected_hash: str, now: datetime) -> None:
+def _validate_request(request: RemoteRetentionRequest, expected_hash: str, now: datetime | None) -> None:
     if (
         request.schema_version != "1.0"
         or request.protocol_version != REMOTE_RETENTION_PROTOCOL_VERSION
@@ -272,14 +272,17 @@ def _validate_request(request: RemoteRetentionRequest, expected_hash: str, now: 
         or request.request_hash != expected_hash
     ):
         raise AdapterError("invalid_remote_retention", "retention request identity is invalid")
-    if any(item.tzinfo is None for item in (request.requested_at, request.created_at, request.expires_at, now)):
+    timestamps = (request.requested_at, request.created_at, request.expires_at) + (
+        () if now is None else (now,)
+    )
+    if any(item.tzinfo is None for item in timestamps):
         raise AdapterError("invalid_remote_retention", "retention timestamps require timezone")
     if (
         request.created_at > request.requested_at
         or request.requested_at > request.expires_at
         or request.expires_at - request.created_at > timedelta(minutes=5)
-        or not request.created_at <= now <= request.expires_at
-        or abs(now - request.requested_at) > timedelta(minutes=1)
+        or (now is not None and not request.created_at <= now <= request.expires_at)
+        or (now is not None and abs(now - request.requested_at) > timedelta(minutes=1))
     ):
         raise AdapterError("expired_remote_retention", "retention request is outside its validity window")
     expected = hashlib.sha256(_bytes(replace(request, request_hash=""))).hexdigest()
