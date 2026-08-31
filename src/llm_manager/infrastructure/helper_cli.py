@@ -79,10 +79,10 @@ def run_helper(
 
 
 def _invoking_uid(environ: dict[str, str]) -> int:
-    values = [environ.get(name) for name in ("PKEXEC_UID", "SUDO_UID") if environ.get(name) is not None]
-    if len(values) != 1 or not values[0].isdigit():
-        raise AdapterError("invalid_invoking_user", "exactly one trusted invoking UID is required")
-    uid = int(values[0])
+    value = environ.get("PKEXEC_UID", "")
+    if not value.isdigit():
+        raise AdapterError("invalid_invoking_user", "PKEXEC_UID is required")
+    uid = int(value)
     if uid < 0 or uid == 0:
         raise AdapterError("invalid_invoking_user", "invoking UID must identify a non-root user")
     return uid

@@ -83,7 +83,7 @@ class HelperCliTests(unittest.TestCase):
                 )
             self.assertEqual(replayed.exception.code, "replayed_request")
 
-    def test_rejects_non_root_ambiguous_uid_wrong_mode_and_operation(self) -> None:
+    def test_rejects_non_root_missing_pkexec_uid_wrong_mode_and_operation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             runtime = Path(directory)
             uid = runtime.stat().st_uid
@@ -91,7 +91,14 @@ class HelperCliTests(unittest.TestCase):
             with self.assertRaises(AdapterError):
                 run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=uid, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
             with self.assertRaises(AdapterError):
-                run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid), "SUDO_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
+                run_helper(request.operation_id, request.request_hash, environ={"SUDO_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))
+            results = run_helper(
+                request.operation_id, request.request_hash,
+                environ={"PKEXEC_UID": str(uid), "SUDO_UID": str(uid)},
+                runtime_base=runtime, backend=_Backend(), effective_uid=0,
+                receipts=HelperReceiptStore(runtime / "receipts-inherited-sudo", sandbox=True),
+            )
+            self.assertTrue(all(item.completed for item in results))
             path.chmod(0o644)
             with self.assertRaises(AdapterError):
                 run_helper(request.operation_id, request.request_hash, environ={"PKEXEC_UID": str(uid)}, runtime_base=runtime, backend=_Backend(), effective_uid=0, receipts=HelperReceiptStore(runtime / "receipts", sandbox=True))

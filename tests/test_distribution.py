@@ -46,7 +46,8 @@ class DebianPackagingTests(unittest.TestCase):
             "python3-cryptography (>= 46.0.5)",
             "python3-secretstorage (>= 3.5)",
             "openssh-client",
-            "policykit-1",
+            "pkexec",
+            "polkitd",
             "systemd",
         ):
             self.assertIn(dependency, control)
@@ -84,7 +85,7 @@ class DebianPackagingTests(unittest.TestCase):
         self.assertIn("python3 (>= 3.14)", control)
         self.assertIn("python3-cryptography (>= 46.0.5)", control)
         self.assertIn("sudo", control)
-        for forbidden in ("python3-secretstorage", "openssh-client", "policykit-1"):
+        for forbidden in ("python3-secretstorage", "openssh-client", "policykit-1", "pkexec", "polkitd"):
             self.assertNotIn(forbidden, control)
 
     def test_remote_helper_deb_artifact_gate(self) -> None:

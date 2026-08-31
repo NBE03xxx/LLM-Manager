@@ -1,6 +1,6 @@
 # ロードマップ
 
-Phase 4のbackup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、executorの`completed`/`partial`/`failed`全終了経路から0700/0600 immutable canonical storeへ保存する。保存失敗時はstable errorに生成済みexecutionと原因codeを保持し、削除済み状態を隠さない。再起動後は全entryをstrict検証してhost/fingerprint単位で列挙し、未知entry、改ざん、fingerprint変更、同一requestの重複executionを拒否する。`partial`/`failed`の再開は、source execution、host/fingerprint、残存kind、5分期限を自己hashで束縛した明示的cleanup requestを0700/0600 immutable storeへmutation前に保存した場合だけ行う。executorは現在の残存suffixを再照合し、停止時を含むcleanup結果を同じimmutable execution storeへ保存する。backup一覧は最新executionと残存kindをattention表示し、未完了executionから別のmutation権限を生成しない。runtimeは`$XDG_STATE_HOME/llm-manager/backup-evidence-retention`へexecution/request storeを固定し、相対XDG値をhome fallbackとして0700 rootを再検証する。実desktop起動Gateは未実施である。
+Phase 4のbackup evidence retention executionはrequest、host/fingerprint、deletion/reconciliation hash、完了時刻、状態を自己hashで束縛し、executorの`completed`/`partial`/`failed`全終了経路から0700/0600 immutable canonical storeへ保存する。保存失敗時はstable errorに生成済みexecutionと原因codeを保持し、削除済み状態を隠さない。再起動後は全entryをstrict検証してhost/fingerprint単位で列挙し、未知entry、改ざん、fingerprint変更、同一requestの重複executionを拒否する。`partial`/`failed`の再開は、source execution、host/fingerprint、残存kind、5分期限を自己hashで束縛した明示的cleanup requestを0700/0600 immutable storeへmutation前に保存した場合だけ行う。executorは現在の残存suffixを再照合し、停止時を含むcleanup結果を同じimmutable execution storeへ保存する。backup一覧は最新executionと残存kindをattention表示し、未完了executionから別のmutation権限を生成しない。runtimeは`$XDG_STATE_HOME/llm-manager/backup-evidence-retention`へexecution/request storeを固定し、相対XDG値をhome fallbackとして0700 rootを再検証する。Ubuntu 26.04の実desktop Gateは完了し、Debian 13差異Gateが残る。
 
 ## Phase 0: 設計確定（完了）
 
@@ -116,9 +116,9 @@ Helper staging実装: staging pathはrequest入力にせず`operation_id/item op
 
 Helper execution core実装: 実行直前にrequest期限/hash、対象before hash、staged content hashを再検証し、固定operationを宣言順にbackendへ渡す。stale targetは変更前に拒否し、write/reload等の失敗後は後続operationを`not_executed`として停止する。backendはprotocolで分離し、単体テストではsandbox fakeだけを使用している。
 
-Local system helper backend実装: 論理targetを専用Ollama drop-inと完全一致させ、regular file/symlink/16 MiB/親directory安全性を再検査する。書込は0644/root:root、atomic rename、file/parent fsyncを行い、service操作は`/usr/bin/systemctl daemon-reload`と`/usr/bin/systemctl restart ollama.service`の固定argvだけを生成する。明示sandbox mode以外の代替rootを拒否し、単体テストでは一時rootとfake runnerだけを使用している。packaged executableとPolicyKit actionの配置は残作業である。
+Local system helper backend実装: 論理targetを専用Ollama drop-inと完全一致させ、regular file/symlink/16 MiB/親directory安全性を再検査する。書込は0644/root:root、atomic rename、file/parent fsyncを行い、service操作は`/usr/bin/systemctl daemon-reload`と`/usr/bin/systemctl restart ollama.service`の固定argvだけを生成する。明示sandbox mode以外の代替rootを拒否し、単体テストでは一時rootとfake runnerだけを使用している。packaged executableとPolicyKit actionの配置はUbuntu 26.04で確認済みだが、実Ollama target/unit操作は禁止境界により未実施である。
 
-Helper CLI/PolicyKit定義実装: CLI引数はoperation IDとrequest hashだけに限定し、`PKEXEC_UID`または`SUDO_UID`からuser runtime staging pathを固定導出する。root実行、requestの0600/owner/regular file/1 MiB上限、operation identityを再検査し、結果はstable codeだけのcanonical JSONで返す。PolicyKit actionはactive sessionの`auth_admin`、固定`/usr/bin/llm-manager-helper`に限定した。実debへのroot-owned配置とPolicyKit実desktop認証は残作業である。
+Helper CLI/PolicyKit定義実装: CLI引数はoperation IDとrequest hashだけに限定し、local固定`pkexec`経路が設定する`PKEXEC_UID`からuser runtime staging pathを固定導出する。継承された`SUDO_UID`はlocal identityに利用しない。root実行、requestの0600/owner/regular file/1 MiB上限、operation identityを再検査し、結果はstable codeだけのcanonical JSONで返す。PolicyKit actionはactive sessionの`auth_admin`、固定`/usr/bin/llm-manager-helper`に限定した。Ubuntu 26.04 desktopでroot-owned配置と認証success/dismiss/denyを確認した。
 
 Helper replay receipt実装: root-only receipt directoryへoperation IDを`O_EXCL`で実行前にclaimし、同一requestの再実行を`replayed_request`、異なるrequest hashによるID再利用を`operation_id_collision`として拒否する。receiptは0600、directoryは0700で、`executing`から`completed`または`failed`へterminal resultをatomic保存する。sandbox testでは成功・失敗・改ざん・CLI二重実行を再現している。
 
@@ -130,13 +130,13 @@ Privileged Safe Apply workflow実装: local root変更専用CoordinatorでBackup
 
 Local privileged境界統合test実装: root CoordinatorからLocalPolicyKitInvokerの固定argv、user staging、helper CLI、root-only replay receipt、DeclaredHelperExecutor、sandbox LocalSystemHelperBackendまでを一時directoryとfake service runnerで接続した。commit、runtime validation起因rollback、daemon-reload失敗起因rollbackについて、apply/rollbackが別receiptを持ちjournalのrequest hashと一致することを検証した。pkexec、実systemd、実設定は起動・変更していない。
 
-Local deb先行Gate実装: Debian debhelper/dh-python構成、PolicyKit policy、manpage、root-owned固定helper wrapperを追加した。helper wrapperは`python3 -I`で起動し、pip console scriptによる特権導入を禁止する。binary debを一時copyでbuildし、artifact内のroot ownership、0755/0644 mode、isolated shebang、PolicyKit固定path、runtime dependencyを`verify-deb.sh`で検証した。実install/upgrade/remove/purgeとdesktop PolicyKit認証は未実施である。
+Local deb先行Gate実装: Debian debhelper/dh-python構成、PolicyKit policy、manpage、root-owned固定helper wrapperを追加した。helper wrapperは`python3 -I`で起動し、pip console scriptによる特権導入を禁止する。binary debを一時copyでbuildし、artifact内のroot ownership、0755/0644 mode、isolated shebang、PolicyKit固定path、runtime dependencyを`verify-deb.sh`で検証した。Ubuntu 26.04 desktopでinstall/reinstall/remove/purge相当/reinstall/upgradeを完了し、PolicyKit dependencyを`polkitd`+`pkexec`へ修正した。Debian 13差異は未確認である。
 
 Helper compatibility診断・Plan Gate実装: local/remoteそれぞれのhelperとroot-owned canonical metadataの固定pathをread-onlyで調べ、root:root ownership、0755/0644 mode、非symlink、content hash、package名、package version、protocol versionを全て満たす場合だけ特権境界へ進める。remote probeはsystem OpenSSHの固定`stat`/bounded `cat`へ接続し、user staging開始前とroot helper起動直前に再検証する。missing、unsafe、invalid、incompatible、probe例外はfail-closedにし、不一致時はstaging commandを発行しない。実SSHでmissing/ready/remove後missing/reinstall後readyを確認した。
 
 Apply時helper再検証実装: 診断・Plan後のhelper差替えや削除を信用せず、root workflowはBackup前とhelper起動直前に互換性を再検証する。Backup前の失敗は永続物を作らず、検証済みBackup後の失敗はBackupを保持して未変更で停止する。いずれもinvoker、pkexec、systemd操作へ到達しないことをsandbox fakeで確認した。
 
-暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。SecretStorage adapterはdefault collection、属性検索、OS unlock prompt、32-byte master keyのcreate/reuse、競合時再読込、cancel/timeout/unavailable停止を実装した。現在の開発環境にはSecretStorage依存が未導入のため、実desktop keyring Gateは引き続き残作業である。
+暗号化基盤の実装: `cryptography` AES-256-GCMによるversioned canonical envelope、item 16 MiB上限、12-byte random nonce、backup ID/host fingerprint/targetを束縛するAAD、key reference/scope検査、改ざん・scope取り違え検出を追加した。生鍵はenvelopeへ保存せず`BackupKeyProvider`から取得する。LocalBackupStoreのcreate/verify/reload/restoreへ統合し、暗号policy hashをPlan/Approvalへ束縛した。鍵provider不在時は平文fallbackせず停止する。SecretStorage adapterはdefault collection、属性検索、OS unlock prompt、32-byte master keyのcreate/reuse、競合時再読込、cancel/timeout/unavailable停止を実装した。Ubuntu 26.04 desktopでGate専用keyのcreate/reload/deleteを完了し、Debian 13差異が残る。
 
 Backup設定実装: 一般配布buildは暗号化ON、明示的development buildはOFFを初回既定とし、保存済みユーザー選択が存在すればbuild既定で上書きしない。設定は0600、親directoryは0700、canonical schemaで保存する。暗号化OFFのApplyは`ApprovalRecord.plaintext_backup_acknowledged=true`がなければ拒否する。
 

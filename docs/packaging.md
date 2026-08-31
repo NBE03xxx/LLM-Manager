@@ -12,6 +12,8 @@ debは次をroot-owned固定pathへ配置する。
 - `/usr/lib/python3/dist-packages/llm_manager`: helperとcoreのPython package
 - `/usr/share/man/man8/llm-manager-helper.8.gz`: 管理者向け境界説明
 
+PolicyKit runtime dependencyはUbuntu 26.04とDebian 13の実package分割に合わせ、authority daemonの`polkitd`と固定launcherの`pkexec`を個別に宣言する。source package名および旧compatibility package名の`policykit-1`には依存しない。
+
 helperはpipのconsole scriptとして導入しない。特権境界はpackage managerが所有するisolated wrapperだけとし、`PYTHONPATH`やuser site packageによるimport差し替えを許可しない。
 
 ## sandbox build
@@ -45,9 +47,7 @@ remote wrapperは`/usr/bin/python3 -I`で起動し、package内のroot-owned pri
 ## 未完了Gate
 
 - disposableなDebian 13環境でのinstall、同一版reinstall、upgrade、remove、purge
-- 実desktop sessionでのPolicyKit allow/deny/cancel
 - GUI entry point、desktop file、icon、翻訳catalog
-- local helper packageのdisposable OS install/upgrade/remove/purge
 - release署名、repository配布、SBOMとlicense review
 
 これらを通過するまで一般ユーザー向けdeb releaseとは扱わず、実ホストへinstallしない。

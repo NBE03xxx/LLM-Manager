@@ -31,6 +31,6 @@ printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/sha
 printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/share/llm-manager/helper-metadata.json$'
 
 depends=$(dpkg-deb --field "$package" Depends)
-for dependency in python3 openssh-client policykit-1 python3-cryptography python3-secretstorage systemd; do
+for dependency in python3 openssh-client pkexec polkitd python3-cryptography python3-secretstorage systemd; do
     printf '%s\n' "$depends" | grep -Fq "$dependency"
 done

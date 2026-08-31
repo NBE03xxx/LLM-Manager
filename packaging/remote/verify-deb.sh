@@ -43,7 +43,7 @@ depends=$(dpkg-deb --field "$package" Depends)
 for dependency in python3 python3-cryptography sudo; do
     printf '%s\n' "$depends" | grep -Fq "$dependency"
 done
-for forbidden in python3-secretstorage openssh-client policykit-1 llm-manager\ \(; do
+for forbidden in python3-secretstorage openssh-client policykit-1 pkexec polkitd llm-manager\ \(; do
     if printf '%s\n' "$depends" | grep -Fq "$forbidden"; then
         echo "unexpected remote dependency: $forbidden" >&2
         exit 1

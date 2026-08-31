@@ -17,7 +17,8 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
  openssh-client,
- policykit-1,
+ pkexec,
+ polkitd,
  python3-cryptography (>= 46.0.5),
  python3-secretstorage (>= 3.5),
  systemd
