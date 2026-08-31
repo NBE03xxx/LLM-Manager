@@ -22,6 +22,7 @@ runtime="$extract_root/usr/lib/llm-manager-remote-helper/llm_manager"
 [ "$(stat -c %a "$metadata")" = 644 ]
 [ "$(stat -c %a "$runtime/infrastructure/remote_helper_cli.py")" = 644 ]
 [ "$(sed -n '1p' "$helper")" = '#!/usr/bin/python3 -I' ]
+grep -Fq 'sys.dont_write_bytecode = True' "$helper"
 grep -Fq 'sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")' "$helper"
 grep -Fxq '{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
 

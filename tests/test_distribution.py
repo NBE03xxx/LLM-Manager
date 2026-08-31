@@ -14,6 +14,11 @@ class DebianPackagingTests(unittest.TestCase):
         helper = ROOT / "packaging/bin/llm-manager-helper"
         content = helper.read_text(encoding="utf-8")
         self.assertEqual(content.splitlines()[0], "#!/usr/bin/python3 -I")
+        self.assertIn("sys.dont_write_bytecode = True", content)
+        self.assertLess(
+            content.index("sys.dont_write_bytecode = True"),
+            content.index("from llm_manager.infrastructure.helper_cli import main"),
+        )
         self.assertIn("llm_manager.infrastructure.helper_cli import main", content)
         self.assertEqual(stat.S_IMODE(helper.stat().st_mode), 0o755)
 
@@ -42,9 +47,9 @@ class DebianPackagingTests(unittest.TestCase):
     def test_control_declares_runtime_and_privilege_dependencies(self) -> None:
         control = (ROOT / "debian/control").read_text(encoding="utf-8")
         for dependency in (
-            "python3-all (>= 3.14)",
-            "python3-cryptography (>= 46.0.5)",
-            "python3-secretstorage (>= 3.5)",
+            "python3-all (>= 3.13)",
+            "python3-cryptography (>= 43.0.0)",
+            "python3-secretstorage (>= 3.3.3)",
             "openssh-client",
             "pkexec",
             "polkitd",
@@ -73,6 +78,11 @@ class DebianPackagingTests(unittest.TestCase):
             'sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")',
             content,
         )
+        self.assertIn("sys.dont_write_bytecode = True", content)
+        self.assertLess(
+            content.index("sys.dont_write_bytecode = True"),
+            content.index('sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")'),
+        )
         self.assertIn("remote_helper_cli import main", content)
         self.assertEqual(stat.S_IMODE(helper.stat().st_mode), 0o755)
 
@@ -82,8 +92,8 @@ class DebianPackagingTests(unittest.TestCase):
 
         control = (ROOT / "packaging/remote/control").read_text(encoding="utf-8")
         self.assertIn("Package: llm-manager-remote-helper", control)
-        self.assertIn("python3 (>= 3.14)", control)
-        self.assertIn("python3-cryptography (>= 46.0.5)", control)
+        self.assertIn("python3 (>= 3.13)", control)
+        self.assertIn("python3-cryptography (>= 43.0.0)", control)
         self.assertIn("sudo", control)
         for forbidden in ("python3-secretstorage", "openssh-client", "policykit-1", "pkexec", "polkitd"):
             self.assertNotIn(forbidden, control)

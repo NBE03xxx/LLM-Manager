@@ -22,6 +22,7 @@ metadata="$extract_root/usr/share/llm-manager/helper-metadata.json"
 [ "$(stat -c %a "$policy")" = 644 ]
 [ "$(stat -c %a "$metadata")" = 644 ]
 [ "$(sed -n '1p' "$helper")" = '#!/usr/bin/python3 -I' ]
+grep -Fq 'sys.dont_write_bytecode = True' "$helper"
 grep -Fq '<annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-helper</annotate>' "$policy"
 grep -Fxq '{"package":"llm-manager","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
 

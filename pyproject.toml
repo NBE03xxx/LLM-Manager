@@ -7,12 +7,12 @@ name = "llm-manager"
 version = "0.1.0.dev0"
 description = "Safely diagnose and optimize local or SSH Ollama/OpenCode hosts"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 license = "MIT"
 authors = [{ name = "LLM-Manager contributors" }]
 dependencies = [
-    "cryptography>=46.0.5,<47",
-    "SecretStorage>=3.5,<4; sys_platform == 'linux'",
+    "cryptography>=43.0.0,<47",
+    "SecretStorage>=3.3.3,<4; sys_platform == 'linux'",
 ]
 
 [project.optional-dependencies]

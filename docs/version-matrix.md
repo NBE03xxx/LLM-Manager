@@ -12,7 +12,7 @@
 |---|---|---|---|---|
 | Ubuntu | 26.04.1 + systemd | Local: D、SSH: D→A候補 | Local read-only統合済み。SSH、system/user unit、PolicyKit、terminal、deb sandbox test |
 | Debian | 13 + systemd | Local/SSH | D→A候補 | Ubuntuと同じ契約test、desktop差分test |
-| Python | 3.14.4 | application | required | unit/serialization/thread/locale test |
+| Python | 3.14.4 baseline、3.13.5 supported minimum | application | required | unit/serialization/thread/locale test。Debian 13 stockで338件成功 |
 | PySide6 | 6.8.6以上、同一minorをpin | GUI | required | 3.14.4 wheel/import/Qt plugin/QThreadPool/i18n test |
 | Ollama | 0.33.2 | Local: D、SSH: D→A候補 | Local API/systemd統合済み。SSH、allowlist、restart/rollback test |
 | OpenCode | 1.18.25 | Local: D、SSH: D→A候補 | Local複数provider JSONC解析済み。merge provenance、SSH、round-trip、connection validation |
@@ -21,6 +21,8 @@
 | Remote helper | app互換protocolの別deb | SSH | required for root A | 固定path、canonical package/version/protocol metadata、root owner/mode、sudo、journal/recovery test |
 
 PySide6は公式release note上6.8.6からPython 3.14対応が明記されるため最低版とする。ただし配布時は、検証済みの同一versionへupper/lower pinし、未検証の新minorへ自動追随しない。
+
+Debian 13のstock runtimeはPython 3.13.5、cryptography 43.0.0、SecretStorage 3.3.3である。初期検証基準のPython 3.14.4は維持しつつ、Debian 13を正式対象としてinstall可能にするsupported minimumをこのstock組合せまで拡張する。2026-08-31のdesktop Live Gateで全338単体テスト、AES-GCM import、Secret Service create/reload/delete、local/remote helper package runtimeを確認した。
 
 ## 3. Ollama 0.33.2 診断契約
 

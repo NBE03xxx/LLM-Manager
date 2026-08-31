@@ -42,7 +42,9 @@ packaging/remote/build-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
 packaging/remote/verify-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
 ```
 
-remote wrapperは`/usr/bin/python3 -I`で起動し、package内のroot-owned private runtime `/usr/lib/llm-manager-remote-helper`を固定でimportする。artifact Gateはwrapper、canonical metadata、private runtimeのroot ownershipと0755/0644 mode、依存関係、bytecode cache不在、およびlocal helper/PolicyKit/system Python packageの非同梱を検査する。OpenSSH read-only互換性Gateは固定pathのownership/mode、非symlink、content hash、canonical metadata、package/version/protocolをstaging前とhelper起動直前に確認する。disposable Ubuntu 26.04で同一版reinstall、remove、purge、再installを行い、package不在時のfail closed、再install後の`ready`、dpkg管理外root backup/keyの保持を確認した。
+remote wrapperは`/usr/bin/python3 -I`で起動し、import前にbytecode生成を無効化して、package内のroot-owned private runtime `/usr/lib/llm-manager-remote-helper`を固定でimportする。privileged wrapperはdpkg管理外のroot-owned `__pycache__`を生成してはならない。artifact Gateはwrapper、canonical metadata、private runtimeのroot ownershipと0755/0644 mode、依存関係、bytecode cache不在、およびlocal helper/PolicyKit/system Python packageの非同梱を検査する。OpenSSH read-only互換性Gateは固定pathのownership/mode、非symlink、content hash、canonical metadata、package/version/protocolをstaging前とhelper起動直前に確認する。disposable Ubuntu 26.04で同一版reinstall、remove、purge、再installを行い、package不在時のfail closed、再install後の`ready`、dpkg管理外root backup/keyの保持を確認した。
+
+Python 3.14.4は検証baselineとして維持するが、正式対象Debian 13のstock repositoryから依存解決できるよう、local/remote debのsupported minimumはPython 3.13とcryptography 43.0.0、local Secret ServiceはSecretStorage 3.3.3とする。下限を変更するときはDebian 13 stock desktopで全単体テスト、暗号、Secret Service、PolicyKit、両helper artifact/lifecycle Gateを再実行する。
 
 ## 未完了Gate
 

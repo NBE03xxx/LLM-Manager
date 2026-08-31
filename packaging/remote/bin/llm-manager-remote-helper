@@ -3,6 +3,7 @@
 
 import sys
 
+sys.dont_write_bytecode = True
 sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")
 
 from llm_manager.infrastructure.remote_helper_cli import main

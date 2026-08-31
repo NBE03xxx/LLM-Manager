@@ -50,7 +50,7 @@ MVP の成功は「対象環境を勝手に変更しない」「同じ入力と�
 
 ## 5. 非機能要件
 
-- **対応環境:** Ubuntu 26.04とDebian 13をMVP正式対象とする。Python 3.14.4、PySide6 6.8.6以上、Ollama 0.33.2、OpenCode 1.18.25を初期検証基準とし、配布時のPySide6は検証済みversionへpinする。周辺バージョンは互換性fixtureと契約テストを通過後にversion matrixへ追加する。
+- **対応環境:** Ubuntu 26.04とDebian 13をMVP正式対象とする。Python 3.14.4、PySide6 6.8.6以上、Ollama 0.33.2、OpenCode 1.18.25を初期検証基準とし、application/runtimeのsupported minimumはDebian 13 stockに合わせPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とする。配布時のPySide6は検証済みversionへpinする。周辺バージョンは互換性fixtureと契約テストを通過後にversion matrixへ追加する。
 - **応答性:** 外部コマンド、SSH、HTTP、ファイル I/O は UI スレッドで行わない。進捗表示とキャンセル要求を提供する。
 - **テスト可能性:** domain/application は PySide6、subprocess、ネットワークに依存しない。Adapter は契約テスト、ルールは表駆動テストを持つ。
 - **決定性:** 推奨と計画は入力スナップショットおよびルール版を記録し、再生成可能にする。

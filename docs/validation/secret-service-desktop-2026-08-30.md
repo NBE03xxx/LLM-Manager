@@ -18,6 +18,6 @@ Phase 4のlocal backup暗号鍵providerについて、GNOME desktop sessionでSe
 
 ## Assessment
 
-これはavailabilityのnegative Gateである。一般配布向けdebは`python3-secretstorage (>= 3.5)`を依存関係として宣言済みだが、現在のsource checkout実行環境にはbindingがない。制約に従い仮想環境作成や`pip install`は行わなかった。
+これはavailabilityのnegative Gateである。一般配布向けdebは`python3-secretstorage (>= 3.3.3)`を依存関係として宣言するが、現在のsource checkout実行環境にはbindingがない。制約に従い仮想環境作成や`pip install`は行わなかった。下限は後続のDebian 13 positive Gateでstock 3.3.3を検証して更新した。
 
 暗号化をsilentにOFFへ落とさず、Backup/Applyを停止できる境界は確認できた。default collectionへのcreate/reloadとlocked collectionのOS promptを含むpositive desktop Gateは、deb実install後のdesktop検証まで未完了とする。

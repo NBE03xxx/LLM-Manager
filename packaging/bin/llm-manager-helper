@@ -1,6 +1,10 @@
 #!/usr/bin/python3 -I
 """Root-owned isolated entry point installed only by the deb package."""
 
+import sys
+
+sys.dont_write_bytecode = True
+
 from llm_manager.infrastructure.helper_cli import main
 
 

@@ -2,7 +2,7 @@ Package: llm-manager-remote-helper
 Version: 0.1.0~dev0
 Architecture: all
 Maintainer: LLM-Manager contributors
-Depends: python3 (>= 3.14), python3-cryptography (>= 46.0.5), sudo
+Depends: python3 (>= 3.13), python3-cryptography (>= 43.0.0), sudo
 Section: admin
 Priority: optional
 Description: restricted remote recovery helper for LLM-Manager
