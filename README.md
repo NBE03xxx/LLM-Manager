@@ -43,6 +43,8 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [SSH remote helper positive validation](docs/validation/ssh-remote-helper-positive-2026-08-30.md)
 - [Remote helper deb lifecycle validation](docs/validation/remote-helper-deb-lifecycle-2026-08-30.md)
 - [Local deb and desktop positive validation](docs/validation/local-deb-desktop-positive-2026-08-31.md)
+- [Debian 13 desktop packaging validation](docs/validation/debian13-desktop-packaging-2026-08-31.md)
+- [Debian 13 PolicyKit/systemd validation](docs/validation/debian13-policykit-systemd-2026-08-31.md)
 - [SSH transfer disconnect validation](docs/validation/ssh-transfer-disconnect-2026-08-30.md)
 - [SSH remote journal reconciliation validation](docs/validation/ssh-remote-journal-reconciliation-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)
