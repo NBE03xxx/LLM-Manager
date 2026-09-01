@@ -20,6 +20,6 @@ Gate専用operation `journal-gate-20260830`のcanonical evidenceだけを`/var/l
 
 照合後にGate専用root evidence、空のjournal directory、一時sudoers、user `/tmp`ファイルを削除した。削除後はevidenceとsudoersが不在、通常の`sudo -n`が拒否、同じproduction journal取得が`remote_journal_failed`となることを確認した。
 
-## Remaining Gate
+## Closure status
 
-Debian 13でのtransport/package差異、Secret ServiceとPolicyKitのdesktop positive Gate、local package lifecycleを確認する。
+後続のDebian 13 package/desktop GateとUbuntu 26.04 local package/desktop Gateで残存差異を確認した。Phase 4 closure判定は[closure audit](phase4-closure-audit-2026-09-01.md)を参照する。

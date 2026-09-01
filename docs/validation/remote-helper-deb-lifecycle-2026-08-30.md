@@ -19,6 +19,6 @@ artifact SHA-256は`2ecd6ef2076a4b9233fdbec6e93eba9d31993e78124c28d0116fd5776be4
 
 packageにmaintainer scriptとconffileはなく、`/var/lib/llm-manager/backups`と`/var/lib/llm-manager/keys`はdpkg管理対象外である。このためremove/purgeは復旧copyとkeyを自動削除しない。purge時点ではremoveにより既に`not-installed`で、残存conffileはなかった。最後にhelperを再installし、次のGateを実行可能な状態へ戻した。
 
-## Remaining Gate
+## Closure status
 
-Debian 13で同じlifecycle差異を確認する。local `llm-manager` debのinstall/upgrade/remove/purgeとPolicyKit desktop認証は別Gateである。
+後続のDebian 13 package GateとUbuntu 26.04 local package/PolicyKit Gateで差異を確認した。Phase 4 closure判定は[closure audit](phase4-closure-audit-2026-09-01.md)を参照する。

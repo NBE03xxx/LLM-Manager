@@ -46,9 +46,9 @@ remote wrapperは`/usr/bin/python3 -I`で起動し、import前にbytecode生成�
 
 Python 3.14.4は検証baselineとして維持するが、正式対象Debian 13のstock repositoryから依存解決できるよう、local/remote debのsupported minimumはPython 3.13とcryptography 43.0.0、local Secret ServiceはSecretStorage 3.3.3とする。下限を変更するときはDebian 13 stock desktopで全単体テスト、暗号、Secret Service、PolicyKit、両helper artifact/lifecycle Gateを再実行する。
 
-## 未完了Gate
+## Phase 5 / release前Gate
 
-- disposableなDebian 13環境でのinstall、同一版reinstall、upgrade、remove、purge
+- Debian 13で正式release artifactを使う最終install/upgrade smoke test（Phase 4ではGate controlのlifecycleと正式artifactのbuild/verify/APT simulationを完了）
 - GUI entry point、desktop file、icon、翻訳catalog
 - release署名、repository配布、SBOMとlicense review
 

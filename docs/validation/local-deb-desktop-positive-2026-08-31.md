@@ -39,6 +39,6 @@ production action `io.github.nbe03xxx.llm-manager.apply-system-settings`はactiv
 
 production allowlistをOllama以外へ広げず、disposable Gate専用action、root-owned固定helper、`llm-manager-phase4-gate.service`を一時配置した。認証後のhelper exit 0、unit `active`、`/run/llm-manager-phase4-gate/marker`存在を確認した。停止後にGate helper/action/unit/runtime directoryを削除し、daemon-reload後に全path不在を確認した。Ollama/OpenCode unitや設定は操作していない。
 
-## Remaining
+## Closure status
 
-Debian 13でlocal/remote package、OpenSSH、PolicyKit、Secret Serviceの差異を確認する。Phase 5 GUIは未着手である。
+後続のDebian 13 Gateでlocal/remote package、PolicyKit、Secret Serviceの差異を確認した。Phase 4 closure判定は[closure audit](phase4-closure-audit-2026-09-01.md)を参照する。
