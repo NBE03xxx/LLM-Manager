@@ -151,6 +151,8 @@ Backup設定実装: 一般配布buildは暗号化ON、明示的development build
 
 Exit: acceptance scenariosがGUI経由で完了し、UI threadがblockしない。対応要件: FR-APPROVEと全表示要件、AC-05、AC-09。
 
+先行実装: Qt非依存のpresentation layerとして6工程の`GuiStep`、workflow status、immutable `GuiState`、`GuiPresenter`を追加した。host未選択、二重診断、report host不一致を拒否し、complete/partial/failed、cancel request、host/plan変更時の承認失効をheadless testで検証する。ja/en catalogは同一key集合を持ち、localeのlanguage部分を選択し、未対応・空localeを英語へfallbackする。system PythonにPySide6は未導入のため、制約に従い依存追加せず、widget/QThreadPool/Qt event-loop Gateは後続とする。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

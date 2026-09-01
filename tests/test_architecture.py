@@ -31,8 +31,11 @@ class ArchitectureTests(unittest.TestCase):
             for module in imported_modules(path):
                 self.assertFalse(module.startswith(forbidden), f"{path} imports outer layer {module}")
 
-    def test_ui_is_not_created_during_phase_one(self) -> None:
-        self.assertFalse((SRC_ROOT / "ui").exists())
+    def test_ui_does_not_leak_into_core_layers(self) -> None:
+        for directory in ("domain", "application", "optimization", "planning"):
+            for path in (SRC_ROOT / directory).glob("*.py"):
+                for module in imported_modules(path):
+                    self.assertFalse(module.startswith("llm_manager.ui"), f"{path} imports UI layer {module}")
 
     def test_optimization_and_planning_do_not_depend_on_ui_or_concrete_adapters(self) -> None:
         forbidden = ("PySide6", "llm_manager.ui", "llm_manager.adapters", "llm_manager.infrastructure")

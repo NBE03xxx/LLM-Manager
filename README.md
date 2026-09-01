@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜4を完了し、次は **Phase 5（PySide6 GUI）**です。Phase 4ではBackup Store、AES-GCM暗号化、Secret Service鍵provider、atomic apply、Validator、journal/audit、rollback、限定特権helper、local/remote packaging、OpenSSH transport、外部端末sudo、remote recovery/retention/deletion、restart recovery、root journal reconciliation、backup evidence retentionを実装・検証しました。Ubuntu 26.04とDebian 13のdesktop/package Gateも完了しています。実Ollama/OpenCode設定へのApply/rollbackは安全境界により行わず、特権・systemd境界はGate専用unitで検証しました。詳細は[Phase 4 closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
+Phase 0〜4を完了し、現在は **Phase 5（PySide6 GUI）**です。Qt非依存のpresenter/view-model、6工程の状態、診断結果遷移、cancel/二重開始防止、host/plan変更時の承認失効、ja/en locale catalogと英語fallbackを先行実装しました。PySide6 widget/QThreadPool接続は後続です。Phase 4の詳細は[closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
