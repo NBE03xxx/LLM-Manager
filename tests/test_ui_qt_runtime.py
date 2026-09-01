@@ -1,0 +1,139 @@
+import os
+import threading
+import time
+import unittest
+from dataclasses import replace
+
+from llm_manager.ui.qt_worker import PYSIDE_AVAILABLE
+
+
+@unittest.skipUnless(PYSIDE_AVAILABLE, "PySide6 runtime is unavailable")
+class QtRuntimeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+        from PySide6.QtWidgets import QApplication
+
+        cls.application = QApplication.instance() or QApplication([])
+
+    def test_thread_pool_keeps_event_loop_responsive_and_emits_result(self) -> None:
+        from PySide6.QtCore import QEventLoop, QThread, QTimer
+
+        from llm_manager.ui.qt_worker import QtTaskRunner, QtWorkerCoordinator
+
+        main_thread = QThread.currentThread()
+        observed = {"sentinel": False, "result": None, "worker_thread": None}
+
+        def task(_cancellation):
+            observed["worker_thread"] = QThread.currentThread()
+            time.sleep(0.05)
+            return "complete"
+
+        loop = QEventLoop()
+        runner = QtTaskRunner(task)
+        runner.signals.result.connect(lambda value: observed.__setitem__("result", value))
+        runner.signals.finished.connect(loop.quit)
+        coordinator = QtWorkerCoordinator()
+        coordinator.start("host-1", runner)
+        QTimer.singleShot(0, lambda: observed.__setitem__("sentinel", True))
+        QTimer.singleShot(2000, loop.quit)
+        loop.exec()
+
+        self.assertTrue(observed["sentinel"])
+        self.assertEqual(observed["result"], "complete")
+        self.assertIsNot(observed["worker_thread"], main_thread)
+        self.assertFalse(coordinator.is_active("host-1"))
+
+    def test_cancel_reaches_shared_token_and_emits_cancelled(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+
+        from llm_manager.application.errors import OperationCancelled
+        from llm_manager.ui.qt_worker import QtTaskRunner, QtWorkerCoordinator
+
+        started = threading.Event()
+        observed = {"cancelled": False}
+
+        def task(cancellation):
+            started.set()
+            while not cancellation.cancelled:
+                time.sleep(0.005)
+            raise OperationCancelled("cancelled at safe point")
+
+        loop = QEventLoop()
+        runner = QtTaskRunner(task)
+        runner.signals.cancelled.connect(lambda: observed.__setitem__("cancelled", True))
+        runner.signals.finished.connect(loop.quit)
+        coordinator = QtWorkerCoordinator()
+        coordinator.start("host-1", runner)
+
+        def cancel_when_started() -> None:
+            if started.is_set():
+                coordinator.cancel("host-1")
+            else:
+                QTimer.singleShot(5, cancel_when_started)
+
+        QTimer.singleShot(0, cancel_when_started)
+        QTimer.singleShot(2000, loop.quit)
+        loop.exec()
+
+        self.assertTrue(observed["cancelled"])
+        self.assertFalse(coordinator.is_active("host-1"))
+
+    def test_minimal_window_constructs_and_switches_language(self) -> None:
+        from PySide6.QtWidgets import QComboBox, QLabel, QPushButton
+
+        from llm_manager.ui.qt_window import MainWindow
+
+        window = MainWindow(lambda _host_id: lambda _token: None, locale="en")
+        try:
+            self.assertEqual(window.windowTitle(), "LLM Manager")
+            diagnose = window.findChild(QPushButton, "start-diagnosis")
+            status = window.findChild(QLabel, "workflow-status")
+            language = window.findChild(QComboBox, "language-selector")
+            self.assertIsNotNone(diagnose)
+            self.assertIsNotNone(status)
+            self.assertIsNotNone(language)
+            self.assertEqual(diagnose.text(), "Diagnose")
+            language.setCurrentIndex(1)
+            self.application.processEvents()
+            self.assertEqual(diagnose.text(), "診断する")
+            self.assertEqual(status.text(), "準備完了")
+        finally:
+            window.close()
+
+    def test_diagnose_button_runs_worker_and_advances_to_recommendations(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QListWidget, QPushButton
+
+        from llm_manager.ui.qt_window import MainWindow
+        from tests.fixtures import report
+
+        local_report = replace(report(), host=replace(report().host, host_id="local"))
+        window = MainWindow(lambda _host_id: lambda _token: local_report, locale="en")
+        try:
+            diagnose = window.findChild(QPushButton, "start-diagnosis")
+            navigation = window.findChild(QListWidget, "workflow-navigation")
+            status = window.findChild(QLabel, "workflow-status")
+            loop = QEventLoop()
+
+            def finish_when_complete() -> None:
+                if navigation.currentRow() == 2:
+                    loop.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_complete)
+
+            diagnose.click()
+            QTimer.singleShot(0, finish_when_complete)
+            QTimer.singleShot(2000, loop.quit)
+            loop.exec()
+
+            self.assertEqual(navigation.currentRow(), 2)
+            self.assertEqual(navigation.currentItem().text(), "Recommendations")
+            self.assertEqual(status.text(), "Completed")
+            self.assertTrue(diagnose.isEnabled())
+        finally:
+            window.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
