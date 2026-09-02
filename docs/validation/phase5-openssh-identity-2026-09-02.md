@@ -8,8 +8,8 @@ Hosts/Diagnose GUI compositionへ渡すSSH identityを、alias文字列や未検
 
 - `ssh -G -- <alias>`でeffective hostname、port、HostKeyAliasを取得する。
 - identity probeは`BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、`RemoteCommand=none`、`RequestTTY=no`と固定remote `true`だけを使う。
-- probeがexit 0で完了し、OpenSSH debug outputに一意で正規形のserver host-key SHA-256 fingerprintがある場合だけ成功する。
-- nonzero、timeout、host-key変更、認証失敗、fingerprint欠落/複数/不正、alias/config不正はreport生成前にfail closedとする。
+- probeがexit 0で完了するか、OpenSSHがknown-host一致を明示して認証だけ未完了となり、debug outputに一意で正規形のserver host-key SHA-256 fingerprintがある場合だけidentityを確定する。
+- timeout、host-key未確認、host-key変更、fingerprint欠落/複数/不正、alias/config不正はreport生成前にfail closedとする。OpenSSH stderrのLF/CRLFを受け付ける。
 - fingerprint値はvalidation outputと文書へ保存しない。
 
 ## Results

@@ -22,8 +22,32 @@ class OpenSshHostIdentityResolverTests(unittest.TestCase):
 
     def test_authentication_or_host_key_failure_never_returns_identity(self) -> None:
         runner = _Runner(probe_exit=255)
-        with self.assertRaisesRegex(AdapterError, "did not complete"):
+        with self.assertRaisesRegex(AdapterError, "did not confirm"):
             OpenSshHostIdentityResolver(runner).resolve("development", CancellationToken())
+
+    def test_verified_known_host_can_request_interactive_authentication(self) -> None:
+        runner = _Runner(
+            probe_exit=255,
+            stderr=(
+                f"debug1: Server host key: ssh-ed25519 {FINGERPRINT}\n"
+                "debug1: Host 'example' is known and matches the ED25519 host key.\n"
+                "user@example: Permission denied (publickey,password).\n"
+            ),
+        )
+        identity = OpenSshHostIdentityResolver(runner).resolve(
+            "development", CancellationToken()
+        )
+        self.assertTrue(identity.authentication_required)
+        self.assertEqual(identity.fingerprint, FINGERPRINT)
+
+    def test_accepts_openssh_crlf_debug_output(self) -> None:
+        runner = _Runner(
+            stderr=f"debug1: Server host key: ssh-ed25519 {FINGERPRINT}\r\n"
+        )
+        identity = OpenSshHostIdentityResolver(runner).resolve(
+            "development", CancellationToken()
+        )
+        self.assertEqual(identity.fingerprint, FINGERPRINT)
 
     def test_rejects_missing_ambiguous_and_malformed_fingerprint(self) -> None:
         for stderr in (

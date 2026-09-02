@@ -38,16 +38,16 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
     def test_authentication_fallback_reuses_socket_for_identity_and_diagnosis(self) -> None:
         broker = MagicMock()
         fingerprint = "SHA256:" + "A" * 43
-        broker.authenticate_alias.return_value = SimpleNamespace(
-            socket_path="/run/user/1000/cm-test", verified_fingerprint=fingerprint
-        )
+        broker.authenticate_alias.return_value = SimpleNamespace(socket_path="/run/user/1000/cm-test")
         self.factory.ssh_auth_broker = broker
         report = object()
         service = MagicMock()
         service.execute.return_value = report
         with patch(
             "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
-            side_effect=AdapterError("host_identity_unverified", "authentication required"),
+            return_value=SimpleNamespace(
+                fingerprint=fingerprint, authentication_required=True
+            ),
         ) as resolve, patch.object(DiagnosticTaskFactory, "_service", return_value=service) as compose:
             result = self.factory._execute_ssh(
                 self.remote, "diagnosis-test", CancellationToken()
@@ -68,18 +68,28 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
             self.factory._execute_ssh(self.remote, "diagnosis-test", CancellationToken())
         broker.authenticate_alias.assert_not_called()
 
+    def test_unverified_host_key_does_not_launch_interactive_authentication(self) -> None:
+        broker = MagicMock()
+        self.factory.ssh_auth_broker = broker
+        with patch(
+            "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
+            side_effect=AdapterError("host_identity_unverified", "host key changed"),
+        ), self.assertRaisesRegex(AdapterError, "host key changed"):
+            self.factory._execute_ssh(self.remote, "diagnosis-test", CancellationToken())
+        broker.authenticate_alias.assert_not_called()
+
     def test_control_session_is_closed_when_diagnosis_fails(self) -> None:
         broker = MagicMock()
-        session = SimpleNamespace(
-            socket_path="/run/user/1000/cm-test", verified_fingerprint="SHA256:" + "A" * 43
-        )
+        session = SimpleNamespace(socket_path="/run/user/1000/cm-test")
         broker.authenticate_alias.return_value = session
         self.factory.ssh_auth_broker = broker
         service = MagicMock()
         service.execute.side_effect = RuntimeError("diagnosis failed")
         with patch(
             "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
-            side_effect=AdapterError("host_identity_unverified", "authentication required"),
+            return_value=SimpleNamespace(
+                fingerprint="SHA256:" + "A" * 43, authentication_required=True
+            ),
         ), patch.object(DiagnosticTaskFactory, "_service", return_value=service), self.assertRaisesRegex(
             RuntimeError, "diagnosis failed"
         ):

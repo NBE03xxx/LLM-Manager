@@ -9,8 +9,11 @@ from llm_manager.infrastructure.process import SubprocessRunner
 
 _ALIAS = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_.@:-]{0,254}")
 _FINGERPRINT = re.compile(
-    r"^debug\d+: Server host key: (?P<algorithm>\S+) (?P<fingerprint>SHA256:[A-Za-z0-9+/]{43})$",
+    r"^debug\d+: Server host key: (?P<algorithm>\S+) (?P<fingerprint>SHA256:[A-Za-z0-9+/]{43})\r?$",
     re.MULTILINE,
+)
+_KNOWN_HOST_MATCH = re.compile(
+    r"^debug\d+: Host '.+' is known and matches the \S+ host key\.\r?$", re.MULTILINE
 )
 
 
@@ -22,6 +25,7 @@ class OpenSshHostIdentity:
     host_key_alias: str | None
     algorithm: str
     fingerprint: str
+    authentication_required: bool = False
 
 
 @dataclass(slots=True)
@@ -78,11 +82,12 @@ class OpenSshHostIdentityResolver:
         )
         if probe.timed_out:
             raise AdapterError("timeout", "OpenSSH host identity probe timed out")
-        if probe.exit_code != 0:
-            raise AdapterError("host_identity_unverified", "OpenSSH host identity probe did not complete")
         matches = {(match.group("algorithm"), match.group("fingerprint")) for match in _FINGERPRINT.finditer(probe.stderr_redacted)}
         if len(matches) != 1:
             raise AdapterError("host_identity_unverified", "OpenSSH did not report one verified server host key")
+        authentication_required = probe.exit_code != 0
+        if authentication_required and _KNOWN_HOST_MATCH.search(probe.stderr_redacted) is None:
+            raise AdapterError("host_identity_unverified", "OpenSSH did not confirm the known server host key")
         algorithm, fingerprint = matches.pop()
         return OpenSshHostIdentity(
             alias=alias,
@@ -91,6 +96,7 @@ class OpenSshHostIdentityResolver:
             host_key_alias=values.get("hostkeyalias"),
             algorithm=algorithm,
             fingerprint=fingerprint,
+            authentication_required=authentication_required,
         )
 
 

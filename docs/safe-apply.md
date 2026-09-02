@@ -203,7 +203,7 @@ local root Applyでも診断時の結果だけを信用しない。Backup開始�
 
 Control socketはuser専用runtime directory（mode 0700）へランダム名で作成する。LLM-Managerは`ssh -S`のcontrol check成功後だけsessionを利用し、操作完了、cancel、timeout時にcontrol `exit`を送る。target、port、socket pathは構造化値として検証し、shell文字列へ連結しない。ControlMasterは接続認証用であり、SSH先のsudo認証共有には利用しない。
 
-GUI diagnosisはまず`BatchMode=yes`とstrict known_hostsで接続し、接続timeoutやconfig異常では対話認証を起動しない。認証未完了の場合だけaliasを変更せず外部terminalのControlMasterへ渡す。masterのreadinessに加えて、その接続が報告した一意なSHA-256 host-key fingerprintを0600の一時debug logからdescriptorでbounded検証できた場合だけ、同じcontrol socketとfingerprintをread-only診断へ渡す。debug logは直後に削除し、曖昧、不正、public、symlink、oversizeならmasterを閉じて診断を開始しない。
+GUI diagnosisはまず`BatchMode=yes`とstrict known_hostsで接続し、一意なSHA-256 fingerprintとOpenSSHのknown-host一致を確認する。認証だけ未完了の場合に限りaliasを変更せず外部terminalのControlMasterへ渡し、そのreadiness成功後だけ事前検証済みfingerprintと同じcontrol socketをread-only診断へ渡す。host-key変更、未知key、接続timeout、config異常では対話認証を起動しない。
 
 ### SSH対話sudoフロー
 

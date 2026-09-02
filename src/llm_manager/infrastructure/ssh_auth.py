@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import re
 import shutil
-import stat
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,10 +17,6 @@ from .process import SubprocessRunner
 _USER = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]{0,63}")
 _HOST = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9_.:-]{0,253}[A-Za-z0-9])?")
 _ALIAS = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_.@:-]{0,254}")
-_FINGERPRINT = re.compile(
-    r"^debug\d+: Server host key: \S+ (?P<fingerprint>SHA256:[A-Za-z0-9+/]{43})$",
-    re.MULTILINE,
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,7 +73,6 @@ class SshControlSession:
     target: str
     port: int | None
     socket_path: str
-    verified_fingerprint: str | None = None
 
     def ssh_prefix(self) -> tuple[str, ...]:
         port = ("-p", str(self.port)) if self.port is not None else ()
@@ -139,18 +133,12 @@ class ExternalTerminalSshBroker:
         session_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         os.chmod(session_dir, 0o700)
         socket_path = session_dir / f"cm-{uuid4().hex[:16]}"
-        log_path = session_dir / f"host-key-{uuid4().hex[:16]}.log"
         if len(os.fsencode(socket_path)) >= 100:
             raise AdapterError("control_path_too_long", "SSH control socket path is too long")
-        log_fd = os.open(log_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        os.close(log_fd)
         session = SshControlSession(target, port, str(socket_path))
         port_args = ("-p", str(port)) if port is not None else ()
         ssh_command = (
             "ssh",
-            "-v",
-            "-E",
-            str(log_path),
             "-M",
             "-S",
             session.socket_path,
@@ -189,22 +177,12 @@ class ExternalTerminalSshBroker:
                     self.close(session, CancellationToken())
                     raise OperationCancelled("SSH authentication cancelled")
                 if self._is_ready(session, cancellation):
-                    try:
-                        fingerprint = self._read_verified_fingerprint(log_path)
-                    except AdapterError:
-                        self.close(session, CancellationToken())
-                        raise
-                    return SshControlSession(target, port, str(socket_path), fingerprint)
+                    return session
                 sleep(0.25)
             self.close(session, CancellationToken())
             raise AdapterError("authentication_timeout", "SSH authentication did not complete in time")
         except OSError as error:
             raise AdapterError("terminal_launch_failed", str(error)) from error
-        finally:
-            try:
-                log_path.unlink(missing_ok=True)
-            except OSError:
-                pass
 
     def close(self, session: SshControlSession, cancellation: CancellationToken) -> None:
         port = ("-p", str(session.port)) if session.port is not None else ()
@@ -231,27 +209,3 @@ class ExternalTerminalSshBroker:
             cancellation,
         )
         return not result.timed_out and result.exit_code == 0
-
-    @staticmethod
-    def _read_verified_fingerprint(log_path: Path) -> str:
-        descriptor = None
-        try:
-            descriptor = os.open(log_path, os.O_RDONLY | os.O_NOFOLLOW)
-            metadata = os.fstat(descriptor)
-            if (
-                not stat.S_ISREG(metadata.st_mode)
-                or metadata.st_uid != os.getuid()
-                or metadata.st_mode & 0o077
-                or metadata.st_size > 1024 * 1024
-            ):
-                raise AdapterError("host_identity_unverified", "SSH host-key log is not private")
-            content = os.read(descriptor, 1024 * 1024 + 1).decode("utf-8", errors="replace")
-        except OSError as error:
-            raise AdapterError("host_identity_unverified", "SSH host-key log is unavailable") from error
-        finally:
-            if descriptor is not None:
-                os.close(descriptor)
-        matches = {match.group("fingerprint") for match in _FINGERPRINT.finditer(content)}
-        if len(matches) != 1:
-            raise AdapterError("host_identity_unverified", "SSH master did not report one server host key")
-        return matches.pop()

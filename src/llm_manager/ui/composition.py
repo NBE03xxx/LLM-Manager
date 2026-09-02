@@ -79,24 +79,18 @@ class DiagnosticTaskFactory:
         resolver = OpenSshHostIdentityResolver(self.ssh_runner)
         session = None
         try:
-            try:
-                identity = resolver.resolve(candidate.ssh_alias, cancellation)
-            except AdapterError as error:
-                if error.code != "host_identity_unverified" or self.ssh_auth_broker is None:
-                    raise
+            identity = resolver.resolve(candidate.ssh_alias, cancellation)
+            if identity.authentication_required:
+                if self.ssh_auth_broker is None:
+                    raise AdapterError(
+                        "authentication_required", "SSH authentication requires an external terminal"
+                    )
                 session = self.ssh_auth_broker.authenticate_alias(
                     SshAliasAuthRequest(candidate.ssh_alias), cancellation
                 )
-                if session.verified_fingerprint is None:
-                    raise AdapterError(
-                        "host_identity_unverified", "SSH master identity was not verified"
-                    )
-                fingerprint = session.verified_fingerprint
-            else:
-                fingerprint = identity.fingerprint
             return self._service(
                 candidate,
-                fingerprint,
+                identity.fingerprint,
                 session.socket_path if session is not None else None,
             ).execute(report_id, cancellation)
         finally:
