@@ -21,6 +21,9 @@ from .workflow import GuiPresenter, GuiStep
 
 DiagnosisTaskFactory = Callable[[str], Callable[[CancellationToken], DiagnosticReport]]
 RecommendationPlanFactory = Callable[[DiagnosticReport, OptimizationProfile], OptimizationPlan]
+ChangePlanTaskFactory = Callable[
+    [OptimizationPlan, DiagnosticReport], Callable[[CancellationToken], OptimizationPlan]
+]
 
 
 if not PYSIDE_AVAILABLE:
@@ -53,6 +56,7 @@ else:
             coordinator: QtWorkerCoordinator | None = None,
             hosts: tuple[HostCandidate, ...] = (),
             recommendation_plan_factory: RecommendationPlanFactory = generate_recommendation_plan,
+            change_plan_task_factory: ChangePlanTaskFactory | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -63,6 +67,7 @@ else:
             self._nav_items: dict[GuiStep, QListWidgetItem] = {}
             self._hosts = hosts or (HostCandidate("local", HostKind.LOCAL, "Local"),)
             self._recommendation_plan_factory = recommendation_plan_factory
+            self._change_plan_task_factory = change_plan_task_factory
             self._recommendation_plan: OptimizationPlan | None = None
 
             self._navigation = QListWidget()
@@ -207,6 +212,8 @@ else:
 
         @Slot()
         def _change_profile(self) -> None:
+            if self._presenter.state.busy:
+                return
             report = self._presenter.state.report
             profile_id = self._profile_selector.currentData()
             if report is not None and isinstance(profile_id, str):
@@ -217,7 +224,7 @@ else:
 
         @Slot()
         def _selection_changed(self) -> None:
-            if self._recommendation_plan is None:
+            if self._recommendation_plan is None or self._presenter.state.busy:
                 return
             selected = tuple(
                 item.data(256)
@@ -234,9 +241,54 @@ else:
         def _review_selected(self) -> None:
             if self._recommendation_plan is None or not self._recommendation_plan.selected_ids:
                 return
-            self._presenter.review_plan(stable_hash(self._recommendation_plan))
-            self._render_review()
+            report = self._presenter.state.report
+            if report is None:
+                return
+            try:
+                self._presenter.begin_change_plan(stable_hash(self._recommendation_plan))
+                if self._change_plan_task_factory is None:
+                    raise RuntimeError("change_planning_unavailable")
+                runner = QtTaskRunner(
+                    self._change_plan_task_factory(self._recommendation_plan, report)
+                )
+                runner.signals.result.connect(self._change_plan_finished)
+                runner.signals.error.connect(self._change_plan_failed)
+                runner.signals.cancelled.connect(self._change_plan_cancelled)
+                self._active_host_id = report.host.host_id
+                self._coordinator.start(report.host.host_id, runner)
+            except (RuntimeError, ValueError) as error:
+                self._presenter.fail_change_plan(str(error))
+                self._active_host_id = None
             self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.REVIEW))
+            self._render()
+
+        @Slot(object)
+        def _change_plan_finished(self, result: object) -> None:
+            if not isinstance(result, OptimizationPlan) or result.change_set is None:
+                self._presenter.fail_change_plan("invalid_change_plan_result")
+            elif (
+                self._recommendation_plan is None
+                or result.plan_id != self._recommendation_plan.plan_id
+                or result.selected_ids != self._recommendation_plan.selected_ids
+            ):
+                self._presenter.fail_change_plan("change_plan_mismatch")
+            else:
+                self._recommendation_plan = result
+                self._presenter.finish_change_plan(result.change_set.content_hash)
+            self._active_host_id = None
+            self._render()
+
+        @Slot(object)
+        def _change_plan_failed(self, failure: object) -> None:
+            self._presenter.fail_change_plan(str(getattr(failure, "code", "worker_failed")))
+            self._active_host_id = None
+            self._render()
+
+        @Slot()
+        def _change_plan_cancelled(self) -> None:
+            self._presenter.fail_change_plan("operation_cancelled")
+            self._active_host_id = None
+            self._render()
 
         @Slot(object)
         def _diagnosis_finished(self, report: object) -> None:
@@ -275,6 +327,8 @@ else:
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
+            self._profile_selector.setEnabled(not state.busy)
+            self._recommendation_list.setEnabled(not state.busy)
             for index, profile in enumerate(PROFILES):
                 self._profile_selector.setItemText(
                     index, self._catalog.text(f"profile.{profile.profile_id}")
@@ -316,7 +370,9 @@ else:
                         Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
                     )
                 self._recommendation_list.addItem(item)
-            self._review_button.setEnabled(bool(self._recommendation_plan.selected_ids))
+            self._review_button.setEnabled(
+                bool(self._recommendation_plan.selected_ids) and not self._presenter.state.busy
+            )
             self._recommendation_list.blockSignals(False)
 
         def _render_review(self) -> None:
@@ -325,11 +381,33 @@ else:
             if plan is None:
                 self._review_summary.setText("")
                 return
-            self._review_summary.setText(
-                self._catalog.text("review.summary", selected=len(plan.selected_ids))
-                + "\n"
-                + self._catalog.text("review.preview_only")
-            )
+            state = self._presenter.state
+            summary = self._catalog.text("review.summary", selected=len(plan.selected_ids))
+            if state.busy and state.step is GuiStep.REVIEW:
+                self._review_summary.setText(summary + "\n" + self._catalog.text("review.generating"))
+                return
+            if state.step is GuiStep.REVIEW and state.error_code:
+                self._review_summary.setText(
+                    summary + "\n" + self._catalog.text("review.failed", code=state.error_code)
+                )
+                return
+            if plan.change_set is None:
+                self._review_summary.setText(summary + "\n" + self._catalog.text("review.preview_only"))
+                return
+            self._review_summary.setText(summary)
+            for change in plan.change_set.changes:
+                self._review_list.addItem(
+                    self._catalog.text(
+                        "review.change",
+                        target=change.target,
+                        diff=change.diff,
+                        root=self._catalog.text("state.yes" if change.requires_root else "state.no"),
+                        restart=self._catalog.text(
+                            "state.yes" if change.requires_restart else "state.no"
+                        ),
+                    )
+                )
+            return
             selected = set(plan.selected_ids)
             view = present_recommendations(plan, self._catalog)
             for item in view.items:

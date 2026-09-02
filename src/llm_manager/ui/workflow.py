@@ -125,6 +125,38 @@ class GuiPresenter:
         )
         return self._state
 
+    def begin_change_plan(self, plan_hash: str) -> GuiState:
+        self.review_plan(plan_hash)
+        self._state = replace(self._state, status=WorkflowStatus.RUNNING)
+        return self._state
+
+    def finish_change_plan(self, change_set_hash: str) -> GuiState:
+        if not self._state.busy:
+            raise RuntimeError("change_planning_not_running")
+        if not change_set_hash.strip():
+            raise ValueError("change_set_hash must not be blank")
+        self._state = replace(
+            self._state,
+            step=GuiStep.REVIEW,
+            status=WorkflowStatus.SUCCESS,
+            plan_hash=change_set_hash,
+            approved_plan_hash=None,
+            error_code=None,
+        )
+        return self._state
+
+    def fail_change_plan(self, error_code: str) -> GuiState:
+        if not self._state.busy:
+            raise RuntimeError("change_planning_not_running")
+        self._state = replace(
+            self._state,
+            step=GuiStep.REVIEW,
+            status=WorkflowStatus.FAILED,
+            approved_plan_hash=None,
+            error_code=error_code,
+        )
+        return self._state
+
     def approve_plan(self) -> GuiState:
         if self._state.plan_hash is None:
             raise RuntimeError("plan_required")

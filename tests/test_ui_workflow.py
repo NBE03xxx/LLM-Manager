@@ -64,6 +64,30 @@ class GuiPresenterTests(unittest.TestCase):
         self.presenter.approve_plan()
         self.assertFalse(self.presenter.select_host("host-2").approved)
 
+    def test_change_planning_is_busy_and_finishes_with_change_set_hash(self) -> None:
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        state = self.presenter.begin_change_plan("selected-plan-hash")
+        self.assertEqual(state.step, GuiStep.REVIEW)
+        self.assertTrue(state.busy)
+        with self.assertRaisesRegex(RuntimeError, "workflow_busy"):
+            self.presenter.select_host("host-2")
+        state = self.presenter.finish_change_plan("change-set-hash")
+        self.assertEqual(state.status, WorkflowStatus.SUCCESS)
+        self.assertEqual(state.plan_hash, "change-set-hash")
+        self.assertFalse(state.approved)
+
+    def test_change_planning_failure_stays_in_review(self) -> None:
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        self.presenter.begin_change_plan("selected-plan-hash")
+        state = self.presenter.fail_change_plan("stale_plan")
+        self.assertEqual(state.step, GuiStep.REVIEW)
+        self.assertEqual(state.status, WorkflowStatus.FAILED)
+        self.assertEqual(state.error_code, "stale_plan")
+
 
 if __name__ == "__main__":
     unittest.main()

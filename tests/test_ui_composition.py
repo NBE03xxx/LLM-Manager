@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from dataclasses import replace
 from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import ANY, MagicMock, patch
@@ -9,7 +10,11 @@ from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.enums import HostKind
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
-from llm_manager.ui.composition import DiagnosticTaskFactory, _local_opencode_candidates
+from llm_manager.ui.composition import (
+    ChangePlanTaskFactory,
+    DiagnosticTaskFactory,
+    _local_opencode_candidates,
+)
 
 
 class DiagnosticTaskFactoryTests(unittest.TestCase):
@@ -119,6 +124,43 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
                 "pathlib.Path.home", return_value=Path(directory)
             ):
                 self.assertTrue(all(path.startswith(directory) for path in _local_opencode_candidates()))
+
+    def test_change_plan_factory_rejects_unknown_report_host_before_io(self) -> None:
+        from tests.fixtures import plan, report
+
+        change_factory = ChangePlanTaskFactory(self.factory, MagicMock())
+        unknown = replace(report(), host=replace(report().host, host_id="local:unknown"))
+        with self.assertRaisesRegex(ValueError, "unknown_host_candidate"):
+            change_factory(plan(), unknown)
+        change_factory.service.execute.assert_not_called()
+
+    def test_change_plan_factory_closes_ssh_session_after_failure(self) -> None:
+        from tests.fixtures import plan, report
+
+        broker = MagicMock()
+        session = SimpleNamespace(socket_path="/run/user/1000/cm-test")
+        broker.authenticate_alias.return_value = session
+        self.factory.ssh_auth_broker = broker
+        service = MagicMock()
+        service.execute.side_effect = RuntimeError("planning failed")
+        change_factory = ChangePlanTaskFactory(self.factory, service)
+        remote_report = replace(
+            report(),
+            host=replace(
+                report().host,
+                host_id=self.remote.host_id,
+                kind=HostKind.SSH,
+                ssh_alias=self.remote.ssh_alias,
+            ),
+        )
+        with patch(
+            "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
+            return_value=SimpleNamespace(
+                fingerprint="SHA256:" + "A" * 43, authentication_required=True
+            ),
+        ), self.assertRaisesRegex(RuntimeError, "planning failed"):
+            change_factory(plan(), remote_report)(CancellationToken())
+        broker.close.assert_called_once_with(session, ANY)
 
 
 if __name__ == "__main__":

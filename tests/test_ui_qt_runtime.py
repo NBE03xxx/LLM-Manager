@@ -122,7 +122,17 @@ class QtRuntimeTests(unittest.TestCase):
             HostCandidate("local:test", HostKind.LOCAL, "Local"),
             HostCandidate("ssh:development", HostKind.SSH, "development", "development"),
         )
-        window = MainWindow(task_factory, locale="en", hosts=hosts)
+        def change_plan_factory(plan, _report):
+            from tests.fixtures import change_set
+
+            return lambda _token: replace(plan, change_set=change_set())
+
+        window = MainWindow(
+            task_factory,
+            locale="en",
+            hosts=hosts,
+            change_plan_task_factory=change_plan_factory,
+        )
         try:
             diagnose = window.findChild(QPushButton, "start-diagnosis")
             navigation = window.findChild(QListWidget, "workflow-navigation")
@@ -167,12 +177,25 @@ class QtRuntimeTests(unittest.TestCase):
             review_button = window.findChild(QPushButton, "review-selected")
             self.assertTrue(review_button.isEnabled())
             review_button.click()
-            self.application.processEvents()
             review_summary = window.findChild(QLabel, "review-summary")
             review_list = window.findChild(QListWidget, "review-list")
+
+            review_loop = QEventLoop()
+
+            def finish_when_planned() -> None:
+                if review_list.count() == 1:
+                    review_loop.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_planned)
+
+            QTimer.singleShot(0, finish_when_planned)
+            QTimer.singleShot(2000, review_loop.quit)
+            review_loop.exec()
             self.assertEqual(navigation.currentRow(), 3)
-            self.assertIn("プレビューのみ", review_summary.text())
+            self.assertNotIn("プレビューのみ", review_summary.text())
             self.assertEqual(review_list.count(), 1)
+            self.assertIn("-old\n+new", review_list.item(0).text())
+            self.assertIn("root権限: 不要", review_list.item(0).text())
         finally:
             window.close()
 

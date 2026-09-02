@@ -10,12 +10,13 @@ from llm_manager.adapters.host.local import LocalHostAdapter
 from llm_manager.adapters.host.openssh import OpenSshHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
+from llm_manager.application.change_planning import BuildSelectedOpenCodeChangePlan
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.services import DiagnoseHost
 from llm_manager.diagnostics.linux import LinuxSystemProbe
 from llm_manager.domain.enums import HostKind
-from llm_manager.domain.models import DiagnosticReport
+from llm_manager.domain.models import DiagnosticReport, OptimizationPlan
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
 from llm_manager.infrastructure.openssh_identity import OpenSshHostIdentityResolver
 from llm_manager.infrastructure.ssh_auth import (
@@ -123,6 +124,64 @@ class DiagnosticTaskFactory:
             client=OpenCodeReadOnlyAdapter(configs),
             system_probe=LinuxSystemProbe(),
         )
+
+
+@dataclass(slots=True)
+class ChangePlanTaskFactory:
+    diagnostics: DiagnosticTaskFactory
+    service: BuildSelectedOpenCodeChangePlan = BuildSelectedOpenCodeChangePlan()
+
+    def __call__(self, plan: OptimizationPlan, report: DiagnosticReport):
+        candidate = next(
+            (item for item in self.diagnostics.hosts if item.host_id == report.host.host_id), None
+        )
+        if candidate is None:
+            raise ValueError("unknown_host_candidate")
+
+        def execute(cancellation: CancellationToken) -> OptimizationPlan:
+            if candidate.kind is HostKind.LOCAL:
+                host = LocalHostAdapter(
+                    self.diagnostics.local_runner, display_name=candidate.display_name
+                )
+                return self.service.execute(plan, report, host, cancellation)
+            return self._execute_ssh(candidate, plan, report, cancellation)
+
+        return execute
+
+    def _execute_ssh(
+        self,
+        candidate: HostCandidate,
+        plan: OptimizationPlan,
+        report: DiagnosticReport,
+        cancellation: CancellationToken,
+    ) -> OptimizationPlan:
+        if candidate.ssh_alias is None:
+            raise ValueError("ssh_candidate_requires_alias")
+        resolver = OpenSshHostIdentityResolver(self.diagnostics.ssh_runner)
+        session = None
+        try:
+            identity = resolver.resolve(candidate.ssh_alias, cancellation)
+            if identity.authentication_required:
+                broker = self.diagnostics.ssh_auth_broker
+                if broker is None:
+                    raise AdapterError(
+                        "authentication_required",
+                        "SSH authentication requires an external terminal",
+                    )
+                session = broker.authenticate_alias(
+                    SshAliasAuthRequest(candidate.ssh_alias), cancellation
+                )
+            host = OpenSshHostAdapter(
+                candidate.ssh_alias,
+                self.diagnostics.ssh_runner,
+                candidate.display_name,
+                verified_fingerprint=identity.fingerprint,
+                control_socket=session.socket_path if session is not None else None,
+            )
+            return self.service.execute(plan, report, host, cancellation)
+        finally:
+            if session is not None and self.diagnostics.ssh_auth_broker is not None:
+                self.diagnostics.ssh_auth_broker.close(session, CancellationToken())
 
 
 def _local_opencode_candidates() -> tuple[str, ...]:
