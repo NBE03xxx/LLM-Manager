@@ -103,17 +103,30 @@ class QtRuntimeTests(unittest.TestCase):
 
     def test_diagnose_button_runs_worker_and_advances_to_recommendations(self) -> None:
         from PySide6.QtCore import QEventLoop, QTimer
-        from PySide6.QtWidgets import QLabel, QListWidget, QPushButton
+        from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QPushButton
 
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.domain.enums import HostKind
         from llm_manager.ui.qt_window import MainWindow
         from tests.fixtures import report
 
-        local_report = replace(report(), host=replace(report().host, host_id="local"))
-        window = MainWindow(lambda _host_id: lambda _token: local_report, locale="en")
+        requested = []
+
+        def task_factory(host_id):
+            requested.append(host_id)
+            bound_report = replace(report(), host=replace(report().host, host_id=host_id))
+            return lambda _token: bound_report
+
+        hosts = (
+            HostCandidate("local:test", HostKind.LOCAL, "Local"),
+            HostCandidate("ssh:development", HostKind.SSH, "development", "development"),
+        )
+        window = MainWindow(task_factory, locale="en", hosts=hosts)
         try:
             diagnose = window.findChild(QPushButton, "start-diagnosis")
             navigation = window.findChild(QListWidget, "workflow-navigation")
             status = window.findChild(QLabel, "workflow-status")
+            host_selector = window.findChild(QComboBox, "host-selector")
             loop = QEventLoop()
 
             def finish_when_complete() -> None:
@@ -122,6 +135,7 @@ class QtRuntimeTests(unittest.TestCase):
                 else:
                     QTimer.singleShot(5, finish_when_complete)
 
+            host_selector.setCurrentIndex(1)
             diagnose.click()
             QTimer.singleShot(0, finish_when_complete)
             QTimer.singleShot(2000, loop.quit)
@@ -131,6 +145,7 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertEqual(navigation.currentItem().text(), "Recommendations")
             self.assertEqual(status.text(), "Completed")
             self.assertTrue(diagnose.isEnabled())
+            self.assertEqual(requested, ["ssh:development"])
         finally:
             window.close()
 

@@ -22,6 +22,7 @@ class QtWindowBoundaryTests(unittest.TestCase):
             "workflow-navigation",
             "workflow-status",
             "language-selector",
+            "host-selector",
             "selected-host",
             "start-diagnosis",
             "cancel-operation",

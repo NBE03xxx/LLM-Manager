@@ -24,7 +24,7 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
-| FR-HOST-01 | architecture, ADR-0001 | `OpenSshHostAdapterTests`完了、ProxyJump/host-key実環境統合待ち | Phase 2一部完了 |
+| FR-HOST-01 | architecture, ADR-0001, gui | `OpenSshHostAdapterTests`, `OpenSshConfigAliasesTests`, `DiagnosticTaskFactoryTests`（Local先頭、literal alias、Include、wildcard/unsafe除外、system OpenSSH composition）、実config read-only候補2件 | Phase 5一部完了（host-key自動解決は後続） |
 | FR-DIAG-01..03 | diagnostics, version matrix | `LinuxParserTests`, `LinuxProbeTests`, partial report完了、実環境待ち | Phase 2一部完了 |
 | FR-OLLAMA-01 | version matrix, allowlist | `OllamaAdapterTests` fixture完了、0.33.2実環境待ち | Phase 2/3 |
 | FR-OPENCODE-01 | version matrix, allowlist | `OpenCodeAdapterTests` JSONC fixture完了、1.18.25探索統合待ち | Phase 2/3 |

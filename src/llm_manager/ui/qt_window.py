@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Callable
 
+from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
+from llm_manager.domain.enums import HostKind
 from llm_manager.domain.models import DiagnosticReport
 
 from .i18n import Catalog
@@ -40,6 +42,7 @@ else:
             locale: str = "en",
             presenter: GuiPresenter | None = None,
             coordinator: QtWorkerCoordinator | None = None,
+            hosts: tuple[HostCandidate, ...] = (),
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -48,12 +51,16 @@ else:
             self._catalog = Catalog(locale)
             self._active_host_id: str | None = None
             self._nav_items: dict[GuiStep, QListWidgetItem] = {}
+            self._hosts = hosts or (HostCandidate("local", HostKind.LOCAL, "Local"),)
 
             self._navigation = QListWidget()
             self._navigation.setObjectName("workflow-navigation")
             self._navigation.setAccessibleName("workflow-navigation")
             self._pages = QStackedWidget()
             self._host_label = QLabel()
+            self._host_selector = QComboBox()
+            self._host_selector.setObjectName("host-selector")
+            self._host_selector.setAccessibleName("host-selector")
             self._status_label = QLabel()
             self._status_label.setObjectName("workflow-status")
             self._status_label.setAccessibleName("workflow-status")
@@ -62,6 +69,8 @@ else:
             self._language.setAccessibleName("language-selector")
             self._language.addItem("English", "en")
             self._language.addItem("日本語", "ja")
+            for host in self._hosts:
+                self._host_selector.addItem(host.display_name, host.host_id)
             self._diagnose_button = QPushButton()
             self._diagnose_button.setObjectName("start-diagnosis")
             self._diagnose_button.setAccessibleName("start-diagnosis")
@@ -84,11 +93,12 @@ else:
 
             self._navigation.currentRowChanged.connect(self._pages.setCurrentIndex)
             self._language.currentIndexChanged.connect(self._change_language)
+            self._host_selector.currentIndexChanged.connect(self._select_host)
             self._diagnose_button.clicked.connect(self._start_diagnosis)
             self._cancel_button.clicked.connect(self._cancel_diagnosis)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
-            self._presenter.select_host("local")
+            self._presenter.select_host(self._hosts[0].host_id)
             self._render()
 
         def _make_page(self, step: GuiStep) -> QWidget:
@@ -100,6 +110,7 @@ else:
                 self._host_label.setAccessibleName("selected-host")
                 self._host_label.setObjectName("selected-host")
                 layout.addWidget(self._host_label)
+                layout.addWidget(self._host_selector)
                 layout.addWidget(self._language)
             elif step is GuiStep.DIAGNOSE:
                 layout.addWidget(self._status_label)
@@ -118,6 +129,13 @@ else:
             locale = self._language.currentData()
             if isinstance(locale, str):
                 self._catalog = Catalog(locale)
+                self._render()
+
+        @Slot()
+        def _select_host(self) -> None:
+            host_id = self._host_selector.currentData()
+            if isinstance(host_id, str) and not self._presenter.state.busy:
+                self._presenter.select_host(host_id)
                 self._render()
 
         @Slot()
@@ -172,12 +190,13 @@ else:
         def _render(self) -> None:
             state = self._presenter.state
             self.setWindowTitle(self._catalog.text("app.title"))
-            self._host_label.setText("Local")
+            self._host_label.setText(self._host_selector.currentText())
             self._status_label.setText(self._catalog.text(f"status.{state.status.value}"))
             self._diagnose_button.setText(self._catalog.text("action.diagnose"))
             self._cancel_button.setText(self._catalog.text("action.cancel"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
+            self._host_selector.setEnabled(not state.busy)
             for step, item in self._nav_items.items():
                 item.setText(self._catalog.text(f"nav.{step.value}"))
             for index, step in enumerate(GuiStep):

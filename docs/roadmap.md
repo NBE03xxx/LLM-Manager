@@ -153,6 +153,8 @@ Exit: acceptance scenariosがGUI経由で完了し、UI threadがblockしない�
 
 先行実装: Qt非依存のpresentation layerとして6工程の`GuiStep`、workflow status、immutable `GuiState`、`GuiPresenter`を追加した。host未選択、二重診断、report host不一致を拒否し、complete/partial/failed、cancel request、host/plan変更時の承認失効をheadless testで検証する。ja/en catalogは同一key集合を持ち、localeのlanguage部分を選択し、未対応・空localeを英語へfallbackする。QThreadPool境界は`QRunnable`、QObject signal、CancellationToken、host単位active lockを持つoptional adapterとし、PySide6不在時はstable `pyside6_unavailable`で停止する。最小Hosts/Diagnose widgetはprimary controlのobject/accessibility name、言語切替、background診断とRecommendations遷移を実装した。Ubuntu 26.04 disposable VMのPySide6 6.10.2 offscreen Gateでworker別thread、event-loop sentinel、result/cancel、window/language、Diagnose vertical sliceの4件を完了した。
 
+Hosts/composition実装: `~/.ssh/config`とrelative `Include` globを1 MiB/128 files上限でread-only列挙し、literalかつAdapter契約に適合するaliasだけを重複排除してLocal候補の後へ表示する。wildcard、negation、unsafe aliasは候補化せず、missing configはLocalだけへ縮退する。host selectorはbusy中無効化し、選択IDをtask/reportへ束縛する。production compositionはLocal processを固定診断allowlist、SSH外側をsystem `ssh`だけへ限定し、未知hostをprocess前に拒否する。main workstationの実Local read-only taskは`partial`、host binding成功、Ollama観測あり、PATH外OpenCodeは個別失敗として確認した。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

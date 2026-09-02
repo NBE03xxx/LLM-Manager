@@ -22,4 +22,8 @@ sourceはlibvirt private network `192.168.122.1`上の一時HTTP serverからVM 
 
 ## Remaining boundary
 
-実Local/OpenSSH diagnosis composition、SSH alias一覧、Recommendations以降の実widget、長文layout、実display操作、packaged GUI entry pointは後続Phase 5 Gateとする。runtime testはPySide6不在環境ではskipし、optional importとcore testを継続する。
+実OpenSSH接続診断、host-key自動解決、Recommendations以降の実widget、長文layout、実display操作、packaged GUI entry pointは後続Phase 5 Gateとする。runtime testはPySide6不在環境ではskipし、optional importとcore testを継続する。
+
+## Hosts/composition follow-up
+
+同日、`~/.ssh/config`のread-only literal alias discovery、Local/OpenSSH task composition、host selectorを追加した。main workstationの実configはalias名を表示せずLocal 1件/SSH 1件として列挙し、接続は開始していない。実Local taskは固定allowlistで`partial` reportを返し、選択host ID bindingとOllama観測に成功した。system PATH外のOpenCodeは個別失敗となり、取得済み結果を保持した。host selectorを含むQt runtime回帰は同じVMで再検証する。

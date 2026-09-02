@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜4を完了し、現在は **Phase 5（PySide6 GUI）**です。Qt非依存presenter/view-model、6工程の状態、cancel/二重開始防止、承認失効、ja/en catalogと英語fallbackに加え、optional QThreadPool workerと最小Hosts/Diagnose widgetを実装しました。Ubuntu 26.04 disposable VMのPySide6 6.10.2で別thread実行、event-loop sentinel、result/cancel signal、言語切替、Diagnose→Recommendations遷移を検証済みです。Phase 4の詳細は[closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
+Phase 0〜4を完了し、現在は **Phase 5（PySide6 GUI）**です。Qt非依存presenter/view-model、optional QThreadPool worker、最小Hosts/Diagnose widget、`~/.ssh/config`のread-only alias discovery、Local/OpenSSH診断compositionを実装しました。Ubuntu 26.04 disposable VMのPySide6 6.10.2で別thread実行、event-loop sentinel、result/cancel signal、言語切替、Diagnose→Recommendations遷移を検証済みです。Phase 4の詳細は[closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
