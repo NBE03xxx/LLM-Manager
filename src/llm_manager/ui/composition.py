@@ -16,6 +16,7 @@ from llm_manager.diagnostics.linux import LinuxSystemProbe
 from llm_manager.domain.enums import HostKind
 from llm_manager.domain.models import DiagnosticReport
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
+from llm_manager.infrastructure.openssh_identity import OpenSshHostIdentityResolver
 
 _LOCAL_EXECUTABLES = frozenset(
     {"curl", "df", "lscpu", "lspci", "nvidia-smi", "ollama", "opencode", "rocm-smi", "systemctl", "uname"}
@@ -43,22 +44,34 @@ class DiagnosticTaskFactory:
         candidate = next((item for item in self.hosts if item.host_id == host_id), None)
         if candidate is None:
             raise ValueError("unknown_host_candidate")
-        service = self._service(candidate)
         report_id = f"diagnosis-{uuid.uuid4().hex}"
 
         def execute(cancellation: CancellationToken) -> DiagnosticReport:
+            fingerprint = None
+            if candidate.kind is HostKind.SSH:
+                if candidate.ssh_alias is None:
+                    raise ValueError("ssh_candidate_requires_alias")
+                fingerprint = OpenSshHostIdentityResolver(self.ssh_runner).resolve(
+                    candidate.ssh_alias, cancellation
+                ).fingerprint
+            service = self._service(candidate, fingerprint)
             return service.execute(report_id, cancellation)
 
         return execute
 
-    def _service(self, candidate: HostCandidate) -> DiagnoseHost:
+    def _service(self, candidate: HostCandidate, verified_fingerprint: str | None = None) -> DiagnoseHost:
         if candidate.kind is HostKind.LOCAL:
             host = LocalHostAdapter(self.local_runner, display_name=candidate.display_name)
             configs = self.local_config_candidates
         else:
             if candidate.ssh_alias is None:
                 raise ValueError("ssh_candidate_requires_alias")
-            host = OpenSshHostAdapter(candidate.ssh_alias, self.ssh_runner, candidate.display_name)
+            host = OpenSshHostAdapter(
+                candidate.ssh_alias,
+                self.ssh_runner,
+                candidate.display_name,
+                verified_fingerprint=verified_fingerprint,
+            )
             configs = self.remote_config_candidates
         return DiagnoseHost(
             host=host,

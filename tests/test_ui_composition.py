@@ -27,6 +27,11 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         self.assertIs(local_service.host.runner, self.local_runner)
         self.assertIs(remote_service.host.runner, self.ssh_runner)
 
+    def test_verified_fingerprint_is_injected_only_for_ssh(self) -> None:
+        fingerprint = "SHA256:" + "A" * 43
+        remote_service = self.factory._service(self.remote, fingerprint)
+        self.assertEqual(remote_service.host.verified_fingerprint, fingerprint)
+
     def test_rejects_unknown_candidate_before_any_process(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown_host_candidate"):
             self.factory("ssh:unknown")
