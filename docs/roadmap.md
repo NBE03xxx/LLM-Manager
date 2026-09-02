@@ -159,6 +159,8 @@ OpenSSH identity実装: 固定`ssh -G -- <alias>`のeffective hostname/port/Host
 
 ControlMaster GUI composition実装: strict known_hostsの直接probeが一意なSHA-256 fingerprintとOpenSSHのknown-host一致を確認したうえで認証未完了となった場合だけ、利用可能な外部terminalでOpenSSH aliasをそのまま使う一時ControlMasterへfallbackする。これによりUser、Port、IdentityFile、Agent、ProxyJump等はsystem OpenSSH configへ委譲する。host-key変更、未知key、config異常、timeoutはterminal起動前にfail closedとする。masterのsocket readiness成功後だけ、事前検証したfingerprintと同socketへ診断を束縛し、sessionは成功、失敗、cancelの全経路でcontrol `exit`する。実`llm-manager-gate`では外部Ptyxis master、同socket上のproduction read-only診断が`complete`、host/fingerprint binding成功、failed probe 0、終了後runtime artifact 0となった。
 
+Recommendations vertical slice実装: 診断reportから既存catalog version固定RuleEngineで期限付きOptimizationPlanを生成し、Balanced/Coding/Agent切替ごとに再評価する。setting/current/recommended、severity、actionable/read-only、理由、影響を一覧表示し、秘密名の設定値は表示前にredactする。ja/en catalogへprofile、summary、rule説明を追加し、言語切替時にprofile名と既存一覧を即時再描画する。Ubuntu 26.04/PySide6 6.10.2 offscreen GateでAgent推奨2件、英日summary、redactionを含む8件が成功した。selectionとPlan preview接続は後続とする。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

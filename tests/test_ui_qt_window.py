@@ -26,6 +26,9 @@ class QtWindowBoundaryTests(unittest.TestCase):
             "selected-host",
             "start-diagnosis",
             "cancel-operation",
+            "profile-selector",
+            "recommendation-summary",
+            "recommendation-list",
         ):
             self.assertIn(f'"{name}"', source)
 

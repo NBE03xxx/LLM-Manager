@@ -108,13 +108,14 @@ class QtRuntimeTests(unittest.TestCase):
         from llm_manager.application.host_discovery import HostCandidate
         from llm_manager.domain.enums import HostKind
         from llm_manager.ui.qt_window import MainWindow
-        from tests.fixtures import report
+        from tests.test_optimization import diagnostic
 
         requested = []
 
         def task_factory(host_id):
             requested.append(host_id)
-            bound_report = replace(report(), host=replace(report().host, host_id=host_id))
+            source = diagnostic()
+            bound_report = replace(source, host=replace(source.host, host_id=host_id))
             return lambda _token: bound_report
 
         hosts = (
@@ -146,6 +147,22 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertEqual(status.text(), "Completed")
             self.assertTrue(diagnose.isEnabled())
             self.assertEqual(requested, ["ssh:development"])
+            profile_selector = window.findChild(QComboBox, "profile-selector")
+            recommendations = window.findChild(QListWidget, "recommendation-list")
+            summary = window.findChild(QLabel, "recommendation-summary")
+            self.assertEqual(profile_selector.count(), 3)
+            self.assertIsNotNone(recommendations)
+            self.assertIsNotNone(summary)
+            profile_selector.setCurrentIndex(2)
+            self.application.processEvents()
+            self.assertEqual(recommendations.count(), 2)
+            self.assertIn("2 recommendations", summary.text())
+            self.assertIn("compaction.", recommendations.item(0).text())
+            language = window.findChild(QComboBox, "language-selector")
+            language.setCurrentIndex(1)
+            self.application.processEvents()
+            self.assertEqual(profile_selector.currentText(), "エージェント")
+            self.assertIn("推奨 2件", summary.text())
         finally:
             window.close()
 

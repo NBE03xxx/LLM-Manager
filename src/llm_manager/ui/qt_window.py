@@ -5,13 +5,16 @@ from typing import Callable
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.enums import HostKind
-from llm_manager.domain.models import DiagnosticReport
+from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile
+from llm_manager.optimization import PROFILES
 
 from .i18n import Catalog
 from .qt_worker import PYSIDE_AVAILABLE, QtTaskRunner, QtUnavailableError, QtWorkerCoordinator
+from .recommendations import generate_recommendation_plan, present_recommendations, profile_by_id
 from .workflow import GuiPresenter, GuiStep
 
 DiagnosisTaskFactory = Callable[[str], Callable[[CancellationToken], DiagnosticReport]]
+RecommendationPlanFactory = Callable[[DiagnosticReport, OptimizationProfile], OptimizationPlan]
 
 
 if not PYSIDE_AVAILABLE:
@@ -43,6 +46,7 @@ else:
             presenter: GuiPresenter | None = None,
             coordinator: QtWorkerCoordinator | None = None,
             hosts: tuple[HostCandidate, ...] = (),
+            recommendation_plan_factory: RecommendationPlanFactory = generate_recommendation_plan,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -52,6 +56,8 @@ else:
             self._active_host_id: str | None = None
             self._nav_items: dict[GuiStep, QListWidgetItem] = {}
             self._hosts = hosts or (HostCandidate("local", HostKind.LOCAL, "Local"),)
+            self._recommendation_plan_factory = recommendation_plan_factory
+            self._recommendation_plan: OptimizationPlan | None = None
 
             self._navigation = QListWidget()
             self._navigation.setObjectName("workflow-navigation")
@@ -77,6 +83,17 @@ else:
             self._cancel_button = QPushButton()
             self._cancel_button.setObjectName("cancel-operation")
             self._cancel_button.setAccessibleName("cancel-operation")
+            self._profile_selector = QComboBox()
+            self._profile_selector.setObjectName("profile-selector")
+            self._profile_selector.setAccessibleName("profile-selector")
+            for profile in PROFILES:
+                self._profile_selector.addItem(profile.name, profile.profile_id)
+            self._recommendation_summary = QLabel()
+            self._recommendation_summary.setObjectName("recommendation-summary")
+            self._recommendation_summary.setAccessibleName("recommendation-summary")
+            self._recommendation_list = QListWidget()
+            self._recommendation_list.setObjectName("recommendation-list")
+            self._recommendation_list.setAccessibleName("recommendation-list")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -96,6 +113,7 @@ else:
             self._host_selector.currentIndexChanged.connect(self._select_host)
             self._diagnose_button.clicked.connect(self._start_diagnosis)
             self._cancel_button.clicked.connect(self._cancel_diagnosis)
+            self._profile_selector.currentIndexChanged.connect(self._change_profile)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -116,6 +134,10 @@ else:
                 layout.addWidget(self._status_label)
                 layout.addWidget(self._diagnose_button)
                 layout.addWidget(self._cancel_button)
+            elif step is GuiStep.RECOMMENDATIONS:
+                layout.addWidget(self._profile_selector)
+                layout.addWidget(self._recommendation_summary)
+                layout.addWidget(self._recommendation_list)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -162,6 +184,16 @@ else:
                 self._presenter.request_cancel()
                 self._render()
 
+        @Slot()
+        def _change_profile(self) -> None:
+            report = self._presenter.state.report
+            profile_id = self._profile_selector.currentData()
+            if report is not None and isinstance(profile_id, str):
+                self._recommendation_plan = self._recommendation_plan_factory(
+                    report, profile_by_id(profile_id)
+                )
+                self._render_recommendations()
+
         @Slot(object)
         def _diagnosis_finished(self, report: object) -> None:
             if not isinstance(report, DiagnosticReport):
@@ -169,6 +201,7 @@ else:
             else:
                 try:
                     self._presenter.finish_diagnosis(report)
+                    self._change_profile()
                 except ValueError:
                     self._presenter.fail_diagnosis("report_host_mismatch")
             self._active_host_id = None
@@ -197,6 +230,10 @@ else:
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
+            for index, profile in enumerate(PROFILES):
+                self._profile_selector.setItemText(
+                    index, self._catalog.text(f"profile.{profile.profile_id}")
+                )
             for step, item in self._nav_items.items():
                 item.setText(self._catalog.text(f"nav.{step.value}"))
             for index, step in enumerate(GuiStep):
@@ -205,3 +242,22 @@ else:
                 for label in labels:
                     if label.accessibleName() == f"placeholder-{step.value}":
                         label.setText(self._catalog.text(f"nav.{step.value}"))
+            self._render_recommendations()
+
+        def _render_recommendations(self) -> None:
+            self._recommendation_list.clear()
+            if self._recommendation_plan is None:
+                self._recommendation_summary.setText("")
+                return
+            view = present_recommendations(self._recommendation_plan, self._catalog)
+            self._recommendation_summary.setText(view.summary)
+            for recommendation in view.items:
+                state = self._catalog.text(
+                    "state.actionable" if recommendation.actionable else "state.read_only"
+                )
+                item = QListWidgetItem(
+                    f"{recommendation.title}\n{recommendation.severity} · {state}\n"
+                    f"{recommendation.reason}\n{recommendation.impact}"
+                )
+                item.setData(256, recommendation.recommendation_id)
+                self._recommendation_list.addItem(item)
