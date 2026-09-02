@@ -102,7 +102,7 @@ class QtRuntimeTests(unittest.TestCase):
             window.close()
 
     def test_diagnose_button_runs_worker_and_advances_to_recommendations(self) -> None:
-        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtCore import QEventLoop, Qt, QTimer
         from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QPushButton
 
         from llm_manager.application.host_discovery import HostCandidate
@@ -163,6 +163,16 @@ class QtRuntimeTests(unittest.TestCase):
             self.application.processEvents()
             self.assertEqual(profile_selector.currentText(), "エージェント")
             self.assertIn("推奨 2件", summary.text())
+            recommendations.item(0).setCheckState(Qt.CheckState.Checked)
+            review_button = window.findChild(QPushButton, "review-selected")
+            self.assertTrue(review_button.isEnabled())
+            review_button.click()
+            self.application.processEvents()
+            review_summary = window.findChild(QLabel, "review-summary")
+            review_list = window.findChild(QListWidget, "review-list")
+            self.assertEqual(navigation.currentRow(), 3)
+            self.assertIn("プレビューのみ", review_summary.text())
+            self.assertEqual(review_list.count(), 1)
         finally:
             window.close()
 

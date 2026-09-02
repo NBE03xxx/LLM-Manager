@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from llm_manager.application.optimization import GenerateOptimizationPlan
 from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile, Recommendation
@@ -37,6 +37,21 @@ class RecommendationPageView:
     profile_name: str
     summary: str
     items: tuple[RecommendationItemView, ...]
+
+
+def select_recommendations(
+    plan: OptimizationPlan, recommendation_ids: tuple[str, ...]
+) -> OptimizationPlan:
+    if len(recommendation_ids) != len(set(recommendation_ids)):
+        raise ValueError("duplicate_recommendation_selection")
+    available = {
+        item.recommendation_id
+        for item in plan.recommendations
+        if item.actionable and not item.conflicts_with
+    }
+    if not set(recommendation_ids).issubset(available):
+        raise ValueError("recommendation_not_actionable")
+    return replace(plan, selected_ids=tuple(sorted(recommendation_ids)), change_set=None)
 
 
 def present_recommendations(

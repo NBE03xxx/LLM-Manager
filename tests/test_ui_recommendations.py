@@ -9,6 +9,7 @@ from llm_manager.ui.recommendations import (
     generate_recommendation_plan,
     present_recommendations,
     profile_by_id,
+    select_recommendations,
 )
 from tests.test_optimization import diagnostic
 
@@ -48,6 +49,14 @@ class RecommendationPresentationTests(unittest.TestCase):
     def test_rejects_unknown_profile(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown_optimization_profile"):
             profile_by_id("fastest")
+
+    def test_selects_only_actionable_recommendations_and_clears_change_set(self) -> None:
+        plan = generate_recommendation_plan(diagnostic(), AGENT)
+        selected = select_recommendations(plan, (plan.recommendations[0].recommendation_id,))
+        self.assertEqual(len(selected.selected_ids), 1)
+        self.assertIsNone(selected.change_set)
+        with self.assertRaisesRegex(ValueError, "recommendation_not_actionable"):
+            select_recommendations(plan, ("unknown",))
 
 
 if __name__ == "__main__":

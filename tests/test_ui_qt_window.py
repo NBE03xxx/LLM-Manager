@@ -29,6 +29,9 @@ class QtWindowBoundaryTests(unittest.TestCase):
             "profile-selector",
             "recommendation-summary",
             "recommendation-list",
+            "review-selected",
+            "review-summary",
+            "review-list",
         ):
             self.assertIn(f'"{name}"', source)
 

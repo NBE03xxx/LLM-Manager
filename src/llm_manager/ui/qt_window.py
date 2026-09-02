@@ -4,13 +4,19 @@ from typing import Callable
 
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
+from llm_manager.application.optimization import stable_hash
 from llm_manager.domain.enums import HostKind
 from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile
 from llm_manager.optimization import PROFILES
 
 from .i18n import Catalog
 from .qt_worker import PYSIDE_AVAILABLE, QtTaskRunner, QtUnavailableError, QtWorkerCoordinator
-from .recommendations import generate_recommendation_plan, present_recommendations, profile_by_id
+from .recommendations import (
+    generate_recommendation_plan,
+    present_recommendations,
+    profile_by_id,
+    select_recommendations,
+)
 from .workflow import GuiPresenter, GuiStep
 
 DiagnosisTaskFactory = Callable[[str], Callable[[CancellationToken], DiagnosticReport]]
@@ -24,7 +30,7 @@ if not PYSIDE_AVAILABLE:
             raise QtUnavailableError("pyside6_unavailable")
 
 else:
-    from PySide6.QtCore import Slot
+    from PySide6.QtCore import Qt, Slot
     from PySide6.QtWidgets import (
         QComboBox,
         QHBoxLayout,
@@ -94,6 +100,15 @@ else:
             self._recommendation_list = QListWidget()
             self._recommendation_list.setObjectName("recommendation-list")
             self._recommendation_list.setAccessibleName("recommendation-list")
+            self._review_button = QPushButton()
+            self._review_button.setObjectName("review-selected")
+            self._review_button.setAccessibleName("review-selected")
+            self._review_summary = QLabel()
+            self._review_summary.setObjectName("review-summary")
+            self._review_summary.setAccessibleName("review-summary")
+            self._review_list = QListWidget()
+            self._review_list.setObjectName("review-list")
+            self._review_list.setAccessibleName("review-list")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -114,6 +129,8 @@ else:
             self._diagnose_button.clicked.connect(self._start_diagnosis)
             self._cancel_button.clicked.connect(self._cancel_diagnosis)
             self._profile_selector.currentIndexChanged.connect(self._change_profile)
+            self._recommendation_list.itemChanged.connect(self._selection_changed)
+            self._review_button.clicked.connect(self._review_selected)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -138,6 +155,10 @@ else:
                 layout.addWidget(self._profile_selector)
                 layout.addWidget(self._recommendation_summary)
                 layout.addWidget(self._recommendation_list)
+                layout.addWidget(self._review_button)
+            elif step is GuiStep.REVIEW:
+                layout.addWidget(self._review_summary)
+                layout.addWidget(self._review_list)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -194,6 +215,29 @@ else:
                 )
                 self._render_recommendations()
 
+        @Slot()
+        def _selection_changed(self) -> None:
+            if self._recommendation_plan is None:
+                return
+            selected = tuple(
+                item.data(256)
+                for index in range(self._recommendation_list.count())
+                if (item := self._recommendation_list.item(index)).checkState()
+                == Qt.CheckState.Checked
+            )
+            self._recommendation_plan = select_recommendations(
+                self._recommendation_plan, selected
+            )
+            self._review_button.setEnabled(bool(selected))
+
+        @Slot()
+        def _review_selected(self) -> None:
+            if self._recommendation_plan is None or not self._recommendation_plan.selected_ids:
+                return
+            self._presenter.review_plan(stable_hash(self._recommendation_plan))
+            self._render_review()
+            self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.REVIEW))
+
         @Slot(object)
         def _diagnosis_finished(self, report: object) -> None:
             if not isinstance(report, DiagnosticReport):
@@ -227,6 +271,7 @@ else:
             self._status_label.setText(self._catalog.text(f"status.{state.status.value}"))
             self._diagnose_button.setText(self._catalog.text("action.diagnose"))
             self._cancel_button.setText(self._catalog.text("action.cancel"))
+            self._review_button.setText(self._catalog.text("action.review_selected"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -243,11 +288,15 @@ else:
                     if label.accessibleName() == f"placeholder-{step.value}":
                         label.setText(self._catalog.text(f"nav.{step.value}"))
             self._render_recommendations()
+            self._render_review()
 
         def _render_recommendations(self) -> None:
+            self._recommendation_list.blockSignals(True)
             self._recommendation_list.clear()
             if self._recommendation_plan is None:
                 self._recommendation_summary.setText("")
+                self._review_button.setEnabled(False)
+                self._recommendation_list.blockSignals(False)
                 return
             view = present_recommendations(self._recommendation_plan, self._catalog)
             self._recommendation_summary.setText(view.summary)
@@ -260,4 +309,29 @@ else:
                     f"{recommendation.reason}\n{recommendation.impact}"
                 )
                 item.setData(256, recommendation.recommendation_id)
+                if recommendation.actionable:
+                    item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+                    checked = recommendation.recommendation_id in self._recommendation_plan.selected_ids
+                    item.setCheckState(
+                        Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
+                    )
                 self._recommendation_list.addItem(item)
+            self._review_button.setEnabled(bool(self._recommendation_plan.selected_ids))
+            self._recommendation_list.blockSignals(False)
+
+        def _render_review(self) -> None:
+            self._review_list.clear()
+            plan = self._recommendation_plan
+            if plan is None:
+                self._review_summary.setText("")
+                return
+            self._review_summary.setText(
+                self._catalog.text("review.summary", selected=len(plan.selected_ids))
+                + "\n"
+                + self._catalog.text("review.preview_only")
+            )
+            selected = set(plan.selected_ids)
+            view = present_recommendations(plan, self._catalog)
+            for item in view.items:
+                if item.recommendation_id in selected:
+                    self._review_list.addItem(item.title)
