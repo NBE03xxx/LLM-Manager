@@ -24,7 +24,7 @@ Phase 4追跡注記: backup evidence retention executionのcanonical自己hash�
 
 | Requirement | Design artifact | Planned verification | Gate |
 |---|---|---|---|
-| FR-HOST-01 | architecture, ADR-0001, gui | `OpenSshHostAdapterTests`, `OpenSshConfigAliasesTests`, `DiagnosticTaskFactoryTests`, `OpenSshHostIdentityResolverTests`（Local先頭、literal alias、Include、system OpenSSH composition、effective destination、strict known_hosts、negotiated fingerprint、変更/timeout fail closed）。実config候補2件、`development` timeout negative Gate | Phase 5一部完了（対話ControlMaster/positive Gateは後続） |
+| FR-HOST-01 | architecture, ADR-0001, gui | `OpenSshHostAdapterTests`, `OpenSshConfigAliasesTests`, `DiagnosticTaskFactoryTests`, `OpenSshHostIdentityResolverTests`, `BrokerTests`（Local先頭、literal alias、Include、system OpenSSH composition、effective destination、strict known_hosts、negotiated fingerprint、alias ControlMaster、private bounded log、socket reuse/終了、変更/timeout fail closed）。実config候補2件、`development` timeout negative Gate | Phase 5一部完了（ControlMaster positive Gateは後続） |
 | FR-DIAG-01..03 | diagnostics, version matrix | `LinuxParserTests`, `LinuxProbeTests`, partial report完了、実環境待ち | Phase 2一部完了 |
 | FR-OLLAMA-01 | version matrix, allowlist | `OllamaAdapterTests` fixture完了、0.33.2実環境待ち | Phase 2/3 |
 | FR-OPENCODE-01 | version matrix, allowlist | `OpenCodeAdapterTests` JSONC fixture完了、1.18.25探索統合待ち | Phase 2/3 |

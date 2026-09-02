@@ -155,7 +155,9 @@ Exit: acceptance scenariosがGUI経由で完了し、UI threadがblockしない�
 
 Hosts/composition実装: `~/.ssh/config`とrelative `Include` globを1 MiB/128 files上限でread-only列挙し、literalかつAdapter契約に適合するaliasだけを重複排除してLocal候補の後へ表示する。wildcard、negation、unsafe aliasは候補化せず、missing configはLocalだけへ縮退する。host selectorはbusy中無効化し、選択IDをtask/reportへ束縛する。production compositionはLocal processを固定診断allowlist、SSH外側をsystem `ssh`だけへ限定し、未知hostをprocess前に拒否する。main workstationの実Local read-only taskは`partial`、host binding成功、Ollama観測あり、PATH外OpenCodeは個別失敗として確認した。
 
-OpenSSH identity実装: 固定`ssh -G -- <alias>`のeffective hostname/port/HostKeyAliasを取得後、`BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、固定remote `true`のverbose接続がexit 0となり、一意な`Server host key` SHA-256 fingerprintを報告した場合だけidentityを確定する。alias、config、timeout、非zero終了、fingerprint欠落/複数/不正は診断前にfail closedとし、検証値だけを`OpenSshHostAdapter`へ注入する。実`development` read-only Gateは接続timeoutとなり、identity/reportを生成せず安全に停止した。対話認証ControlMasterとの統合と到達可能hostでのpositive Gateは後続とする。
+OpenSSH identity実装: 固定`ssh -G -- <alias>`のeffective hostname/port/HostKeyAliasを取得後、`BatchMode=yes`、`StrictHostKeyChecking=yes`、`UpdateHostKeys=no`、固定remote `true`のverbose接続がexit 0となり、一意な`Server host key` SHA-256 fingerprintを報告した場合だけidentityを確定する。alias、config、timeout、非zero終了、fingerprint欠落/複数/不正は診断前にfail closedとし、検証値だけを`OpenSshHostAdapter`へ注入する。実`development` read-only Gateは接続timeoutとなり、identity/reportを生成せず安全に停止した。
+
+ControlMaster GUI composition実装: strict known_hostsの直接probeが認証未完了で終了した場合だけ、利用可能な外部terminalでOpenSSH aliasをそのまま使う一時ControlMasterへfallbackする。これによりUser、Port、IdentityFile、Agent、ProxyJump等はsystem OpenSSH configへ委譲する。master接続の一意なSHA-256 host-key fingerprintはuser専用0700 runtime directoryの0600・owner確認済み・1 MiB上限・`O_NOFOLLOW`読込の一時debug logから取得し、socket readinessと両方が成功した場合だけ同socketへ診断を束縛する。logは直後に削除し、sessionは成功、失敗、cancelの全経路でcontrol `exit`する。timeoutやterminal不在では対話fallbackせずfail closedを維持する。到達可能hostでのGUI positive Gateは後続とする。
 
 ## Phase 6: Hardening と MVP Release
 

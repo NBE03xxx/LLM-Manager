@@ -10,6 +10,7 @@ from llm_manager.adapters.host.local import LocalHostAdapter
 from llm_manager.adapters.host.openssh import OpenSshHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
+from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.services import DiagnoseHost
 from llm_manager.diagnostics.linux import LinuxSystemProbe
@@ -17,6 +18,11 @@ from llm_manager.domain.enums import HostKind
 from llm_manager.domain.models import DiagnosticReport
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
 from llm_manager.infrastructure.openssh_identity import OpenSshHostIdentityResolver
+from llm_manager.infrastructure.ssh_auth import (
+    ExternalTerminalSshBroker,
+    SshAliasAuthRequest,
+    detect_terminal,
+)
 
 _LOCAL_EXECUTABLES = frozenset(
     {"curl", "df", "lscpu", "lspci", "nvidia-smi", "ollama", "opencode", "rocm-smi", "systemctl", "uname"}
@@ -30,14 +36,26 @@ class DiagnosticTaskFactory:
     ssh_runner: SubprocessRunner
     local_config_candidates: tuple[str, ...]
     remote_config_candidates: tuple[str, ...] = ()
+    ssh_auth_broker: ExternalTerminalSshBroker | None = None
 
     @classmethod
     def production(cls, hosts: tuple[HostCandidate, ...]) -> "DiagnosticTaskFactory":
+        ssh_runner = SubprocessRunner(ProcessPolicy(frozenset({"ssh"})))
+        terminal = detect_terminal()
+        runtime_base = os.environ.get("XDG_RUNTIME_DIR")
+        runtime_root = Path(runtime_base) if runtime_base and Path(runtime_base).is_absolute() else Path(
+            f"/run/user/{os.getuid()}"
+        )
         return cls(
             hosts=hosts,
             local_runner=SubprocessRunner(ProcessPolicy(_LOCAL_EXECUTABLES)),
-            ssh_runner=SubprocessRunner(ProcessPolicy(frozenset({"ssh"}))),
+            ssh_runner=ssh_runner,
             local_config_candidates=_local_opencode_candidates(),
+            ssh_auth_broker=(
+                ExternalTerminalSshBroker(ssh_runner, runtime_root / "llm-manager", terminal)
+                if terminal is not None
+                else None
+            ),
         )
 
     def __call__(self, host_id: str):
@@ -47,19 +65,50 @@ class DiagnosticTaskFactory:
         report_id = f"diagnosis-{uuid.uuid4().hex}"
 
         def execute(cancellation: CancellationToken) -> DiagnosticReport:
-            fingerprint = None
-            if candidate.kind is HostKind.SSH:
-                if candidate.ssh_alias is None:
-                    raise ValueError("ssh_candidate_requires_alias")
-                fingerprint = OpenSshHostIdentityResolver(self.ssh_runner).resolve(
-                    candidate.ssh_alias, cancellation
-                ).fingerprint
-            service = self._service(candidate, fingerprint)
-            return service.execute(report_id, cancellation)
+            if candidate.kind is HostKind.LOCAL:
+                return self._service(candidate).execute(report_id, cancellation)
+            return self._execute_ssh(candidate, report_id, cancellation)
 
         return execute
 
-    def _service(self, candidate: HostCandidate, verified_fingerprint: str | None = None) -> DiagnoseHost:
+    def _execute_ssh(
+        self, candidate: HostCandidate, report_id: str, cancellation: CancellationToken
+    ) -> DiagnosticReport:
+        if candidate.ssh_alias is None:
+            raise ValueError("ssh_candidate_requires_alias")
+        resolver = OpenSshHostIdentityResolver(self.ssh_runner)
+        session = None
+        try:
+            try:
+                identity = resolver.resolve(candidate.ssh_alias, cancellation)
+            except AdapterError as error:
+                if error.code != "host_identity_unverified" or self.ssh_auth_broker is None:
+                    raise
+                session = self.ssh_auth_broker.authenticate_alias(
+                    SshAliasAuthRequest(candidate.ssh_alias), cancellation
+                )
+                if session.verified_fingerprint is None:
+                    raise AdapterError(
+                        "host_identity_unverified", "SSH master identity was not verified"
+                    )
+                fingerprint = session.verified_fingerprint
+            else:
+                fingerprint = identity.fingerprint
+            return self._service(
+                candidate,
+                fingerprint,
+                session.socket_path if session is not None else None,
+            ).execute(report_id, cancellation)
+        finally:
+            if session is not None and self.ssh_auth_broker is not None:
+                self.ssh_auth_broker.close(session, CancellationToken())
+
+    def _service(
+        self,
+        candidate: HostCandidate,
+        verified_fingerprint: str | None = None,
+        control_socket: str | None = None,
+    ) -> DiagnoseHost:
         if candidate.kind is HostKind.LOCAL:
             host = LocalHostAdapter(self.local_runner, display_name=candidate.display_name)
             configs = self.local_config_candidates
@@ -71,6 +120,7 @@ class DiagnosticTaskFactory:
                 self.ssh_runner,
                 candidate.display_name,
                 verified_fingerprint=verified_fingerprint,
+                control_socket=control_socket,
             )
             configs = self.remote_config_candidates
         return DiagnoseHost(

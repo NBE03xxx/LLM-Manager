@@ -3,10 +3,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import CancellationToken, CommandResult
 from llm_manager.infrastructure.ssh_auth import (
     ExternalTerminalSshBroker,
     SshAuthRequest,
+    SshAliasAuthRequest,
     SshControlSession,
     TerminalSpec,
     detect_terminal,
@@ -33,6 +35,10 @@ class SshAuthRequestTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             SshAuthRequest("user", "host", 70000)
 
+    def test_alias_request_rejects_option_injection(self) -> None:
+        with self.assertRaises(ValueError):
+            SshAliasAuthRequest("-oProxyCommand=bad")
+
 
 class TerminalTests(unittest.TestCase):
     def test_prefers_ptyxis(self) -> None:
@@ -46,6 +52,38 @@ class TerminalTests(unittest.TestCase):
 
 
 class BrokerTests(unittest.TestCase):
+    def test_reads_one_private_host_key_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            log_path = Path(directory) / "host-key.log"
+            fingerprint = "SHA256:" + "A" * 43
+            log_path.write_text(
+                f"debug1: Connecting to host\ndebug1: Server host key: ssh-ed25519 {fingerprint}\n",
+                encoding="utf-8",
+            )
+            log_path.chmod(0o600)
+            self.assertEqual(
+                ExternalTerminalSshBroker._read_verified_fingerprint(log_path), fingerprint
+            )
+
+    def test_rejects_ambiguous_or_public_host_key_log(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            log_path = Path(directory) / "host-key.log"
+            fingerprint = "SHA256:" + "A" * 43
+            log_path.write_text(
+                f"debug1: Server host key: ssh-ed25519 {fingerprint}\n"
+                f"debug1: Server host key: ecdsa-sha2-nistp256 SHA256:{'B' * 43}\n",
+                encoding="utf-8",
+            )
+            log_path.chmod(0o600)
+            with self.assertRaisesRegex(AdapterError, "one server host key"):
+                ExternalTerminalSshBroker._read_verified_fingerprint(log_path)
+            log_path.write_text(
+                f"debug1: Server host key: ssh-ed25519 {fingerprint}\n", encoding="utf-8"
+            )
+            log_path.chmod(0o644)
+            with self.assertRaisesRegex(AdapterError, "not private"):
+                ExternalTerminalSshBroker._read_verified_fingerprint(log_path)
+
     def test_authentication_launches_control_master_without_password_argument(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             runner = FakeRunner()
@@ -53,7 +91,9 @@ class BrokerTests(unittest.TestCase):
                 runner, Path(directory), TerminalSpec("/usr/bin/ptyxis", "ptyxis")
             )  # type: ignore[arg-type]
             with patch("llm_manager.infrastructure.ssh_auth.subprocess.Popen") as popen:
-                with patch.object(ExternalTerminalSshBroker, "_is_ready", return_value=True):
+                with patch.object(ExternalTerminalSshBroker, "_is_ready", return_value=True), patch.object(
+                    ExternalTerminalSshBroker, "_read_verified_fingerprint", return_value="SHA256:" + "A" * 43
+                ):
                     session = broker.authenticate(
                         SshAuthRequest("yoshimi", "192.168.1.253"), CancellationToken()
                     )
@@ -73,6 +113,28 @@ class BrokerTests(unittest.TestCase):
             )  # type: ignore[arg-type]
             broker.close(SshControlSession("user@host", 22, "/tmp/test-socket"), CancellationToken())
             self.assertIn("exit", runner.requests[0].argv)
+
+    def test_alias_authentication_preserves_openssh_config_and_strict_host_key(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            broker = ExternalTerminalSshBroker(
+                FakeRunner(), Path(directory), TerminalSpec("/usr/bin/ptyxis", "ptyxis")
+            )  # type: ignore[arg-type]
+            with patch("llm_manager.infrastructure.ssh_auth.subprocess.Popen") as popen, patch.object(
+                ExternalTerminalSshBroker, "_is_ready", return_value=True
+            ), patch.object(
+                ExternalTerminalSshBroker, "_read_verified_fingerprint", return_value="SHA256:" + "A" * 43
+            ):
+                session = broker.authenticate_alias(
+                    SshAliasAuthRequest("development"), CancellationToken()
+                )
+            argv = popen.call_args.args[0]
+            self.assertEqual(session.target, "development")
+            self.assertIsNone(session.port)
+            self.assertNotIn("-p", argv)
+            self.assertIn("StrictHostKeyChecking=yes", argv)
+            self.assertIn("UpdateHostKeys=no", argv)
+            self.assertEqual(argv[-1], "development")
+            self.assertEqual(session.verified_fingerprint, "SHA256:" + "A" * 43)
 
 
 if __name__ == "__main__":
