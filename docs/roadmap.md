@@ -161,6 +161,8 @@ ControlMaster GUI composition実装: strict known_hostsの直接probeが一意�
 
 Recommendations/Review preview vertical slice実装: 診断reportから既存catalog version固定RuleEngineで期限付きOptimizationPlanを生成し、Balanced/Coding/Agent切替ごとに再評価する。setting/current/recommended、severity、actionable/read-only、理由、影響を一覧表示し、秘密名の設定値は表示前にredactする。ja/en catalogへprofile、summary、rule説明を追加し、言語切替時にprofile名と既存一覧を即時再描画する。actionableかつ非conflictの推奨だけを明示チェック可能とし、重複・未知・read-only IDを拒否してsorted selected IDsへ束縛する。Reviewは選択内容と「preview only・実行可能ChangeSet未生成」を明示し、自動Applyや承認へ進まない。Ubuntu 26.04/PySide6 6.10.2 offscreen GateでAgent推奨2件、英日再描画、1件選択、Review遷移を含む9件が成功した。read-only再取得、実diff生成、承認接続は後続とする。
 
+ChangeSet planning core実装: 選択済みOptimizationPlanを元DiagnosticReportのID/hash/期限へ再束縛し、選択IDがactionable・非conflict・active OpenCode configだけを対象とすることを検証する。hostを再identifyしてID/kind/fingerprint一致後にactive configをread-onlyで最大1 MiB・strict UTF-8として再取得し、既存OpenCode plannerからsource span、before hash、masked diffを持つChangeSetを生成する。stale report/plan、host identity変更、欠落・不正選択、target不一致、encoding異常、空ChangeSetはfail closedとする。Qt worker/Review diff接続は後続とする。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
