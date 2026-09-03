@@ -189,6 +189,8 @@ Local restore preview core: strict manifestからhost/backup/manifest hash、時
 
 Qt restore preview: inventory選択からworkerでmetadata-only previewを取得し、英日表示と独立restore承認checkboxへ接続した。host変更、refresh、backup選択変更はpreview/承認を失効させ、言語変更だけでは再取得しない。restore mutation controlは存在しない。Ubuntu 26.04/PySide6 6.10.2でruntime/accessibility/import/i18nの9件が0.043秒で成功し、1件はPySide存在時の期待skipだった。次はpreview expiry timerを実Qtで検証する。
 
+Restore preview expiry: 150 ms previewを使うQt runtime Gateで、承認後の期限到達によりcheckboxが自動解除・無効化され、previewを破棄してstable `stale_restore_preview`を表示することを確認した。Ubuntu 26.04/PySide6 6.10.2で1件が0.192秒で成功した。次は実行直前manifest/approval/target再検証契約を構築し、restore mutationは未接続に保つ。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

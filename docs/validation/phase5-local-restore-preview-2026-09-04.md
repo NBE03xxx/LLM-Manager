@@ -24,4 +24,10 @@ Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、Qt runtime、accessible boundar
 
 ## Next
 
-短い有効期限を注入した実Qt timer Gateで、preview期限切れ時にcheckboxが解除・無効化され、stable `stale_restore_preview`表示になることを確認する。復元実行buttonはまだ設けない。
+## Expiry timer Gate
+
+150 msの有効期限を持つcanonical previewを注入し、承認後にQt timerだけでpreviewとapprovalが破棄されるruntime testを追加した。Ubuntu 26.04/PySide6 6.10.2 offscreen環境で1件が0.192秒で成功し、checkboxの自動解除・無効化とstable `stale_restore_preview`表示を確認した。restoreその他のmutation callは存在しない。
+
+## Next
+
+復元実行を接続する前に、実行直前にstrict manifestを再読込し、host/backup/manifest/preview/approval bindingとtarget allowlistを再検証するapplication契約を構築する。GUIの復元実行buttonはまだ設けない。

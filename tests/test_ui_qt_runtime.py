@@ -682,6 +682,73 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_restore_preview_expiry_clears_approval_without_mutation(self) -> None:
+        from types import SimpleNamespace
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QCheckBox, QLabel, QListWidget, QPushButton
+
+        from llm_manager.application.restore_preview import RestorePreview, RestorePreviewItem
+        from llm_manager.domain.models import utc_now
+        from llm_manager.ui.qt_window import MainWindow
+
+        now = utc_now()
+        preview = RestorePreview(
+            "local", "backup-expiring", "a" * 64, now,
+            now + timedelta(milliseconds=150), False,
+            (RestorePreviewItem("/tmp/config.json", True, "b" * 64, 0o600),),
+        ).with_hash()
+        item = SimpleNamespace(
+            backup_id="backup-expiring", state="committed",
+            local_presence="present", remote_presence="absent",
+            protected=False, requires_attention=False, allowed_actions=(),
+        )
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            backup_inventory_task_factory=lambda _host: lambda _token: (item,),
+            restore_preview_task_factory=(
+                lambda _host, _backup: lambda _token: preview
+            ),
+        )
+        try:
+            refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+            inventory = window.findChild(QListWidget, "backup-inventory-list")
+            approval = window.findChild(QCheckBox, "approve-restore-preview")
+            summary = window.findChild(QLabel, "restore-preview-summary")
+            refresh.click()
+            ready = QEventLoop()
+
+            def approve_when_ready() -> None:
+                if inventory.count() == 1 and inventory.currentRow() < 0:
+                    inventory.setCurrentRow(0)
+                if approval.isEnabled():
+                    approval.click()
+                    ready.quit()
+                else:
+                    QTimer.singleShot(5, approve_when_ready)
+
+            QTimer.singleShot(0, approve_when_ready)
+            QTimer.singleShot(2000, ready.quit)
+            ready.exec()
+            self.assertTrue(approval.isChecked())
+
+            expired = QEventLoop()
+
+            def finish_when_expired() -> None:
+                if not approval.isEnabled() and "stale_restore_preview" in summary.text():
+                    expired.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_expired)
+
+            QTimer.singleShot(0, finish_when_expired)
+            QTimer.singleShot(2000, expired.quit)
+            expired.exec()
+            self.assertFalse(approval.isChecked())
+            self.assertFalse(approval.isEnabled())
+            self.assertIn("stale_restore_preview", summary.text())
+        finally:
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()
