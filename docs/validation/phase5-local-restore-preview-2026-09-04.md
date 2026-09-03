@@ -46,4 +46,14 @@ authorization/target変更、複数target、cancelはmutation前に拒否する�
 
 ## Next
 
-restore専用journal/auditとimmutable authorization consumptionを実装し、開始前の保存失敗ではmutationしないこと、commit後の結果保存失敗をunknownとして隠さないことをfault injectionで検証する。GUIの復元実行buttonはまだ設けない。
+## Immutable execution evidence and audit
+
+authorization hashごとのimmutable attemptをmutation前に0700/0600 storeへ保存し、同じauthorizationの再実行を拒否する。attemptはhost/backup/manifest/preview/approval/actor/target/時刻を自己hashへ束縛する。開始auditが失敗した場合もattemptを消さず、mutationせず、暗黙retryを許さない。
+
+成功または失敗resultはattempt hash、authorization、manifest、target、state、時刻、errorを別のimmutable自己hash evidenceへ保存する。restart loadはcanonical bytes、filename identity、hash、owner/mode、symlink、1 MiB上限を再検証する。commit後のaudit失敗は`UNKNOWN` evidenceを保存して専用persistence errorへ公開する。commit後のresult保存失敗も、生成済み`COMMITTED` evidenceとcause codeを専用errorから取得でき、未変更とは推測しない。
+
+正常、replay、attempt保存失敗、result保存失敗、開始/完了audit失敗、restart、tamper、metadata不正を含むfocused 12件が成功した。production/GUI compositionは未接続である。
+
+## Next
+
+execution storeの全entry strict一覧と、attemptだけが残ったrestart状態のread-only inventory表示を実装する。自動restore retryは行わない。GUIの復元実行buttonはまだ設けない。

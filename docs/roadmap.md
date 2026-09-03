@@ -195,6 +195,8 @@ Local restore preflight: 承認済みpreviewから直接restoreせず、実行�
 
 Sandbox local restore executor: 複数fileを一般filesystem上で真にatomicにできないため、最初の境界を単一local user targetに限定した。preflight時の現在target存在/hashもauthorizationへ束縛し、executorは復号前後にauthorization、strict manifest、target一覧、現在状態を再照合してからatomic replaceまたは単一unlink+directory fsyncを行う。変更・複数target・cancelはmutation前に拒否する。sandbox 6件が0.005秒で成功した。journal/audit、immutable replay防止、production/GUI compositionは未接続であり、次にこれらを構築する。
 
+Restore execution evidence: authorization hashごとのattemptをmutation前にimmutable保存して再利用を拒否し、開始/完了auditと別immutable result evidenceへ接続した。restart時にcanonical/identity/hash/owner/mode/symlink/sizeを検証する。attemptまたは開始audit失敗はmutationせず、開始audit失敗でもattemptを保持して暗黙retryしない。commit後audit失敗は`UNKNOWN`、result保存失敗は生成済み`COMMITTED` evidenceを専用errorへ公開して未変更と推測しない。fault injectionを含むfocused 12件が成功した。次はstrict全entry一覧とattempt-only状態のread-only表示である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
