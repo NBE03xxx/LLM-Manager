@@ -191,6 +191,8 @@ Qt restore preview: inventory選択からworkerでmetadata-only previewを取得
 
 Restore preview expiry: 150 ms previewを使うQt runtime Gateで、承認後の期限到達によりcheckboxが自動解除・無効化され、previewを破棄してstable `stale_restore_preview`を表示することを確認した。Ubuntu 26.04/PySide6 6.10.2で1件が0.192秒で成功した。次は実行直前manifest/approval/target再検証契約を構築し、restore mutationは未接続に保つ。
 
+Local restore preflight: 承認済みpreviewから直接restoreせず、実行直前にstrict manifestを再列挙してcanonical preview、approval期限、host/backup/manifest、protection、全target metadataとallowlistを再検証する。成功時も本文やmanifestではなく、approval/actor/hash/target/最短expiryをcanonical hashへ束縛した短命authorizationだけを返す。tamper、manifest変更、approval mismatch、cancelではfail closedとし、sandbox 9件が0.007秒で成功した。次はexecutor側の再検証・journal/audit・atomicity契約を設計する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

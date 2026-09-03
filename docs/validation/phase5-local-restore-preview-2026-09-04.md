@@ -30,4 +30,12 @@ Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、Qt runtime、accessible boundar
 
 ## Next
 
-復元実行を接続する前に、実行直前にstrict manifestを再読込し、host/backup/manifest/preview/approval bindingとtarget allowlistを再検証するapplication契約を構築する。GUIの復元実行buttonはまだ設けない。
+## Restore preflight
+
+`PrepareLocalRestore`は承認済みpreviewをそのまま実行権限にせず、実行直前にhost単位のstrict manifest一覧を再読込する。canonical preview hash、approval期限、host/backup/manifest hash、protection、全targetのpath・存在有無・SHA-256・modeを再照合する。strict storeが各targetをallowlistへ再検証した後、approval ID、actor、全hash、target一覧、有効期限をcanonical hashへ束縛した短命authorizationだけを返す。
+
+本文content、復号鍵、manifest objectはauthorizationへ含めない。cancel、approval mismatch、preview/manifest変更、unknown/tampered entryではauthorizationを生成せず、restore APIを呼ばない。`RestorePreflightTests`、`RestorePreviewTests`、`LocalApplyInventoryTests`のsandbox 9件が0.007秒で成功した。
+
+## Next
+
+preflight authorizationを消費するrestore executorの契約を設計する。executor自身でもauthorization、strict manifest、targetの現在状態を再検証し、失敗時のjournal/auditと部分復元を避けるatomicityを先に確定する。GUIの復元実行buttonはまだ設けない。
