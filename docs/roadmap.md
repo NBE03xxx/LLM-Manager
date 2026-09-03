@@ -185,6 +185,8 @@ Local production inventory: 互換list APIとは別にstrict manifest/journal列
 
 SSH inventory監査: 現行のroot journal readは既知operation/request hashに束縛された単一evidence取得だけで、backup ID列挙ではない。remote retention一覧も明示prune requestのroot helper内部照合でありGUI用read-only OpenSSH portではない。SSH production inventoryの接続には新しい固定helper commandとPolicyKit/sudo相当の権限・identity/fingerprint binding・実SSH Gateが必要になるため、Phase 5で安全境界を暗黙に拡張せずfail closedを維持する。次はlocal restore previewと明示承認境界を設計し、実mutationは未接続に保つ。
 
+Local restore preview core: strict manifestからhost/backup/manifest hash、時刻、protection、target path・存在有無・SHA-256・modeだけをcanonical preview hashへ束縛するmetadata-only modelを追加した。本文復号、Secret Service、target読込、mutationは行わない。独立restore approvalは明示review、actor、exact preview、最長5分へ束縛し、tamper・別backup・期限切れを拒否する。sandbox 6件が成功した。次はQt表示とcheckboxの失効条件を接続する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

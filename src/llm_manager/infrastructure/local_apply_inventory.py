@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from llm_manager.application.errors import OperationCancelled
+from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import CancellationToken
+from llm_manager.application.restore_preview import CreateRestorePreview, RestorePreview
 
 from .backup import LocalBackupStore
 from .backup_inventory import BackupListAction
@@ -59,3 +60,14 @@ class LocalApplyInventoryService:
                 allowed_actions=(BackupListAction.REFRESH_INVENTORY,),
             ))
         return tuple(sorted(result, key=lambda item: item.backup_id, reverse=True))
+
+    def preview_restore(
+        self, host_id: str, backup_id: str, cancellation: CancellationToken
+    ) -> RestorePreview:
+        if cancellation.cancelled:
+            raise OperationCancelled("restore preview cancelled")
+        manifests = self.backups.list_manifests_strict(host_id)
+        manifest = next((item for item in manifests if item.backup_id == backup_id), None)
+        if manifest is None:
+            raise AdapterError("backup_not_found", "backup is unavailable for restore preview")
+        return CreateRestorePreview().execute(manifest)
