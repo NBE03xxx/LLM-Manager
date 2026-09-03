@@ -183,6 +183,8 @@ Backup/Rollback read-only UI slice: 注入可能なinventory taskをhost lock付
 
 Local production inventory: 互換list APIとは別にstrict manifest/journal列挙を追加し、未知entry、symlink、owner/mode不一致、改ざん、host/storage/target root不一致を黙って除外せずrefresh全体で拒否する。共通backup/operation IDでmanifestとterminal journalを結合し、`committed`/`rolled_back`/`recovery_required`または`backup_only`、presence、protection、attentionを表示する。空stateはdirectoryを作らず空一覧とし、SSH hostはlocal loaderへ渡さない。暗号本文を復号せずSecret Serviceを起動しない。Ubuntu 26.04/PySide6 6.10.2でrestart/tamper/empty/SSH分離/entrypoint/Qtを含む5件が0.040秒で成功した。次はSSH production inventory compositionを監査する。
 
+SSH inventory監査: 現行のroot journal readは既知operation/request hashに束縛された単一evidence取得だけで、backup ID列挙ではない。remote retention一覧も明示prune requestのroot helper内部照合でありGUI用read-only OpenSSH portではない。SSH production inventoryの接続には新しい固定helper commandとPolicyKit/sudo相当の権限・identity/fingerprint binding・実SSH Gateが必要になるため、Phase 5で安全境界を暗黙に拡張せずfail closedを維持する。次はlocal restore previewと明示承認境界を設計し、実mutationは未接続に保つ。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

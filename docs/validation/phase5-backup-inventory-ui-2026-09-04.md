@@ -28,4 +28,12 @@ Ubuntu 26.04/PySide6 6.10.2で、restart後のmanifest/journal結合、tamper/�
 
 ## Next
 
-次はSSH inventoryを既存read-only transportとimmutable evidence storeへ安全に接続できるか監査する。SSH側が未完成でもlocal production loaderとGUIは独立して維持する。
+## SSH production inventory audit
+
+既存OpenSSH境界を再監査した。root journal evidence取得は既知の`operation-id`と`request-hash`を必須にする固定`read-journal-evidence` commandだけであり、remote backup IDの列挙APIではない。remote retentionの`list_retention`はroot helper内で明示的な`prune-retention` requestを処理する前後の照合に使うbackendで、GUI refresh用のread-only transportとして公開されていない。
+
+したがって現行protocolのままSSH production inventoryを接続すると、ID非束縛のremote列挙または新しいpasswordless sudo commandが必要になり、Phase 4で確定した最小権限境界を拡張する。Phase 5ではこれを暗黙に行わず、SSH hostをlocal loaderで拒否するfail-closed状態を維持する。local production inventoryとGUI read-only表示は独立して完了扱いとする。
+
+## Next
+
+次はlocal inventoryの表示情報を基に、復元内容をまだ読み出さないrestore previewと明示承認境界を設計する。実restore、rollback、delete、cleanupは接続しない。SSH inventory protocolの追加は、固定command、identity/fingerprint binding、権限、実SSH Gateを含む独立したmaterial変更として扱う。
