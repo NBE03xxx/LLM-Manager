@@ -171,6 +171,8 @@ Sandbox/fake Apply Results実装: `OptimizationPlan + ApprovalRecord`をimmutabl
 
 Production Apply接続監査: report/plan/host/change-set bindingと全changeのroot要否から`local_user`、`local_root`、`ssh_user`、`ssh_root`を決定論的に分類し、混在privilegeを拒否する。4経路とも現時点ではproduction GUIへ接続せず、それぞれlocal store/executor composition、PolicyKit workflow composition、SSH user atomic write/backup transport、remote privileged Apply helper protocolの不足を固定理由としてResultsへ表示する。既存remote sudo helperのallowlistはrecovery/retention/deletionだけでありApplyへ流用しない。次はまずlocal user経路のprivate production state root、Secret Service、audit/journal、runtime validator compositionをsandboxで閉じる。
 
+Local user Apply composition Gate: non-root local OpenCode ChangeSetだけを許可するtask factoryを追加し、対象をcanonicalな`$XDG_CONFIG_HOME/opencode`（fallback `~/.config/opencode`）配下へ限定した。SSH host、root change、範囲外target、symlink application rootをI/O開始前に拒否し、実行直前にもrootを再検証する。private `$XDG_STATE_HOME/llm-manager`（fallback `~/.local/state/llm-manager`）は所有者と0700を検証し、暗号化時だけSecret Service providerを遅延生成してAES-GCM local backup、atomic Apply、file/runtime validation、hash-chain audit、operation journal、rollbackを一つのcompositionへ束縛した。一時rootのencrypted success/unsafe-root negative sandbox Gateに加え、Ubuntu 26.04 password-backed GNOME sessionで実Secret Service keyの作成、暗号化Apply、key cleanupまで1件成功した。production GUIへの接続と実OpenCode target mutationは未実施である。次はlocal user routeだけを選択的にGUIへ接続し、他の3 routeをfail closedに保つ。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
