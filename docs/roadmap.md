@@ -197,6 +197,8 @@ Sandbox local restore executor: 複数fileを一般filesystem上で真にatomic�
 
 Restore execution evidence: authorization hashごとのattemptをmutation前にimmutable保存して再利用を拒否し、開始/完了auditと別immutable result evidenceへ接続した。restart時にcanonical/identity/hash/owner/mode/symlink/sizeを検証する。attemptまたは開始audit失敗はmutationせず、開始audit失敗でもattemptを保持して暗黙retryしない。commit後audit失敗は`UNKNOWN`、result保存失敗は生成済み`COMMITTED` evidenceを専用errorへ公開して未変更と推測しない。fault injectionを含むfocused 12件が成功した。次はstrict全entry一覧とattempt-only状態のread-only表示である。
 
+Restore execution restart inventory: store全entryをstrict検証し、未知entry、symlink、metadata/canonical/hash/filename/binding不一致、orphan resultを一覧全体で拒否する。attempt-onlyはattentionとして既存local inventoryへ結合し、restore stateを英日表示するが自動retry actionは追加しない。restore evidenceだけのbackup IDも表示対象にする。Ubuntu 26.04/PySide6 6.10.2でQt/restart/tamper/fault injectionを含む12件が0.091秒で成功した。次はproduction composition可否監査である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

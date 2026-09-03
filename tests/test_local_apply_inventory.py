@@ -7,10 +7,11 @@ from llm_manager.application.errors import AdapterError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import BackupRequest, CancellationToken
 from llm_manager.domain.enums import ChangeOperation, HostKind
-from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
+from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo, utc_now
 from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.journal import JournalStatus, JournalTarget, LocalOperationJournal
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
+from llm_manager.infrastructure.restore_execution import RestoreExecutionAttempt, RestoreExecutionStore
 from llm_manager.ui.composition import LocalBackupInventoryTaskFactory
 
 
@@ -77,6 +78,24 @@ class LocalApplyInventoryTests(unittest.TestCase):
             self.assertFalse((root / "state" / "llm-manager").exists())
             with self.assertRaisesRegex(ValueError, "requires_local"):
                 factory(remote.host_id)
+
+    def test_attempt_only_restore_is_visible_and_requires_attention(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            backups, journals, state = self._stores(root)
+            executions = RestoreExecutionStore(state / "restore-executions")
+            manifest = backups.list_manifests_strict("local:test")[0]
+            executions.save_attempt(RestoreExecutionAttempt(
+                "1.0", "a" * 64, "local:test", "operation-1",
+                manifest.manifest_hash, "b" * 64, "approval-1", "tester",
+                manifest.items[0].target, utc_now(),
+            ))
+            values = LocalApplyInventoryService(
+                backups, journals, executions
+            ).list_for_host("local:test", CancellationToken())
+            self.assertEqual(values[0].restore_state, "attempt_only")
+            self.assertTrue(values[0].restore_requires_attention)
+            self.assertTrue(values[0].requires_attention)
 
 
 if __name__ == "__main__":

@@ -560,6 +560,8 @@ class QtRuntimeTests(unittest.TestCase):
             protected=True,
             requires_attention=True,
             allowed_actions=(SimpleNamespace(value="refresh_inventory"),),
+            restore_state="attempt_only",
+            restore_requires_attention=True,
         )
 
         def inventory_factory(host_id):
@@ -598,11 +600,13 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertIn("read-only", summary.text())
             self.assertIn("backup-1 · local_only", inventory.item(0).text())
             self.assertIn("actions: refresh_inventory", inventory.item(0).text())
+            self.assertIn("restore: attempt_only", inventory.item(0).text())
             language = window.findChild(QComboBox, "language-selector")
             language.setCurrentIndex(1)
             self.application.processEvents()
             self.assertIn("read-only", summary.text())
             self.assertIn("要確認: true", inventory.item(0).text())
+            self.assertIn("復元: attempt_only", inventory.item(0).text())
             self.assertEqual(len(calls), 2)
         finally:
             window.close()

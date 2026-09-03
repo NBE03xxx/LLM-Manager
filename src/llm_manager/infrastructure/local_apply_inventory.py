@@ -10,6 +10,7 @@ from .backup import LocalBackupStore
 from .backup_inventory import BackupListAction
 from .backup_reconciliation import CopyPresence
 from .journal import JournalStatus, LocalOperationJournal
+from .restore_execution import RestoreExecutionStore
 
 
 @dataclass(frozen=True, slots=True)
@@ -21,12 +22,15 @@ class LocalApplyInventoryItem:
     protected: bool
     requires_attention: bool
     allowed_actions: tuple[BackupListAction, ...]
+    restore_state: str | None = None
+    restore_requires_attention: bool = False
 
 
 @dataclass(slots=True)
 class LocalApplyInventoryService:
     backups: LocalBackupStore
     journals: LocalOperationJournal
+    restore_executions: RestoreExecutionStore | None = None
 
     def list_for_host(
         self, host_id: str, cancellation: CancellationToken
@@ -39,16 +43,31 @@ class LocalApplyInventoryService:
         journals = {
             item.operation_id: item for item in self.journals.list_for_host_strict(host_id)
         }
-        identifiers = set(manifests) | set(journals)
+        restore_by_backup: dict[str, list[object]] = {}
+        if self.restore_executions is not None:
+            for value in self.restore_executions.list_strict():
+                if value.attempt.host_id != host_id:
+                    raise AdapterError(
+                        "restore_execution_binding_mismatch", "restore host changed identity"
+                    )
+                restore_by_backup.setdefault(value.attempt.backup_id, []).append(value)
+        identifiers = set(manifests) | set(journals) | set(restore_by_backup)
         result = []
         for backup_id in identifiers:
             manifest = manifests.get(backup_id)
             journal = journals.get(backup_id)
+            restore_values = restore_by_backup.get(backup_id, [])
+            restore_attention = any(value.requires_attention for value in restore_values)
+            restore_state = (
+                str(getattr(restore_values[0].state, "value", restore_values[0].state))
+                if restore_values else None
+            )
             attention = (
                 manifest is None
                 or journal is None
                 or journal.status is JournalStatus.RECOVERY_REQUIRED
                 or (journal is not None and journal.change_set_hash != manifest.change_set_hash)
+                or restore_attention
             )
             result.append(LocalApplyInventoryItem(
                 backup_id=backup_id,
@@ -58,6 +77,8 @@ class LocalApplyInventoryService:
                 protected=manifest.protected if manifest is not None else False,
                 requires_attention=attention,
                 allowed_actions=(BackupListAction.REFRESH_INVENTORY,),
+                restore_state=restore_state,
+                restore_requires_attention=restore_attention,
             ))
         return tuple(sorted(result, key=lambda item: item.backup_id, reverse=True))
 

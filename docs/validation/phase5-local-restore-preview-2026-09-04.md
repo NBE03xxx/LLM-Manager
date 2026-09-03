@@ -56,4 +56,12 @@ authorization hashごとのimmutable attemptをmutation前に0700/0600 storeへ�
 
 ## Next
 
-execution storeの全entry strict一覧と、attemptだけが残ったrestart状態のread-only inventory表示を実装する。自動restore retryは行わない。GUIの復元実行buttonはまだ設けない。
+## Restart execution inventory
+
+restore execution storeの全entry strict一覧を追加した。未知entry、symlink、owner/mode不一致、非canonical record、filename/hash/attempt-result binding不一致、attemptを欠くorphan resultが1件でもあれば部分一覧を返さない。resultのないattemptは`attempt_only`として保持し、attentionを必須にする。自動retry actionは生成しない。
+
+local production inventoryはmanifest/journalに加えてrestore executionをread-onlyで結合し、restore stateとrestore attentionを英日表示する。restore evidenceだけが残るbackup IDも黙って消さない。Ubuntu 26.04/PySide6 6.10.2でQt表示、fault injection、restart/tamper、attempt-only結合を含む12件が0.091秒で成功した。
+
+## Next
+
+local production restore compositionを監査し、Secret Service prompt、authorization有効期限、execution store/audit配置、単一target制限を実環境で安全に満たせるか判定する。明示的な実行controlと実config mutationはまだ接続しない。

@@ -74,6 +74,20 @@ class RestoreExecutionPersistenceError(AdapterError):
         self.cause_code = cause_code
 
 
+@dataclass(frozen=True, slots=True)
+class RestoreExecutionView:
+    attempt: RestoreExecutionAttempt
+    evidence: RestoreExecutionEvidence | None
+
+    @property
+    def state(self) -> RestoreExecutionState | str:
+        return self.evidence.state if self.evidence is not None else "attempt_only"
+
+    @property
+    def requires_attention(self) -> bool:
+        return self.evidence is None or self.evidence.state is not RestoreExecutionState.COMMITTED
+
+
 class RestoreAuditPort(Protocol):
     def append(
         self, event_type: str, correlation_id: str,
@@ -168,6 +182,47 @@ class RestoreExecutionStore:
         ):
             raise AdapterError("invalid_restore_evidence", "restore evidence integrity failed")
         return value
+
+    def list_strict(self) -> tuple[RestoreExecutionView, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError("unsafe_restore_execution_store", "restore store is unsafe")
+        metadata = self.root.stat(follow_symlinks=False)
+        if metadata.st_uid != os.getuid() or stat.S_IMODE(metadata.st_mode) != 0o700:
+            raise AdapterError("unsafe_restore_execution_store", "restore store is unsafe")
+        identities: dict[str, set[str]] = {}
+        for path in self.root.iterdir():
+            parts = path.name.split(".")
+            if (
+                path.is_symlink()
+                or not path.is_file()
+                or len(parts) != 3
+                or parts[1] not in {"attempt", "result"}
+                or parts[2] != "json"
+            ):
+                raise AdapterError("unsafe_restore_execution_store", "unknown restore entry")
+            self._path(parts[0], parts[1])
+            identities.setdefault(parts[0], set()).add(parts[1])
+        views = []
+        for identity, kinds in identities.items():
+            if "attempt" not in kinds:
+                raise AdapterError("invalid_restore_evidence", "result has no source attempt")
+            attempt = self.load_attempt(identity)
+            evidence = self.load_evidence(identity) if "result" in kinds else None
+            if evidence is not None and (
+                evidence.attempt_hash != attempt.attempt_hash
+                or (
+                    evidence.authorization_hash, evidence.host_id, evidence.backup_id,
+                    evidence.manifest_hash, evidence.target,
+                ) != (
+                    attempt.authorization_hash, attempt.host_id, attempt.backup_id,
+                    attempt.manifest_hash, attempt.target,
+                )
+            ):
+                raise AdapterError("invalid_restore_evidence", "restore evidence binding changed")
+            views.append(RestoreExecutionView(attempt, evidence))
+        return tuple(sorted(views, key=lambda item: item.attempt.started_at, reverse=True))
 
     def _prepare(self) -> None:
         self.root.mkdir(mode=0o700, parents=True, exist_ok=True)

@@ -756,6 +756,10 @@ else:
                     remote=getattr(getattr(value, "remote_presence"), "value", getattr(value, "remote_presence")),
                     protected=str(bool(getattr(value, "protected"))).lower(),
                     attention=str(bool(getattr(value, "requires_attention"))).lower(),
+                    restore_state=getattr(value, "restore_state", None) or "none",
+                    restore_attention=str(bool(
+                        getattr(value, "restore_requires_attention", False)
+                    )).lower(),
                     actions=", ".join(getattr(action, "value", str(action)) for action in actions) or "none",
                 ))
                 self._backup_inventory_list.item(self._backup_inventory_list.count() - 1).setData(

@@ -24,6 +24,7 @@ from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
 from llm_manager.infrastructure.journal import LocalOperationJournal
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
+from llm_manager.infrastructure.restore_execution import RestoreExecutionStore
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
 from llm_manager.infrastructure.safe_apply import AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider, SecretStorageBackend
@@ -306,6 +307,7 @@ class LocalBackupInventoryTaskFactory:
             service = LocalApplyInventoryService(
                 LocalBackupStore(self.state_root / "backups", (allowed_root,)),
                 LocalOperationJournal(self.state_root / "journal", (allowed_root,)),
+                RestoreExecutionStore(self.state_root / "restore-executions"),
             )
             return service.list_for_host(host_id, cancellation)
 

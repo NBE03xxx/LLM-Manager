@@ -81,6 +81,23 @@ class RestoreExecutionTests(unittest.TestCase):
                 restarted.load_attempt(authorization.authorization_hash)
             self.assertEqual(caught.exception.code, "unsafe_restore_execution_store")
 
+    def test_strict_list_rejects_unknown_and_orphan_result_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            coordinator, authorization, _manifest, store, _audit = self._coordinator(root)
+            coordinator.execute(authorization, CancellationToken())
+            unknown = root / "restore-executions" / "README"
+            unknown.write_text("unknown", encoding="utf-8")
+            with self.assertRaises(AdapterError) as caught:
+                store.list_strict()
+            self.assertEqual(caught.exception.code, "unsafe_restore_execution_store")
+            unknown.unlink()
+            attempt = root / "restore-executions" / f"{authorization.authorization_hash}.attempt.json"
+            attempt.unlink()
+            with self.assertRaises(AdapterError) as caught:
+                store.list_strict()
+            self.assertEqual(caught.exception.code, "invalid_restore_evidence")
+
     def test_result_persistence_failure_exposes_committed_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             coordinator, authorization, manifest, _store, _audit = self._coordinator(Path(directory))
@@ -112,6 +129,10 @@ class RestoreExecutionTests(unittest.TestCase):
             with self.assertRaises(AdapterError) as caught:
                 coordinator.execute(authorization, CancellationToken())
             self.assertEqual(caught.exception.code, "restore_authorization_consumed")
+            views = store.list_strict()
+            self.assertEqual(len(views), 1)
+            self.assertEqual(views[0].state, "attempt_only")
+            self.assertTrue(views[0].requires_attention)
 
     def test_commit_audit_failure_persists_unknown_and_exposes_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
