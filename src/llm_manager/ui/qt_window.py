@@ -42,6 +42,9 @@ ChangePlanTaskFactory = Callable[
 ApplyTaskFactory = Callable[
     [OptimizationPlan, ApprovalRecord], Callable[[CancellationToken], object]
 ]
+BackupInventoryTaskFactory = Callable[
+    [str], Callable[[CancellationToken], tuple[object, ...]]
+]
 
 
 if not PYSIDE_AVAILABLE:
@@ -81,6 +84,7 @@ else:
             approval_service: CreateApprovalRecord = CreateApprovalRecord(),
             apply_task_factory: ApplyTaskFactory | None = None,
             apply_availability_service: AssessProductionApplyAvailability | None = None,
+            backup_inventory_task_factory: BackupInventoryTaskFactory | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -99,7 +103,10 @@ else:
             self._approval_record: ApprovalRecord | None = None
             self._apply_task_factory = apply_task_factory
             self._apply_availability_service = apply_availability_service
+            self._backup_inventory_task_factory = backup_inventory_task_factory
             self._apply_outcome: object | None = None
+            self._backup_inventory_items: tuple[object, ...] = ()
+            self._backup_inventory_error: str | None = None
             self._stale_timer = QTimer(self)
             self._stale_timer.setSingleShot(True)
             self._stale_timer.timeout.connect(self._expire_review)
@@ -172,6 +179,15 @@ else:
             self._apply_cancel_button = QPushButton()
             self._apply_cancel_button.setObjectName("cancel-sandbox-apply")
             self._apply_cancel_button.setAccessibleName("cancel-sandbox-apply")
+            self._backup_inventory_summary = QLabel()
+            self._backup_inventory_summary.setObjectName("backup-inventory-summary")
+            self._backup_inventory_summary.setAccessibleName("backup-inventory-summary")
+            self._backup_inventory_list = QListWidget()
+            self._backup_inventory_list.setObjectName("backup-inventory-list")
+            self._backup_inventory_list.setAccessibleName("backup-inventory-list")
+            self._refresh_backups_button = QPushButton()
+            self._refresh_backups_button.setObjectName("refresh-backup-inventory")
+            self._refresh_backups_button.setAccessibleName("refresh-backup-inventory")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -199,6 +215,7 @@ else:
             self._prepare_apply_button.clicked.connect(self._prepare_apply)
             self._run_apply_button.clicked.connect(self._run_apply)
             self._apply_cancel_button.clicked.connect(self._cancel_apply)
+            self._refresh_backups_button.clicked.connect(self._refresh_backups)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -236,6 +253,10 @@ else:
                 layout.addWidget(self._results_summary)
                 layout.addWidget(self._run_apply_button)
                 layout.addWidget(self._apply_cancel_button)
+            elif step is GuiStep.BACKUPS:
+                layout.addWidget(self._backup_inventory_summary)
+                layout.addWidget(self._backup_inventory_list)
+                layout.addWidget(self._refresh_backups_button)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -256,6 +277,8 @@ else:
             host_id = self._host_selector.currentData()
             if isinstance(host_id, str) and not self._presenter.state.busy:
                 self._presenter.select_host(host_id)
+                self._backup_inventory_items = ()
+                self._backup_inventory_error = None
                 self._render()
 
         @Slot()
@@ -498,6 +521,35 @@ else:
             self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.REVIEW))
             self._render()
 
+        @Slot()
+        def _refresh_backups(self) -> None:
+            host_id = self._presenter.state.selected_host_id
+            if host_id is None or self._backup_inventory_task_factory is None:
+                return
+            try:
+                self._backup_inventory_error = None
+                runner = QtTaskRunner(self._backup_inventory_task_factory(host_id))
+                runner.signals.result.connect(self._backup_inventory_finished)
+                runner.signals.error.connect(self._backup_inventory_failed)
+                self._coordinator.start(host_id, runner)
+            except (ApplicationError, RuntimeError, ValueError) as error:
+                self._backup_inventory_error = str(getattr(error, "code", error))
+            self._render_backups()
+
+        @Slot(object)
+        def _backup_inventory_finished(self, result: object) -> None:
+            self._backup_inventory_items = tuple(result)  # type: ignore[arg-type]
+            self._backup_inventory_error = None
+            self._render_backups()
+
+        @Slot(object)
+        def _backup_inventory_failed(self, failure: object) -> None:
+            self._backup_inventory_items = ()
+            self._backup_inventory_error = str(
+                getattr(failure, "code", "worker_failed")
+            )
+            self._render_backups()
+
         def _invalidate_review(self) -> None:
             self._stale_timer.stop()
             self._approval_record = None
@@ -530,6 +582,7 @@ else:
             self._prepare_apply_button.setText(self._catalog.text("action.prepare_apply"))
             self._run_apply_button.setText(self._catalog.text("action.run_apply"))
             self._apply_cancel_button.setText(self._catalog.text("action.cancel"))
+            self._refresh_backups_button.setText(self._catalog.text("action.refresh_backups"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -551,6 +604,40 @@ else:
             self._render_review()
             self._render_approval()
             self._render_results()
+            self._render_backups()
+
+        def _render_backups(self) -> None:
+            self._backup_inventory_list.clear()
+            self._refresh_backups_button.setEnabled(
+                self._backup_inventory_task_factory is not None
+                and not self._presenter.state.busy
+            )
+            if self._backup_inventory_error is not None:
+                self._backup_inventory_summary.setText(
+                    self._catalog.text("backups.failed", code=self._backup_inventory_error)
+                )
+                return
+            if self._backup_inventory_task_factory is None:
+                self._backup_inventory_summary.setText(self._catalog.text("backups.unavailable"))
+                return
+            if not self._backup_inventory_items:
+                self._backup_inventory_summary.setText(self._catalog.text("backups.empty"))
+                return
+            self._backup_inventory_summary.setText(
+                self._catalog.text("backups.loaded", count=len(self._backup_inventory_items))
+            )
+            for value in self._backup_inventory_items:
+                actions = getattr(value, "allowed_actions", ())
+                self._backup_inventory_list.addItem(self._catalog.text(
+                    "backups.item",
+                    backup_id=getattr(value, "backup_id"),
+                    state=getattr(getattr(value, "state"), "value", getattr(value, "state")),
+                    local=getattr(getattr(value, "local_presence"), "value", getattr(value, "local_presence")),
+                    remote=getattr(getattr(value, "remote_presence"), "value", getattr(value, "remote_presence")),
+                    protected=str(bool(getattr(value, "protected"))).lower(),
+                    attention=str(bool(getattr(value, "requires_attention"))).lower(),
+                    actions=", ".join(getattr(action, "value", str(action)) for action in actions) or "none",
+                ))
 
         def _render_recommendations(self) -> None:
             self._recommendation_list.blockSignals(True)

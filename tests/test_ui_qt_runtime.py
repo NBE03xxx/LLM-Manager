@@ -543,6 +543,70 @@ class QtRuntimeTests(unittest.TestCase):
         self.assertIn(PlanStatus.RECOVERY_REQUIRED.value, recovery_summary)
         self.assertEqual(recovery_content, '{"model":"new"}')
 
+    def test_backup_inventory_refresh_is_read_only_and_localized(self) -> None:
+        from types import SimpleNamespace
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QPushButton
+
+        from llm_manager.ui.qt_window import MainWindow
+
+        calls = []
+        item = SimpleNamespace(
+            backup_id="backup-1",
+            state=SimpleNamespace(value="local_only"),
+            local_presence=SimpleNamespace(value="present"),
+            remote_presence=SimpleNamespace(value="absent"),
+            protected=True,
+            requires_attention=True,
+            allowed_actions=(SimpleNamespace(value="refresh_inventory"),),
+        )
+
+        def inventory_factory(host_id):
+            calls.append(("factory", host_id))
+
+            def load(_cancellation):
+                calls.append(("load", host_id))
+                return (item,)
+
+            return load
+
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            locale="en",
+            backup_inventory_task_factory=inventory_factory,
+        )
+        try:
+            refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+            summary = window.findChild(QLabel, "backup-inventory-summary")
+            inventory = window.findChild(QListWidget, "backup-inventory-list")
+            self.assertEqual(calls, [])
+            self.assertEqual(inventory.count(), 0)
+            refresh.click()
+            loop = QEventLoop()
+
+            def finish() -> None:
+                if inventory.count() == 1:
+                    loop.quit()
+                else:
+                    QTimer.singleShot(5, finish)
+
+            QTimer.singleShot(0, finish)
+            QTimer.singleShot(2000, loop.quit)
+            loop.exec()
+            self.assertEqual(calls, [("factory", "local"), ("load", "local")])
+            self.assertIn("read-only", summary.text())
+            self.assertIn("backup-1 · local_only", inventory.item(0).text())
+            self.assertIn("actions: refresh_inventory", inventory.item(0).text())
+            language = window.findChild(QComboBox, "language-selector")
+            language.setCurrentIndex(1)
+            self.application.processEvents()
+            self.assertIn("read-only", summary.text())
+            self.assertIn("要確認: true", inventory.item(0).text())
+            self.assertEqual(len(calls), 2)
+        finally:
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

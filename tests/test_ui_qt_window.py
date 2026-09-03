@@ -32,6 +32,9 @@ class QtWindowBoundaryTests(unittest.TestCase):
             "review-selected",
             "review-summary",
             "review-list",
+            "backup-inventory-summary",
+            "backup-inventory-list",
+            "refresh-backup-inventory",
         ):
             self.assertIn(f'"{name}"', source)
 

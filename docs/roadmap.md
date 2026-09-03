@@ -179,6 +179,8 @@ Local user GUI Apply vertical slice: 承認済みrecordからResultsの明示App
 
 Local user GUI failure outcomes: production既定を変えずにruntime validatorとbackup storeをGate用に差し替えられるcomposition seamを追加した。Ubuntu 26.04/PySide6 6.10.2で一時configへのApply後にruntime validation失敗を注入し、暗号化backupから元内容へ復元してGUIへ`rolled_back`を表示した。別caseではrestore failureも注入し、変更後内容を残してGUIへ`recovery_required`を表示した。両caseを含む1件が0.087秒で成功した。次はBackup/Rollback画面のread-only inventoryと永続結果表示を監査する。
 
+Backup/Rollback read-only UI slice: 注入可能なinventory taskをhost lock付きQt workerへ接続し、初期表示ではI/Oを行わず明示「再読込」でだけ実行する。backup ID、dual-copy state、local/remote presence、manual protection、attention、coreが算出済みのallowed action名を一覧表示するが、restore/rollback/delete/cleanupを開始するcontrolは設けない。host変更では旧一覧を破棄し、英日再描画はloaderを再実行しない。Ubuntu 26.04/PySide6 6.10.2 Gate 1件が0.054秒で成功した。production inventory factoryは未接続であり、次はlocal manifest/journalのstrict read-only compositionを構築する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
