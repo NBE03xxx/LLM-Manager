@@ -234,6 +234,39 @@ class LocalBackupStore:
             )
         )
 
+    def list_manifests_strict(self, host_id: str) -> tuple[BackupManifest, ...]:
+        """List canonical manifests without hiding unknown or damaged entries."""
+        host_directory = self.root / _safe_component(host_id)
+        if not host_directory.exists() and not host_directory.is_symlink():
+            return ()
+        if host_directory.is_symlink() or not host_directory.is_dir():
+            raise AdapterError("invalid_backup_store", "host backup location is unsafe")
+        metadata = host_directory.stat(follow_symlinks=False)
+        if metadata.st_uid != os.getuid() or metadata.st_mode & 0o777 != 0o700:
+            raise AdapterError("invalid_backup_store", "host backup metadata is unsafe")
+        values: list[BackupManifest] = []
+        for backup_directory in host_directory.iterdir():
+            if backup_directory.is_symlink() or not backup_directory.is_dir():
+                raise AdapterError("invalid_backup_store", "unknown backup store entry")
+            metadata = backup_directory.stat(follow_symlinks=False)
+            manifest_path = backup_directory / "manifest.json"
+            if (
+                metadata.st_uid != os.getuid()
+                or metadata.st_mode & 0o777 != 0o700
+                or manifest_path.is_symlink()
+                or not manifest_path.is_file()
+                or manifest_path.stat(follow_symlinks=False).st_uid != os.getuid()
+                or manifest_path.stat(follow_symlinks=False).st_mode & 0o777 != 0o600
+            ):
+                raise AdapterError("invalid_backup_store", "backup metadata is unsafe")
+            manifest = _read_manifest(manifest_path, backup_directory, host_id)
+            for item in manifest.items:
+                self._validated_target(item.target)
+            values.append(manifest)
+        if len({item.backup_id for item in values}) != len(values):
+            raise AdapterError("invalid_backup_store", "duplicate backup identity")
+        return tuple(sorted(values, key=lambda item: item.created_at, reverse=True))
+
     def set_protected(self, host_id: str, backup_id: str, protected: bool) -> BackupManifest:
         self._load_host_manifests(host_id)
         key = (host_id, backup_id)

@@ -143,6 +143,31 @@ class LocalOperationJournal:
             raise AdapterError("invalid_journal", "operation journal is not canonical")
         return journal
 
+    def list_for_host_strict(self, host_id: str) -> tuple[OperationJournal, ...]:
+        if not self.root.exists() and not self.root.is_symlink():
+            return ()
+        if self.root.is_symlink() or not self.root.is_dir():
+            raise AdapterError("invalid_journal", "journal directory is unsafe")
+        metadata = self.root.stat(follow_symlinks=False)
+        if metadata.st_uid != os.getuid() or metadata.st_mode & 0o777 != 0o700:
+            raise AdapterError("invalid_journal", "journal metadata is unsafe")
+        values: list[OperationJournal] = []
+        for path in self.root.iterdir():
+            if path.is_symlink() or not path.is_file() or path.suffix != ".json":
+                raise AdapterError("invalid_journal", "unknown journal entry")
+            metadata = path.stat(follow_symlinks=False)
+            if metadata.st_uid != os.getuid() or metadata.st_mode & 0o777 != 0o600:
+                raise AdapterError("invalid_journal", "journal metadata is unsafe")
+            journal = self.load(path.stem)
+            if journal.host_id != host_id:
+                raise AdapterError("invalid_journal", "journal host identity changed")
+            for target in journal.targets:
+                self._target(target.target)
+            values.append(journal)
+        if len({item.operation_id for item in values}) != len(values):
+            raise AdapterError("invalid_journal", "duplicate journal identity")
+        return tuple(sorted(values, key=lambda item: item.updated_at, reverse=True))
+
     def reconcile(self, operation_id: str) -> tuple[ReconciliationResult, ...]:
         journal = self.load(operation_id)
         results: list[ReconciliationResult] = []

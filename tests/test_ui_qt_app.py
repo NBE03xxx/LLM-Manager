@@ -12,11 +12,16 @@ class QtProductionCompositionTests(unittest.TestCase):
         diagnostic_tasks = MagicMock()
         change_tasks = MagicMock()
         apply_tasks = MagicMock()
+        inventory_tasks = MagicMock()
         backup_policy = EncryptionInfo(enabled=False)
         with patch.object(qt_app, "DiscoverHosts") as discover, patch.object(
             qt_app.DiagnosticTaskFactory, "production", return_value=diagnostic_tasks
         ), patch.object(qt_app, "ChangePlanTaskFactory", return_value=change_tasks), patch.object(
             qt_app.LocalUserApplyTaskFactory, "production", return_value=apply_tasks
+        ), patch.object(
+            qt_app.LocalBackupInventoryTaskFactory,
+            "production",
+            return_value=inventory_tasks,
         ), patch.object(
             qt_app.BackupSettingsStore, "load", return_value=backup_policy
         ), patch.object(qt_app, "run_gui", return_value=0) as run_gui:
@@ -29,6 +34,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         service = keywords["apply_availability_service"]
         self.assertEqual(service.available_routes, frozenset({ApplyRoute.LOCAL_USER}))
         self.assertIs(keywords["change_plan_task_factory"], change_tasks)
+        self.assertIs(keywords["backup_inventory_task_factory"], inventory_tasks)
 
 
 if __name__ == "__main__":

@@ -181,6 +181,8 @@ Local user GUI failure outcomes: production既定を変えずにruntime validato
 
 Backup/Rollback read-only UI slice: 注入可能なinventory taskをhost lock付きQt workerへ接続し、初期表示ではI/Oを行わず明示「再読込」でだけ実行する。backup ID、dual-copy state、local/remote presence、manual protection、attention、coreが算出済みのallowed action名を一覧表示するが、restore/rollback/delete/cleanupを開始するcontrolは設けない。host変更では旧一覧を破棄し、英日再描画はloaderを再実行しない。Ubuntu 26.04/PySide6 6.10.2 Gate 1件が0.054秒で成功した。production inventory factoryは未接続であり、次はlocal manifest/journalのstrict read-only compositionを構築する。
 
+Local production inventory: 互換list APIとは別にstrict manifest/journal列挙を追加し、未知entry、symlink、owner/mode不一致、改ざん、host/storage/target root不一致を黙って除外せずrefresh全体で拒否する。共通backup/operation IDでmanifestとterminal journalを結合し、`committed`/`rolled_back`/`recovery_required`または`backup_only`、presence、protection、attentionを表示する。空stateはdirectoryを作らず空一覧とし、SSH hostはlocal loaderへ渡さない。暗号本文を復号せずSecret Serviceを起動しない。Ubuntu 26.04/PySide6 6.10.2でrestart/tamper/empty/SSH分離/entrypoint/Qtを含む5件が0.040秒で成功した。次はSSH production inventory compositionを監査する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

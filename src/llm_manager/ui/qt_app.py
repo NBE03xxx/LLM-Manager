@@ -15,7 +15,12 @@ from llm_manager.infrastructure.backup_settings import BackupSettingsStore, Buil
 from .qt_worker import PYSIDE_AVAILABLE, QtUnavailableError
 from .qt_window import ChangePlanTaskFactory as QtChangePlanTaskFactory
 from .qt_window import DiagnosisTaskFactory, MainWindow
-from .composition import ChangePlanTaskFactory, DiagnosticTaskFactory, LocalUserApplyTaskFactory
+from .composition import (
+    ChangePlanTaskFactory,
+    DiagnosticTaskFactory,
+    LocalBackupInventoryTaskFactory,
+    LocalUserApplyTaskFactory,
+)
 
 
 def run_gui(
@@ -28,6 +33,7 @@ def run_gui(
     approval_actor: str = "interactive-user",
     apply_task_factory=None,
     apply_availability_service: AssessProductionApplyAvailability | None = None,
+    backup_inventory_task_factory=None,
 ) -> int:
     if not PYSIDE_AVAILABLE:
         raise QtUnavailableError("pyside6_unavailable")
@@ -43,6 +49,7 @@ def run_gui(
         approval_actor=approval_actor,
         apply_task_factory=apply_task_factory,
         apply_availability_service=apply_availability_service,
+        backup_inventory_task_factory=backup_inventory_task_factory,
     )
     window.resize(960, 640)
     window.show()
@@ -77,6 +84,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     apply_availability = AssessProductionApplyAvailability(
         frozenset({ApplyRoute.LOCAL_USER})
     )
+    backup_inventory_tasks = LocalBackupInventoryTaskFactory.production(hosts)
     import locale as system_locale
 
     locale_name = system_locale.getlocale()[0] or "en"
@@ -90,6 +98,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         approval_actor=actor,
         apply_task_factory=apply_tasks,
         apply_availability_service=apply_availability,
+        backup_inventory_task_factory=backup_inventory_tasks,
     )
 
 

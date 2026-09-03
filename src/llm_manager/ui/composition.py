@@ -23,6 +23,7 @@ from llm_manager.infrastructure.audit import LocalAuditLog
 from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
 from llm_manager.infrastructure.journal import LocalOperationJournal
+from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
 from llm_manager.infrastructure.safe_apply import AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider, SecretStorageBackend
@@ -273,6 +274,44 @@ class LocalUserApplyTaskFactory:
         return execute
 
 
+@dataclass(slots=True)
+class LocalBackupInventoryTaskFactory:
+    """Compose strict read-only local manifest and operation-journal inventory."""
+
+    hosts: tuple[HostCandidate, ...]
+    config_root: Path
+    state_root: Path
+
+    @classmethod
+    def production(cls, hosts: tuple[HostCandidate, ...]) -> "LocalBackupInventoryTaskFactory":
+        return cls(hosts, _local_config_root(), _local_state_root())
+
+    def __post_init__(self) -> None:
+        self.config_root = _safe_application_root(self.config_root, "opencode")
+        self.state_root = _safe_application_root(self.state_root, "llm-manager") / "llm-manager"
+
+    def __call__(self, host_id: str):
+        candidate = next((item for item in self.hosts if item.host_id == host_id), None)
+        if candidate is None or candidate.kind is not HostKind.LOCAL:
+            raise ValueError("local_backup_inventory_requires_local_host")
+
+        def execute(cancellation: CancellationToken) -> tuple[object, ...]:
+            if not self.state_root.exists() and not self.state_root.is_symlink():
+                return ()
+            _validate_private_state_root(self.state_root)
+            for child in (self.state_root / "backups", self.state_root / "journal"):
+                if child.is_symlink():
+                    raise ValueError("application_root_symlink_rejected")
+            allowed_root = self.config_root / "opencode"
+            service = LocalApplyInventoryService(
+                LocalBackupStore(self.state_root / "backups", (allowed_root,)),
+                LocalOperationJournal(self.state_root / "journal", (allowed_root,)),
+            )
+            return service.list_for_host(host_id, cancellation)
+
+        return execute
+
+
 def _local_opencode_candidates() -> tuple[str, ...]:
     root = _local_config_root()
     directory = root / "opencode"
@@ -304,6 +343,12 @@ def _prepare_private_state_root(root: Path) -> None:
     if not root.exists():
         root.mkdir(mode=0o700, parents=True)
         os.chmod(root, 0o700)
+    _validate_private_state_root(root)
+
+
+def _validate_private_state_root(root: Path) -> None:
+    if root.is_symlink() or not root.exists():
+        raise ValueError("private_state_root_unsafe")
     stat = root.stat()
     if not root.is_dir() or stat.st_uid != os.getuid() or stat.st_mode & 0o077:
         raise ValueError("private_state_root_unsafe")
