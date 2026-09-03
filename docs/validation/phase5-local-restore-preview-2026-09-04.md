@@ -38,4 +38,12 @@ Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、Qt runtime、accessible boundar
 
 ## Next
 
-preflight authorizationを消費するrestore executorの契約を設計する。executor自身でもauthorization、strict manifest、targetの現在状態を再検証し、失敗時のjournal/auditと部分復元を避けるatomicityを先に確定する。GUIの復元実行buttonはまだ設けない。
+## Sandbox single-target executor
+
+一般的なfilesystemでは複数fileの置換を一つのatomic transactionにできず、既存restoreは途中成功を許す。このため最初のexecutorを単一local user targetだけに制限した。preflightは現在targetの存在有無とSHA-256もauthorizationへ束縛する。executorはauthorizationのcanonical hash/expiry、strict manifest、target一覧、現在状態を復号前に再検証し、backup item読込後にも現在状態を再照合する。既存fileは同一directoryの一時fileから`os.replace`、元が不存在なら単一unlink後にdirectory fsyncする。
+
+authorization/target変更、複数target、cancelはmutation前に拒否する。sandbox 6件が0.005秒で成功し、成功restoreと変更検出時の内容保持を確認した。production composition、GUI button、journal/audit、authorization消費のimmutable replay防止は未接続であり、このexecutorをproductionへ公開しない。
+
+## Next
+
+restore専用journal/auditとimmutable authorization consumptionを実装し、開始前の保存失敗ではmutationしないこと、commit後の結果保存失敗をunknownとして隠さないことをfault injectionで検証する。GUIの復元実行buttonはまだ設けない。

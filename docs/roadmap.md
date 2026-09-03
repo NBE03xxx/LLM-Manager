@@ -193,6 +193,8 @@ Restore preview expiry: 150 ms previewを使うQt runtime Gateで、承認後の
 
 Local restore preflight: 承認済みpreviewから直接restoreせず、実行直前にstrict manifestを再列挙してcanonical preview、approval期限、host/backup/manifest、protection、全target metadataとallowlistを再検証する。成功時も本文やmanifestではなく、approval/actor/hash/target/最短expiryをcanonical hashへ束縛した短命authorizationだけを返す。tamper、manifest変更、approval mismatch、cancelではfail closedとし、sandbox 9件が0.007秒で成功した。次はexecutor側の再検証・journal/audit・atomicity契約を設計する。
 
+Sandbox local restore executor: 複数fileを一般filesystem上で真にatomicにできないため、最初の境界を単一local user targetに限定した。preflight時の現在target存在/hashもauthorizationへ束縛し、executorは復号前後にauthorization、strict manifest、target一覧、現在状態を再照合してからatomic replaceまたは単一unlink+directory fsyncを行う。変更・複数target・cancelはmutation前に拒否する。sandbox 6件が0.005秒で成功した。journal/audit、immutable replay防止、production/GUI compositionは未接続であり、次にこれらを構築する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

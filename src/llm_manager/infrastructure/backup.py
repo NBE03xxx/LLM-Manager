@@ -267,6 +267,24 @@ class LocalBackupStore:
             raise AdapterError("invalid_backup_store", "duplicate backup identity")
         return tuple(sorted(values, key=lambda item: item.created_at, reverse=True))
 
+    def observe_restore_targets(self, manifest: BackupManifest):
+        from llm_manager.application.restore_preflight import RestoreTargetObservation
+
+        observations = []
+        for item in manifest.items:
+            target = self._validated_target(item.target)
+            if target.is_symlink():
+                raise AdapterError("symlink_rejected", "restore target is a symlink")
+            if not target.exists():
+                observations.append(RestoreTargetObservation(str(target), False, None))
+                continue
+            if not target.is_file() or target.stat().st_size > MAX_ITEM_BYTES:
+                raise AdapterError("unsupported_target", "restore target is unsafe")
+            observations.append(RestoreTargetObservation(
+                str(target), True, hashlib.sha256(target.read_bytes()).hexdigest()
+            ))
+        return tuple(observations)
+
     def set_protected(self, host_id: str, backup_id: str, protected: bool) -> BackupManifest:
         self._load_host_manifests(host_id)
         key = (host_id, backup_id)

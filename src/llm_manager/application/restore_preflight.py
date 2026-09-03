@@ -20,6 +20,17 @@ from llm_manager.domain.serialization import to_primitive
 class StrictManifestInventory(Protocol):
     def list_manifests_strict(self, host_id: str) -> tuple[BackupManifest, ...]: ...
 
+    def observe_restore_targets(
+        self, manifest: BackupManifest
+    ) -> tuple["RestoreTargetObservation", ...]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class RestoreTargetObservation:
+    target: str
+    exists: bool
+    sha256: str | None
+
 
 @dataclass(frozen=True, slots=True)
 class PreparedRestoreAuthorization:
@@ -30,6 +41,7 @@ class PreparedRestoreAuthorization:
     approval_id: str
     actor: str
     targets: tuple[str, ...]
+    current_targets: tuple[RestoreTargetObservation, ...]
     prepared_at: datetime
     expires_at: datetime
     authorization_hash: str = ""
@@ -88,6 +100,7 @@ class PrepareLocalRestore:
             approval.approval_id,
             approval.actor,
             tuple(item.target for item in manifest.items),
+            self.manifests.observe_restore_targets(manifest),
             current,
             min(preview.expires_at, approval.expires_at),
         ).with_hash()
