@@ -169,6 +169,8 @@ Apply前準備実装: Review checkboxとは別の明示操作でだけ期限付�
 
 Sandbox/fake Apply Results実装: `OptimizationPlan + ApprovalRecord`をimmutable入力とする注入可能なtask factoryを、診断・ChangeSet生成と同じhost lock、QThreadPool、CancellationTokenへ接続した。Resultsはrunning、committed、rolled_back、recovery_required、worker error/cancelを構造化状態から表示し、UIはinfrastructureへ依存しない。production compositionはtask factoryを渡さないため実行buttonを無効化し「Apply未接続」を明示する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは25件中24件成功、PySide6存在時のnegative test 1件skipで完了した。実backup/file mutation/PolicyKit/sudoは行っていない。
 
+Production Apply接続監査: report/plan/host/change-set bindingと全changeのroot要否から`local_user`、`local_root`、`ssh_user`、`ssh_root`を決定論的に分類し、混在privilegeを拒否する。4経路とも現時点ではproduction GUIへ接続せず、それぞれlocal store/executor composition、PolicyKit workflow composition、SSH user atomic write/backup transport、remote privileged Apply helper protocolの不足を固定理由としてResultsへ表示する。既存remote sudo helperのallowlistはrecovery/retention/deletionだけでありApplyへ流用しない。次はまずlocal user経路のprivate production state root、Secret Service、audit/journal、runtime validator compositionをsandboxで閉じる。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

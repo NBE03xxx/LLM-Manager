@@ -234,6 +234,8 @@ passwordless sudoの場合も同じhelper/request経路を使い、任意の`sud
 
 ## 13. 残存検証事項
 
+Phase 5 production GUI接続監査では、local user、local root、SSH user、SSH rootの4経路をfail closed分類した。local userはprivate production state root、Secret Service、audit/journal、runtime validatorを束ねるcomposition、local rootはこれにPolicyKit readiness/invokerを加えたcomposition、SSH userはatomic writeとlocal正本＋remote copy backup transport、SSH rootはremote helperのApply request/result/journal protocolが未完成である。これらが個別Gateを通るまでGUIのproduction Apply factoryを公開しない。既存remote helperのrecovery/retention/deletion commandをApplyとして流用しない。
+
 PolicyKit/remote helper、local/remote保存場所、AES-256-GCM envelope、独立復旧鍵、endpoint policy、OpenCode source-span patch、SSH対話sudoの設計判断は[Threat model](threat-model.md)と[ADR](adr/README.md)に確定した。追加terminalと依存versionのpinは実装依存性reviewで固定する。
 
 ### ADR決定状況

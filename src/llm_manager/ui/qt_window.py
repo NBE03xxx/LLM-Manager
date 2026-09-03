@@ -5,6 +5,7 @@ from dataclasses import replace
 from typing import Callable
 
 from llm_manager.application.approval import CreateApprovalRecord
+from llm_manager.application.apply_availability import AssessProductionApplyAvailability
 from llm_manager.application.errors import ApplicationError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
@@ -657,7 +658,18 @@ else:
                     "results.prepared", approval_id=self._approval_record.approval_id
                 )
                 if self._apply_task_factory is None:
-                    message += "\n" + self._catalog.text("results.sandbox_unavailable")
+                    report = self._presenter.state.report
+                    if report is not None and self._recommendation_plan is not None:
+                        availability = AssessProductionApplyAvailability().execute(
+                            self._recommendation_plan, report
+                        )
+                        message += "\n" + self._catalog.text(
+                            "results.production_unavailable",
+                            route=self._catalog.text(f"apply.route.{availability.route.value}"),
+                            reason=self._catalog.text(
+                                f"apply.reason.{availability.reason_code}"
+                            ),
+                        )
                 self._results_summary.setText(message)
             elif state.error_code:
                 self._results_summary.setText(
