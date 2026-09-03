@@ -4,6 +4,8 @@
 
 Ubuntu 26.04 / Debian 13向け一般配布の先行Gateとして、local privileged helperを含む`llm-manager` binary debを構築できる。Phase 5 GUIはまだ含まないため、現時点の成果物は開発用であり公開releaseではない。
 
+Phase 5 GUIの一般配布実行はbackup暗号化を初回既定ONとして扱う。source checkoutで暗号化OFFを初回既定にする場合だけ`LLM_MANAGER_DEVELOPMENT_MODE=1`を明示する。これは保存済みprivate backup設定を上書きせず、helperやpackage lifecycleの挙動も変更しない。
+
 debは次をroot-owned固定pathへ配置する。
 
 - `/usr/bin/llm-manager-helper`: mode 0755、`/usr/bin/python3 -I`で起動する限定helper

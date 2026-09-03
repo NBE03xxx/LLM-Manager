@@ -35,6 +35,7 @@ class GuiState:
     plan_hash: str | None = None
     approved_plan_hash: str | None = None
     plan_expires_at: datetime | None = None
+    approval_id: str | None = None
     error_code: str | None = None
 
     @property
@@ -76,6 +77,7 @@ class GuiPresenter:
             plan_hash=None,
             approved_plan_hash=None,
             plan_expires_at=None,
+            approval_id=None,
             error_code=None,
         )
         return self._state
@@ -152,6 +154,7 @@ class GuiPresenter:
             plan_hash=change_set_hash,
             approved_plan_hash=None,
             plan_expires_at=expires_at,
+            approval_id=None,
             error_code=None,
         )
         return self._state
@@ -165,6 +168,7 @@ class GuiPresenter:
             status=WorkflowStatus.FAILED,
             approved_plan_hash=None,
             plan_expires_at=None,
+            approval_id=None,
             error_code=error_code,
         )
         return self._state
@@ -179,7 +183,7 @@ class GuiPresenter:
         return self._state
 
     def revoke_plan(self) -> GuiState:
-        self._state = replace(self._state, approved_plan_hash=None)
+        self._state = replace(self._state, approved_plan_hash=None, approval_id=None)
         return self._state
 
     def invalidate_plan(self) -> GuiState:
@@ -190,6 +194,7 @@ class GuiPresenter:
             plan_hash=None,
             approved_plan_hash=None,
             plan_expires_at=None,
+            approval_id=None,
             error_code=None,
         )
         return self._state
@@ -197,8 +202,24 @@ class GuiPresenter:
     def expire_plan(self) -> GuiState:
         self._state = replace(
             self._state,
+            step=GuiStep.REVIEW,
             status=WorkflowStatus.FAILED,
             approved_plan_hash=None,
+            approval_id=None,
             error_code="stale_plan",
+        )
+        return self._state
+
+    def prepare_results(self, approval_id: str) -> GuiState:
+        if not self._state.approved:
+            raise RuntimeError("approval_required")
+        if not approval_id.strip():
+            raise ValueError("approval_id must not be blank")
+        self._state = replace(
+            self._state,
+            step=GuiStep.RESULTS,
+            status=WorkflowStatus.SUCCESS,
+            approval_id=approval_id,
+            error_code=None,
         )
         return self._state

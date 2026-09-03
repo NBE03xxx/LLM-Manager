@@ -202,16 +202,26 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertIn("root権限: 不要", review_list.item(0).text())
             approval = window.findChild(QCheckBox, "approve-change-set")
             approval_status = window.findChild(QLabel, "approval-status")
+            plaintext_ack = window.findChild(QCheckBox, "plaintext-backup-ack")
+            prepare_apply = window.findChild(QPushButton, "prepare-apply")
+            results_summary = window.findChild(QLabel, "results-summary")
             self.assertTrue(approval.isEnabled())
             self.assertFalse(approval.isChecked())
             approval.click()
             self.assertTrue(approval.isChecked())
             self.assertIn("明示承認", approval_status.text())
+            self.assertFalse(plaintext_ack.isHidden())
+            self.assertFalse(prepare_apply.isEnabled())
+            plaintext_ack.click()
+            self.assertTrue(prepare_apply.isEnabled())
+            prepare_apply.click()
+            self.assertEqual(navigation.currentRow(), 4)
+            self.assertIn("Applyはまだ開始していません", results_summary.text())
 
             stale_loop = QEventLoop()
 
             def finish_when_stale() -> None:
-                if not approval.isEnabled():
+                if navigation.currentRow() == 3 and not approval.isEnabled():
                     stale_loop.quit()
                 else:
                     QTimer.singleShot(5, finish_when_stale)

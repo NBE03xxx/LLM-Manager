@@ -165,6 +165,8 @@ ChangeSet planning core/GUI接続実装: 選択済みOptimizationPlanを元Diagn
 
 Review明示承認/stale失効実装: ChangeSet生成成功後だけ承認checkboxを有効にし、表示中の`change_set.content_hash`とplan期限へ承認状態を束縛する。checkbox解除は即時取消、期限到達はsingle-shot timerと承認時の再検査の双方で`stale_plan`へ失効する。host変更と再診断はworkflow stateを初期化し、profile/selection変更はChangeSet、hash、承認、timerを同時に破棄する。staleまたは生成失敗時はdiffと承認controlを無効化する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは自動期限切れを含む関連20件に成功した。ApprovalRecord生成、Apply前のbackup policy確認、Results接続は後続とする。
 
+Apply前準備実装: Review checkboxとは別の明示操作でだけ期限付き`ApprovalRecord`を生成し、plan/report/change-set/backup-policy hash、GUI実行user、平文acknowledgement、planと5分の短い方の期限へ束縛する。一般配布は暗号化ON、`LLM_MANAGER_DEVELOPMENT_MODE=1`を明示したsource開発実行だけOFFを初回既定とし、既存のprivate backup settingsがあれば優先する。Reviewに暗号化・30日/10世代保持を表示し、暗号化OFFでは独立した平文risk checkboxを満たすまで準備できない。有効なrecordだけResultsへ渡し「Apply未開始」を明示する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは関連24件に成功した。実Apply、backup作成、PolicyKit/sudoは未接続である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

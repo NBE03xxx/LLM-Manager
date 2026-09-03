@@ -1,12 +1,23 @@
 from __future__ import annotations
 
+import uuid
+from dataclasses import replace
 from typing import Callable
 
+from llm_manager.application.approval import CreateApprovalRecord
+from llm_manager.application.errors import ApplicationError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.optimization import stable_hash
 from llm_manager.domain.enums import HostKind
-from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile, utc_now
+from llm_manager.domain.models import (
+    ApprovalRecord,
+    DiagnosticReport,
+    EncryptionInfo,
+    OptimizationPlan,
+    OptimizationProfile,
+    utc_now,
+)
 from llm_manager.optimization import PROFILES
 
 from .i18n import Catalog
@@ -58,6 +69,9 @@ else:
             hosts: tuple[HostCandidate, ...] = (),
             recommendation_plan_factory: RecommendationPlanFactory = generate_recommendation_plan,
             change_plan_task_factory: ChangePlanTaskFactory | None = None,
+            backup_policy: EncryptionInfo = EncryptionInfo(enabled=False),
+            approval_actor: str = "interactive-user",
+            approval_service: CreateApprovalRecord = CreateApprovalRecord(),
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -70,6 +84,10 @@ else:
             self._recommendation_plan_factory = recommendation_plan_factory
             self._change_plan_task_factory = change_plan_task_factory
             self._recommendation_plan: OptimizationPlan | None = None
+            self._backup_policy = backup_policy
+            self._approval_actor = approval_actor
+            self._approval_service = approval_service
+            self._approval_record: ApprovalRecord | None = None
             self._stale_timer = QTimer(self)
             self._stale_timer.setSingleShot(True)
             self._stale_timer.timeout.connect(self._expire_review)
@@ -124,6 +142,18 @@ else:
             self._approval_status = QLabel()
             self._approval_status.setObjectName("approval-status")
             self._approval_status.setAccessibleName("approval-status")
+            self._backup_summary = QLabel()
+            self._backup_summary.setObjectName("backup-policy-summary")
+            self._backup_summary.setAccessibleName("backup-policy-summary")
+            self._plaintext_ack = QCheckBox()
+            self._plaintext_ack.setObjectName("plaintext-backup-ack")
+            self._plaintext_ack.setAccessibleName("plaintext-backup-ack")
+            self._prepare_apply_button = QPushButton()
+            self._prepare_apply_button.setObjectName("prepare-apply")
+            self._prepare_apply_button.setAccessibleName("prepare-apply")
+            self._results_summary = QLabel()
+            self._results_summary.setObjectName("results-summary")
+            self._results_summary.setAccessibleName("results-summary")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -147,6 +177,8 @@ else:
             self._recommendation_list.itemChanged.connect(self._selection_changed)
             self._review_button.clicked.connect(self._review_selected)
             self._approval_checkbox.toggled.connect(self._toggle_approval)
+            self._plaintext_ack.toggled.connect(lambda _checked: self._render_approval())
+            self._prepare_apply_button.clicked.connect(self._prepare_apply)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -175,8 +207,13 @@ else:
             elif step is GuiStep.REVIEW:
                 layout.addWidget(self._review_summary)
                 layout.addWidget(self._review_list)
+                layout.addWidget(self._backup_summary)
                 layout.addWidget(self._approval_checkbox)
+                layout.addWidget(self._plaintext_ack)
                 layout.addWidget(self._approval_status)
+                layout.addWidget(self._prepare_apply_button)
+            elif step is GuiStep.RESULTS:
+                layout.addWidget(self._results_summary)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -212,7 +249,7 @@ else:
                 runner.signals.error.connect(self._diagnosis_failed)
                 runner.signals.cancelled.connect(self._diagnosis_cancelled)
                 self._coordinator.start(host_id, runner)
-            except (RuntimeError, ValueError) as error:
+            except (ApplicationError, RuntimeError, ValueError) as error:
                 self._presenter.fail_diagnosis(str(error))
             self._active_host_id = host_id
             self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.DIAGNOSE))
@@ -232,8 +269,9 @@ else:
             profile_id = self._profile_selector.currentData()
             if report is not None and isinstance(profile_id, str):
                 self._invalidate_review()
-                self._recommendation_plan = self._recommendation_plan_factory(
-                    report, profile_by_id(profile_id)
+                self._recommendation_plan = replace(
+                    self._recommendation_plan_factory(report, profile_by_id(profile_id)),
+                    backup_policy=self._backup_policy,
                 )
                 self._render_recommendations()
 
@@ -338,6 +376,7 @@ else:
 
         @Slot(bool)
         def _toggle_approval(self, checked: bool) -> None:
+            self._approval_record = None
             if checked:
                 try:
                     self._presenter.approve_plan()
@@ -352,16 +391,45 @@ else:
             self._render_approval()
 
         @Slot()
+        def _prepare_apply(self) -> None:
+            plan = self._recommendation_plan
+            if plan is None:
+                return
+            try:
+                record = self._approval_service.execute(
+                    plan=plan,
+                    approval_id=f"approval-{uuid.uuid4().hex}",
+                    actor=self._approval_actor,
+                    explicit_review=self._presenter.state.approved,
+                    plaintext_backup_acknowledged=(
+                        self._plaintext_ack.isChecked() if not plan.backup_policy.enabled else False
+                    ),
+                )
+                self._approval_record = record
+                self._presenter.prepare_results(record.approval_id)
+                self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.RESULTS))
+            except (RuntimeError, ValueError) as error:
+                if str(getattr(error, "code", error)) == "stale_plan":
+                    self._presenter.expire_plan()
+            self._render()
+
+        @Slot()
         def _expire_review(self) -> None:
             plan = self._recommendation_plan
             if plan is not None and plan.expires_at is not None and utc_now() < plan.expires_at:
                 self._schedule_stale_expiry(plan)
                 return
+            self._approval_record = None
             self._presenter.expire_plan()
+            self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.REVIEW))
             self._render()
 
         def _invalidate_review(self) -> None:
             self._stale_timer.stop()
+            self._approval_record = None
+            self._plaintext_ack.blockSignals(True)
+            self._plaintext_ack.setChecked(False)
+            self._plaintext_ack.blockSignals(False)
             self._presenter.invalidate_plan()
 
         def _schedule_stale_expiry(self, plan: OptimizationPlan) -> None:
@@ -383,6 +451,8 @@ else:
             self._cancel_button.setText(self._catalog.text("action.cancel"))
             self._review_button.setText(self._catalog.text("action.review_selected"))
             self._approval_checkbox.setText(self._catalog.text("action.approve"))
+            self._plaintext_ack.setText(self._catalog.text("review.plaintext_ack"))
+            self._prepare_apply_button.setText(self._catalog.text("action.prepare_apply"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -403,6 +473,7 @@ else:
             self._render_recommendations()
             self._render_review()
             self._render_approval()
+            self._render_results()
 
         def _render_recommendations(self) -> None:
             self._recommendation_list.blockSignals(True)
@@ -482,9 +553,30 @@ else:
             self._approval_checkbox.setEnabled(available)
             self._approval_checkbox.setChecked(available and state.approved)
             self._approval_checkbox.blockSignals(False)
+            encrypted = plan is not None and plan.backup_policy.enabled
+            self._backup_summary.setText(
+                self._catalog.text(
+                    "review.backup_encrypted" if encrypted else "review.backup_plaintext"
+                )
+                if plan is not None and plan.change_set is not None
+                else ""
+            )
+            self._plaintext_ack.setVisible(available and not encrypted)
+            acknowledged = encrypted or self._plaintext_ack.isChecked()
+            self._prepare_apply_button.setEnabled(available and state.approved and acknowledged)
             if not available:
                 self._approval_status.setText("")
             elif state.approved:
                 self._approval_status.setText(self._catalog.text("review.approved"))
             else:
                 self._approval_status.setText(self._catalog.text("review.approval_required"))
+
+        def _render_results(self) -> None:
+            if self._approval_record is None or self._presenter.state.step is not GuiStep.RESULTS:
+                self._results_summary.setText("")
+                return
+            self._results_summary.setText(
+                self._catalog.text(
+                    "results.prepared", approval_id=self._approval_record.approval_id
+                )
+            )

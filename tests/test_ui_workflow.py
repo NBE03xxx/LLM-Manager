@@ -115,6 +115,19 @@ class GuiPresenterTests(unittest.TestCase):
         self.assertIsNone(state.approved_plan_hash)
         self.assertFalse(state.approved)
 
+    def test_results_require_current_explicit_approval(self) -> None:
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        self.presenter.begin_change_plan("selected-plan-hash")
+        self.presenter.finish_change_plan("change-set-hash")
+        with self.assertRaisesRegex(RuntimeError, "approval_required"):
+            self.presenter.prepare_results("approval-1")
+        self.presenter.approve_plan()
+        state = self.presenter.prepare_results("approval-1")
+        self.assertEqual(state.step, GuiStep.RESULTS)
+        self.assertEqual(state.approval_id, "approval-1")
+
 
 if __name__ == "__main__":
     unittest.main()
