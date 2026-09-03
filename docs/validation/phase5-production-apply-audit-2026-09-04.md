@@ -26,3 +26,7 @@ OK
 Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、production availability、entrypoint composition、i18n、Qt runtimeの14件が成功した。実Qt上でlocal root routeのbuttonが無効かつ理由表示され、同じ画面状態をnon-root local ChangeSetへ切り替えた場合だけ有効になることを確認した。
 
 この接続Gateでは実Ollama/OpenCode、systemd、SSH設定、backup、PolicyKit、sudoへのmutationは行っていない。次は一時config/state rootと実Secret Serviceを使い、GUIからlocal user compositionへ到達するvertical sliceを検証する。
+
+## Local user GUI vertical slice
+
+Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、承認済み`ApprovalRecord`をResultsへ渡し、実`LocalUserApplyTaskFactory`をQt workerから実行するvertical sliceを追加した。`/tmp`内の一時OpenCode config/state rootだけを使い、AES-GCM backup、atomic Apply、validation、hash-chain audit、operation journalを経てGUIへ`committed`が表示されることを確認した。Gate専用memory key providerを使い、Secret Serviceと実製品設定は変更していない。対象1件は0.114秒で成功した。

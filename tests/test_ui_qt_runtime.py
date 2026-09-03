@@ -320,6 +320,112 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_results_runs_local_user_composition_in_temporary_roots(self) -> None:
+        import hashlib
+        import tempfile
+        from pathlib import Path
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.apply_availability import (
+            ApplyRoute,
+            AssessProductionApplyAvailability,
+        )
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.application.optimization import stable_hash
+        from llm_manager.domain.enums import ChangeOperation, HostKind, PlanStatus
+        from llm_manager.domain.models import ApprovalRecord, Change, ChangeSet, EncryptionInfo
+        from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
+        from llm_manager.ui.composition import LocalUserApplyTaskFactory
+        from llm_manager.ui.qt_window import MainWindow
+        from llm_manager.ui.workflow import GuiPresenter, GuiState, GuiStep, WorkflowStatus
+        from tests.fixtures import plan, report
+
+        class TestKeys:
+            def get_key(self, _reference: str, _scope: str) -> bytes:
+                return b"k" * 32
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "config"
+            target_root = config / "opencode"
+            target_root.mkdir(parents=True)
+            target = target_root / "opencode.json"
+            original = '{"model":"old"}'
+            replacement = '{"model":"new"}'
+            target.write_text(original, encoding="utf-8")
+            observed = report()
+            change = Change(
+                "change-local", str(target), ChangeOperation.REPLACE_FILE,
+                "old", "new", hashlib.sha256(original.encode()).hexdigest(), "masked",
+                source_span=(0, len(original)), replacement_text=replacement,
+            )
+            changes = ChangeSet(
+                "cs-local", observed.host.host_id, (change,), "c" * 64
+            )
+            encryption = EncryptionInfo(
+                True, "AES-256-GCM", 1, "local-master-v1", "local_secret_service"
+            )
+            current = replace(
+                plan(), report_id=observed.report_id, report_hash=stable_hash(observed),
+                change_set=changes, backup_policy=encryption,
+            )
+            approval = ApprovalRecord(
+                "approval-local", current.plan_id, current.report_hash,
+                changes.content_hash, "tester", encryption.content_hash,
+            )
+            presenter = GuiPresenter()
+            apply_factory = LocalUserApplyTaskFactory(
+                (HostCandidate(observed.host.host_id, HostKind.LOCAL, "Local"),),
+                SubprocessRunner(ProcessPolicy(frozenset())), config, root / "state",
+                lambda: TestKeys(),
+            )
+            window = MainWindow(
+                lambda _host: lambda _token: observed,
+                presenter=presenter,
+                apply_task_factory=apply_factory,
+                apply_availability_service=AssessProductionApplyAvailability(
+                    frozenset({ApplyRoute.LOCAL_USER})
+                ),
+            )
+            try:
+                presenter._state = GuiState(
+                    step=GuiStep.RESULTS,
+                    status=WorkflowStatus.SUCCESS,
+                    selected_host_id=observed.host.host_id,
+                    report=observed,
+                    plan_hash=changes.content_hash,
+                    approved_plan_hash=changes.content_hash,
+                    approval_id=approval.approval_id,
+                )
+                window._recommendation_plan = current
+                window._approval_record = approval
+                window._render()
+                run_apply = window.findChild(QPushButton, "run-sandbox-apply")
+                summary = window.findChild(QLabel, "results-summary")
+                self.assertTrue(run_apply.isEnabled())
+                run_apply.click()
+                loop = QEventLoop()
+
+                def finish_when_applied() -> None:
+                    if "committed" in summary.text():
+                        loop.quit()
+                    else:
+                        QTimer.singleShot(5, finish_when_applied)
+
+                QTimer.singleShot(0, finish_when_applied)
+                QTimer.singleShot(2000, loop.quit)
+                loop.exec()
+                self.assertIn("committed", summary.text())
+                self.assertEqual(target.read_text(encoding="utf-8"), replacement)
+                state = root / "state" / "llm-manager"
+                self.assertTrue(any((state / "backups").rglob("*.enc")))
+                self.assertTrue((state / "audit" / "HEAD").is_file())
+                self.assertTrue(any((state / "journal").glob("*.json")))
+            finally:
+                window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

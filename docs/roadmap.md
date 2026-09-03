@@ -175,6 +175,8 @@ Local user Apply composition Gate: non-root local OpenCode ChangeSetだけを許
 
 Selective production Apply接続: route availabilityを完成済みrouteの明示集合へ変更し、既定の空集合はfail closedを維持する。production entrypointは`LocalUserApplyTaskFactory`と`local_user`だけをGUIへ注入し、実行buttonはfactoryとroute availabilityの双方が揃う場合だけ有効になる。local root/SSH user/SSH rootは個別理由を表示して無効のままである。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateでentrypoint、4 route分類、英日catalog、実Qtのlocal root無効→local user有効を含む14件が成功した。Gateでは実設定を変更していない。次は一時config/state rootを使うGUI→local user composition vertical sliceである。
 
+Local user GUI Apply vertical slice: 承認済みrecordからResultsの明示Apply操作、host lock付きQt worker、実`LocalUserApplyTaskFactory`、AES-GCM backup、atomic Apply、validation、audit/journal、`committed`表示を一続きにした。Ubuntu 26.04/PySide6 6.10.2で`/tmp`内の一時config/state rootだけを変更する1件が0.114秒で成功した。Gate専用memory keyを使い、実Secret Serviceと実OpenCode設定は変更していない。次はvalidation failure rollbackと`RECOVERY_REQUIRED`の実composition GUI表示を故障注入で検証する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
