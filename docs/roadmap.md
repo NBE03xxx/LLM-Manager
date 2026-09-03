@@ -177,6 +177,8 @@ Selective production Apply接続: route availabilityを完成済みrouteの明�
 
 Local user GUI Apply vertical slice: 承認済みrecordからResultsの明示Apply操作、host lock付きQt worker、実`LocalUserApplyTaskFactory`、AES-GCM backup、atomic Apply、validation、audit/journal、`committed`表示を一続きにした。Ubuntu 26.04/PySide6 6.10.2で`/tmp`内の一時config/state rootだけを変更する1件が0.114秒で成功した。Gate専用memory keyを使い、実Secret Serviceと実OpenCode設定は変更していない。次はvalidation failure rollbackと`RECOVERY_REQUIRED`の実composition GUI表示を故障注入で検証する。
 
+Local user GUI failure outcomes: production既定を変えずにruntime validatorとbackup storeをGate用に差し替えられるcomposition seamを追加した。Ubuntu 26.04/PySide6 6.10.2で一時configへのApply後にruntime validation失敗を注入し、暗号化backupから元内容へ復元してGUIへ`rolled_back`を表示した。別caseではrestore failureも注入し、変更後内容を残してGUIへ`recovery_required`を表示した。両caseを含む1件が0.087秒で成功した。次はBackup/Rollback画面のread-only inventoryと永続結果表示を監査する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

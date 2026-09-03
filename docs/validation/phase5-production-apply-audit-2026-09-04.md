@@ -30,3 +30,7 @@ Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、production availability、entry
 ## Local user GUI vertical slice
 
 Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、承認済み`ApprovalRecord`をResultsへ渡し、実`LocalUserApplyTaskFactory`をQt workerから実行するvertical sliceを追加した。`/tmp`内の一時OpenCode config/state rootだけを使い、AES-GCM backup、atomic Apply、validation、hash-chain audit、operation journalを経てGUIへ`committed`が表示されることを確認した。Gate専用memory key providerを使い、Secret Serviceと実製品設定は変更していない。対象1件は0.114秒で成功した。
+
+## Local user failure outcomes
+
+同じUbuntu desktop/PySide6環境で、実`LocalUserApplyTaskFactory`へGate専用runtime validatorとbackup storeを注入し、一時configだけを対象に失敗経路を検証した。runtime validation失敗では暗号化backupから元内容へ復元され、GUIに`rolled_back`が表示された。別caseではrestore failureを注入し、変更後内容が残ると同時にGUIへ`recovery_required`が表示された。2 caseを含む対象1件は0.087秒で成功した。production既定compositionは実`ProductRuntimeValidator`と`LocalBackupStore`を使い、注入点は構成境界の故障検証にだけ利用した。

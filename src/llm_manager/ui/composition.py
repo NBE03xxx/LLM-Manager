@@ -13,7 +13,7 @@ from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.change_planning import BuildSelectedOpenCodeChangePlan
 from llm_manager.application.errors import AdapterError
-from llm_manager.application.ports import CancellationToken
+from llm_manager.application.ports import BackupStorePort, CancellationToken, RuntimeValidatorPort
 from llm_manager.application.services import DiagnoseHost
 from llm_manager.application.validation import ProductRuntimeValidator
 from llm_manager.diagnostics.linux import LinuxSystemProbe
@@ -203,6 +203,14 @@ class LocalUserApplyTaskFactory:
     key_provider_factory: Callable[[], BackupKeyProvider] = lambda: SecretServiceKeyProvider(
         SecretStorageBackend()
     )
+    backup_store_factory: Callable[
+        [Path, tuple[Path, ...], AesGcmBackupCipher | None], BackupStorePort
+    ] = LocalBackupStore
+    runtime_validator_factory: Callable[
+        [LocalHostAdapter, tuple[str, ...]], RuntimeValidatorPort
+    ] = lambda host, candidates: ProductRuntimeValidator(
+        host, OllamaReadOnlyAdapter(), OpenCodeReadOnlyAdapter(candidates)
+    )
 
     @classmethod
     def production(
@@ -243,14 +251,12 @@ class LocalUserApplyTaskFactory:
             cipher = None
             if plan.backup_policy.enabled:
                 cipher = AesGcmBackupCipher(self.key_provider_factory())
-            backups = LocalBackupStore(
+            backups = self.backup_store_factory(
                 self.state_root / "backups", (allowed_root,), cipher
             )
             host = LocalHostAdapter(self.local_runner, display_name=candidate.display_name)
-            runtime = ProductRuntimeValidator(
-                host,
-                OllamaReadOnlyAdapter(),
-                OpenCodeReadOnlyAdapter(tuple(change.target for change in change_set.changes)),
+            runtime = self.runtime_validator_factory(
+                host, tuple(change.target for change in change_set.changes)
             )
             coordinator = SafeApplyCoordinator(
                 backups,
