@@ -163,6 +163,8 @@ Recommendations/Review preview vertical slice実装: 診断reportから既存cat
 
 ChangeSet planning core/GUI接続実装: 選択済みOptimizationPlanを元DiagnosticReportのID/hash/期限へ再束縛し、選択IDがactionable・非conflict・active OpenCode configだけを対象とすることを検証する。hostを再identifyしてID/kind/fingerprint一致後にactive configをread-onlyで最大1 MiB・strict UTF-8として再取得し、既存OpenCode plannerからsource span、before hash、masked diffを持つChangeSetを生成する。stale report/plan、host identity変更、欠落・不正選択、target不一致、encoding異常、空ChangeSetはfail closedとする。Local/SSH compositionを同じhost lockとCancellationTokenのQThreadPool workerへ接続し、生成中はhost/profile/selectionを固定する。SSHは診断と同じstrict identity・外部terminal ControlMaster境界を再利用し、全終了経路でsessionを閉じる。成功時だけtarget、masked diff、root/restart要否をReviewへ表示し、失敗時はChangeSetなしでstable errorを残す。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは関連25件に成功した。明示承認とstale失効、Apply接続は後続とする。
 
+Review明示承認/stale失効実装: ChangeSet生成成功後だけ承認checkboxを有効にし、表示中の`change_set.content_hash`とplan期限へ承認状態を束縛する。checkbox解除は即時取消、期限到達はsingle-shot timerと承認時の再検査の双方で`stale_plan`へ失効する。host変更と再診断はworkflow stateを初期化し、profile/selection変更はChangeSet、hash、承認、timerを同時に破棄する。staleまたは生成失敗時はdiffと承認controlを無効化する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは自動期限切れを含む関連20件に成功した。ApprovalRecord生成、Apply前のbackup policy確認、Results接続は後続とする。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

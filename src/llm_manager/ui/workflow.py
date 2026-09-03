@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from datetime import datetime
 from enum import StrEnum
 
 from llm_manager.domain.enums import ReportStatus
-from llm_manager.domain.models import DiagnosticReport
+from llm_manager.domain.models import DiagnosticReport, utc_now
 
 
 class GuiStep(StrEnum):
@@ -33,6 +34,7 @@ class GuiState:
     report: DiagnosticReport | None = None
     plan_hash: str | None = None
     approved_plan_hash: str | None = None
+    plan_expires_at: datetime | None = None
     error_code: str | None = None
 
     @property
@@ -73,6 +75,7 @@ class GuiPresenter:
             report=None,
             plan_hash=None,
             approved_plan_hash=None,
+            plan_expires_at=None,
             error_code=None,
         )
         return self._state
@@ -130,17 +133,25 @@ class GuiPresenter:
         self._state = replace(self._state, status=WorkflowStatus.RUNNING)
         return self._state
 
-    def finish_change_plan(self, change_set_hash: str) -> GuiState:
+    def finish_change_plan(
+        self,
+        change_set_hash: str,
+        expires_at: datetime | None = None,
+        now: datetime | None = None,
+    ) -> GuiState:
         if not self._state.busy:
             raise RuntimeError("change_planning_not_running")
         if not change_set_hash.strip():
             raise ValueError("change_set_hash must not be blank")
+        if expires_at is not None and (now or utc_now()) >= expires_at:
+            return self.fail_change_plan("stale_plan")
         self._state = replace(
             self._state,
             step=GuiStep.REVIEW,
             status=WorkflowStatus.SUCCESS,
             plan_hash=change_set_hash,
             approved_plan_hash=None,
+            plan_expires_at=expires_at,
             error_code=None,
         )
         return self._state
@@ -153,12 +164,41 @@ class GuiPresenter:
             step=GuiStep.REVIEW,
             status=WorkflowStatus.FAILED,
             approved_plan_hash=None,
+            plan_expires_at=None,
             error_code=error_code,
         )
         return self._state
 
-    def approve_plan(self) -> GuiState:
+    def approve_plan(self, now: datetime | None = None) -> GuiState:
         if self._state.plan_hash is None:
             raise RuntimeError("plan_required")
+        if self._state.plan_expires_at is not None and (now or utc_now()) >= self._state.plan_expires_at:
+            self.expire_plan()
+            raise RuntimeError("stale_plan")
         self._state = replace(self._state, approved_plan_hash=self._state.plan_hash)
+        return self._state
+
+    def revoke_plan(self) -> GuiState:
+        self._state = replace(self._state, approved_plan_hash=None)
+        return self._state
+
+    def invalidate_plan(self) -> GuiState:
+        if self._state.busy:
+            raise RuntimeError("workflow_busy")
+        self._state = replace(
+            self._state,
+            plan_hash=None,
+            approved_plan_hash=None,
+            plan_expires_at=None,
+            error_code=None,
+        )
+        return self._state
+
+    def expire_plan(self) -> GuiState:
+        self._state = replace(
+            self._state,
+            status=WorkflowStatus.FAILED,
+            approved_plan_hash=None,
+            error_code="stale_plan",
+        )
         return self._state

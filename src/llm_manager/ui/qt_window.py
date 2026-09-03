@@ -6,7 +6,7 @@ from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.optimization import stable_hash
 from llm_manager.domain.enums import HostKind
-from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile
+from llm_manager.domain.models import DiagnosticReport, OptimizationPlan, OptimizationProfile, utc_now
 from llm_manager.optimization import PROFILES
 
 from .i18n import Catalog
@@ -33,8 +33,9 @@ if not PYSIDE_AVAILABLE:
             raise QtUnavailableError("pyside6_unavailable")
 
 else:
-    from PySide6.QtCore import Qt, Slot
+    from PySide6.QtCore import Qt, QTimer, Slot
     from PySide6.QtWidgets import (
+        QCheckBox,
         QComboBox,
         QHBoxLayout,
         QLabel,
@@ -69,6 +70,9 @@ else:
             self._recommendation_plan_factory = recommendation_plan_factory
             self._change_plan_task_factory = change_plan_task_factory
             self._recommendation_plan: OptimizationPlan | None = None
+            self._stale_timer = QTimer(self)
+            self._stale_timer.setSingleShot(True)
+            self._stale_timer.timeout.connect(self._expire_review)
 
             self._navigation = QListWidget()
             self._navigation.setObjectName("workflow-navigation")
@@ -114,6 +118,12 @@ else:
             self._review_list = QListWidget()
             self._review_list.setObjectName("review-list")
             self._review_list.setAccessibleName("review-list")
+            self._approval_checkbox = QCheckBox()
+            self._approval_checkbox.setObjectName("approve-change-set")
+            self._approval_checkbox.setAccessibleName("approve-change-set")
+            self._approval_status = QLabel()
+            self._approval_status.setObjectName("approval-status")
+            self._approval_status.setAccessibleName("approval-status")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -136,6 +146,7 @@ else:
             self._profile_selector.currentIndexChanged.connect(self._change_profile)
             self._recommendation_list.itemChanged.connect(self._selection_changed)
             self._review_button.clicked.connect(self._review_selected)
+            self._approval_checkbox.toggled.connect(self._toggle_approval)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -164,6 +175,8 @@ else:
             elif step is GuiStep.REVIEW:
                 layout.addWidget(self._review_summary)
                 layout.addWidget(self._review_list)
+                layout.addWidget(self._approval_checkbox)
+                layout.addWidget(self._approval_status)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -192,6 +205,7 @@ else:
             if host_id is None:
                 return
             try:
+                self._stale_timer.stop()
                 self._presenter.begin_diagnosis()
                 runner = QtTaskRunner(self._task_factory(host_id))
                 runner.signals.result.connect(self._diagnosis_finished)
@@ -217,6 +231,7 @@ else:
             report = self._presenter.state.report
             profile_id = self._profile_selector.currentData()
             if report is not None and isinstance(profile_id, str):
+                self._invalidate_review()
                 self._recommendation_plan = self._recommendation_plan_factory(
                     report, profile_by_id(profile_id)
                 )
@@ -235,6 +250,7 @@ else:
             self._recommendation_plan = select_recommendations(
                 self._recommendation_plan, selected
             )
+            self._invalidate_review()
             self._review_button.setEnabled(bool(selected))
 
         @Slot()
@@ -274,7 +290,11 @@ else:
                 self._presenter.fail_change_plan("change_plan_mismatch")
             else:
                 self._recommendation_plan = result
-                self._presenter.finish_change_plan(result.change_set.content_hash)
+                self._presenter.finish_change_plan(
+                    result.change_set.content_hash, result.expires_at
+                )
+                if self._presenter.state.error_code is None:
+                    self._schedule_stale_expiry(result)
             self._active_host_id = None
             self._render()
 
@@ -316,6 +336,44 @@ else:
             self._active_host_id = None
             self._render()
 
+        @Slot(bool)
+        def _toggle_approval(self, checked: bool) -> None:
+            if checked:
+                try:
+                    self._presenter.approve_plan()
+                except RuntimeError:
+                    self._approval_checkbox.blockSignals(True)
+                    self._approval_checkbox.setChecked(False)
+                    self._approval_checkbox.blockSignals(False)
+                    self._render()
+                    return
+            else:
+                self._presenter.revoke_plan()
+            self._render_approval()
+
+        @Slot()
+        def _expire_review(self) -> None:
+            plan = self._recommendation_plan
+            if plan is not None and plan.expires_at is not None and utc_now() < plan.expires_at:
+                self._schedule_stale_expiry(plan)
+                return
+            self._presenter.expire_plan()
+            self._render()
+
+        def _invalidate_review(self) -> None:
+            self._stale_timer.stop()
+            self._presenter.invalidate_plan()
+
+        def _schedule_stale_expiry(self, plan: OptimizationPlan) -> None:
+            self._stale_timer.stop()
+            if plan.expires_at is None:
+                return
+            remaining_ms = int((plan.expires_at - utc_now()).total_seconds() * 1000)
+            if remaining_ms <= 0:
+                self._expire_review()
+            else:
+                self._stale_timer.start(min(remaining_ms, 2_147_483_647))
+
         def _render(self) -> None:
             state = self._presenter.state
             self.setWindowTitle(self._catalog.text("app.title"))
@@ -324,6 +382,7 @@ else:
             self._diagnose_button.setText(self._catalog.text("action.diagnose"))
             self._cancel_button.setText(self._catalog.text("action.cancel"))
             self._review_button.setText(self._catalog.text("action.review_selected"))
+            self._approval_checkbox.setText(self._catalog.text("action.approve"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -343,6 +402,7 @@ else:
                         label.setText(self._catalog.text(f"nav.{step.value}"))
             self._render_recommendations()
             self._render_review()
+            self._render_approval()
 
         def _render_recommendations(self) -> None:
             self._recommendation_list.blockSignals(True)
@@ -407,9 +467,24 @@ else:
                         ),
                     )
                 )
-            return
-            selected = set(plan.selected_ids)
-            view = present_recommendations(plan, self._catalog)
-            for item in view.items:
-                if item.recommendation_id in selected:
-                    self._review_list.addItem(item.title)
+
+        def _render_approval(self) -> None:
+            state = self._presenter.state
+            plan = self._recommendation_plan
+            available = (
+                plan is not None
+                and plan.change_set is not None
+                and state.step is GuiStep.REVIEW
+                and state.error_code is None
+                and not state.busy
+            )
+            self._approval_checkbox.blockSignals(True)
+            self._approval_checkbox.setEnabled(available)
+            self._approval_checkbox.setChecked(available and state.approved)
+            self._approval_checkbox.blockSignals(False)
+            if not available:
+                self._approval_status.setText("")
+            elif state.approved:
+                self._approval_status.setText(self._catalog.text("review.approved"))
+            else:
+                self._approval_status.setText(self._catalog.text("review.approval_required"))

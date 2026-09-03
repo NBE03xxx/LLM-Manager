@@ -3,6 +3,7 @@ import threading
 import time
 import unittest
 from dataclasses import replace
+from datetime import timedelta
 
 from llm_manager.ui.qt_worker import PYSIDE_AVAILABLE
 
@@ -103,10 +104,11 @@ class QtRuntimeTests(unittest.TestCase):
 
     def test_diagnose_button_runs_worker_and_advances_to_recommendations(self) -> None:
         from PySide6.QtCore import QEventLoop, Qt, QTimer
-        from PySide6.QtWidgets import QComboBox, QLabel, QListWidget, QPushButton
+        from PySide6.QtWidgets import QCheckBox, QComboBox, QLabel, QListWidget, QPushButton
 
         from llm_manager.application.host_discovery import HostCandidate
         from llm_manager.domain.enums import HostKind
+        from llm_manager.domain.models import utc_now
         from llm_manager.ui.qt_window import MainWindow
         from tests.test_optimization import diagnostic
 
@@ -125,7 +127,9 @@ class QtRuntimeTests(unittest.TestCase):
         def change_plan_factory(plan, _report):
             from tests.fixtures import change_set
 
-            return lambda _token: replace(plan, change_set=change_set())
+            return lambda _token: replace(
+                plan, change_set=change_set(), expires_at=utc_now() + timedelta(milliseconds=500)
+            )
 
         window = MainWindow(
             task_factory,
@@ -196,6 +200,28 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertEqual(review_list.count(), 1)
             self.assertIn("-old\n+new", review_list.item(0).text())
             self.assertIn("root権限: 不要", review_list.item(0).text())
+            approval = window.findChild(QCheckBox, "approve-change-set")
+            approval_status = window.findChild(QLabel, "approval-status")
+            self.assertTrue(approval.isEnabled())
+            self.assertFalse(approval.isChecked())
+            approval.click()
+            self.assertTrue(approval.isChecked())
+            self.assertIn("明示承認", approval_status.text())
+
+            stale_loop = QEventLoop()
+
+            def finish_when_stale() -> None:
+                if not approval.isEnabled():
+                    stale_loop.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_stale)
+
+            QTimer.singleShot(0, finish_when_stale)
+            QTimer.singleShot(2000, stale_loop.quit)
+            stale_loop.exec()
+            self.assertFalse(approval.isEnabled())
+            self.assertFalse(approval.isChecked())
+            self.assertIn("stale_plan", review_summary.text())
         finally:
             window.close()
 

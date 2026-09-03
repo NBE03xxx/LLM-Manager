@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 
 from llm_manager.domain.enums import ReportStatus
 from llm_manager.ui.workflow import GuiPresenter, GuiStep, WorkflowStatus
@@ -87,6 +88,32 @@ class GuiPresenterTests(unittest.TestCase):
         self.assertEqual(state.step, GuiStep.REVIEW)
         self.assertEqual(state.status, WorkflowStatus.FAILED)
         self.assertEqual(state.error_code, "stale_plan")
+
+    def test_expired_plan_cannot_be_approved_and_clears_prior_approval(self) -> None:
+        now = datetime.now(UTC)
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        self.presenter.begin_change_plan("selected-plan-hash")
+        self.presenter.finish_change_plan("change-set-hash", now + timedelta(seconds=1), now)
+        self.presenter.approve_plan(now)
+        self.assertTrue(self.presenter.state.approved)
+        with self.assertRaisesRegex(RuntimeError, "stale_plan"):
+            self.presenter.approve_plan(now + timedelta(seconds=1))
+        self.assertFalse(self.presenter.state.approved)
+        self.assertEqual(self.presenter.state.error_code, "stale_plan")
+
+    def test_profile_or_selection_invalidation_clears_review_binding(self) -> None:
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        self.presenter.begin_change_plan("selected-plan-hash")
+        self.presenter.finish_change_plan("change-set-hash")
+        self.presenter.approve_plan()
+        state = self.presenter.invalidate_plan()
+        self.assertIsNone(state.plan_hash)
+        self.assertIsNone(state.approved_plan_hash)
+        self.assertFalse(state.approved)
 
 
 if __name__ == "__main__":
