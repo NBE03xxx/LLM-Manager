@@ -607,6 +607,81 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_restore_preview_requires_exact_approval_and_refresh_invalidates_it(self) -> None:
+        from types import SimpleNamespace
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QCheckBox, QLabel, QListWidget, QPushButton
+
+        from llm_manager.application.restore_preview import CreateRestorePreview
+        from llm_manager.domain.models import BackupItem, BackupManifest, EncryptionInfo, utc_now
+        from llm_manager.ui.qt_window import MainWindow
+
+        now = utc_now()
+        manifest = BackupManifest(
+            backup_id="backup-1", schema_version="1.0", plan_id="plan-1",
+            change_set_hash="c" * 64, host_id="local", host_fingerprint=None,
+            items=(BackupItem(
+                target="/tmp/config.json", existed=True, content_ref="item-0.bin",
+                sha256="a" * 64, mode=0o600,
+            ),),
+            manifest_hash="b" * 64, storage_location="/tmp/metadata-only",
+            encryption=EncryptionInfo(enabled=False), protected=False,
+            created_at=now, retention_expires_at=now + timedelta(days=30),
+            complete=True,
+        )
+        preview = CreateRestorePreview().execute(manifest)
+        inventory_item = SimpleNamespace(
+            backup_id="backup-1", state="committed",
+            local_presence="present", remote_presence="absent",
+            protected=False, requires_attention=False, allowed_actions=(),
+        )
+
+        def inventory_factory(_host_id):
+            return lambda _token: (inventory_item,)
+
+        def preview_factory(host_id, backup_id):
+            self.assertEqual((host_id, backup_id), ("local", "backup-1"))
+            return lambda _token: preview
+
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            backup_inventory_task_factory=inventory_factory,
+            restore_preview_task_factory=preview_factory,
+        )
+        try:
+            refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+            inventory = window.findChild(QListWidget, "backup-inventory-list")
+            preview_list = window.findChild(QListWidget, "restore-preview-list")
+            approval = window.findChild(QCheckBox, "approve-restore-preview")
+            status = window.findChild(QLabel, "restore-approval-status")
+            refresh.click()
+            loop = QEventLoop()
+
+            def select_when_loaded() -> None:
+                if inventory.count() == 1:
+                    inventory.setCurrentRow(0)
+                if preview_list.count() == 1:
+                    loop.quit()
+                else:
+                    QTimer.singleShot(5, select_when_loaded)
+
+            QTimer.singleShot(0, select_when_loaded)
+            QTimer.singleShot(2000, loop.quit)
+            loop.exec()
+            self.assertIn("/tmp/config.json", preview_list.item(0).text())
+            self.assertNotIn("old", preview_list.item(0).text())
+            self.assertTrue(approval.isEnabled())
+            approval.click()
+            self.assertTrue(approval.isChecked())
+            self.assertIn("exact preview", status.text())
+            refresh.click()
+            self.application.processEvents()
+            self.assertFalse(approval.isChecked())
+            self.assertFalse(approval.isEnabled())
+        finally:
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

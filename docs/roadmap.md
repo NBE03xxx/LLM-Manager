@@ -187,6 +187,8 @@ SSH inventory監査: 現行のroot journal readは既知operation/request hash�
 
 Local restore preview core: strict manifestからhost/backup/manifest hash、時刻、protection、target path・存在有無・SHA-256・modeだけをcanonical preview hashへ束縛するmetadata-only modelを追加した。本文復号、Secret Service、target読込、mutationは行わない。独立restore approvalは明示review、actor、exact preview、最長5分へ束縛し、tamper・別backup・期限切れを拒否する。sandbox 6件が成功した。次はQt表示とcheckboxの失効条件を接続する。
 
+Qt restore preview: inventory選択からworkerでmetadata-only previewを取得し、英日表示と独立restore承認checkboxへ接続した。host変更、refresh、backup選択変更はpreview/承認を失効させ、言語変更だけでは再取得しない。restore mutation controlは存在しない。Ubuntu 26.04/PySide6 6.10.2でruntime/accessibility/import/i18nの9件が0.043秒で成功し、1件はPySide存在時の期待skipだった。次はpreview expiry timerを実Qtで検証する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

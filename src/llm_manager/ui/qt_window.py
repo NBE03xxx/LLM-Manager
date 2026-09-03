@@ -13,6 +13,11 @@ from llm_manager.application.errors import ApplicationError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.optimization import stable_hash
+from llm_manager.application.restore_preview import (
+    CreateRestoreApproval,
+    RestoreApproval,
+    RestorePreview,
+)
 from llm_manager.domain.enums import HostKind, PlanStatus
 from llm_manager.domain.models import (
     ApprovalRecord,
@@ -44,6 +49,9 @@ ApplyTaskFactory = Callable[
 ]
 BackupInventoryTaskFactory = Callable[
     [str], Callable[[CancellationToken], tuple[object, ...]]
+]
+RestorePreviewTaskFactory = Callable[
+    [str, str], Callable[[CancellationToken], RestorePreview]
 ]
 
 
@@ -85,6 +93,8 @@ else:
             apply_task_factory: ApplyTaskFactory | None = None,
             apply_availability_service: AssessProductionApplyAvailability | None = None,
             backup_inventory_task_factory: BackupInventoryTaskFactory | None = None,
+            restore_preview_task_factory: RestorePreviewTaskFactory | None = None,
+            restore_approval_service: CreateRestoreApproval = CreateRestoreApproval(),
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -104,12 +114,20 @@ else:
             self._apply_task_factory = apply_task_factory
             self._apply_availability_service = apply_availability_service
             self._backup_inventory_task_factory = backup_inventory_task_factory
+            self._restore_preview_task_factory = restore_preview_task_factory
+            self._restore_approval_service = restore_approval_service
             self._apply_outcome: object | None = None
             self._backup_inventory_items: tuple[object, ...] = ()
             self._backup_inventory_error: str | None = None
+            self._restore_preview: RestorePreview | None = None
+            self._restore_approval: RestoreApproval | None = None
+            self._restore_preview_error: str | None = None
             self._stale_timer = QTimer(self)
             self._stale_timer.setSingleShot(True)
             self._stale_timer.timeout.connect(self._expire_review)
+            self._restore_stale_timer = QTimer(self)
+            self._restore_stale_timer.setSingleShot(True)
+            self._restore_stale_timer.timeout.connect(self._expire_restore_preview)
 
             self._navigation = QListWidget()
             self._navigation.setObjectName("workflow-navigation")
@@ -188,6 +206,18 @@ else:
             self._refresh_backups_button = QPushButton()
             self._refresh_backups_button.setObjectName("refresh-backup-inventory")
             self._refresh_backups_button.setAccessibleName("refresh-backup-inventory")
+            self._restore_preview_summary = QLabel()
+            self._restore_preview_summary.setObjectName("restore-preview-summary")
+            self._restore_preview_summary.setAccessibleName("restore-preview-summary")
+            self._restore_preview_list = QListWidget()
+            self._restore_preview_list.setObjectName("restore-preview-list")
+            self._restore_preview_list.setAccessibleName("restore-preview-list")
+            self._restore_approval_checkbox = QCheckBox()
+            self._restore_approval_checkbox.setObjectName("approve-restore-preview")
+            self._restore_approval_checkbox.setAccessibleName("approve-restore-preview")
+            self._restore_approval_status = QLabel()
+            self._restore_approval_status.setObjectName("restore-approval-status")
+            self._restore_approval_status.setAccessibleName("restore-approval-status")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -216,6 +246,8 @@ else:
             self._run_apply_button.clicked.connect(self._run_apply)
             self._apply_cancel_button.clicked.connect(self._cancel_apply)
             self._refresh_backups_button.clicked.connect(self._refresh_backups)
+            self._backup_inventory_list.currentItemChanged.connect(self._select_backup_preview)
+            self._restore_approval_checkbox.toggled.connect(self._toggle_restore_approval)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -257,6 +289,10 @@ else:
                 layout.addWidget(self._backup_inventory_summary)
                 layout.addWidget(self._backup_inventory_list)
                 layout.addWidget(self._refresh_backups_button)
+                layout.addWidget(self._restore_preview_summary)
+                layout.addWidget(self._restore_preview_list)
+                layout.addWidget(self._restore_approval_checkbox)
+                layout.addWidget(self._restore_approval_status)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -279,6 +315,7 @@ else:
                 self._presenter.select_host(host_id)
                 self._backup_inventory_items = ()
                 self._backup_inventory_error = None
+                self._invalidate_restore_preview()
                 self._render()
 
         @Slot()
@@ -527,6 +564,7 @@ else:
             if host_id is None or self._backup_inventory_task_factory is None:
                 return
             try:
+                self._invalidate_restore_preview()
                 self._backup_inventory_error = None
                 runner = QtTaskRunner(self._backup_inventory_task_factory(host_id))
                 runner.signals.result.connect(self._backup_inventory_finished)
@@ -544,11 +582,81 @@ else:
 
         @Slot(object)
         def _backup_inventory_failed(self, failure: object) -> None:
+            self._invalidate_restore_preview()
             self._backup_inventory_items = ()
             self._backup_inventory_error = str(
                 getattr(failure, "code", "worker_failed")
             )
             self._render_backups()
+
+        @Slot(object, object)
+        def _select_backup_preview(self, current: object, _previous: object) -> None:
+            self._invalidate_restore_preview()
+            host_id = self._presenter.state.selected_host_id
+            backup_id = current.data(256) if current is not None else None
+            if (
+                host_id is None
+                or not isinstance(backup_id, str)
+                or self._restore_preview_task_factory is None
+            ):
+                self._render_backups()
+                return
+            try:
+                runner = QtTaskRunner(self._restore_preview_task_factory(host_id, backup_id))
+                runner.signals.result.connect(self._restore_preview_finished)
+                runner.signals.error.connect(self._restore_preview_failed)
+                self._coordinator.start(host_id, runner)
+            except (ApplicationError, RuntimeError, ValueError) as error:
+                self._restore_preview_error = str(getattr(error, "code", error))
+            self._render_backups()
+
+        @Slot(object)
+        def _restore_preview_finished(self, result: object) -> None:
+            if not isinstance(result, RestorePreview):
+                self._restore_preview_error = "invalid_restore_preview"
+            else:
+                self._restore_preview = result
+                remaining_ms = int((result.expires_at - utc_now()).total_seconds() * 1000)
+                if remaining_ms <= 0:
+                    self._expire_restore_preview()
+                    return
+                self._restore_stale_timer.start(min(remaining_ms, 2_147_483_647))
+            self._render_backups()
+
+        @Slot(object)
+        def _restore_preview_failed(self, failure: object) -> None:
+            self._restore_preview_error = str(getattr(failure, "code", "worker_failed"))
+            self._render_backups()
+
+        @Slot(bool)
+        def _toggle_restore_approval(self, checked: bool) -> None:
+            self._restore_approval = None
+            preview = self._restore_preview
+            if checked and preview is not None:
+                try:
+                    self._restore_approval = self._restore_approval_service.execute(
+                        preview, f"restore-{uuid.uuid4().hex}", self._approval_actor, True
+                    )
+                except ApplicationError as error:
+                    self._restore_preview_error = error.code
+                    self._restore_approval_checkbox.blockSignals(True)
+                    self._restore_approval_checkbox.setChecked(False)
+                    self._restore_approval_checkbox.blockSignals(False)
+            self._render_backups()
+
+        @Slot()
+        def _expire_restore_preview(self) -> None:
+            self._invalidate_restore_preview(error="stale_restore_preview")
+            self._render_backups()
+
+        def _invalidate_restore_preview(self, error: str | None = None) -> None:
+            self._restore_stale_timer.stop()
+            self._restore_preview = None
+            self._restore_approval = None
+            self._restore_preview_error = error
+            self._restore_approval_checkbox.blockSignals(True)
+            self._restore_approval_checkbox.setChecked(False)
+            self._restore_approval_checkbox.blockSignals(False)
 
         def _invalidate_review(self) -> None:
             self._stale_timer.stop()
@@ -583,6 +691,7 @@ else:
             self._run_apply_button.setText(self._catalog.text("action.run_apply"))
             self._apply_cancel_button.setText(self._catalog.text("action.cancel"))
             self._refresh_backups_button.setText(self._catalog.text("action.refresh_backups"))
+            self._restore_approval_checkbox.setText(self._catalog.text("action.approve_restore"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -607,6 +716,11 @@ else:
             self._render_backups()
 
         def _render_backups(self) -> None:
+            selected = (
+                self._backup_inventory_list.currentItem().data(256)
+                if self._backup_inventory_list.currentItem() is not None else None
+            )
+            self._backup_inventory_list.blockSignals(True)
             self._backup_inventory_list.clear()
             self._refresh_backups_button.setEnabled(
                 self._backup_inventory_task_factory is not None
@@ -616,12 +730,18 @@ else:
                 self._backup_inventory_summary.setText(
                     self._catalog.text("backups.failed", code=self._backup_inventory_error)
                 )
+                self._backup_inventory_list.blockSignals(False)
+                self._render_restore_preview()
                 return
             if self._backup_inventory_task_factory is None:
                 self._backup_inventory_summary.setText(self._catalog.text("backups.unavailable"))
+                self._backup_inventory_list.blockSignals(False)
+                self._render_restore_preview()
                 return
             if not self._backup_inventory_items:
                 self._backup_inventory_summary.setText(self._catalog.text("backups.empty"))
+                self._backup_inventory_list.blockSignals(False)
+                self._render_restore_preview()
                 return
             self._backup_inventory_summary.setText(
                 self._catalog.text("backups.loaded", count=len(self._backup_inventory_items))
@@ -638,6 +758,44 @@ else:
                     attention=str(bool(getattr(value, "requires_attention"))).lower(),
                     actions=", ".join(getattr(action, "value", str(action)) for action in actions) or "none",
                 ))
+                self._backup_inventory_list.item(self._backup_inventory_list.count() - 1).setData(
+                    256, getattr(value, "backup_id")
+                )
+            if selected is not None:
+                for index in range(self._backup_inventory_list.count()):
+                    item = self._backup_inventory_list.item(index)
+                    if item.data(256) == selected:
+                        self._backup_inventory_list.setCurrentItem(item)
+                        break
+            self._backup_inventory_list.blockSignals(False)
+            self._render_restore_preview()
+
+        def _render_restore_preview(self) -> None:
+            self._restore_preview_list.clear()
+            preview = self._restore_preview
+            if self._restore_preview_error is not None:
+                self._restore_preview_summary.setText(self._catalog.text(
+                    "restore_preview.failed", code=self._restore_preview_error
+                ))
+            elif preview is None:
+                self._restore_preview_summary.setText(self._catalog.text("restore_preview.select"))
+            else:
+                self._restore_preview_summary.setText(self._catalog.text(
+                    "restore_preview.summary", backup_id=preview.backup_id,
+                    count=len(preview.items), protected=str(preview.protected).lower(),
+                ))
+                for item in preview.items:
+                    self._restore_preview_list.addItem(self._catalog.text(
+                        "restore_preview.item", target=item.target,
+                        existed=str(item.existed).lower(), sha256=item.sha256 or "none",
+                        mode=oct(item.mode) if item.mode is not None else "none",
+                    ))
+            enabled = preview is not None and utc_now() < preview.expires_at
+            self._restore_approval_checkbox.setEnabled(enabled)
+            self._restore_approval_status.setText(self._catalog.text(
+                "restore_preview.approved" if self._restore_approval is not None
+                else "restore_preview.approval_required"
+            ))
 
         def _render_recommendations(self) -> None:
             self._recommendation_list.blockSignals(True)

@@ -311,6 +311,22 @@ class LocalBackupInventoryTaskFactory:
 
         return execute
 
+    def preview(self, host_id: str, backup_id: str):
+        self(host_id)
+
+        def execute(cancellation: CancellationToken):
+            if not self.state_root.exists() and not self.state_root.is_symlink():
+                raise AdapterError("backup_not_found", "backup is unavailable for restore preview")
+            _validate_private_state_root(self.state_root)
+            allowed_root = self.config_root / "opencode"
+            service = LocalApplyInventoryService(
+                LocalBackupStore(self.state_root / "backups", (allowed_root,)),
+                LocalOperationJournal(self.state_root / "journal", (allowed_root,)),
+            )
+            return service.preview_restore(host_id, backup_id, cancellation)
+
+        return execute
+
 
 def _local_opencode_candidates() -> tuple[str, ...]:
     root = _local_config_root()

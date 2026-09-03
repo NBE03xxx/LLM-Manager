@@ -34,6 +34,7 @@ def run_gui(
     apply_task_factory=None,
     apply_availability_service: AssessProductionApplyAvailability | None = None,
     backup_inventory_task_factory=None,
+    restore_preview_task_factory=None,
 ) -> int:
     if not PYSIDE_AVAILABLE:
         raise QtUnavailableError("pyside6_unavailable")
@@ -50,6 +51,7 @@ def run_gui(
         apply_task_factory=apply_task_factory,
         apply_availability_service=apply_availability_service,
         backup_inventory_task_factory=backup_inventory_task_factory,
+        restore_preview_task_factory=restore_preview_task_factory,
     )
     window.resize(960, 640)
     window.show()
@@ -99,6 +101,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         apply_task_factory=apply_tasks,
         apply_availability_service=apply_availability,
         backup_inventory_task_factory=backup_inventory_tasks,
+        restore_preview_task_factory=backup_inventory_tasks.preview,
     )
 
 

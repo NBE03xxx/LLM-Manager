@@ -16,4 +16,12 @@ restore approvalはapproval ID、actor、host ID、backup ID、manifest hash、p
 
 ## Next
 
-Qt Backup/Rollback画面へpreview選択・表示・独立したrestore承認checkboxを接続する。host変更、inventory refresh、backup選択変更、preview期限切れで承認を失効させる。復元実行buttonはまだ設けない。
+## Qt read-only slice
+
+Backup/Rollback画面のinventory選択をworker経由のpreview生成へ接続した。対象path、元の存在有無、SHA-256、modeだけを英日表示し、独立したrestore承認checkboxはexact previewに対する承認だけを生成する。host変更、inventory refresh、backup選択変更でpreviewと承認を破棄する。言語変更の再描画ではpreview loaderを再実行しない。復元実行controlは設けていない。
+
+Ubuntu 26.04/PySide6 6.10.2 offscreen環境で、Qt runtime、accessible boundary、import boundary、英日catalogを含む9件が0.043秒で成功した。PySide6が存在するためmissing-PySide negative test 1件だけをskipした。preview表示、本文非表示、exact承認、inventory refresh直後の承認解除・無効化を確認した。
+
+## Next
+
+短い有効期限を注入した実Qt timer Gateで、preview期限切れ時にcheckboxが解除・無効化され、stable `stale_restore_preview`表示になることを確認する。復元実行buttonはまだ設けない。

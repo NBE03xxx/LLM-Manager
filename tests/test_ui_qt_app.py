@@ -35,6 +35,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertEqual(service.available_routes, frozenset({ApplyRoute.LOCAL_USER}))
         self.assertIs(keywords["change_plan_task_factory"], change_tasks)
         self.assertIs(keywords["backup_inventory_task_factory"], inventory_tasks)
+        self.assertIs(keywords["restore_preview_task_factory"], inventory_tasks.preview)
 
 
 if __name__ == "__main__":
