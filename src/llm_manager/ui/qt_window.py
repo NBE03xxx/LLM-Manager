@@ -5,7 +5,10 @@ from dataclasses import replace
 from typing import Callable
 
 from llm_manager.application.approval import CreateApprovalRecord
-from llm_manager.application.apply_availability import AssessProductionApplyAvailability
+from llm_manager.application.apply_availability import (
+    ApplyAvailability,
+    AssessProductionApplyAvailability,
+)
 from llm_manager.application.errors import ApplicationError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
@@ -77,6 +80,7 @@ else:
             approval_actor: str = "interactive-user",
             approval_service: CreateApprovalRecord = CreateApprovalRecord(),
             apply_task_factory: ApplyTaskFactory | None = None,
+            apply_availability_service: AssessProductionApplyAvailability | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -94,6 +98,7 @@ else:
             self._approval_service = approval_service
             self._approval_record: ApprovalRecord | None = None
             self._apply_task_factory = apply_task_factory
+            self._apply_availability_service = apply_availability_service
             self._apply_outcome: object | None = None
             self._stale_timer = QTimer(self)
             self._stale_timer.setSingleShot(True)
@@ -437,6 +442,9 @@ else:
             approval = self._approval_record
             if plan is None or approval is None or self._apply_task_factory is None:
                 return
+            availability = self._apply_availability()
+            if availability is not None and not availability.available:
+                return
             try:
                 self._presenter.begin_apply()
                 runner = QtTaskRunner(self._apply_task_factory(plan, approval))
@@ -520,7 +528,7 @@ else:
             self._approval_checkbox.setText(self._catalog.text("action.approve"))
             self._plaintext_ack.setText(self._catalog.text("review.plaintext_ack"))
             self._prepare_apply_button.setText(self._catalog.text("action.prepare_apply"))
-            self._run_apply_button.setText(self._catalog.text("action.run_sandbox_apply"))
+            self._run_apply_button.setText(self._catalog.text("action.run_apply"))
             self._apply_cancel_button.setText(self._catalog.text("action.cancel"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
@@ -647,8 +655,13 @@ else:
                 self._apply_cancel_button.setEnabled(False)
                 return
             state = self._presenter.state
+            availability = self._apply_availability()
+            route_available = (
+                self._apply_task_factory is not None
+                and (availability is None or availability.available)
+            )
             self._run_apply_button.setEnabled(
-                self._apply_task_factory is not None and not state.busy and self._apply_outcome is None
+                route_available and not state.busy and self._apply_outcome is None
             )
             self._apply_cancel_button.setEnabled(state.busy and self._active_host_id is not None)
             if state.busy:
@@ -657,12 +670,11 @@ else:
                 message = self._catalog.text(
                     "results.prepared", approval_id=self._approval_record.approval_id
                 )
-                if self._apply_task_factory is None:
+                if not route_available:
                     report = self._presenter.state.report
                     if report is not None and self._recommendation_plan is not None:
-                        availability = AssessProductionApplyAvailability().execute(
-                            self._recommendation_plan, report
-                        )
+                        availability = availability or AssessProductionApplyAvailability().execute(
+                            self._recommendation_plan, report)
                         message += "\n" + self._catalog.text(
                             "results.production_unavailable",
                             route=self._catalog.text(f"apply.route.{availability.route.value}"),
@@ -685,3 +697,13 @@ else:
                         "results.completed", status=getattr(self._apply_outcome, "status").value
                     )
                 )
+
+        def _apply_availability(self) -> ApplyAvailability | None:
+            if self._apply_availability_service is None:
+                return None
+            report = self._presenter.state.report
+            if report is None or self._recommendation_plan is None:
+                return None
+            return self._apply_availability_service.execute(
+                self._recommendation_plan, report
+            )

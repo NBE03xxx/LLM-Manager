@@ -22,8 +22,11 @@ class ApplyAvailability:
     reason_code: str
 
 
+@dataclass(frozen=True, slots=True)
 class AssessProductionApplyAvailability:
     """Fail-closed route audit until each production composition is complete."""
+
+    available_routes: frozenset[ApplyRoute] = frozenset()
 
     def execute(
         self, plan: OptimizationPlan, report: DiagnosticReport
@@ -53,4 +56,5 @@ class AssessProductionApplyAvailability:
             ApplyRoute.SSH_USER: "ssh_user_apply_transport_missing",
             ApplyRoute.SSH_ROOT: "ssh_root_apply_protocol_missing",
         }[route]
-        return ApplyAvailability(route, False, reason)
+        available = route in self.available_routes
+        return ApplyAvailability(route, available, "available" if available else reason)

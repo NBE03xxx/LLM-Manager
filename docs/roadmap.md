@@ -173,6 +173,8 @@ Production Apply接続監査: report/plan/host/change-set bindingと全changeの
 
 Local user Apply composition Gate: non-root local OpenCode ChangeSetだけを許可するtask factoryを追加し、対象をcanonicalな`$XDG_CONFIG_HOME/opencode`（fallback `~/.config/opencode`）配下へ限定した。SSH host、root change、範囲外target、symlink application rootをI/O開始前に拒否し、実行直前にもrootを再検証する。private `$XDG_STATE_HOME/llm-manager`（fallback `~/.local/state/llm-manager`）は所有者と0700を検証し、暗号化時だけSecret Service providerを遅延生成してAES-GCM local backup、atomic Apply、file/runtime validation、hash-chain audit、operation journal、rollbackを一つのcompositionへ束縛した。一時rootのencrypted success/unsafe-root negative sandbox Gateに加え、Ubuntu 26.04 password-backed GNOME sessionで実Secret Service keyの作成、暗号化Apply、key cleanupまで1件成功した。production GUIへの接続と実OpenCode target mutationは未実施である。次はlocal user routeだけを選択的にGUIへ接続し、他の3 routeをfail closedに保つ。
 
+Selective production Apply接続: route availabilityを完成済みrouteの明示集合へ変更し、既定の空集合はfail closedを維持する。production entrypointは`LocalUserApplyTaskFactory`と`local_user`だけをGUIへ注入し、実行buttonはfactoryとroute availabilityの双方が揃う場合だけ有効になる。local root/SSH user/SSH rootは個別理由を表示して無効のままである。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateでentrypoint、4 route分類、英日catalog、実Qtのlocal root無効→local user有効を含む14件が成功した。Gateでは実設定を変更していない。次は一時config/state rootを使うGUI→local user composition vertical sliceである。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

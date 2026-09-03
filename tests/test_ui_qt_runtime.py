@@ -257,6 +257,69 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_production_availability_keeps_root_route_disabled(self) -> None:
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.apply_availability import (
+            ApplyRoute,
+            AssessProductionApplyAvailability,
+        )
+        from llm_manager.application.optimization import stable_hash
+        from llm_manager.ui.qt_window import MainWindow
+        from llm_manager.ui.workflow import GuiPresenter, GuiState, GuiStep, WorkflowStatus
+        from tests.fixtures import plan, report
+
+        observed = report()
+        template = plan()
+        root_change = replace(template.change_set.changes[0], requires_root=True)
+        changes = replace(
+            template.change_set, host_id=observed.host.host_id, changes=(root_change,)
+        )
+        current = replace(
+            template,
+            report_id=observed.report_id,
+            report_hash=stable_hash(observed),
+            change_set=changes,
+        )
+        presenter = GuiPresenter()
+        apply_factory = MagicMock()
+        window = MainWindow(
+            lambda _host: lambda _token: observed,
+            presenter=presenter,
+            apply_task_factory=apply_factory,
+            apply_availability_service=AssessProductionApplyAvailability(
+                frozenset({ApplyRoute.LOCAL_USER})
+            ),
+        )
+        try:
+            presenter._state = GuiState(
+                step=GuiStep.RESULTS,
+                status=WorkflowStatus.SUCCESS,
+                selected_host_id=observed.host.host_id,
+                report=observed,
+                approval_id="approval-test",
+            )
+            window._recommendation_plan = current
+            window._approval_record = SimpleNamespace(approval_id="approval-test")
+            window._render_results()
+            run_apply = window.findChild(QPushButton, "run-sandbox-apply")
+            summary = window.findChild(QLabel, "results-summary")
+            self.assertFalse(run_apply.isEnabled())
+            self.assertIn("local root", summary.text())
+            window._run_apply()
+            apply_factory.assert_not_called()
+            user_change = replace(root_change, requires_root=False)
+            window._recommendation_plan = replace(
+                current, change_set=replace(changes, changes=(user_change,))
+            )
+            window._render_results()
+            self.assertTrue(run_apply.isEnabled())
+        finally:
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

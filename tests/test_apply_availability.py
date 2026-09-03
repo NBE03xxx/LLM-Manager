@@ -62,6 +62,21 @@ class ProductionApplyAvailabilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "mixed_privilege"):
             service.execute(bound, observed)
 
+    def test_only_explicitly_completed_route_is_available(self) -> None:
+        observed = report()
+        current = plan()
+        change = replace(current.change_set.changes[0], requires_root=False)
+        changes = replace(current.change_set, host_id=observed.host.host_id, changes=(change,))
+        current = replace(
+            current, report_id=observed.report_id,
+            report_hash=stable_hash(observed), change_set=changes,
+        )
+        availability = AssessProductionApplyAvailability(
+            frozenset({ApplyRoute.LOCAL_USER})
+        ).execute(current, observed)
+        self.assertTrue(availability.available)
+        self.assertEqual(availability.reason_code, "available")
+
 
 if __name__ == "__main__":
     unittest.main()

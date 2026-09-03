@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from llm_manager.application.host_discovery import DiscoverHosts, OpenSshConfigAliases
+from llm_manager.application.apply_availability import ApplyRoute, AssessProductionApplyAvailability
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.models import DiagnosticReport, EncryptionInfo
 from llm_manager.infrastructure.backup_settings import BackupSettingsStore, BuildMode
@@ -14,7 +15,7 @@ from llm_manager.infrastructure.backup_settings import BackupSettingsStore, Buil
 from .qt_worker import PYSIDE_AVAILABLE, QtUnavailableError
 from .qt_window import ChangePlanTaskFactory as QtChangePlanTaskFactory
 from .qt_window import DiagnosisTaskFactory, MainWindow
-from .composition import ChangePlanTaskFactory, DiagnosticTaskFactory
+from .composition import ChangePlanTaskFactory, DiagnosticTaskFactory, LocalUserApplyTaskFactory
 
 
 def run_gui(
@@ -25,6 +26,8 @@ def run_gui(
     change_plan_task_factory: QtChangePlanTaskFactory | None = None,
     backup_policy: EncryptionInfo | None = None,
     approval_actor: str = "interactive-user",
+    apply_task_factory=None,
+    apply_availability_service: AssessProductionApplyAvailability | None = None,
 ) -> int:
     if not PYSIDE_AVAILABLE:
         raise QtUnavailableError("pyside6_unavailable")
@@ -38,6 +41,8 @@ def run_gui(
         change_plan_task_factory=change_plan_task_factory,
         **({"backup_policy": backup_policy} if backup_policy is not None else {}),
         approval_actor=approval_actor,
+        apply_task_factory=apply_task_factory,
+        apply_availability_service=apply_availability_service,
     )
     window.resize(960, 640)
     window.show()
@@ -68,10 +73,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         config_root / "llm-manager" / "backup.json"
     ).load(mode)
     actor = pwd.getpwuid(os.getuid()).pw_name
+    apply_tasks = LocalUserApplyTaskFactory.production(hosts, tasks.local_runner)
+    apply_availability = AssessProductionApplyAvailability(
+        frozenset({ApplyRoute.LOCAL_USER})
+    )
     import locale as system_locale
 
     locale_name = system_locale.getlocale()[0] or "en"
-    return run_gui(tasks, locale_name, argv, hosts, change_tasks, backup_policy, actor)
+    return run_gui(
+        tasks,
+        locale_name,
+        argv=argv,
+        hosts=hosts,
+        change_plan_task_factory=change_tasks,
+        backup_policy=backup_policy,
+        approval_actor=actor,
+        apply_task_factory=apply_tasks,
+        apply_availability_service=apply_availability,
+    )
 
 
 if __name__ == "__main__":
