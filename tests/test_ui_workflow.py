@@ -2,7 +2,7 @@ import unittest
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
-from llm_manager.domain.enums import ReportStatus
+from llm_manager.domain.enums import PlanStatus, ReportStatus
 from llm_manager.ui.workflow import GuiPresenter, GuiStep, WorkflowStatus
 
 from tests.fixtures import report
@@ -127,6 +127,21 @@ class GuiPresenterTests(unittest.TestCase):
         state = self.presenter.prepare_results("approval-1")
         self.assertEqual(state.step, GuiStep.RESULTS)
         self.assertEqual(state.approval_id, "approval-1")
+
+    def test_apply_state_requires_prepared_approval_and_preserves_outcome(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "approval_required"):
+            self.presenter.begin_apply()
+        self.presenter.select_host("host-1")
+        self.presenter.begin_diagnosis()
+        self.presenter.finish_diagnosis(report())
+        self.presenter.begin_change_plan("selected-plan-hash")
+        self.presenter.finish_change_plan("change-set-hash")
+        self.presenter.approve_plan()
+        self.presenter.prepare_results("approval-1")
+        self.assertTrue(self.presenter.begin_apply().busy)
+        state = self.presenter.finish_apply(PlanStatus.COMMITTED)
+        self.assertEqual(state.status, WorkflowStatus.SUCCESS)
+        self.assertEqual(state.apply_status, PlanStatus.COMMITTED)
 
 
 if __name__ == "__main__":

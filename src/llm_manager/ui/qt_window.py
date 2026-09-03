@@ -9,7 +9,7 @@ from llm_manager.application.errors import ApplicationError
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.ports import CancellationToken
 from llm_manager.application.optimization import stable_hash
-from llm_manager.domain.enums import HostKind
+from llm_manager.domain.enums import HostKind, PlanStatus
 from llm_manager.domain.models import (
     ApprovalRecord,
     DiagnosticReport,
@@ -34,6 +34,9 @@ DiagnosisTaskFactory = Callable[[str], Callable[[CancellationToken], DiagnosticR
 RecommendationPlanFactory = Callable[[DiagnosticReport, OptimizationProfile], OptimizationPlan]
 ChangePlanTaskFactory = Callable[
     [OptimizationPlan, DiagnosticReport], Callable[[CancellationToken], OptimizationPlan]
+]
+ApplyTaskFactory = Callable[
+    [OptimizationPlan, ApprovalRecord], Callable[[CancellationToken], object]
 ]
 
 
@@ -72,6 +75,7 @@ else:
             backup_policy: EncryptionInfo = EncryptionInfo(enabled=False),
             approval_actor: str = "interactive-user",
             approval_service: CreateApprovalRecord = CreateApprovalRecord(),
+            apply_task_factory: ApplyTaskFactory | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -88,6 +92,8 @@ else:
             self._approval_actor = approval_actor
             self._approval_service = approval_service
             self._approval_record: ApprovalRecord | None = None
+            self._apply_task_factory = apply_task_factory
+            self._apply_outcome: object | None = None
             self._stale_timer = QTimer(self)
             self._stale_timer.setSingleShot(True)
             self._stale_timer.timeout.connect(self._expire_review)
@@ -154,6 +160,12 @@ else:
             self._results_summary = QLabel()
             self._results_summary.setObjectName("results-summary")
             self._results_summary.setAccessibleName("results-summary")
+            self._run_apply_button = QPushButton()
+            self._run_apply_button.setObjectName("run-sandbox-apply")
+            self._run_apply_button.setAccessibleName("run-sandbox-apply")
+            self._apply_cancel_button = QPushButton()
+            self._apply_cancel_button.setObjectName("cancel-sandbox-apply")
+            self._apply_cancel_button.setAccessibleName("cancel-sandbox-apply")
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -179,6 +191,8 @@ else:
             self._approval_checkbox.toggled.connect(self._toggle_approval)
             self._plaintext_ack.toggled.connect(lambda _checked: self._render_approval())
             self._prepare_apply_button.clicked.connect(self._prepare_apply)
+            self._run_apply_button.clicked.connect(self._run_apply)
+            self._apply_cancel_button.clicked.connect(self._cancel_apply)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -214,6 +228,8 @@ else:
                 layout.addWidget(self._prepare_apply_button)
             elif step is GuiStep.RESULTS:
                 layout.addWidget(self._results_summary)
+                layout.addWidget(self._run_apply_button)
+                layout.addWidget(self._apply_cancel_button)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -406,12 +422,61 @@ else:
                     ),
                 )
                 self._approval_record = record
+                self._apply_outcome = None
                 self._presenter.prepare_results(record.approval_id)
                 self._navigation.setCurrentRow(list(GuiStep).index(GuiStep.RESULTS))
             except (RuntimeError, ValueError) as error:
                 if str(getattr(error, "code", error)) == "stale_plan":
                     self._presenter.expire_plan()
             self._render()
+
+        @Slot()
+        def _run_apply(self) -> None:
+            plan = self._recommendation_plan
+            approval = self._approval_record
+            if plan is None or approval is None or self._apply_task_factory is None:
+                return
+            try:
+                self._presenter.begin_apply()
+                runner = QtTaskRunner(self._apply_task_factory(plan, approval))
+                runner.signals.result.connect(self._apply_finished)
+                runner.signals.error.connect(self._apply_failed)
+                runner.signals.cancelled.connect(self._apply_cancelled)
+                self._active_host_id = plan.change_set.host_id if plan.change_set is not None else ""
+                self._coordinator.start(self._active_host_id, runner)
+            except (ApplicationError, RuntimeError, ValueError) as error:
+                self._presenter.fail_apply(str(getattr(error, "code", error)))
+                self._active_host_id = None
+            self._render()
+
+        @Slot(object)
+        def _apply_finished(self, result: object) -> None:
+            status = getattr(result, "status", None)
+            if not isinstance(status, PlanStatus):
+                self._presenter.fail_apply("invalid_apply_result")
+            else:
+                self._apply_outcome = result
+                self._presenter.finish_apply(status, getattr(result, "error", None))
+            self._active_host_id = None
+            self._render()
+
+        @Slot(object)
+        def _apply_failed(self, failure: object) -> None:
+            self._presenter.fail_apply(str(getattr(failure, "code", "worker_failed")))
+            self._active_host_id = None
+            self._render()
+
+        @Slot()
+        def _apply_cancelled(self) -> None:
+            self._presenter.fail_apply("operation_cancelled")
+            self._active_host_id = None
+            self._render()
+
+        @Slot()
+        def _cancel_apply(self) -> None:
+            if self._active_host_id is not None and self._coordinator.cancel(self._active_host_id):
+                self._presenter.request_cancel()
+                self._render()
 
         @Slot()
         def _expire_review(self) -> None:
@@ -427,6 +492,7 @@ else:
         def _invalidate_review(self) -> None:
             self._stale_timer.stop()
             self._approval_record = None
+            self._apply_outcome = None
             self._plaintext_ack.blockSignals(True)
             self._plaintext_ack.setChecked(False)
             self._plaintext_ack.blockSignals(False)
@@ -453,6 +519,8 @@ else:
             self._approval_checkbox.setText(self._catalog.text("action.approve"))
             self._plaintext_ack.setText(self._catalog.text("review.plaintext_ack"))
             self._prepare_apply_button.setText(self._catalog.text("action.prepare_apply"))
+            self._run_apply_button.setText(self._catalog.text("action.run_sandbox_apply"))
+            self._apply_cancel_button.setText(self._catalog.text("action.cancel"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not state.busy)
@@ -574,9 +642,34 @@ else:
         def _render_results(self) -> None:
             if self._approval_record is None or self._presenter.state.step is not GuiStep.RESULTS:
                 self._results_summary.setText("")
+                self._run_apply_button.setEnabled(False)
+                self._apply_cancel_button.setEnabled(False)
                 return
-            self._results_summary.setText(
-                self._catalog.text(
+            state = self._presenter.state
+            self._run_apply_button.setEnabled(
+                self._apply_task_factory is not None and not state.busy and self._apply_outcome is None
+            )
+            self._apply_cancel_button.setEnabled(state.busy and self._active_host_id is not None)
+            if state.busy:
+                self._results_summary.setText(self._catalog.text("results.running"))
+            elif self._apply_outcome is None:
+                message = self._catalog.text(
                     "results.prepared", approval_id=self._approval_record.approval_id
                 )
-            )
+                if self._apply_task_factory is None:
+                    message += "\n" + self._catalog.text("results.sandbox_unavailable")
+                self._results_summary.setText(message)
+            elif state.error_code:
+                self._results_summary.setText(
+                    self._catalog.text(
+                        "results.failed",
+                        status=getattr(self._apply_outcome, "status").value,
+                        error=state.error_code,
+                    )
+                )
+            else:
+                self._results_summary.setText(
+                    self._catalog.text(
+                        "results.completed", status=getattr(self._apply_outcome, "status").value
+                    )
+                )

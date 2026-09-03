@@ -4,7 +4,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from enum import StrEnum
 
-from llm_manager.domain.enums import ReportStatus
+from llm_manager.domain.enums import PlanStatus, ReportStatus
 from llm_manager.domain.models import DiagnosticReport, utc_now
 
 
@@ -36,6 +36,7 @@ class GuiState:
     approved_plan_hash: str | None = None
     plan_expires_at: datetime | None = None
     approval_id: str | None = None
+    apply_status: PlanStatus | None = None
     error_code: str | None = None
 
     @property
@@ -78,6 +79,7 @@ class GuiPresenter:
             approved_plan_hash=None,
             plan_expires_at=None,
             approval_id=None,
+            apply_status=None,
             error_code=None,
         )
         return self._state
@@ -155,6 +157,7 @@ class GuiPresenter:
             approved_plan_hash=None,
             plan_expires_at=expires_at,
             approval_id=None,
+            apply_status=None,
             error_code=None,
         )
         return self._state
@@ -169,6 +172,7 @@ class GuiPresenter:
             approved_plan_hash=None,
             plan_expires_at=None,
             approval_id=None,
+            apply_status=None,
             error_code=error_code,
         )
         return self._state
@@ -183,7 +187,9 @@ class GuiPresenter:
         return self._state
 
     def revoke_plan(self) -> GuiState:
-        self._state = replace(self._state, approved_plan_hash=None, approval_id=None)
+        self._state = replace(
+            self._state, approved_plan_hash=None, approval_id=None, apply_status=None
+        )
         return self._state
 
     def invalidate_plan(self) -> GuiState:
@@ -195,6 +201,7 @@ class GuiPresenter:
             approved_plan_hash=None,
             plan_expires_at=None,
             approval_id=None,
+            apply_status=None,
             error_code=None,
         )
         return self._state
@@ -206,6 +213,7 @@ class GuiPresenter:
             status=WorkflowStatus.FAILED,
             approved_plan_hash=None,
             approval_id=None,
+            apply_status=None,
             error_code="stale_plan",
         )
         return self._state
@@ -220,6 +228,36 @@ class GuiPresenter:
             step=GuiStep.RESULTS,
             status=WorkflowStatus.SUCCESS,
             approval_id=approval_id,
+            apply_status=None,
             error_code=None,
         )
         return self._state
+
+    def begin_apply(self) -> GuiState:
+        if self._state.busy:
+            raise RuntimeError("workflow_busy")
+        if self._state.approval_id is None:
+            raise RuntimeError("approval_required")
+        self._state = replace(
+            self._state,
+            step=GuiStep.RESULTS,
+            status=WorkflowStatus.RUNNING,
+            apply_status=PlanStatus.APPLYING,
+            error_code=None,
+        )
+        return self._state
+
+    def finish_apply(self, status: PlanStatus, error_code: str | None = None) -> GuiState:
+        if not self._state.busy:
+            raise RuntimeError("apply_not_running")
+        self._state = replace(
+            self._state,
+            step=GuiStep.RESULTS,
+            status=(WorkflowStatus.SUCCESS if status is PlanStatus.COMMITTED else WorkflowStatus.FAILED),
+            apply_status=status,
+            error_code=error_code,
+        )
+        return self._state
+
+    def fail_apply(self, error_code: str) -> GuiState:
+        return self.finish_apply(PlanStatus.RECOVERY_REQUIRED, error_code)

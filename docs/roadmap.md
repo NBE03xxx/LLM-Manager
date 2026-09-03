@@ -167,6 +167,8 @@ Review明示承認/stale失効実装: ChangeSet生成成功後だけ承認checkb
 
 Apply前準備実装: Review checkboxとは別の明示操作でだけ期限付き`ApprovalRecord`を生成し、plan/report/change-set/backup-policy hash、GUI実行user、平文acknowledgement、planと5分の短い方の期限へ束縛する。一般配布は暗号化ON、`LLM_MANAGER_DEVELOPMENT_MODE=1`を明示したsource開発実行だけOFFを初回既定とし、既存のprivate backup settingsがあれば優先する。Reviewに暗号化・30日/10世代保持を表示し、暗号化OFFでは独立した平文risk checkboxを満たすまで準備できない。有効なrecordだけResultsへ渡し「Apply未開始」を明示する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは関連24件に成功した。実Apply、backup作成、PolicyKit/sudoは未接続である。
 
+Sandbox/fake Apply Results実装: `OptimizationPlan + ApprovalRecord`をimmutable入力とする注入可能なtask factoryを、診断・ChangeSet生成と同じhost lock、QThreadPool、CancellationTokenへ接続した。Resultsはrunning、committed、rolled_back、recovery_required、worker error/cancelを構造化状態から表示し、UIはinfrastructureへ依存しない。production compositionはtask factoryを渡さないため実行buttonを無効化し「Apply未接続」を明示する。Ubuntu 26.04/PySide6 6.10.2 offscreen Gateは25件中24件成功、PySide6存在時のnegative test 1件skipで完了した。実backup/file mutation/PolicyKit/sudoは行っていない。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

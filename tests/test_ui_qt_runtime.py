@@ -108,7 +108,9 @@ class QtRuntimeTests(unittest.TestCase):
 
         from llm_manager.application.host_discovery import HostCandidate
         from llm_manager.domain.enums import HostKind
+        from llm_manager.domain.enums import PlanStatus
         from llm_manager.domain.models import utc_now
+        from llm_manager.infrastructure.safe_apply import ApplyOutcome
         from llm_manager.ui.qt_window import MainWindow
         from tests.test_optimization import diagnostic
 
@@ -131,11 +133,15 @@ class QtRuntimeTests(unittest.TestCase):
                 plan, change_set=change_set(), expires_at=utc_now() + timedelta(milliseconds=500)
             )
 
+        def apply_task_factory(_plan, _approval):
+            return lambda _token: ApplyOutcome(PlanStatus.COMMITTED, None)
+
         window = MainWindow(
             task_factory,
             locale="en",
             hosts=hosts,
             change_plan_task_factory=change_plan_factory,
+            apply_task_factory=apply_task_factory,
         )
         try:
             diagnose = window.findChild(QPushButton, "start-diagnosis")
@@ -204,6 +210,7 @@ class QtRuntimeTests(unittest.TestCase):
             approval_status = window.findChild(QLabel, "approval-status")
             plaintext_ack = window.findChild(QCheckBox, "plaintext-backup-ack")
             prepare_apply = window.findChild(QPushButton, "prepare-apply")
+            run_apply = window.findChild(QPushButton, "run-sandbox-apply")
             results_summary = window.findChild(QLabel, "results-summary")
             self.assertTrue(approval.isEnabled())
             self.assertFalse(approval.isChecked())
@@ -217,6 +224,21 @@ class QtRuntimeTests(unittest.TestCase):
             prepare_apply.click()
             self.assertEqual(navigation.currentRow(), 4)
             self.assertIn("Applyはまだ開始していません", results_summary.text())
+            self.assertTrue(run_apply.isEnabled())
+            run_apply.click()
+
+            apply_loop = QEventLoop()
+
+            def finish_when_applied() -> None:
+                if "committed" in results_summary.text():
+                    apply_loop.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_applied)
+
+            QTimer.singleShot(0, finish_when_applied)
+            QTimer.singleShot(2000, apply_loop.quit)
+            apply_loop.exec()
+            self.assertIn("committed", results_summary.text())
 
             stale_loop = QEventLoop()
 
