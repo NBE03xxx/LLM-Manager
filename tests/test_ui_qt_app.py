@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from llm_manager.application.apply_availability import ApplyRoute
+from llm_manager.application.restore_availability import RestoreRoute
 from llm_manager.domain.models import EncryptionInfo
 from llm_manager.ui import qt_app
 
@@ -42,6 +43,10 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertIs(keywords["backup_inventory_task_factory"], inventory_tasks)
         self.assertIs(keywords["restore_preview_task_factory"], inventory_tasks.preview)
         self.assertIs(keywords["restore_task_factory"], restore_tasks.task)
+        restore_service = keywords["restore_availability_service"]
+        self.assertEqual(
+            restore_service.available_routes, frozenset({RestoreRoute.LOCAL_USER})
+        )
 
 
 if __name__ == "__main__":

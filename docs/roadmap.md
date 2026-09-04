@@ -209,6 +209,8 @@ Qt restore result evidence: production taskは正常COMMITTEDだけでなく、�
 
 Local restore explicit refresh and production publication: sandboxの実backup/journal、production inventory/restore factory、Qt workerをend-to-end接続した。COMMITTED直後は旧inventoryをmutation結果として自動更新せず、明示refresh後だけstrict execution storeから`restore: committed`、attention falseを表示し、同じapprovalからrunを再有効化しない。Ubuntu 26.04/PySide6 6.10.2で1件が0.143秒で成功した。local user単一OpenCode target経路の全境界が閉じたためproduction `main()`へrestore taskを接続した。local root・SSH restoreは未接続である。
 
+Restore route closure audit: 手動restoreをApply失敗時の自動rollbackから分離し、`local_user`、`local_root`、`ssh_user`、`ssh_root`のproduction可用性を独立してfail closed評価する。完成済みlocal userだけをproduction entrypointで有効化した。local rootはprivileged inventory/restore protocol、SSH user/rootは固定read-only inventory、fingerprint binding、atomic restore、journal reconciliationが不足するため、既存recovery/retention helperを流用しない。Backup/Restore画面はSSH選択時にI/O前から固定理由を英日表示し、再読込を無効化する。次はPhase 5全体のDoD closure auditで残項目を分類する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

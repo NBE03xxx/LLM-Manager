@@ -614,6 +614,43 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_ssh_backup_restore_route_is_disabled_before_inventory_io(self) -> None:
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.application.restore_availability import (
+            AssessProductionRestoreAvailability,
+            RestoreRoute,
+        )
+        from llm_manager.domain.enums import HostKind
+        from llm_manager.ui.qt_window import MainWindow
+
+        calls = []
+        hosts = (
+            HostCandidate("local", HostKind.LOCAL, "Local"),
+            HostCandidate("ssh:test", HostKind.SSH, "test", "test"),
+        )
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            hosts=hosts,
+            backup_inventory_task_factory=lambda host: calls.append(host),
+            restore_availability_service=AssessProductionRestoreAvailability(
+                frozenset({RestoreRoute.LOCAL_USER})
+            ),
+        )
+        try:
+            window._host_selector.setCurrentIndex(1)
+            self.application.processEvents()
+            refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+            summary = window.findChild(QLabel, "backup-inventory-summary")
+            self.assertFalse(refresh.isEnabled())
+            self.assertIn("SSH user", summary.text())
+            self.assertIn("protocol is incomplete", summary.text())
+            refresh.click()
+            self.assertEqual(calls, [])
+        finally:
+            window.close()
+
     def test_restore_preview_requires_exact_approval_and_refresh_invalidates_it(self) -> None:
         from types import SimpleNamespace
 

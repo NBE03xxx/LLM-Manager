@@ -8,6 +8,10 @@ from pathlib import Path
 
 from llm_manager.application.host_discovery import DiscoverHosts, OpenSshConfigAliases
 from llm_manager.application.apply_availability import ApplyRoute, AssessProductionApplyAvailability
+from llm_manager.application.restore_availability import (
+    AssessProductionRestoreAvailability,
+    RestoreRoute,
+)
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.models import DiagnosticReport, EncryptionInfo
 from llm_manager.infrastructure.backup_settings import BackupSettingsStore, BuildMode
@@ -37,6 +41,7 @@ def run_gui(
     backup_inventory_task_factory=None,
     restore_preview_task_factory=None,
     restore_task_factory=None,
+    restore_availability_service: AssessProductionRestoreAvailability | None = None,
 ) -> int:
     if not PYSIDE_AVAILABLE:
         raise QtUnavailableError("pyside6_unavailable")
@@ -55,6 +60,7 @@ def run_gui(
         backup_inventory_task_factory=backup_inventory_task_factory,
         restore_preview_task_factory=restore_preview_task_factory,
         restore_task_factory=restore_task_factory,
+        restore_availability_service=restore_availability_service,
     )
     window.resize(960, 640)
     window.show()
@@ -91,6 +97,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     backup_inventory_tasks = LocalBackupInventoryTaskFactory.production(hosts)
     restore_tasks = LocalUserRestoreTaskFactory.production(hosts)
+    restore_availability = AssessProductionRestoreAvailability(
+        frozenset({RestoreRoute.LOCAL_USER})
+    )
     import locale as system_locale
 
     locale_name = system_locale.getlocale()[0] or "en"
@@ -107,6 +116,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         backup_inventory_task_factory=backup_inventory_tasks,
         restore_preview_task_factory=backup_inventory_tasks.preview,
         restore_task_factory=restore_tasks.task,
+        restore_availability_service=restore_availability,
     )
 
 

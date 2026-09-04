@@ -18,6 +18,9 @@ from llm_manager.application.restore_preview import (
     RestoreApproval,
     RestorePreview,
 )
+from llm_manager.application.restore_availability import (
+    AssessProductionRestoreAvailability,
+)
 from llm_manager.domain.enums import HostKind, PlanStatus
 from llm_manager.domain.models import (
     ApprovalRecord,
@@ -99,6 +102,7 @@ else:
             restore_preview_task_factory: RestorePreviewTaskFactory | None = None,
             restore_approval_service: CreateRestoreApproval = CreateRestoreApproval(),
             restore_task_factory: RestoreTaskFactory | None = None,
+            restore_availability_service: AssessProductionRestoreAvailability | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -121,6 +125,7 @@ else:
             self._restore_preview_task_factory = restore_preview_task_factory
             self._restore_approval_service = restore_approval_service
             self._restore_task_factory = restore_task_factory
+            self._restore_availability_service = restore_availability_service
             self._apply_outcome: object | None = None
             self._backup_inventory_items: tuple[object, ...] = ()
             self._backup_inventory_error: str | None = None
@@ -578,7 +583,11 @@ else:
         @Slot()
         def _refresh_backups(self) -> None:
             host_id = self._presenter.state.selected_host_id
-            if host_id is None or self._backup_inventory_task_factory is None:
+            if (
+                host_id is None
+                or self._backup_inventory_task_factory is None
+                or self._restore_route_unavailable() is not None
+            ):
                 return
             try:
                 self._restore_outcome = None
@@ -813,10 +822,22 @@ else:
             )
             self._backup_inventory_list.blockSignals(True)
             self._backup_inventory_list.clear()
+            route_unavailable = self._restore_route_unavailable()
             self._refresh_backups_button.setEnabled(
                 self._backup_inventory_task_factory is not None
+                and route_unavailable is None
                 and not self._ui_busy()
             )
+            if route_unavailable is not None:
+                route, reason = route_unavailable
+                self._backup_inventory_summary.setText(self._catalog.text(
+                    "backups.production_unavailable",
+                    route=self._catalog.text(f"restore.route.{route}"),
+                    reason=self._catalog.text(f"restore.reason.{reason}"),
+                ))
+                self._backup_inventory_list.blockSignals(False)
+                self._render_restore_preview()
+                return
             if self._backup_inventory_error is not None:
                 self._backup_inventory_summary.setText(
                     self._catalog.text("backups.failed", code=self._backup_inventory_error)
@@ -905,6 +926,19 @@ else:
                 and enabled
             )
             self._cancel_restore_button.setEnabled(self._restore_active_host_id is not None)
+
+        def _restore_route_unavailable(self) -> tuple[str, str] | None:
+            service = self._restore_availability_service
+            host_id = self._presenter.state.selected_host_id
+            if service is None or host_id is None:
+                return None
+            host = next((candidate for candidate in self._hosts if candidate.host_id == host_id), None)
+            if host is None:
+                return ("ssh_user", "ssh_user_restore_protocol_missing")
+            availability = service.execute(host.kind, False)
+            if availability.available:
+                return None
+            return (availability.route.value, availability.reason_code)
 
         def _render_recommendations(self) -> None:
             self._recommendation_list.blockSignals(True)
