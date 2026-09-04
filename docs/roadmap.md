@@ -140,7 +140,7 @@ Apply時helper再検証実装: 診断・Plan後のhelper差替えや削除を信
 
 Backup設定実装: 一般配布buildは暗号化ON、明示的development buildはOFFを初回既定とし、保存済みユーザー選択が存在すればbuild既定で上書きしない。設定は0600、親directoryは0700、canonical schemaで保存する。暗号化OFFのApplyは`ApprovalRecord.plaintext_backup_acknowledged=true`がなければ拒否する。
 
-## Phase 5: PySide6 GUI
+## Phase 5: PySide6 GUI（完了）
 
 - Hosts/Diagnose/Recommendations/Review/Results/Backup
 - QThreadPool coordinator、progress、cancel、host lock
@@ -211,8 +211,11 @@ Local restore explicit refresh and production publication: sandboxの実backup/j
 
 Restore route closure audit: 手動restoreをApply失敗時の自動rollbackから分離し、`local_user`、`local_root`、`ssh_user`、`ssh_root`のproduction可用性を独立してfail closed評価する。完成済みlocal userだけをproduction entrypointで有効化した。local rootはprivileged inventory/restore protocol、SSH user/rootは固定read-only inventory、fingerprint binding、atomic restore、journal reconciliationが不足するため、既存recovery/retention helperを流用しない。Backup/Restore画面はSSH選択時にI/O前から固定理由を英日表示し、再読込を無効化する。次はPhase 5全体のDoD closure auditで残項目を分類する。
 
+Closure audit: 6工程、AC-05のReview表示、AC-09のQt非blocking/cancel/終端状態、AC-10の依存境界、AC-15の英日/fallback、local user Apply/restoreのproduction vertical sliceを確認し、Phase 5 Exitを満たした。local root・SSH user/root mutation、正式GUI deb、最終実機matrix、security/recovery文書、performance・長時間Agent・実display/layout・SSH切断のGUI acceptanceはMVP release blockerまたはPhase 6 hardeningとして明示的に引き継ぐ。詳細は[Phase 5 closure audit](validation/phase5-closure-audit-2026-09-04.md)を参照する。
+
 ## Phase 6: Hardening と MVP Release
 
+- local root・SSH user/rootのproduction Apply/手動restore経路を安全な固定protocolと実機Gateで完成
 - 対応環境 matrix の実機検証
 - security/privacy review
 - ソース起動手順、deb packaging、upgrade/uninstall、backup retention、recovery guide
