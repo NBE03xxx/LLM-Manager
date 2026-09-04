@@ -182,6 +182,57 @@ def decode_remote_user_apply_request(
     return request
 
 
+def decode_remote_user_apply_result(content: bytes) -> RemoteUserApplyResult:
+    if len(content) > MAX_REMOTE_USER_APPLY_REQUEST_BYTES:
+        raise AdapterError("remote_user_apply_result_too_large", "apply result exceeds its bound")
+    fields = {
+        "request_id", "request_hash", "host_id", "host_fingerprint", "target",
+        "before_hash", "after_hash",
+    }
+    try:
+        value = json.loads(content.decode("utf-8"))
+        if not isinstance(value, dict) or set(value) != fields:
+            raise ValueError("invalid result fields")
+        strings = fields - {"before_hash"}
+        if any(not isinstance(value[key], str) for key in strings) or (
+            value["before_hash"] is not None and not isinstance(value["before_hash"], str)
+        ):
+            raise ValueError("invalid result values")
+        result = RemoteUserApplyResult(
+            value["request_id"], value["request_hash"], value["host_id"],
+            value["host_fingerprint"], value["target"], value["before_hash"],
+            value["after_hash"],
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+        raise AdapterError("invalid_remote_user_apply_result", "apply result is malformed") from error
+    if content != _canonical(result):
+        raise AdapterError("invalid_remote_user_apply_result", "apply result is not canonical")
+    if not _IDENTIFIER.fullmatch(result.request_id) or not _DIGEST.fullmatch(result.request_hash):
+        raise AdapterError("invalid_remote_user_apply_result", "apply result identity is invalid")
+    if not result.host_id or not result.host_fingerprint or result.target not in _ALLOWED_TARGETS:
+        raise AdapterError("invalid_remote_user_apply_result", "apply result binding is invalid")
+    if result.before_hash is not None and not _DIGEST.fullmatch(result.before_hash):
+        raise AdapterError("invalid_remote_user_apply_result", "apply before hash is invalid")
+    if not _DIGEST.fullmatch(result.after_hash):
+        raise AdapterError("invalid_remote_user_apply_result", "apply after hash is invalid")
+    return result
+
+
+def validate_remote_user_apply_result(
+    request: RemoteUserApplyRequest, result: RemoteUserApplyResult
+) -> None:
+    expected = (
+        request.request_id, request.request_hash, request.host_id,
+        request.host_fingerprint, request.target, request.before_hash, request.after_hash,
+    )
+    actual = (
+        result.request_id, result.request_hash, result.host_id,
+        result.host_fingerprint, result.target, result.before_hash, result.after_hash,
+    )
+    if actual != expected:
+        raise AdapterError("remote_user_apply_result_binding_mismatch", "apply result does not match its request")
+
+
 def validate_remote_user_apply_request(
     request: RemoteUserApplyRequest, expected_hash: str, *, now: datetime
 ) -> None:
