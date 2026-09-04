@@ -48,7 +48,8 @@ ChangePlanTaskFactory = Callable[
     [OptimizationPlan, DiagnosticReport], Callable[[CancellationToken], OptimizationPlan]
 ]
 ApplyTaskFactory = Callable[
-    [OptimizationPlan, ApprovalRecord], Callable[[CancellationToken], object]
+    [OptimizationPlan, DiagnosticReport, ApprovalRecord],
+    Callable[[CancellationToken], object],
 ]
 BackupInventoryTaskFactory = Callable[
     [str], Callable[[CancellationToken], tuple[object, ...]]
@@ -521,15 +522,21 @@ else:
         @Slot()
         def _run_apply(self) -> None:
             plan = self._recommendation_plan
+            report = self._presenter.state.report
             approval = self._approval_record
-            if plan is None or approval is None or self._apply_task_factory is None:
+            if (
+                plan is None
+                or report is None
+                or approval is None
+                or self._apply_task_factory is None
+            ):
                 return
             availability = self._apply_availability()
             if availability is not None and not availability.available:
                 return
             try:
                 self._presenter.begin_apply()
-                runner = QtTaskRunner(self._apply_task_factory(plan, approval))
+                runner = QtTaskRunner(self._apply_task_factory(plan, report, approval))
                 runner.signals.result.connect(self._apply_finished)
                 runner.signals.error.connect(self._apply_failed)
                 runner.signals.cancelled.connect(self._apply_cancelled)

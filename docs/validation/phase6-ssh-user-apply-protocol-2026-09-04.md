@@ -69,3 +69,7 @@ production `remote_config_candidates`が空で、SSH診断がOpenCode設定を�
 UI未公開の内部`SshUserApplyTaskFactory`で、Apply直前のfingerprint再照合、ControlMaster認証session、home/target再解決、remote helper readiness、Secret Service暗号化local backup、stable remote snapshot、sudoによるremote-root recovery copy、immutable completion、user Apply/rollback、runtime validation、local audit/journalを結合した。local stateとremote recovery evidence rootは所有者限定0700、transfer runnerは`ssh`と`scp`だけを許可する。
 
 fingerprint変更、home外target、root change、外部認証端末なしはmutation前に停止する。再識別、session再利用/close、exact mapping、dual backup composition、private roots、production固定依存を含むfocused 22件が成功した。既存GUI Apply APIはplan/approvalの2引数でreportを渡さないため、次はworkflow保持reportを明示的に渡すadapterを追加し、Gate完了までavailabilityは閉じたままにする。
+
+## GUI report-bound routing
+
+GUI Apply factory契約を`plan/report/approval`へ変更し、presenterが保持する同一診断reportをApply worker生成時に渡す。production routerはreport ID/hash/host、単一privilege分類をI/O前に検証し、localは既存router、SSH userは内部factoryへ委譲する。SSH rootとmixed privilegeはdispatchしない。production起動時にSSH user factoryまで構成する一方、availabilityは閉じたままにし、非公開理由を構成不足からproduction検証待ちへ更新した。focused 26件（環境上のPySide6 15 skip）が成功した。

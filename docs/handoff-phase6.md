@@ -18,9 +18,9 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、remote home/global config discovery、recommendation、fresh read、diff生成、unprivileged fixed Apply/rollback protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy preparation、Apply/validate/rollback coordinatorは追加済みだが、availabilityはまだ未公開。
 
-1. 追加済みの内部`SshUserApplyTaskFactory`を、reportを保持するGUI workflowの2引数Apply APIへ安全にadapter接続する。
-2. production公開前にsandbox GUI Gateと実SSH VM Gateを行う。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
-3. 実SSH Gateが必要になった時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
+1. production公開前にPySide6 sandbox GUI Gateを行い、report-bound routerがlocal既存経路を壊さずSSH userだけへ正しいreportを渡すことを確認する。
+2. 続いて実SSH VM Gateを行う。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
+3. 実SSH Gateに入る時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
 4. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
 
 ## Phase 6残件分類

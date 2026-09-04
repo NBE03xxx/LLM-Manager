@@ -136,7 +136,7 @@ class QtRuntimeTests(unittest.TestCase):
                 plan, change_set=change_set(), expires_at=utc_now() + timedelta(milliseconds=500)
             )
 
-        def apply_task_factory(_plan, _approval):
+        def apply_task_factory(_plan, _report, _approval):
             return lambda _token: ApplyOutcome(PlanStatus.COMMITTED, None)
 
         window = MainWindow(
@@ -292,7 +292,7 @@ class QtRuntimeTests(unittest.TestCase):
         window = MainWindow(
             lambda _host: lambda _token: observed,
             presenter=presenter,
-            apply_task_factory=apply_factory,
+            apply_task_factory=lambda plan, _report, approval: apply_factory(plan, approval),
             apply_availability_service=AssessProductionApplyAvailability(
                 frozenset({ApplyRoute.LOCAL_USER})
             ),
@@ -387,7 +387,7 @@ class QtRuntimeTests(unittest.TestCase):
             window = MainWindow(
                 lambda _host: lambda _token: observed,
                 presenter=presenter,
-                apply_task_factory=apply_factory,
+                apply_task_factory=lambda plan, _report, approval: apply_factory(plan, approval),
                 apply_availability_service=AssessProductionApplyAvailability(
                     frozenset({ApplyRoute.LOCAL_USER})
                 ),
@@ -492,7 +492,7 @@ class QtRuntimeTests(unittest.TestCase):
             window = MainWindow(
                 lambda _host: lambda _token: observed,
                 presenter=presenter,
-                apply_task_factory=apply_factory,
+                apply_task_factory=lambda plan, _report, approval: apply_factory(plan, approval),
                 apply_availability_service=AssessProductionApplyAvailability(
                     frozenset({ApplyRoute.LOCAL_ROOT})
                 ),
@@ -609,7 +609,7 @@ class QtRuntimeTests(unittest.TestCase):
                 window = MainWindow(
                     lambda _host: lambda _token: observed,
                     presenter=presenter,
-                    apply_task_factory=apply_factory,
+                    apply_task_factory=lambda plan, _report, approval: apply_factory(plan, approval),
                     apply_availability_service=AssessProductionApplyAvailability(
                         frozenset({ApplyRoute.LOCAL_USER})
                     ),

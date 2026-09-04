@@ -15,7 +15,7 @@ class ProductionApplyAvailabilityTests(unittest.TestCase):
         expected = {
             (HostKind.LOCAL, False): (ApplyRoute.LOCAL_USER, "local_user_apply_composition_missing"),
             (HostKind.LOCAL, True): (ApplyRoute.LOCAL_ROOT, "local_root_apply_composition_missing"),
-            (HostKind.SSH, False): (ApplyRoute.SSH_USER, "ssh_user_apply_transport_missing"),
+            (HostKind.SSH, False): (ApplyRoute.SSH_USER, "ssh_user_apply_validation_pending"),
             (HostKind.SSH, True): (ApplyRoute.SSH_ROOT, "ssh_root_apply_protocol_missing"),
         }
         for (kind, requires_root), (route, reason) in expected.items():

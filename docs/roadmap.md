@@ -251,6 +251,8 @@ SSH user target mapping: 解決済みremote homeが生成する3つのabsolute O
 
 SSH user production composition: UI公開前の内部`SshUserApplyTaskFactory`を追加した。Apply直前にknown_hosts由来fingerprintを再解決して診断reportと照合し、必要なら同じControlMaster sessionで認証、remote homeとexact target mapを再構築する。固定`ssh`/`scp` runner、remote helper readiness、Secret Service local AES backup、stable SSH snapshot、sudo remote-root recovery copy、immutable completion probe、Apply/rollback transport、runtime validation、0700 local audit/journal/recovery stateをcoordinatorへ接続した。外部端末なし、fingerprint変更、home外targetはbackup state作成またはmutation前に停止する。focused 22件が成功した。routeはまだGUI/availabilityへ公開しない。
 
+SSH user GUI adapter: GUI Apply factory契約を`plan/report/approval`へ明示化し、report ID/hash/hostを再照合するproduction routerを追加した。local経路は既存factoryへ委譲し、SSH userだけがreport-bound内部factoryへ進み、mixed privilegeとSSH rootはdispatch前に拒否する。production起動時にfactoryは構成するがavailabilityは閉じたままで、理由を`ssh_user_apply_validation_pending`へ更新した。focused 26件（PySide6なしの15 skipを含む）が成功した。次はPySide6 sandbox GUI Gateと実SSH VM Gate。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP

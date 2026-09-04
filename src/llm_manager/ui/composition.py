@@ -11,6 +11,7 @@ from llm_manager.adapters.host.local import LocalHostAdapter
 from llm_manager.adapters.host.openssh import OpenSshHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
+from llm_manager.application.optimization import stable_hash
 from llm_manager.application.change_planning import (
     BuildSelectedOllamaChangePlan,
     BuildSelectedOpenCodeChangePlan,
@@ -633,6 +634,39 @@ class SshUserApplyTaskFactory:
 class _UnavailableRecoveryInvoker:
     def invoke(self, *_args, **_kwargs) -> None:
         raise AdapterError("remote_authorization_unavailable", "completion probe cannot invoke")
+
+
+@dataclass(frozen=True, slots=True)
+class ProductionApplyTaskFactory:
+    """Route a report-bound GUI Apply without widening unsupported routes."""
+
+    local: LocalApplyTaskFactory
+    ssh_user: SshUserApplyTaskFactory
+
+    def __call__(
+        self,
+        plan: OptimizationPlan,
+        report: DiagnosticReport,
+        approval: ApprovalRecord,
+    ):
+        change_set = plan.change_set
+        if (
+            plan.report_id != report.report_id
+            or plan.report_hash != stable_hash(report)
+            or change_set is None
+            or change_set.host_id != report.host.host_id
+        ):
+            raise ValueError("apply_plan_binding_invalid")
+        privilege = {change.requires_root for change in change_set.changes}
+        if not privilege:
+            raise ValueError("change_set_empty")
+        if len(privilege) != 1:
+            raise ValueError("mixed_privilege_plan_unsupported")
+        if report.host.kind is HostKind.LOCAL:
+            return self.local(plan, approval)
+        if privilege == {True}:
+            raise ValueError("ssh_root_apply_protocol_missing")
+        return self.ssh_user(plan, report, approval)
 
 
 @dataclass(slots=True)

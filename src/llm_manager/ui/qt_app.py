@@ -27,6 +27,8 @@ from .composition import (
     LocalRootApplyTaskFactory,
     LocalUserApplyTaskFactory,
     LocalUserRestoreTaskFactory,
+    ProductionApplyTaskFactory,
+    SshUserApplyTaskFactory,
 )
 
 
@@ -99,7 +101,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     root_apply_tasks = LocalRootApplyTaskFactory.production(
         hosts, tasks.local_runner, tasks.local_helper_probe
     )
-    apply_tasks = LocalApplyTaskFactory(user_apply_tasks, root_apply_tasks)
+    local_apply_tasks = LocalApplyTaskFactory(user_apply_tasks, root_apply_tasks)
+    ssh_user_apply_tasks = SshUserApplyTaskFactory.production(tasks)
+    apply_tasks = ProductionApplyTaskFactory(local_apply_tasks, ssh_user_apply_tasks)
     apply_availability = AssessProductionApplyAvailability(
         frozenset({ApplyRoute.LOCAL_USER})
     )

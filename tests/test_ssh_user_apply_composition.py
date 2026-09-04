@@ -3,11 +3,13 @@ from __future__ import annotations
 import stat
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import ANY, MagicMock, patch
 
 from llm_manager.application.host_discovery import HostCandidate
+from llm_manager.application.optimization import stable_hash
 from llm_manager.application.ports import CancellationToken
 from llm_manager.domain.enums import HostKind
 from llm_manager.infrastructure.helper_compat import remote_helper_compatibility_probe
@@ -17,7 +19,11 @@ from llm_manager.infrastructure.ssh_backup import SshSnapshotLocalBackupStore
 from llm_manager.infrastructure.ssh_auth import TerminalSpec
 from llm_manager.infrastructure.ssh_user_apply_coordinator import SshUserSafeApplyCoordinator
 from llm_manager.infrastructure.ssh_user_home import RemoteUserHome
-from llm_manager.ui.composition import DiagnosticTaskFactory, SshUserApplyTaskFactory
+from llm_manager.ui.composition import (
+    DiagnosticTaskFactory,
+    ProductionApplyTaskFactory,
+    SshUserApplyTaskFactory,
+)
 from tests.test_ssh_user_apply_preparation import ABSOLUTE, _bound_inputs
 
 
@@ -167,6 +173,45 @@ class SshUserApplyTaskFactoryTests(unittest.TestCase):
             TerminalSpec("/usr/bin/terminal", "ptyxis"),
             key_provider_factory=lambda: MagicMock(),
         )
+
+
+class ProductionApplyTaskFactoryTests(unittest.TestCase):
+    def test_routes_report_bound_local_and_ssh_user_plans(self) -> None:
+        report, plan, approval = _bound_inputs()
+        local = MagicMock(return_value="local-task")
+        ssh_user = MagicMock(return_value="ssh-task")
+        router = ProductionApplyTaskFactory(local, ssh_user)
+        self.assertEqual(router(plan, report, approval), "ssh-task")
+        ssh_user.assert_called_once_with(plan, report, approval)
+
+        local_host = replace(report.host, host_id="local:test", kind=HostKind.LOCAL)
+        local_report = replace(report, host=local_host)
+        local_plan = replace(
+            plan,
+            report_hash=stable_hash(local_report),
+            change_set=replace(plan.change_set, host_id=local_host.host_id),
+        )
+        self.assertEqual(router(local_plan, local_report, approval), "local-task")
+        local.assert_called_once_with(local_plan, approval)
+
+    def test_rejects_stale_report_and_ssh_root_without_dispatch(self) -> None:
+        report, plan, approval = _bound_inputs()
+        local = MagicMock()
+        ssh_user = MagicMock()
+        router = ProductionApplyTaskFactory(local, ssh_user)
+        with self.assertRaisesRegex(ValueError, "binding"):
+            router(plan, replace(report, report_id="changed"), approval)
+        root_plan = replace(
+            plan,
+            change_set=replace(
+                plan.change_set,
+                changes=(replace(plan.change_set.changes[0], requires_root=True),),
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "ssh_root"):
+            router(root_plan, report, approval)
+        local.assert_not_called()
+        ssh_user.assert_not_called()
 
 
 if __name__ == "__main__":

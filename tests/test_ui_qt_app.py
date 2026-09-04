@@ -5,6 +5,7 @@ from llm_manager.application.apply_availability import ApplyRoute
 from llm_manager.application.restore_availability import RestoreRoute
 from llm_manager.domain.models import EncryptionInfo
 from llm_manager.ui import qt_app
+from llm_manager.ui.composition import ProductionApplyTaskFactory
 
 
 class QtProductionCompositionTests(unittest.TestCase):
@@ -15,6 +16,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         apply_tasks = MagicMock()
         root_apply_tasks = MagicMock()
         routed_apply_tasks = MagicMock()
+        ssh_user_apply_tasks = MagicMock()
         inventory_tasks = MagicMock()
         restore_tasks = MagicMock()
         backup_policy = EncryptionInfo(enabled=False)
@@ -26,6 +28,10 @@ class QtProductionCompositionTests(unittest.TestCase):
             qt_app.LocalRootApplyTaskFactory, "production", return_value=root_apply_tasks
         ) as root_production, patch.object(
             qt_app, "LocalApplyTaskFactory", return_value=routed_apply_tasks
+        ), patch.object(
+            qt_app.SshUserApplyTaskFactory,
+            "production",
+            return_value=ssh_user_apply_tasks,
         ), patch.object(
             qt_app.LocalBackupInventoryTaskFactory,
             "production",
@@ -43,7 +49,9 @@ class QtProductionCompositionTests(unittest.TestCase):
             self.assertEqual(qt_app.main(("llm-manager",)), 0)
 
         keywords = run_gui.call_args.kwargs
-        self.assertIs(keywords["apply_task_factory"], routed_apply_tasks)
+        self.assertIsInstance(keywords["apply_task_factory"], ProductionApplyTaskFactory)
+        self.assertIs(keywords["apply_task_factory"].local, routed_apply_tasks)
+        self.assertIs(keywords["apply_task_factory"].ssh_user, ssh_user_apply_tasks)
         root_production.assert_called_once_with(
             hosts, diagnostic_tasks.local_runner, diagnostic_tasks.local_helper_probe
         )
