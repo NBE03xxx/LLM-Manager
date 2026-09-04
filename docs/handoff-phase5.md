@@ -4,14 +4,14 @@
 
 ---
 
-LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production restore desktop Gate監査から続行してください。
+LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUI全体のDoD closure auditから続行してください。
 
 ## 作業場所
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新実装/evidence commit: `50f7964 Publish local restore workflow`（この引き継ぎ更新のcommitが後続する）
+- 最新実装/evidence commit: `5964772 Close production restore routes`（この引き継ぎ更新のcommitが後続する）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
 ## Phaseと確定済み要件
@@ -71,10 +71,13 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - immutable restore attempt/result、authorization一回消費、開始/完了audit
 - commit後audit失敗は`UNKNOWN`、result保存失敗は生成済み`COMMITTED` evidenceを公開
 - restore restart inventory: attempt-onlyをattention表示、自動retryなし、unknown/orphan/tamper拒否
-- local user production restore compositionは接続済み。GUI実行buttonは未接続
+- local user production restore compositionとGUI実行buttonは接続済み
+- restore可用性を4経路でfail closed評価し、productionはlocal userだけを公開
+- SSH Backup/Restoreは固定理由を表示し、inventory I/O前に再読込を無効化
 
 ## 最新commit
 
+- `5964772 Close production restore routes`
 - `50f7964 Publish local restore workflow`
 - `7d41bc0 Show strict restore result evidence`
 - `e40a895 Gate Qt restore execution`
@@ -96,13 +99,14 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新validation
 
-- main host全test: 449件成功、PySide6依存13件と明示Secret Service Gate 2件の計15件skip
+- main host全test: 452件成功、PySide6依存14件と明示Secret Service Gate 2件の計16件skip
+- Ubuntu 26.04/PySide6 restore route fail-closed Gate: 1件、0.061秒、成功。SSH選択時に固定理由、再読込無効、inventory I/O 0回
 - Ubuntu 26.04/PySide6 local restore→explicit refresh Gate: 1件、0.143秒、成功。production `main()`へlocal user restore接続済み
 - Ubuntu 26.04/PySide6 Qt restore result Gate: worker/result 2件、成功。初回表示不具合修正後に再Gate済み
 - Ubuntu 26.04/PySide6 Qt restore worker Gate: 1件、0.114秒、成功。一時directoryはcleanup済み
 - Ubuntu 26.04 desktop Secret Service restore Gate: 1件、0.080秒、成功。Gate keyと一時directoryはcleanup済み
 - Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
-- 直前artifact SHA-256: `11fe7441870b0f259c56d10132224f03339e52e68ed39f3bda49865c71b7539b`
+- 直前artifact SHA-256: `52e3324e88de8d673b0cb0c90e8e1687990c8fc7f31ae033036e38d693d417be`
 - ユーザー側`/tmp/llm-manager-ui-gate`は未cleanupの可能性あり
 
 主要evidence:
@@ -112,6 +116,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - `docs/validation/phase5-qt-restore-execution-2026-09-04.md`
 - `docs/validation/phase5-qt-restore-results-2026-09-04.md`
 - `docs/validation/phase5-local-restore-refresh-2026-09-04.md`
+- `docs/validation/phase5-restore-route-closure-audit-2026-09-04.md`
 - `docs/validation/phase5-backup-inventory-ui-2026-09-04.md`
 - `docs/validation/phase5-local-user-apply-sandbox-2026-09-04.md`
 - `docs/validation/phase5-production-apply-audit-2026-09-04.md`
@@ -122,13 +127,13 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 次の作業
 
-まずPhase 5 restore/Backup画面のclosure auditを行う。
+まずPhase 5 PySide6 GUI全体のDoD closure auditを行う。
 
-1. local user restoreの要件・traceability・validation・production接続を総点検
-2. local root、SSH user/root restoreをMVP内で実装すべきか、既存Apply/remote helper境界と照合
-3. safe protocolなしに既存helper commandを流用せず、未接続経路は固定理由でfail closedにする
-4. Backup/Rollback画面の残存DoDを整理し、次の最小vertical sliceを決定する
-5. materialな仕様変更が不要なら実装し、全必須検査、commit/push
+1. requirements、MVP scope、GUI、roadmap、traceabilityとPhase 5 validationを画面・workflow単位で照合
+2. 残項目をMVP blocker、既にfail closedで閉じた経路、明示的な後続、実環境acceptanceに分類
+3. performance、long-running Agent scenario、SSH disconnectなどroadmap残件のうちPhase 5 blockerを特定
+4. materialな仕様変更なしで閉じられる最小vertical sliceを実装し、全必須検査、commit/push
+5. Phase 5完了判定が可能ならclosure evidenceと次Phaseの引き継ぎへ更新
 
 ## 重要な安全境界
 
@@ -138,6 +143,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - commit後evidence失敗を未変更と推測しない
 - inventory/reconciliationはread-onlyでmutation authorityにしない
 - remote inventoryはsafeな固定列挙protocolがない限り未接続
+- restoreは4経路を独立評価し、local userだけ明示的に有効。local root/SSHは固定理由でI/O前にfail closed
 - `PARTIAL`/`FAILED`/`UNKNOWN`後のmutation retryには新しい明示requestが必要
 - local正本はremote失敗時も保持
 - remote journal取得は固定`read-journal-evidence <operation-id> <request-hash>`だけ
