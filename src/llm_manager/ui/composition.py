@@ -57,6 +57,7 @@ from llm_manager.infrastructure.ssh_auth import (
     SshAliasAuthRequest,
     detect_terminal,
 )
+from llm_manager.infrastructure.ssh_user_home import ResolveSshUserHome
 
 _LOCAL_EXECUTABLES = frozenset(
     {"curl", "df", "lscpu", "lspci", "nvidia-smi", "ollama", "opencode", "rocm-smi", "systemctl", "uname"}
@@ -72,6 +73,7 @@ class DiagnosticTaskFactory:
     remote_config_candidates: tuple[str, ...] = ()
     ssh_auth_broker: ExternalTerminalSshBroker | None = None
     local_helper_probe: HelperCompatibilityProbe | None = None
+    discover_remote_home: bool = False
 
     @classmethod
     def production(cls, hosts: tuple[HostCandidate, ...]) -> "DiagnosticTaskFactory":
@@ -94,6 +96,7 @@ class DiagnosticTaskFactory:
                 if terminal is not None
                 else None
             ),
+            discover_remote_home=True,
         )
 
     def __call__(self, host_id: str):
@@ -126,11 +129,19 @@ class DiagnosticTaskFactory:
                 session = self.ssh_auth_broker.authenticate_alias(
                     SshAliasAuthRequest(candidate.ssh_alias), cancellation
                 )
-            return self._service(
-                candidate,
-                identity.fingerprint,
-                session.socket_path if session is not None else None,
-            ).execute(report_id, cancellation)
+            socket = session.socket_path if session is not None else None
+            configs = self.remote_config_candidates
+            if self.discover_remote_home:
+                probe_host = OpenSshHostAdapter(
+                    candidate.ssh_alias, self.ssh_runner, candidate.display_name,
+                    verified_fingerprint=identity.fingerprint, control_socket=socket,
+                )
+                configs = ResolveSshUserHome().execute(
+                    probe_host, cancellation
+                ).opencode_candidates
+            return self._service(candidate, identity.fingerprint, socket, configs).execute(
+                report_id, cancellation
+            )
         finally:
             if session is not None and self.ssh_auth_broker is not None:
                 self.ssh_auth_broker.close(session, CancellationToken())
@@ -140,6 +151,7 @@ class DiagnosticTaskFactory:
         candidate: HostCandidate,
         verified_fingerprint: str | None = None,
         control_socket: str | None = None,
+        remote_configs: tuple[str, ...] | None = None,
     ) -> DiagnoseHost:
         if candidate.kind is HostKind.LOCAL:
             host = LocalHostAdapter(self.local_runner, display_name=candidate.display_name)
@@ -154,7 +166,7 @@ class DiagnosticTaskFactory:
                 verified_fingerprint=verified_fingerprint,
                 control_socket=control_socket,
             )
-            configs = self.remote_config_candidates
+            configs = self.remote_config_candidates if remote_configs is None else remote_configs
         return DiagnoseHost(
             host=host,
             ollama=OllamaReadOnlyAdapter(),
@@ -231,6 +243,13 @@ class ChangePlanTaskFactory:
                 verified_fingerprint=identity.fingerprint,
                 control_socket=session.socket_path if session is not None else None,
             )
+            if self.diagnostics.discover_remote_home:
+                candidates = ResolveSshUserHome().execute(host, cancellation).opencode_candidates
+                if report.opencode is None or report.opencode.active_config not in candidates:
+                    raise AdapterError(
+                        "ssh_user_config_not_allowed",
+                        "diagnosed OpenCode config is outside the remote user allowlist",
+                    )
             return self.service.execute(plan, report, host, cancellation)
         finally:
             if session is not None and self.diagnostics.ssh_auth_broker is not None:

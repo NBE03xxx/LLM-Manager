@@ -243,6 +243,8 @@ SSH user fixed rollback protocol/transport: Apply request hash、plan/change set
 
 SSH user Apply coordinator: Prepared Applyとreport/approval/change set/manifest/fingerprint/request/payloadを再照合し、両backupを再verifyしてlocal正本から短命rollback requestを生成するfactoryを追加した。開始済みApplyの安全rollbackは元approval期限切れで阻害せず、rollback request自身へ新しい5分期限を持たせる。coordinatorはapproved/backup/commit/rollback audit、manifest/request-bound journal、Apply、runtime validation、rollbackを接続する。切断時は同一immutable resultだけをread-only照合し、Apply不明ならrollbackを推測実行せず、rollback不明とともに`RECOVERY_REQUIRED`へ終端する。Apply後cancelでもsafety rollbackは継続する。focused 13件が成功した。次はremote home/config discovery、helper readiness、Secret Service、sudo authorization、private stateをproduction task factoryへ安全に構成する。
 
+SSH production home/config discovery: 空だったproduction remote config candidatesを、固定`id -u`と`getent passwd <uid>`によるnon-root UID/home解決へ接続した。shell展開や任意commandを使わず、root、relative home、複数行、UID不一致を拒否する。診断時はhome配下の3つのOpenCode global configだけを候補とし、planning時も同じControlMaster sessionで再解決して診断済みactive configが集合外ならfresh read前に停止する。focused 19件が成功した。`OPENCODE_CONFIG`やhome外XDG configはhelper allowlist外としてfail closedを維持する。次はhelper readiness、Secret Service、remote sudo recovery、private state/runtime rootsをproduction SSH user task factoryへ構成する。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP

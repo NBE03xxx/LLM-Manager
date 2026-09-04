@@ -121,6 +121,25 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         self.assertTrue(callable(factory(self.local.host_id)))
         self.assertTrue(callable(factory(self.remote.host_id)))
 
+    def test_production_ssh_diagnosis_discovers_fixed_home_candidates(self) -> None:
+        self.factory.discover_remote_home = True
+        fingerprint = "SHA256:" + "A" * 43
+        candidates = ("/home/test/.config/opencode/opencode.jsonc",)
+        service = MagicMock()
+        service.execute.return_value = object()
+        with patch(
+            "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
+            return_value=SimpleNamespace(fingerprint=fingerprint, authentication_required=False),
+        ), patch(
+            "llm_manager.ui.composition.ResolveSshUserHome.execute",
+            return_value=SimpleNamespace(opencode_candidates=candidates),
+        ) as resolve_home, patch.object(
+            DiagnosticTaskFactory, "_service", return_value=service
+        ) as compose:
+            self.factory._execute_ssh(self.remote, "diagnosis-test", CancellationToken())
+        resolve_home.assert_called_once()
+        self.assertEqual(compose.call_args.args[3], candidates)
+
     def test_local_config_uses_absolute_xdg_or_home_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with patch.dict("os.environ", {"XDG_CONFIG_HOME": directory}):
@@ -166,6 +185,49 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         ), self.assertRaisesRegex(RuntimeError, "planning failed"):
             change_factory(plan(), remote_report)(CancellationToken())
         broker.close.assert_called_once_with(session, ANY)
+
+    def test_production_ssh_planning_revalidates_diagnosed_config_under_home(self) -> None:
+        from tests.fixtures import plan, report
+
+        self.factory.discover_remote_home = True
+        fingerprint = "SHA256:" + "A" * 43
+        candidate = "/home/test/.config/opencode/opencode.jsonc"
+        remote_report = replace(
+            report(),
+            host=replace(
+                report().host, host_id=self.remote.host_id, kind=HostKind.SSH,
+                ssh_alias=self.remote.ssh_alias, fingerprint=fingerprint,
+            ),
+            opencode=replace(report().opencode, active_config=candidate),
+        )
+        service = MagicMock()
+        service.execute.return_value = object()
+        change_factory = ChangePlanTaskFactory(self.factory, service)
+        with patch(
+            "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
+            return_value=SimpleNamespace(fingerprint=fingerprint, authentication_required=False),
+        ), patch(
+            "llm_manager.ui.composition.ResolveSshUserHome.execute",
+            return_value=SimpleNamespace(opencode_candidates=(candidate,)),
+        ):
+            change_factory._execute_ssh(
+                self.remote, plan(), remote_report, CancellationToken()
+            )
+        service.execute.assert_called_once()
+
+        service.reset_mock()
+        with patch(
+            "llm_manager.ui.composition.OpenSshHostIdentityResolver.resolve",
+            return_value=SimpleNamespace(fingerprint=fingerprint, authentication_required=False),
+        ), patch(
+            "llm_manager.ui.composition.ResolveSshUserHome.execute",
+            return_value=SimpleNamespace(opencode_candidates=(candidate + ".other",)),
+        ), self.assertRaises(AdapterError) as caught:
+            change_factory._execute_ssh(
+                self.remote, plan(), remote_report, CancellationToken()
+            )
+        self.assertEqual(caught.exception.code, "ssh_user_config_not_allowed")
+        service.execute.assert_not_called()
 
     def test_change_plan_factory_routes_local_ollama_to_privileged_planner(self) -> None:
         from tests.test_ollama_change_planning import selected_plan

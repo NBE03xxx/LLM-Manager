@@ -12,7 +12,7 @@ from llm_manager.infrastructure.process import SubprocessRunner
 
 _ALIAS = re.compile(r"[A-Za-z0-9_.][A-Za-z0-9_.@:-]{0,254}")
 _READ_COMMANDS = frozenset(
-    {"cat", "curl", "df", "lscpu", "lspci", "nvidia-smi", "rocm-smi", "ollama", "opencode", "stat", "systemctl", "uname"}
+    {"cat", "curl", "df", "getent", "id", "lscpu", "lspci", "nvidia-smi", "rocm-smi", "ollama", "opencode", "stat", "systemctl", "uname"}
 )
 
 

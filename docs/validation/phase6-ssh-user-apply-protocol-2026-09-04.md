@@ -47,3 +47,11 @@ OpenSSH transportは固定helper argvだけを呼び、bounded canonical result�
 `SshUserSafeApplyCoordinator`はapproved audit、dual-copy preparation、manifest/request-bound journal、固定Apply、runtime validation、固定rollback、terminal audit/journalを一つにした。Applyまたはrollback transport切断時は同一immutable resultをread-only取得し、mutationをretryしない。Apply resultを確認できない場合はafter hashを推測してrollbackせず`RECOVERY_REQUIRED`、validation失敗はrollback、rollback resultも確認不能なら`RECOVERY_REQUIRED`とする。Apply後のユーザーcancelでも安全rollbackには新しい非cancel tokenを使用する。
 
 期限切れ後rollback factory、commit、validation rollback、Apply/rollback切断reconciliation、両copy失敗、unknown Apply、rollback不能、cancel-after-Applyを含むfocused 13件が成功した。次はproduction compositionに必要なremote home/config discovery、helper readiness、Secret Service、sudo authorization、state rootsを監査する。
+
+## Production remote home/config discovery
+
+production `remote_config_candidates`が空で、SSH診断がOpenCode設定を発見できない未接続点を修正した。system OpenSSHのread-only adapterに固定`id`と`getent`だけを追加し、`id -u`で非root UID、`getent passwd <uid>`で単一かつUID一致するabsolute non-root homeを取得する。shell、環境展開、任意commandは使用しない。
+
+診断では解決したhome配下の`.config/opencode/{opencode.jsonc,opencode.json,config.json}`だけをadapter候補に渡す。planning時も同じControlMaster sessionでhomeを再解決し、診断済みactive configが候補集合に含まれなければfresh read前に停止する。固定command、root/relative/ambiguous/mismatched passwd拒否、診断/planning compositionを含むfocused 19件が成功した。
+
+`OPENCODE_CONFIG`やremote `XDG_CONFIG_HOME`によるhome外targetは現在のhelper allowlist外としてfail closedであり、MVPでは自動拡張しない。次はhelper readiness、Secret Service、remote sudo recovery authorization、private state/runtime rootsをproduction SSH user task factoryへ構成する。
