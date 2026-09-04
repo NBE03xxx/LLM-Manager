@@ -4,14 +4,14 @@
 
 ---
 
-LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production restore composition可否監査から続行してください。
+LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production restore desktop Gate監査から続行してください。
 
 ## 作業場所
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新実装/evidence commit: `823d7c9 Show strict restore execution inventory`（この引き継ぎ文書のcommitが後続する）
+- 最新実装/evidence commit: `da33477 Compose local production restore`（この引き継ぎ更新のcommitが後続する）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
 ## Phaseと確定済み要件
@@ -75,6 +75,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新commit
 
+- `da33477 Compose local production restore`
 - `823d7c9 Show strict restore execution inventory`
 - `3a2049e Persist local restore execution evidence`
 - `b6c6797 Add sandbox single-target restore executor`
