@@ -225,6 +225,8 @@ Exit: Definition of Done と release checklist を満たす。
 
 開発途中のMVP検証はソース起動を許容する。一般ユーザーへMVPを配布するrelease gateではdebのinstall/upgrade/uninstall、依存関係、PolicyKit/helper配置を検証する。
 
+Local root planning boundary: local root production Apply監査で、GUI planningがOpenCode専用でOllama root ChangeSetへ到達不能なことを確認した。最初のsliceとして、plan/report/selection/host identityを再検証し、互換local helperをread-only再probeした後だけ固定Ollama drop-inをbounded readしてbefore hash付きChangeSetを生成するapplication serviceを追加した。既存fileなし、host/helper/target変更、非root selectionを含むsandbox 4件に成功した。local root routeはまだ公開せず、次はproduction診断へのhelper capabilityとtarget別planning factoryを接続する。
+
 ## Post-MVP
 
 優先候補:
