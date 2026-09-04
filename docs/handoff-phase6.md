@@ -18,12 +18,11 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planning、production local helper診断、target別GUI planning、local root Apply task compositionは完了済み。availabilityはまだ未公開。
 
-1. `ubuntu26.04` VMの通常desktop sessionを利用可能にし、追加済み`QtRuntimeTests.test_results_runs_local_root_composition_with_sandbox_helper`を実行する。直前確認ではguest agent無応答、`192.168.122.48:22` connection refusedだった。
-2. Ubuntu 26.04/PySide6 sandbox GUI ResultsでCOMMITTED/ROLLED_BACK/RECOVERY_REQUIREDとPolicyKit deny/cancelを検証する。
+1. default rule catalog、optimization要件、setting allowlist、Ollama plannerを照合し、root Ollama recommendationをGUIで生成できるかDoD監査する。
+2. 根拠のない「最適値」を追加せず、既存の検証済みruleだけで閉じられる最小sliceを決める。materialな推奨仕様変更が必要ならユーザーへ確認する。
 3. 実PolicyKit Gateが必要な場合は既存Gate専用targetだけを使い、実Ollama/OpenCode設定や既存systemd unitを変更しない。
-4. materialなPolicyKit/system policy変更が必要なら実行前にユーザー承認を得る。
-5. Gate完了後だけ`local_root` availability公開可否を判断する。
-6. 全必須検査後、commitして`origin/main`へpushする。
+4. root recommendation→Review→Applyの全経路Gate完了後だけ`local_root` availabilityを公開する。
+5. 全必須検査後、commitして`origin/main`へpushする。
 
 ## Phase 6残件分類
 

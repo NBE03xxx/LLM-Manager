@@ -218,7 +218,29 @@ class PrivilegedSafeApplyCoordinator:
                 approval_id=approval.approval_id, backup_id=manifest.backup_id,
                 manifest_hash=manifest.manifest_hash, request_hash=prepared.request.request_hash,
             )
-            results = self.invoker.invoke(prepared.request, prepared.staged_contents, cancellation)
+            try:
+                results = self.invoker.invoke(
+                    prepared.request, prepared.staged_contents, cancellation
+                )
+            except AdapterError as error:
+                if error.code not in {"privilege_denied", "helper_launch_failed"}:
+                    raise
+                self.journal.update(operation_id, JournalStatus.ROLLING_BACK)
+                try:
+                    self._audit(
+                        "apply.not_started",
+                        plan,
+                        (("backup_id", manifest.backup_id), ("error_code", error.code)),
+                    )
+                except (AdapterError, OSError) as audit_error:
+                    self.journal.update(operation_id, JournalStatus.RECOVERY_REQUIRED)
+                    return ApplyOutcome(
+                        PlanStatus.RECOVERY_REQUIRED, manifest, error=str(audit_error)
+                    )
+                self.journal.update(operation_id, JournalStatus.ROLLED_BACK)
+                return ApplyOutcome(
+                    PlanStatus.ROLLED_BACK, manifest, error=str(error)
+                )
             if not _helper_passed(results):
                 if results and not results[0].completed:
                     self.journal.update(operation_id, JournalStatus.ROLLING_BACK)

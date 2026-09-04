@@ -90,6 +90,24 @@ class ApprovedHelperRequestFactoryTests(unittest.TestCase):
 
 
 class PrivilegedSafeApplyCoordinatorTests(unittest.TestCase):
+    def test_policykit_denial_does_not_invoke_rollback_helper(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            coordinator, backend, _, journal, current, approval = self._workflow(
+                Path(directory), b"old"
+            )
+
+            def deny(*_args):
+                raise AdapterError("privilege_denied", "dismissed")
+
+            backend.invoke = deny
+            outcome = coordinator.execute(
+                current, approval, "operation-1", CancellationToken()
+            )
+
+            self.assertEqual(outcome.status, PlanStatus.ROLLED_BACK)
+            self.assertEqual(journal.load("operation-1").status, JournalStatus.ROLLED_BACK)
+            self.assertEqual(backend.content, b"old")
+
     def test_helper_change_before_apply_stops_without_invoking_or_recovery(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             readiness = _Readiness(True, False)

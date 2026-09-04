@@ -20,6 +20,10 @@ sandbox compositionはfake backup/helper backendだけを使い、COMMITTED、pr
 
 production `main()`はlocal user/root routing factoryを注入するが、availabilityは`local_user`だけのためroot実行buttonは無効のままである。次はUbuntu 26.04/PySide6 sandbox GUI Resultsでsuccess/rollback/recovery/deny/cancelを検証してから公開可否を判断する。
 
-## Qt Gate status
+## Qt Gate
 
-一時private state、fake backup/helper、root route availabilityだけを使い、Qt workerから実`LocalRootApplyTaskFactory`へ到達してCOMMITTED、audit、journal、helper二重readinessを確認するruntime testを追加した。main hostはPySide6不在のためskipする。既存`ubuntu26.04` VMはrunningだがguest agentが応答せず、lease address `192.168.122.48`のSSHがconnection refusedだったため、このturnでは実行できなかった。VMやsystem policyを変更して到達性を作らず、Gate未完了として`local_root` availabilityを無効のまま維持する。
+一時private state、fake backup/helper、root route availabilityだけを使い、Qt workerから実`LocalRootApplyTaskFactory`へ到達してCOMMITTED、audit、journal、helper二重readinessを確認するruntime testを追加した。ユーザーが導入したqemu guest agent経由で既存`ubuntu26.04` VMへSHA-256 `349cf29aea0e8b59ccba1ea47a5a4f84a1005a9606f49c8dcd5e959d0c49b74e`のartifactを転送し、PySide6 6.10.2環境で対象1件が0.195秒で成功した。実PolicyKit、systemd、Ollama設定は起動・変更していない。Gate専用VM/local artifactとHTTP serverはcleanup済みである。
+
+PolicyKit拒否はhelperが未起動であるため、不明mutationと同じrollback helperを再起動しないようcoordinatorを修正した。`privilege_denied`と`helper_launch_failed`は`apply.not_started` auditとterminal journalへ記録して`ROLLED_BACK`を返す。audit保存に失敗した場合もhelperを起動せず`RECOVERY_REQUIRED`へ閉じる。focused 20件でdeny、固定argv、success/rollback/recovery compositionを確認した。
+
+Qt composition Gateは完了したが、default rule catalogからroot Ollama recommendationを生成する経路のDoD監査が残るため、`local_root` availabilityはまだ無効のまま維持する。
