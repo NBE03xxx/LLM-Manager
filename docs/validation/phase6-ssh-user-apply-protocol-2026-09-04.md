@@ -73,3 +73,9 @@ fingerprint変更、home外target、root change、外部認証端末なしはmut
 ## GUI report-bound routing
 
 GUI Apply factory契約を`plan/report/approval`へ変更し、presenterが保持する同一診断reportをApply worker生成時に渡す。production routerはreport ID/hash/host、単一privilege分類をI/O前に検証し、localは既存router、SSH userは内部factoryへ委譲する。SSH rootとmixed privilegeはdispatchしない。production起動時にSSH user factoryまで構成する一方、availabilityは閉じたままにし、非公開理由を構成不足からproduction検証待ちへ更新した。focused 26件（環境上のPySide6 15 skip）が成功した。
+
+## Ubuntu 26.04 PySide6 sandbox GUI Gate
+
+desktop VM `ubuntu26.04`、Python 3.14、PySide6 6.10.2、`QT_QPA_PLATFORM=offscreen`で`tests.test_ui_qt_runtime`、`tests.test_ui_qt_app`、`tests.test_ssh_user_apply_composition`の24件を実行し、0.903秒で全件成功した。実Qt worker上の既存local user/root Apply回帰、production entrypointのreport-bound router構成、stale report/SSH rootの事前拒否、SSH userへの同一report dispatchを確認した。
+
+Gate artifact SHA-256は`bff341f0c5699e8a69abe169c610da458dc484d5ac56e9ac15c4092857305b35`。転送・展開先はVMの`/tmp/llm-manager-ssh-user-gui-gate*`だけで、実OpenCode設定、Secret Service、SSH設定、systemdは変更していない。ホストの一時HTTP serverを停止し、VMとホスト双方のartifact不在を終了コード0で確認した。availabilityは実SSH Gateまで閉じたままにする。

@@ -253,6 +253,8 @@ SSH user production composition: UI公開前の内部`SshUserApplyTaskFactory`�
 
 SSH user GUI adapter: GUI Apply factory契約を`plan/report/approval`へ明示化し、report ID/hash/hostを再照合するproduction routerを追加した。local経路は既存factoryへ委譲し、SSH userだけがreport-bound内部factoryへ進み、mixed privilegeとSSH rootはdispatch前に拒否する。production起動時にfactoryは構成するがavailabilityは閉じたままで、理由を`ssh_user_apply_validation_pending`へ更新した。focused 26件（PySide6なしの15 skipを含む）が成功した。次はPySide6 sandbox GUI Gateと実SSH VM Gate。
 
+SSH user report-bound Qt Gate: Ubuntu 26.04 VMのPySide6 6.10.2 offscreen環境で、Qt runtime、production entrypoint、report-bound production router、SSH user内部compositionの24件が0.903秒で成功した。既存local user/root GUI workerの回帰がなく、stale report/SSH rootはdispatch前に拒否し、SSH userへ同一reportを渡すことを確認した。GateはVMの`/tmp`だけを使い、実OpenCode、Secret Service、SSH、systemdを変更せず、artifact/serverをcleanupした。次は実SSH VM Gate。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP
