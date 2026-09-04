@@ -257,6 +257,8 @@ SSH user report-bound Qt Gate: Ubuntu 26.04 VMのPySide6 6.10.2 offscreen環境�
 
 SSH VM Gate preparation: Ubuntu VMへOpenSSH Serverと検証済みremote helper 0.1.0~dev0を導入し、公開鍵BatchMode接続、guest agent/network双方のED25519 fingerprint一致、UID 1000、helper strict readinessを確認した。VMにOpenCode本体がないため、production既定を変えずGate専用runtime validatorを注入できるcomposition seamを追加した。また`PrepareSshUserApply`の承認検証だけが注入clockでなく実時計を使う非決定性を修正し、同一clock値をapproval/request expiryへ使用する。次は実Applyと明示cleanup Gate。
 
+SSH user real Apply/rollback Gate: Ubuntu 26.04 VMへproduction SSH compositionで接続し、stable snapshot、local encrypted backup、対話sudo remote-root recovery copy、unprivileged fixed Apply、remote payload validation、別request rollbackを実行した。未作成OpenCode configだけを一時作成し、validatorで31 byte payloadを確認後に意図的FAILEDとして自動削除した。`ROLLED_BACK`、apply observed、target absentを確認し、local/user stagingをcleanupした。root recovery/key/helper/SSH trustは後続disconnect Gate用に保持する。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP
