@@ -10,18 +10,20 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - branch: `main`
+- last implementation commit before this handoff: `06628f6 Enable validated SSH user apply route`
 - Phase 0〜5完了。Phase 5 closure根拠は`docs/validation/phase5-closure-audit-2026-09-04.md`
-- production GUIで完成・公開済みのmutation routeはlocal user Applyと単一OpenCode target restoreだけ
-- local root、SSH user、SSH rootは固定理由でI/O前にfail closed。local rootはcomposition/Gate済みだが、根拠あるactionable Ollama rule確定まで公開を保留する
+- production GUIで完成・公開済みのmutation routeはlocal user Apply、SSH user Apply、単一local OpenCode target restore
+- local rootとSSH root Apply、SSH user/root restoreは固定理由でI/O前にfail closed。local rootはcomposition/Gate済みだが、根拠あるactionable Ollama rule確定まで公開を保留する
 
 ## 最初の作業
 
-Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行した。SSH diagnosis、remote home/global config discovery、recommendation、fresh read、diff生成、unprivileged fixed Apply/rollback protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy preparation、Apply/validate/rollback coordinator、Qt Results Gateまで完了し、SSH user availabilityを公開した。
+Phase 6 Hardening / MVP Release監査を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH user Applyを先行して完成・公開した。実装とGateの詳細は`docs/validation/phase6-ssh-user-real-gate-2026-09-05.md`を読む。
 
 1. PySide6 sandbox GUI Gate、実SSH Apply→validation failure→自動rollback Gate、Apply/rollbackの実transport disconnect reconciliation Gate、全Gate evidenceのexact cleanup、SSH user GUI Results Gateが成功済み。
 2. VMにOpenCode本体はないため追加済みGate専用runtime validator seamを使用し、production既定`ProductRuntimeValidator`は変更しない。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
-3. 実SSH Gateのlocal/remote backup、root key、user staging、helper package/deb、target、Gate用空directoryはcleanup済み。SSH Server/公開鍵だけは意図的に保持し、扱いをユーザーへ確認する。
-4. `ssh_user` availabilityは公開済み。全必須検査後にcommitして`origin/main`へpushし、次は未完了route/Release監査へ進む。
+3. 実SSH Gateのlocal/remote backup、root key、user staging、helper package/deb、target、Gate用空directoryはcleanup済み。VMのSSH Server、VM user `authorized_keys`、host `known_hosts` entryだけは意図的に保持している。新チャットでは最初に、今後のGate用として維持するか削除するかをユーザーへ確認する。
+4. `ssh_user` availabilityは公開済み。直近の全検査は512件成功、ホストにPySide6がないため18件skip。新規SSH Results Qt testはUbuntu 26.04 VMのPySide6 6.10.2で別途成功した。
+5. SSH環境の扱いを確定後、`docs/roadmap.md`、`docs/requirements.md`、`docs/traceability.md`を再監査し、残るMVP blockerから次の独立sliceを選ぶ。local rootはactionable Ollama rule不足を解消できるまで公開しない。SSH root ApplyやSSH restoreを既存SSH user protocolの単純な拡張として推測実装しない。
 
 ## Phase 6残件分類
 
