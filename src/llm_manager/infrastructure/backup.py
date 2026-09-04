@@ -52,6 +52,72 @@ class LocalBackupStore:
             raise AdapterError("host_mismatch", "backup request and ChangeSet host differ")
         if not request.backup_id or Path(request.backup_id).name != request.backup_id:
             raise AdapterError("invalid_backup_id", "backup ID must be a single path component")
+        captured: list[BackupRestoreItem] = []
+        targets = tuple(dict.fromkeys(change.target for change in request.change_set.changes))
+        for target_text in targets:
+            _cancel(cancellation)
+            target = self._validated_target(target_text)
+            if target.is_symlink():
+                raise AdapterError("symlink_rejected", f"backup target is a symlink: {target}")
+            try:
+                metadata = target.stat()
+            except FileNotFoundError:
+                captured.append(BackupRestoreItem(str(target), False, None, None, None, None, None))
+                continue
+            if not target.is_file():
+                raise AdapterError("unsupported_target", f"backup target is not a regular file: {target}")
+            if metadata.st_size > MAX_ITEM_BYTES:
+                raise AdapterError("item_too_large", f"backup target exceeds 16 MiB: {target}")
+            content = target.read_bytes()
+            captured.append(
+                BackupRestoreItem(
+                    str(target), True, content, hashlib.sha256(content).hexdigest(),
+                    metadata.st_mode & 0o7777, metadata.st_uid, metadata.st_gid,
+                )
+            )
+        return self._persist_captured(request, tuple(captured), cancellation, require_precondition=False)
+
+    def create_captured(
+        self,
+        request: BackupRequest,
+        captured: tuple[BackupRestoreItem, ...],
+        cancellation: CancellationToken,
+    ) -> BackupManifest:
+        """Persist an already observed snapshot, such as a bounded SSH read."""
+        return self._persist_captured(request, captured, cancellation, require_precondition=True)
+
+    def _persist_captured(
+        self,
+        request: BackupRequest,
+        captured: tuple[BackupRestoreItem, ...],
+        cancellation: CancellationToken,
+        *,
+        require_precondition: bool,
+    ) -> BackupManifest:
+        _cancel(cancellation)
+        if request.host_id != request.change_set.host_id:
+            raise AdapterError("host_mismatch", "backup request and ChangeSet host differ")
+        if not request.backup_id or Path(request.backup_id).name != request.backup_id:
+            raise AdapterError("invalid_backup_id", "backup ID must be a single path component")
+        targets = tuple(dict.fromkeys(change.target for change in request.change_set.changes))
+        if tuple(item.target for item in captured) != targets:
+            raise AdapterError("captured_backup_mismatch", "captured targets do not match ChangeSet")
+        before_hashes = {
+            target: {change.before_hash for change in request.change_set.changes if change.target == target}
+            for target in targets
+        }
+        for item in captured:
+            self._validated_target(item.target)
+            expected = before_hashes[item.target]
+            if len(expected) != 1 or (require_precondition and expected != {item.sha256}):
+                raise AdapterError("captured_backup_mismatch", "captured content is stale")
+            if item.existed:
+                if item.content is None or item.sha256 is None or len(item.content) > MAX_ITEM_BYTES:
+                    raise AdapterError("captured_backup_mismatch", "captured content is incomplete")
+                if hashlib.sha256(item.content).hexdigest() != item.sha256:
+                    raise AdapterError("captured_backup_mismatch", "captured content hash changed")
+            elif item.content is not None or item.sha256 is not None:
+                raise AdapterError("captured_backup_mismatch", "absent target has captured content")
         backup_dir = self.root / _safe_component(request.host_id) / request.backup_id
         item_dir = backup_dir / "items"
         item_dir.mkdir(mode=0o700, parents=True, exist_ok=False)
@@ -59,37 +125,23 @@ class LocalBackupStore:
         os.chmod(backup_dir.parent, 0o700)
         os.chmod(backup_dir, 0o700)
         items: list[BackupItem] = []
-        targets = tuple(dict.fromkeys(change.target for change in request.change_set.changes))
         try:
-            for index, target_text in enumerate(targets):
+            for index, item in enumerate(captured):
                 _cancel(cancellation)
-                target = self._validated_target(target_text)
-                if target.is_symlink():
-                    raise AdapterError("symlink_rejected", f"backup target is a symlink: {target}")
-                try:
-                    stat = target.stat()
-                except FileNotFoundError:
-                    items.append(BackupItem(str(target), False, None, None, storage_location=str(backup_dir)))
-                    continue
-                if not target.is_file():
-                    raise AdapterError("unsupported_target", f"backup target is not a regular file: {target}")
-                if stat.st_size > MAX_ITEM_BYTES:
-                    raise AdapterError("item_too_large", f"backup target exceeds 16 MiB: {target}")
-                content = target.read_bytes()
-                digest = hashlib.sha256(content).hexdigest()
-                stored_content = self._encode_content(content, request.encryption, request.backup_id, request.host_fingerprint, str(target))
-                content_name = f"{index:04d}-{digest}.{'enc' if request.encryption.enabled else 'bin'}"
-                content_path = item_dir / content_name
-                _atomic_write(content_path, stored_content, 0o600)
+                content_ref = None
+                if item.existed:
+                    assert item.content is not None and item.sha256 is not None
+                    stored = self._encode_content(
+                        item.content, request.encryption, request.backup_id,
+                        request.host_fingerprint, item.target,
+                    )
+                    name = f"{index:04d}-{item.sha256}.{'enc' if request.encryption.enabled else 'bin'}"
+                    _atomic_write(item_dir / name, stored, 0o600)
+                    content_ref = f"items/{name}"
                 items.append(
                     BackupItem(
-                        target=str(target),
-                        existed=True,
-                        content_ref=f"items/{content_name}",
-                        sha256=digest,
-                        mode=stat.st_mode & 0o7777,
-                        uid=stat.st_uid,
-                        gid=stat.st_gid,
+                        target=item.target, existed=item.existed, content_ref=content_ref,
+                        sha256=item.sha256, mode=item.mode, uid=item.uid, gid=item.gid,
                         storage_location=str(backup_dir),
                     )
                 )

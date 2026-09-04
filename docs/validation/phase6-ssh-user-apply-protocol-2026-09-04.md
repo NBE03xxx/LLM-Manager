@@ -22,4 +22,6 @@ protocol/executorとOpenSSH transportのfocused 12件で、成功、stale precon
 
 ## 次のslice
 
-remote targetのread-only snapshotからlocal authoritative encrypted backupを生成する境界と、remote user-owned recovery copyを追加し、双方の検証成功後だけこのApply transportを呼ぶcoordinatorへ接続する。
+remote targetのread-only snapshotからlocal authoritative encrypted backupを生成する境界を追加した。SSH host ID/fingerprintを再確認し、allowlist済みtargetをstat→bounded read→statで観測してmetadata/hashが変化していない場合だけ、ChangeSetのbefore hashへ一致するcaptured snapshotを永続化する。通常のlocal backupも同じ永続化内部経路を使うが、外部取得snapshotだけはbefore hash一致を必須にする。
+
+次はこのlocal正本を既存のroot-owned remote recovery copyへ接続する。remote stagingだけがSSH user所有であり、恒久copyと独立鍵はADR-0009どおりremote root所有を維持する。双方の検証成功後だけApply transportを呼ぶcoordinatorへ接続する。
