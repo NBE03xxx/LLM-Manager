@@ -249,6 +249,8 @@ SSH remote sudo completion: 外部端末でremote recovery helperのsudo認証�
 
 SSH user target mapping: 解決済みremote homeが生成する3つのabsolute OpenCode候補との完全一致だけを、helperの固定home-relative allowlistへ変換する境界を追加した。空集合、重複、接尾辞付き類似名、別homeを拒否し、文字列prefix除去に依存しない。protocol/preparationを含むfocused 19件が成功した。次はproduction factoryでこのmappingを再構築して各transportへ接続する。
 
+SSH user production composition: UI公開前の内部`SshUserApplyTaskFactory`を追加した。Apply直前にknown_hosts由来fingerprintを再解決して診断reportと照合し、必要なら同じControlMaster sessionで認証、remote homeとexact target mapを再構築する。固定`ssh`/`scp` runner、remote helper readiness、Secret Service local AES backup、stable SSH snapshot、sudo remote-root recovery copy、immutable completion probe、Apply/rollback transport、runtime validation、0700 local audit/journal/recovery stateをcoordinatorへ接続した。外部端末なし、fingerprint変更、home外targetはbackup state作成またはmutation前に停止する。focused 22件が成功した。routeはまだGUI/availabilityへ公開しない。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP

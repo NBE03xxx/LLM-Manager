@@ -63,3 +63,9 @@ production `remote_config_candidates`が空で、SSH診断がOpenCode設定を�
 ## Exact target mapping
 
 解決済みremote homeから得た3候補との完全一致だけを、`.config/opencode/{opencode.jsonc,opencode.json,config.json}`というhelper用home-relative targetへ変換する。空・重複・接尾辞付き類似パス・別homeは拒否し、文字列prefix除去による境界誤認を避ける。home discovery、remote protocol、preparationを含むfocused 19件が成功した。
+
+## Production composition boundary
+
+UI未公開の内部`SshUserApplyTaskFactory`で、Apply直前のfingerprint再照合、ControlMaster認証session、home/target再解決、remote helper readiness、Secret Service暗号化local backup、stable remote snapshot、sudoによるremote-root recovery copy、immutable completion、user Apply/rollback、runtime validation、local audit/journalを結合した。local stateとremote recovery evidence rootは所有者限定0700、transfer runnerは`ssh`と`scp`だけを許可する。
+
+fingerprint変更、home外target、root change、外部認証端末なしはmutation前に停止する。再識別、session再利用/close、exact mapping、dual backup composition、private roots、production固定依存を含むfocused 22件が成功した。既存GUI Apply APIはplan/approvalの2引数でreportを渡さないため、次はworkflow保持reportを明示的に渡すadapterを追加し、Gate完了までavailabilityは閉じたままにする。

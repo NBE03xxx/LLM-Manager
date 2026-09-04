@@ -23,7 +23,7 @@ from llm_manager.application.services import DiagnoseHost
 from llm_manager.application.validation import ProductRuntimeValidator
 from llm_manager.diagnostics.linux import LinuxSystemProbe
 from llm_manager.domain.enums import HostKind
-from llm_manager.domain.models import ApprovalRecord, DiagnosticReport, OptimizationPlan
+from llm_manager.domain.models import ApprovalRecord, DiagnosticReport, OptimizationPlan, utc_now
 from llm_manager.infrastructure.audit import LocalAuditLog
 from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
@@ -32,6 +32,7 @@ from llm_manager.infrastructure.helper_compat import (
     HelperCompatibilityApplyGate,
     HelperCompatibilityProbe,
     local_helper_compatibility_probe,
+    remote_helper_compatibility_probe,
 )
 from llm_manager.infrastructure.helper_staging import HelperStagingStore
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
@@ -55,9 +56,30 @@ from llm_manager.infrastructure.openssh_identity import OpenSshHostIdentityResol
 from llm_manager.infrastructure.ssh_auth import (
     ExternalTerminalSshBroker,
     SshAliasAuthRequest,
+    TerminalSpec,
     detect_terminal,
 )
 from llm_manager.infrastructure.ssh_user_home import ResolveSshUserHome
+from llm_manager.infrastructure.openssh_staging import OpenSshUserStagingRunner
+from llm_manager.infrastructure.remote_backup import DualCopyPrivilegedBackupStore
+from llm_manager.infrastructure.remote_helper import (
+    RemoteHelperRecoveryCopyStore,
+    RemoteRecoveryAttemptStore,
+    RemoteRecoveryReceiptStore,
+)
+from llm_manager.infrastructure.remote_sudo import OpenSshRemoteSudoInvoker
+from llm_manager.infrastructure.ssh_backup import SshSnapshotLocalBackupStore
+from llm_manager.infrastructure.ssh_remote_staging import (
+    RemoteRecoveryResultCompletionProbe,
+    UserOnlySshRecoveryTransport,
+)
+from llm_manager.infrastructure.ssh_user_apply import UserOnlySshApplyTransport
+from llm_manager.infrastructure.ssh_user_apply_coordinator import SshUserSafeApplyCoordinator
+from llm_manager.infrastructure.ssh_user_apply_preparation import (
+    PrepareSshUserApply,
+    PrepareSshUserRollback,
+)
+from llm_manager.infrastructure.ssh_user_rollback import UserOnlySshRollbackTransport
 
 _LOCAL_EXECUTABLES = frozenset(
     {"curl", "df", "lscpu", "lspci", "nvidia-smi", "ollama", "opencode", "rocm-smi", "systemctl", "uname"}
@@ -447,6 +469,170 @@ class LocalApplyTaskFactory:
         if len(privilege) != 1:
             raise ValueError("mixed_privilege_plan_unsupported")
         return self.root(plan, approval) if privilege == {True} else self.user(plan, approval)
+
+
+@dataclass(slots=True)
+class SshUserApplyTaskFactory:
+    """Compose the internal SSH user Safe Apply route; UI exposure remains gated."""
+
+    diagnostics: DiagnosticTaskFactory
+    transfer_runner: SubprocessRunner
+    state_root: Path
+    staging_root: Path
+    helper_probe: HelperCompatibilityProbe
+    terminal: TerminalSpec | None
+    key_provider_factory: Callable[[], BackupKeyProvider] = lambda: SecretServiceKeyProvider(
+        SecretStorageBackend()
+    )
+    remote_key_reference: str = "remote-master-v1"
+
+    @classmethod
+    def production(cls, diagnostics: DiagnosticTaskFactory) -> "SshUserApplyTaskFactory":
+        runtime_base = os.environ.get("XDG_RUNTIME_DIR")
+        runtime_root = (
+            Path(runtime_base)
+            if runtime_base and Path(runtime_base).is_absolute()
+            else Path(f"/run/user/{os.getuid()}")
+        )
+        return cls(
+            diagnostics,
+            SubprocessRunner(ProcessPolicy(frozenset({"ssh", "scp"}))),
+            _local_state_root(),
+            runtime_root / "llm-manager" / "ssh-transfer",
+            remote_helper_compatibility_probe(frozenset({"0.1.0~dev0"})),
+            detect_terminal(),
+        )
+
+    def __post_init__(self) -> None:
+        self.state_root = _safe_application_root(self.state_root, "llm-manager") / "llm-manager"
+        if not self.staging_root.is_absolute() or self.staging_root == Path("/"):
+            raise ValueError("ssh_staging_root_unsafe")
+
+    def __call__(
+        self,
+        plan: OptimizationPlan,
+        report: DiagnosticReport,
+        approval: ApprovalRecord,
+    ):
+        change_set = plan.change_set
+        candidate = next(
+            (item for item in self.diagnostics.hosts if item.host_id == report.host.host_id),
+            None,
+        )
+        if candidate is None or candidate.kind is not HostKind.SSH or candidate.ssh_alias is None:
+            raise ValueError("ssh_user_apply_requires_ssh_host")
+        if change_set is None or not change_set.changes:
+            raise ValueError("change_set_empty")
+        if change_set.host_id != report.host.host_id or any(
+            change.requires_root for change in change_set.changes
+        ):
+            raise ValueError("ssh_user_apply_rejects_host_or_root_change")
+
+        def execute(cancellation: CancellationToken):
+            if not approval.is_valid_for(plan):
+                raise AdapterError("invalid_approval", "approval does not match the current plan")
+            identity = OpenSshHostIdentityResolver(self.diagnostics.ssh_runner).resolve(
+                candidate.ssh_alias, cancellation
+            )
+            if not report.host.fingerprint or identity.fingerprint != report.host.fingerprint:
+                raise AdapterError("host_identity_changed", "SSH host identity changed before Apply")
+            session = None
+            try:
+                if identity.authentication_required:
+                    broker = self.diagnostics.ssh_auth_broker
+                    if broker is None:
+                        raise AdapterError(
+                            "authentication_required",
+                            "SSH authentication requires an external terminal",
+                        )
+                    session = broker.authenticate_alias(
+                        SshAliasAuthRequest(candidate.ssh_alias), cancellation
+                    )
+                socket = session.socket_path if session is not None else None
+                host = OpenSshHostAdapter(
+                    candidate.ssh_alias,
+                    self.transfer_runner,
+                    candidate.display_name,
+                    verified_fingerprint=identity.fingerprint,
+                    control_socket=socket,
+                )
+                home = ResolveSshUserHome().execute(host, cancellation)
+                targets = tuple(dict.fromkeys(change.target for change in change_set.changes))
+                if len(targets) != 1:
+                    raise AdapterError(
+                        "unsupported_ssh_user_change",
+                        "SSH user Apply requires exactly one target",
+                    )
+                target_map = home.helper_target_map(targets)
+                coordinator = self._coordinator(host, candidate.ssh_alias, socket, target_map)
+                return coordinator.execute(
+                    plan,
+                    report,
+                    approval,
+                    f"ssh-user-{uuid.uuid4().hex}",
+                    cancellation,
+                )
+            finally:
+                if session is not None and self.diagnostics.ssh_auth_broker is not None:
+                    self.diagnostics.ssh_auth_broker.close(session, CancellationToken())
+
+        return execute
+
+    def _coordinator(self, host, alias: str, socket: str | None, target_map: dict[str, str]):
+        if self.terminal is None:
+            raise AdapterError(
+                "remote_authorization_unavailable",
+                "remote sudo authorization requires an external terminal",
+            )
+        _prepare_private_state_root(self.state_root)
+        allowed_root = Path(next(iter(target_map))).parent
+        local = LocalBackupStore(
+            self.state_root / "backups",
+            (allowed_root,),
+            AesGcmBackupCipher(self.key_provider_factory()),
+        )
+        captured = SshSnapshotLocalBackupStore(local, host, frozenset(target_map))
+        readiness = HelperCompatibilityApplyGate(host, self.helper_probe)
+        probe_staging = OpenSshUserStagingRunner(
+            alias,
+            self.transfer_runner,
+            _UnavailableRecoveryInvoker(),
+            self.staging_root,
+            readiness,
+            socket,
+        )
+        completion = RemoteRecoveryResultCompletionProbe(probe_staging)
+        sudo = OpenSshRemoteSudoInvoker(self.transfer_runner, self.terminal, completion)
+        staging = OpenSshUserStagingRunner(
+            alias, self.transfer_runner, sudo, self.staging_root, readiness, socket
+        )
+        recovery_state = self.state_root / "remote-recovery"
+        _prepare_private_state_root(recovery_state)
+        remote = RemoteHelperRecoveryCopyStore(
+            UserOnlySshRecoveryTransport(staging, clock=utc_now),
+            self.remote_key_reference,
+            attempts=RemoteRecoveryAttemptStore(recovery_state / "attempts"),
+            receipts=RemoteRecoveryReceiptStore(recovery_state / "receipts"),
+        )
+        backups = DualCopyPrivilegedBackupStore(captured, remote)
+        candidates = tuple(target_map)
+        validator = ProductRuntimeValidator(
+            host, OllamaReadOnlyAdapter(), OpenCodeReadOnlyAdapter(candidates)
+        )
+        return SshUserSafeApplyCoordinator(
+            PrepareSshUserApply(backups, target_map),
+            PrepareSshUserRollback(backups),
+            UserOnlySshApplyTransport(staging, utc_now),
+            UserOnlySshRollbackTransport(staging, utc_now),
+            validator,
+            LocalOperationJournal(self.state_root / "journal", (allowed_root,)),
+            LocalAuditLog(self.state_root / "audit"),
+        )
+
+
+class _UnavailableRecoveryInvoker:
+    def invoke(self, *_args, **_kwargs) -> None:
+        raise AdapterError("remote_authorization_unavailable", "completion probe cannot invoke")
 
 
 @dataclass(slots=True)

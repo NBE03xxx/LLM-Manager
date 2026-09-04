@@ -18,11 +18,10 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、remote home/global config discovery、recommendation、fresh read、diff生成、unprivileged fixed Apply/rollback protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy preparation、Apply/validate/rollback coordinatorは追加済みだが、availabilityはまだ未公開。
 
-1. 追加済みのimmutable result completion probeを使い、helper readiness、Secret Service local key、remote root recovery key、sudo authorization、private state/runtime rootsをSSH user task factoryへ接続する。
-2. 追加済みのexact target mappingをfactory内で診断済みabsolute targetと解決済みhomeから毎回再構築する。
-3. production公開前にsandbox GUI Gateと実SSH VM Gateを行う。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
-4. 実SSH Gateが必要になった時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
-5. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
+1. 追加済みの内部`SshUserApplyTaskFactory`を、reportを保持するGUI workflowの2引数Apply APIへ安全にadapter接続する。
+2. production公開前にsandbox GUI Gateと実SSH VM Gateを行う。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
+3. 実SSH Gateが必要になった時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
+4. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
 
 ## Phase 6残件分類
 
