@@ -11,7 +11,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新実装/evidence commit: `7d41bc0 Show strict restore result evidence`（この引き継ぎ更新のcommitが後続する）
+- 最新実装/evidence commit: `50f7964 Publish local restore workflow`（この引き継ぎ更新のcommitが後続する）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
 ## Phaseと確定済み要件
@@ -75,6 +75,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新commit
 
+- `50f7964 Publish local restore workflow`
 - `7d41bc0 Show strict restore result evidence`
 - `e40a895 Gate Qt restore execution`
 - `22d4a08 Validate desktop restore composition`
