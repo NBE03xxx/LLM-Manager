@@ -18,6 +18,20 @@ remote helper artifact SHA-256は`a86c6d6c7c02fb437af59442738a07623ce003e9bff35b
 
 実行後、host側のGate専用`/tmp` state/runtime/scriptとVM user stagingのApply/rollback IDを削除し、target不在を再確認した。remote root copy、`remote-master-v1.key`、helper package、SSH Server、公開鍵は後続のdisconnect reconciliation Gate用に一時保持する。availabilityは未公開のままである。
 
+## Real transport disconnect reconciliation
+
+同じVMと未作成targetを使い、production `OpenSshUserStagingRunner`、strict helper readiness gate、`UserOnlySshApplyTransport`、`UserOnlySshRollbackTransport`を実SSHへ接続した。固定helperがmutationとimmutable `result.json`保存を正常完了した直後だけ、Gate wrapperがtransport `disconnect`を返すことで「server側完了、client側応答喪失」を再現した。ネットワークやSSH Server自体は停止していない。
+
+Applyとrollbackはいずれもinvoke回数は1回で、例外後は同じrequest ID/hashの`result.json`をread-only取得した。mutationは再送していない。Apply後に一時payloadをremote readで確認し、rollback後はtarget不存在へ戻ったことを確認した。
+
+- Apply request hash: `d18eee27a3f8e3fb27bb87cfa3e1613b68c28b82eaa8b4d2d67debf395ab1eff`
+- rollback request hash: `a45327be2b5c925bc2f4579e281ed213706dea9ede5900588e26534a5c5d8424`
+- Apply helper invocation: 1
+- rollback helper invocation: 1
+- final target state: absent
+
+Gate専用Apply/rollback stagingは固定cleanup経路で削除し、両operation directory不在を実SSHで確認した。root recovery copyやkeyはこのuser-only transport Gateでは変更していない。
+
 ## Observed fail-closed preflight
 
-最初に`yoshimi@192.168.122.48`をaliasとして試した際、`@`を許可しないremote protocol host ID境界がrequest生成前に拒否し、local backupだけを残してApplyしなかった。SSH configを変更せず、同名local/remote userのsystem OpenSSH既定を使ってaliasを`192.168.122.48`へ限定し、protocol-safe host IDで再実行した。失敗時local artifactは削除済みで、remote staging、root backup、key、target mutationは発生しなかった。
+最初に`yoshimi@192.168.122.48`をaliasとして試した際、`@`を許可しないremote protocol host ID境界がrequest生成前に拒否し、local backupだけを残してApplyしなかった。SSH configを変更せず、同名local/remote userのsystem OpenSSH既定を使ってaliasを`192.168.122.48`へ限定し、protocol-safe host IDで再実行した。これはdisposable Gateに限った便宜であり、local/remote user名の一致は製品要件ではない。productionでは`User`、`HostName`、`IdentityFile`をsystem OpenSSH configの安全なaliasへ保持し、LLM-Managerには`@`を含まないaliasだけを渡す。失敗時local artifactは削除済みで、remote staging、root backup、key、target mutationは発生しなかった。
