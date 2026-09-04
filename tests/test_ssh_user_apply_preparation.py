@@ -25,7 +25,9 @@ from llm_manager.infrastructure.remote_backup import (
     DualCopyPrivilegedBackupStore, SandboxRemoteRecoveryStore,
 )
 from llm_manager.infrastructure.ssh_backup import SshSnapshotLocalBackupStore
-from llm_manager.infrastructure.ssh_user_apply_preparation import PrepareSshUserApply
+from llm_manager.infrastructure.ssh_user_apply_preparation import (
+    PrepareSshUserApply, PrepareSshUserRollback,
+)
 
 
 NOW = datetime(2026, 9, 4, 13, 0, tzinfo=UTC)
@@ -107,6 +109,72 @@ class PrepareSshUserApplyTests(unittest.TestCase):
         self.assertEqual(stale_error.exception.code, "backup_binding_mismatch")
 
 
+class PrepareSshUserRollbackTests(unittest.TestCase):
+    def test_builds_rollback_from_same_verified_manifest_and_apply_hash(self) -> None:
+        report, plan, approval = _bound_inputs()
+        backups = _Backups()
+        prepared_apply = PrepareSshUserApply(
+            backups, {ABSOLUTE: RELATIVE}, lambda: NOW
+        ).execute(plan, report, approval, "ssh-user-1", CancellationToken())
+        backups.calls.clear()
+
+        rollback = PrepareSshUserRollback(backups, lambda: NOW).execute(
+            plan, report, approval, prepared_apply, "ssh-user-1-rollback",
+            CancellationToken(),
+        )
+
+        self.assertEqual(backups.calls, ["verify", "restore_items"])
+        self.assertEqual(rollback.request.apply_request_hash, prepared_apply.request.request_hash)
+        self.assertEqual(rollback.request.local_manifest_hash, prepared_apply.manifest.manifest_hash)
+        self.assertEqual(rollback.request.expected_current_hash, prepared_apply.request.after_hash)
+        self.assertEqual(rollback.request.restore_hash, BEFORE_HASH)
+        self.assertEqual(rollback.request.restore_mode, 0o600)
+        self.assertEqual(rollback.restore_content, BEFORE)
+
+    def test_rejects_changed_manifest_payload_and_failed_remote_reverification(self) -> None:
+        report, plan, approval = _bound_inputs()
+        backups = _Backups()
+        prepared = PrepareSshUserApply(
+            backups, {ABSOLUTE: RELATIVE}, lambda: NOW
+        ).execute(plan, report, approval, "ssh-user-1", CancellationToken())
+        factory = PrepareSshUserRollback(backups, lambda: NOW)
+
+        with self.assertRaises(AdapterError) as manifest_error:
+            factory.execute(
+                plan, report, approval,
+                replace(prepared, manifest=replace(prepared.manifest, manifest_hash="f" * 64)),
+                "rollback-1", CancellationToken(),
+            )
+        self.assertEqual(manifest_error.exception.code, "rollback_binding_mismatch")
+
+        with self.assertRaises(AdapterError) as payload_error:
+            factory.execute(
+                plan, report, approval, replace(prepared, payload=b"changed"),
+                "rollback-2", CancellationToken(),
+            )
+        self.assertEqual(payload_error.exception.code, "rollback_binding_mismatch")
+
+        backups.remote_passed = False
+        with self.assertRaises(AdapterError) as backup_error:
+            factory.execute(
+                plan, report, approval, prepared, "rollback-3", CancellationToken()
+            )
+        self.assertEqual(backup_error.exception.code, "backup_verification_failed")
+
+    def test_started_apply_can_prepare_short_lived_rollback_after_approval_expiry(self) -> None:
+        report, plan, approval = _bound_inputs()
+        backups = _Backups()
+        prepared = PrepareSshUserApply(
+            backups, {ABSOLUTE: RELATIVE}, lambda: NOW
+        ).execute(plan, report, approval, "ssh-user-1", CancellationToken())
+        later = NOW + timedelta(minutes=6)
+        rollback = PrepareSshUserRollback(backups, lambda: later).execute(
+            plan, report, approval, prepared, "rollback-late", CancellationToken()
+        )
+        self.assertEqual(rollback.request.requested_at, later)
+        self.assertEqual(rollback.request.expires_at, later + timedelta(minutes=5))
+
+
 class _Backups:
     def __init__(self, *, remote_passed=True, item_hash=BEFORE_HASH):
         self.remote_passed = remote_passed
@@ -119,7 +187,7 @@ class _Backups:
         self.manifest = BackupManifest(
             request.backup_id, "1.0", request.plan_id, request.change_set.content_hash,
             request.host_id, request.host_fingerprint,
-            (BackupItem(ABSOLUTE, True, "items/item.enc", BEFORE_HASH),),
+            (BackupItem(ABSOLUTE, True, "items/item.enc", BEFORE_HASH, 0o600, 1000, 1000),),
             "d" * 64, "/local/backup", request.encryption,
             created_at=NOW, retention_expires_at=NOW + timedelta(days=30), complete=True,
         )

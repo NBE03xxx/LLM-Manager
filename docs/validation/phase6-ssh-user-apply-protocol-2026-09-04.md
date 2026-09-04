@@ -39,3 +39,11 @@ sandbox root recovery storeを使う統合caseを含むfocused 4件で、local c
 unprivileged remote helperへ固定`user-rollback` operationを追加した。canonical rollback requestはApply request hash、plan/change set、backup/local manifest、host ID/fingerprint、target、期待する現在のafter hash、元の存在有無・content hash・mode、短いexpiryを束縛する。現在hashがApply結果から変わっていればmutation前に停止する。元が存在した場合はlocal正本由来payloadをrequest-last staging後に元modeでatomic replaceし、元が不存在なら単一unlink＋directory fsyncを行う。
 
 OpenSSH transportは固定helper argvだけを呼び、bounded canonical resultの全bindingを照合する。切断後は同一requestのresultをread-only取得し、rollbackを自動再実行しない。existing/created target、stale、payload/tamper、root拒否、取消、reconciliationを含むfocused 11件が成功した。次はpreparationが保持するmanifestからrollback requestを生成し、Apply・validation・rollback終端をcoordinatorへ接続する。
+
+## Apply/validate/rollback coordinator
+
+`PrepareSshUserRollback`はPrepared Applyと同一のreport、approval、change set、manifest、host fingerprint、Apply request/payloadを構造的に再照合し、両backup copyを再検証してからlocal正本だけを復元payloadにする。Apply開始後は元approvalの期限切れで安全rollbackを妨げず、新しいrollback request自体へ独立した5分期限を付ける。
+
+`SshUserSafeApplyCoordinator`はapproved audit、dual-copy preparation、manifest/request-bound journal、固定Apply、runtime validation、固定rollback、terminal audit/journalを一つにした。Applyまたはrollback transport切断時は同一immutable resultをread-only取得し、mutationをretryしない。Apply resultを確認できない場合はafter hashを推測してrollbackせず`RECOVERY_REQUIRED`、validation失敗はrollback、rollback resultも確認不能なら`RECOVERY_REQUIRED`とする。Apply後のユーザーcancelでも安全rollbackには新しい非cancel tokenを使用する。
+
+期限切れ後rollback factory、commit、validation rollback、Apply/rollback切断reconciliation、両copy失敗、unknown Apply、rollback不能、cancel-after-Applyを含むfocused 13件が成功した。次はproduction compositionに必要なremote home/config discovery、helper readiness、Secret Service、sudo authorization、state rootsを監査する。
