@@ -87,24 +87,39 @@ class AtomicFileExecutor:
 
     @staticmethod
     def _render(content: bytes, changes: list[Change]) -> bytes:
-        try:
-            text = content.decode("utf-8")
-        except UnicodeDecodeError as error:
-            raise AdapterError("unsupported_encoding", "target is not UTF-8") from error
-        spans: list[tuple[int, int, str]] = []
-        for change in changes:
-            if change.replacement_text is None:
-                raise AdapterError("missing_replacement", "file change has no replacement text")
-            span = change.source_span or (0, len(text))
-            spans.append((span[0], span[1], change.replacement_text))
-        spans.sort(reverse=True)
-        previous_start = len(text) + 1
-        for start, end, replacement in spans:
-            if end > len(text) or end > previous_start:
-                raise AdapterError("overlapping_changes", "source spans overlap or exceed target")
-            text = text[:start] + replacement + text[end:]
-            previous_start = start
-        return text.encode("utf-8")
+        return render_file_changes(content, changes)
+
+
+def render_file_changes(content: bytes, changes: list[Change]) -> bytes:
+    """Render already captured content without accessing a local target path."""
+    if not changes:
+        raise AdapterError("empty_change_set", "file rendering requires changes")
+    target = changes[0].target
+    if any(
+        change.target != target
+        or change.requires_root
+        or change.operation not in {ChangeOperation.CREATE_FILE, ChangeOperation.REPLACE_FILE}
+        for change in changes
+    ):
+        raise AdapterError("unsupported_change", "renderer accepts one non-root file target")
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise AdapterError("unsupported_encoding", "target is not UTF-8") from error
+    spans: list[tuple[int, int, str]] = []
+    for change in changes:
+        if change.replacement_text is None:
+            raise AdapterError("missing_replacement", "file change has no replacement text")
+        span = change.source_span or (0, len(text))
+        spans.append((span[0], span[1], change.replacement_text))
+    spans.sort(reverse=True)
+    previous_start = len(text) + 1
+    for start, end, replacement in spans:
+        if start < 0 or end > len(text) or end > previous_start:
+            raise AdapterError("overlapping_changes", "source spans overlap or exceed target")
+        text = text[:start] + replacement + text[end:]
+        previous_start = start
+    return text.encode("utf-8")
 
 
 class FileValidator:

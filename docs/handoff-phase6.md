@@ -16,11 +16,11 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最初の作業
 
-Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、recommendation、fresh read、diff生成、unprivileged fixed Apply protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshotからのlocal authoritative backupは追加済みだが、availabilityはまだ未公開。
+Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、recommendation、fresh read、diff生成、unprivileged fixed Apply protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy検証後のmutation-free preparationは追加済みだが、availabilityはまだ未公開。
 
-1. `SshSnapshotLocalBackupStore`を既存`DualCopyPrivilegedBackupStore`とroot-owned remote recovery helperへ接続する。user-ownedなのはremote stagingだけである。
-2. local/remote双方をApply前に検証してhost fingerprint・manifest・request identityを一貫して束縛する。
-3. SSH切断時は同一immutable request/resultを再照合し、Applyを自動retryしない。rollback、runtime validation、journal/audit終端までsandbox故障注入で閉じる。
+1. local manifest、Apply request、before/after hashへ束縛したSSH user rollback protocolを追加する。
+2. Apply result、runtime validation、rollback、journal/audit終端を一つのcoordinatorへ接続する。
+3. SSH切断時は同一immutable request/resultを再照合し、Applyを自動retryしない。
 4. 実SSH Gateが必要になった時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
 5. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
 

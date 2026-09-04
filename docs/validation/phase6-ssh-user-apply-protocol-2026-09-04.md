@@ -25,3 +25,11 @@ protocol/executorとOpenSSH transportのfocused 12件で、成功、stale precon
 remote targetのread-only snapshotからlocal authoritative encrypted backupを生成する境界を追加した。SSH host ID/fingerprintを再確認し、allowlist済みtargetをstat→bounded read→statで観測してmetadata/hashが変化していない場合だけ、ChangeSetのbefore hashへ一致するcaptured snapshotを永続化する。通常のlocal backupも同じ永続化内部経路を使うが、外部取得snapshotだけはbefore hash一致を必須にする。
 
 次はこのlocal正本を既存のroot-owned remote recovery copyへ接続する。remote stagingだけがSSH user所有であり、恒久copyと独立鍵はADR-0009どおりremote root所有を維持する。双方の検証成功後だけApply transportを呼ぶcoordinatorへ接続する。
+
+## Dual-copy preparation
+
+mutationを行わない`PrepareSshUserApply`を追加した。exact report/plan/approvalとSSH fingerprintを再照合し、単一allowlist済みnon-root fileだけを受け付ける。`SshSnapshotLocalBackupStore`と既存`DualCopyPrivilegedBackupStore`を通したlocal manifestおよびroot-owned remote receiptの全checkが成功した後に限り、検証済みlocal backup本文からpayloadをrenderし、manifest hashを含むcanonical Apply requestを生成する。片側copy失敗時はbackup本文の再読込やApply request生成へ進まない。
+
+sandbox root recovery storeを使う統合caseを含むfocused 4件で、local captured copy、独立remote AES-GCM key scope、両copy verify、remote failure、report/fingerprint/target/stale bindingを確認した。preparation serviceはApply transportを保持せず、rollback protocolが完成するまでmutationを構造的に開始できない。
+
+次は同じmanifest/requestへ束縛したSSH user rollback protocolと、Apply result・runtime validation・rollback終端を管理するcoordinatorを構築する。
