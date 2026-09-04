@@ -1,175 +1,140 @@
-# LLM-Manager Phase 4 引き継ぎプロンプト
+# LLM-Manager Phase 5 引き継ぎプロンプト
 
 以下を新しいチャットの最初のメッセージとして使用してください。
 
 ---
 
-LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreのclosure auditを続行してください。
+LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production restore composition可否監査から続行してください。
 
 ## 作業場所
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - GitHub: `git@github.com:NBE03xxx/LLM-Manager.git`
 - branch: `main`
-- 最新の実装・evidence commit: `a1962d3 Complete Debian PolicyKit dismiss gate`（この引き継ぎ文書のcommitが後続する）
+- 最新実装/evidence commit: `823d7c9 Show strict restore execution inventory`（この引き継ぎ文書のcommitが後続する）
 - `main`と`origin/main`は同期済み、作業ツリーはclean
 
-## 確定済み要件
+## Phaseと確定済み要件
 
+- Phase 0〜4は完了。現在はPhase 5 PySide6 GUI
 - 正式対象: Ubuntu 26.04、Debian 13
-- Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25を初期検証baselineとする
-- Debian 13 stockを正式対象へ含めるsupported minimum:
-  - Python 3.13
-  - cryptography 43.0.0
-  - SecretStorage 3.3.3
+- 初期検証baseline: Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25
+- Debian 13 supported minimum: Python 3.13、cryptography 43.0.0、SecretStorage 3.3.3
 - UIはlocaleに基づく日本語・英語
-- root必須systemd drop-in変更までMVP対象。GUI全体はrootにしない
-- SSHはsystem OpenSSH、`~/.ssh/config`、Agent、ProxyJump等を利用
-- 秘密鍵・passwordを独自保存しない。対話認証は外部端末とControlMasterを利用
-- backupはlocal正本＋SSH先復元用copy
-- 保持は30日かつhostごと直近10世代、manual protectionは削除しない
+- root必須systemd drop-inまでMVP対象だがGUI全体はrootにしない
+- SSHはsystem OpenSSHと既存`~/.ssh/config`、Agent、ProxyJump、外部terminal ControlMasterを利用
+- 秘密鍵/passwordを独自保存しない
+- backupはlocal正本＋SSH先復元用copy、30日かつhostごと直近10世代、manual protectionは削除しない
 - 一般配布は暗号化既定ON、開発モード既定OFF
-
-## 実機・VM情報
-
-- `development`: 192.168.1.201、Ubuntu 26.04、OpenCode 1.18.18、Ollamaなし
-- AI server: `yoshimi@192.168.1.253`、Ubuntu 26.04、Ollama 0.33.2 active、OpenCodeなし
-- disposable VM `llm-manager-gate`: Ubuntu 26.04、user `user`、remote helper 0.1.0~dev0導入済み
-  - Gate専用sudoers、root journal evidence、user `/tmp` artifactはcleanup済み
-  - 通常の`sudo -n`は拒否状態
-- desktop VM `ubuntu26.04`: T16上のUbuntu 26.04。local deb/Secret Service/PolicyKit positive Gateに使用
-  - snapshot `phase4-pre-local-deb-20260831`を保持
-- desktop VM `debian13`: Debian 13.6を32 GiB qcow2へ通常install済み
-  - VM user `user`、password-backed GNOME session、自動loginなし
-  - ISOはeject済み、disk boot、autostart disabled
-  - 2026-09-01時点では稼働中
-  - passwordはチャット・repository・artifactへ保存していない
-  - Gate専用helper/action/unit/deny rule/`/run` artifactはcleanup済み
 
 ## 禁止事項
 
-- Ollama、OpenCode、既存systemd unit、SSH設定を無断変更しない
-- passwordをチャットで尋ねず、argv/stdin/logへ渡さない。sudo/PolicyKit認証は外部terminal/GUIだけで行う
+- 実Ollama/OpenCode設定、既存systemd unit、SSH設定を無断変更しない
+- passwordをチャットで尋ねず、argv/stdin/logへ渡さない
 - main workstationへdebやdependencyを無断installしない
 - disposable OSでもmaterialなPolicyKit/sudoers/systemd変更は先に承認を得る
 - venv作成、`pip install`禁止
+- restore/delete/cleanupをinventoryやrestart状態から自動実行しない
 
-## Phase 0〜3とPhase 4 coreの完了済み実装
+## 実機・VM
 
-- Phase 0〜3
-- LocalBackupStore、AES-GCM、Secret Service provider abstraction
-- AtomicFileExecutor、FileValidator、SafeApplyCoordinator
-- rollback、`RECOVERY_REQUIRED`、operation journal、hash-chain audit
-- Ollama/OpenCode runtime Validator
-- local helper protocol、PolicyKit境界、root専用Backup→Apply→Validate→Rollback
-- local/remote helper分離deb、helper compatibility Gate
-- local正本＋remote encrypted recovery copyのdual backup Apply Gate
-- remote request/receipt canonical schemaとidentity/hash/fingerprint/key binding
-- user-only SSH staging、request-last publication、固定helper identity
-- remote root AES-GCM backend、root key provider、production entrypoint
-- remote retention、canonical deletion、dual-copy deletion coordination
-- deletion/manifest/reconciliation evidenceのimmutable永続化と改ざん検証
-- backup evidence retention planner/executor/execution store
-  - 実行直前candidate再検証、参照逆順削除、各削除後directory fsync
-  - 全終了経路のexecution保存、保存失敗時も生成済みexecutionを公開
-  - restart後host/fingerprint単位strict一覧、未知entry・改ざん・重複拒否
-- `PARTIAL`/`FAILED`再開はimmutableな明示cleanup requestだけ
-- inventory表示はread-onlyで、自動orphan再判定・自動削除を行わない
-- remote request/receiptのlocal immutable保存とrestart回収
-- privileged local/remote wrapperはimport前にbytecode生成を無効化し、dpkg管理外root `__pycache__`を作らない
+- `development`: 192.168.1.201、Ubuntu 26.04、OpenCode 1.18.18、Ollamaなし
+- AI server: `yoshimi@192.168.1.253`、Ubuntu 26.04、Ollama 0.33.2 active、OpenCodeなし
+- disposable `llm-manager-gate`: Ubuntu 26.04。Gate専用artifactはcleanup済み、通常`sudo -n`拒否
+- desktop VM `ubuntu26.04`: PySide6 6.10.2導入済み。Qt offscreen Gateに使用
+- desktop VM `debian13`: Debian 13.6、password-backed GNOME、自動loginなし
+- passwordはrepository/chat/artifactへ保存していない
+- main hostにはPySide6がない。ユーザーは「PySide6 installが必要なら知らせる」よう依頼済み。現状はVMで足りるためinstall不要
 
-## 完了済み実機Gate
+## Phase 4完了要約
 
-- Secret Service desktop negative Gate
-  - source checkoutのsystem Pythonにbindingなし
-  - stable `secret_service_unavailable`、secret mutationなし
-- PolicyKit desktop negative Gate
-  - authority到達可能、action/helper未install、mutationなし
-- remote helper未導入hostのnegative compatibility Gate
-- `llm-manager-gate` positive recovery transport
-  - compatibility、user staging、外部端末sudo、root key/AES-GCM copy、receipt、cleanup
-- 別processでhelperを再実行しないrestart receipt recovery
-- 実remote retention（3件残存、削除0）
-- 実remote deletion（専用copyのみ削除、local正本保持、既存3件不変）
-- remote helper deb reinstall/remove/purge/reinstall
-  - package不在時`missing`、dpkg管理外root backup/key保持
-- 実SSH転送切断
-  - 16 MiB転送中に専用ControlMaster終了
-  - `remote_staging_failed`、request/result未公開、root helper 0回
-  - local正本検証成功、user staging cleanup
-- 実remote root journal evidence取得とread-only reconciliation
-  - canonical evidenceのidentity/hash/status binding検証
-  - remote targetを`unapplied`と照合、Apply/rollbackなし
-  - Gate artifact全cleanup、cleanup後`remote_journal_failed`と`sudo -n`拒否
-- Ubuntu 26.04 local deb desktop positive Gate
-  - install/reinstall/remove/purge相当/reinstall/upgrade
-  - `policykit-1`ではなく`polkitd`+`pkexec`へdependency修正
-  - Secret Service default collectionへGate専用key create/reload/delete
-  - PolicyKit success、dismiss exit 126、explicit deny exit 127
-  - Gate専用path/unitだけを使うsystemd操作と完全cleanup
-- Debian 13 desktop/package Gate
-  - stock Python 3.13.5、cryptography 43.0.0、SecretStorage 3.3.3
-  - stock runtimeで全338単体テスト成功
-  - AES-GCM、Secret Service create/reload/delete、PolicyKit action確認
-  - local/remote Gate deb installとremote helper remove/purge/reinstall
-  - remote helper未知command fail closed、bytecode非生成、remove後private runtime完全消去
-  - 正式local/remote artifactをbuild/verifyし、APT simulationはいずれもexit 0
-  - Live desktopでPolicyKit success、explicit deny、Gate専用systemd操作、cleanup
-  - 通常installしたpassword-backed GNOME sessionで認証dialogをCancel
-    - `Request dismissed`、exit 126
-    - Gate unit inactive、markerなし
-    - helper/action/unit/`/run` artifact完全cleanup
+- Safe Apply、AES-GCM/Secret Service、atomic user apply、PolicyKit local root helper
+- remote helper protocol、SSH user staging、root recovery copy、retention/deletion/reconciliation
+- immutable audit/journal/evidence、strict restart loading、retention cleanup安全境界
+- Ubuntu 26.04/Debian 13 package・Secret Service・PolicyKit・SSH実機Gate完了
+- 実Ollama/OpenCode targetへのApply/rollbackは無断変更禁止のため意図的に未実施
+
+## Phase 5完了済み
+
+- PySide6 boundary、worker/QThreadPool、ja/en UI、host discovery
+- Diagnose→Recommendations→Review→exact approval→Results workflow
+- system OpenSSH診断、外部terminal ControlMaster auth fallback
+- recommendation/change-set生成、秘密値redaction
+- 明示承認checkbox、plan/host/profile/selection/expiryによるstale失効
+- production Apply availabilityを4 routeでfail closed評価。local userのみ接続済み、他3 routeは未接続
+- local user GUI Applyのsuccess/rollback/`RECOVERY_REQUIRED` vertical slice
+- Backup/Rollback read-only inventory UIとstrict local manifest/journal restart loader
+- SSH production inventoryはsafeなbackup列挙commandがないため未接続
+- metadata-only restore preview、exact approval、5分expiry、host/refresh/selection/timer失効
+- strict restore preflight: manifest/preview/approval/allowlist/current targetを直前再検証
+- sandbox single-target restore executor: 復号前後再検証、atomic replaceまたはunlink+fsync。複数target拒否
+- immutable restore attempt/result、authorization一回消費、開始/完了audit
+- commit後audit失敗は`UNKNOWN`、result保存失敗は生成済み`COMMITTED` evidenceを公開
+- restore restart inventory: attempt-onlyをattention表示、自動retryなし、unknown/orphan/tamper拒否
+- production restore compositionとGUI実行buttonは未接続
 
 ## 最新commit
 
-- `5074cdb Update Phase 4 handoff after SSH gates`
-- `5c25852 Validate local deb desktop gates`
-- `ca6a346 Validate Debian 13 packaging compatibility`
-- `cfb1ab2 Record Debian PolicyKit systemd gate`
-- `a1962d3 Complete Debian PolicyKit dismiss gate`
+- `823d7c9 Show strict restore execution inventory`
+- `3a2049e Persist local restore execution evidence`
+- `b6c6797 Add sandbox single-target restore executor`
+- `78d1b5a Add strict local restore preflight`
+- `f6546ba Validate restore preview expiry`
+- `95328bb Add restore preview approval UI`
+- `7c9b1a3 Add bound local restore preview`
+- `92a88f1 Audit SSH backup inventory boundary`
+- `46beabe Connect strict local backup inventory`
+- `d662d4b Add read-only backup inventory UI`
+- `85ee6e5 Validate GUI Apply failure outcomes`
+- `abeb517 Validate local user GUI Apply path`
+- `39645eb Enable local user production Apply route`
 
-それ以前のPhase 4 commit一覧は`git log`と旧引き継ぎ履歴を参照する。
+## 最新validation
 
-## 主要validation evidence
+- main host全test: 440件成功、PySide6依存11件skip
+- Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
+- 直前artifact SHA-256: `11fe7441870b0f259c56d10132224f03339e52e68ed39f3bda49865c71b7539b`
+- ユーザー側`/tmp/llm-manager-ui-gate`は未cleanupの可能性あり
 
-- `docs/validation/local-deb-desktop-positive-2026-08-31.md`
-- `docs/validation/debian13-desktop-packaging-2026-08-31.md`
-- `docs/validation/debian13-policykit-systemd-2026-08-31.md`
-- `docs/validation/remote-helper-deb-lifecycle-2026-08-30.md`
-- `docs/validation/remote-journal-reconciliation-2026-08-30.md`
-- `docs/validation/ssh-transfer-disconnect-2026-08-30.md`
+主要evidence:
 
-## 次の推奨作業
+- `docs/validation/phase5-local-restore-preview-2026-09-04.md`
+- `docs/validation/phase5-backup-inventory-ui-2026-09-04.md`
+- `docs/validation/phase5-local-user-apply-sandbox-2026-09-04.md`
+- `docs/validation/phase5-production-apply-audit-2026-09-04.md`
+- `docs/validation/phase5-approval-invalidation-2026-09-03.md`
+- `docs/validation/phase5-change-planning-2026-09-02.md`
+- `docs/validation/phase5-controlmaster-integration-2026-09-02.md`
+- `docs/validation/phase5-qt-runtime-2026-09-01.md`
 
-まずPhase 4 closure auditを行う。
+## 次の作業
 
-1. `README.md`、roadmap、traceability、safe-apply、packaging、全validation evidenceとPhase 4 test/sourceを照合
-2. roadmap/traceability内の古い「Debian 13差異待ち」「desktop positive待ち」「実PolicyKit未実施」記述を分類
-   - 完了済みなら更新
-   - 実Ollama/OpenCode targetへのApplyを意図する項目は、禁止境界のため未実施であることを明記し、Gate専用unit成功と混同しない
-3. Phase 4 Exit条件と重要な未完了Gateを再判定
-4. safe boundaryを拡張せず完了できる文書・test整合性修正を行う
-5. 全必須検査を実行し、closure auditをcommit/push
-6. Phase 4 Exitを満たすなら、次をPhase 5 PySide6 GUI開始として明示する
+まずlocal production restore composition可否を監査する。
 
-## 現時点で意図的に未実施または次Phase
+1. restore preview/preflight/executor/evidence、local inventory、UI composition、関連testを照合
+2. productionで次を同時に満たせるか判定
+   - local user、単一OpenCode config targetだけ
+   - encrypted backupは既存Secret Service providerを使用
+   - state root配下のrestore execution store/auditを0700/0600で分離
+   - preview/approval/preflight authorizationの短いexpiry
+   - mutation直前のstrict再検証
+   - attempt保存・開始audit成功前にmutationしない
+   - attempt-only/UNKNOWNから自動retryしない
+3. compositionを接続してもGUI実行buttonはまだ追加しない。sandbox production-root overrideで先にGateする
+4. materialな仕様変更が不要なら実装し、全必須検査、commit/push
+5. 実configを変更するdesktop Gateが必要ならGate専用一時XDG rootだけを使う。実`~/.config/opencode`は変更しない
 
-- 実Ollama/OpenCode設定へのApply/rollback（無断変更禁止。Gate専用unitで特権/systemd境界だけ検証済み）
-- Debian 13 installed desktopへの正式deb実install lifecycle
-  - Gate-only control packageでruntime/lifecycle実施、正式artifactはbuild/verify/APT simulationまで完了
-  - closure auditで追加実installがPhase 4 Exitに必要か、安全境界とevidenceから判断する
-- GUI Phase 5
+## 重要な安全境界
 
-## 安全境界
-
-- evidence削除は実行直前再検証＋参照逆順。`PARTIAL`/`FAILED`後は自動再削除しない
-- journal/backup reconciliationはread-onlyで、自動Apply/rollbackしない
-- `executing` receiptを自動再実行しない
-- local正本はremote失敗時も保持する
-- staging cleanup以外のmutation retryは明示requestなしに行わない
+- local restore executorは単一target限定。複数targetはfail closed
+- previewはmetadata-only。content/鍵をUIへ渡さない
+- authorizationはattempt保存で一回消費。attempt-onlyは自動再実行しない
+- commit後evidence失敗を未変更と推測しない
+- inventory/reconciliationはread-onlyでmutation authorityにしない
+- remote inventoryはsafeな固定列挙protocolがない限り未接続
+- `PARTIAL`/`FAILED`/`UNKNOWN`後のmutation retryには新しい明示requestが必要
+- local正本はremote失敗時も保持
 - remote journal取得は固定`read-journal-evidence <operation-id> <request-hash>`だけ
-- remote evidenceはstatusを含めlocal journalへbindingする
-- passwordless read権限がない場合、sudo timestamp共有へ依存しない
 
 ## 作業制約
 
@@ -179,6 +144,7 @@ LLM-Managerの作業を引き継ぎ、Phase 4 Safe Apply Coreのclosure auditを
 - venv作成、`pip install`禁止
 - 実Ollama/OpenCode/systemd/SSH設定を変更しない
 - sandbox/fakeを実機より先に使い、既存変更を尊重する
+- PySide6 runtime Gateは既存Ubuntu VMを使う。installが本当に必要になった場合だけユーザーへ知らせる
 - 実装後は必ず実行:
 
 ```bash
@@ -201,10 +167,13 @@ git diff --check
 - `docs/safe-apply.md`
 - `docs/packaging.md`
 - `docs/version-matrix.md`
-- `docs/validation/local-deb-desktop-positive-2026-08-31.md`
-- `docs/validation/debian13-desktop-packaging-2026-08-31.md`
-- `docs/validation/debian13-policykit-systemd-2026-08-31.md`
-- `packaging/`
-- Secret Service、PolicyKit、local/remote packagingの関連source/test
+- `docs/validation/phase5-local-restore-preview-2026-09-04.md`
+- `src/llm_manager/application/restore_preview.py`
+- `src/llm_manager/application/restore_preflight.py`
+- `src/llm_manager/infrastructure/local_restore.py`
+- `src/llm_manager/infrastructure/restore_execution.py`
+- `src/llm_manager/infrastructure/local_apply_inventory.py`
+- `src/llm_manager/ui/composition.py`
+- restore/inventory/Qt関連test
 
 ---
