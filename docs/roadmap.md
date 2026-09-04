@@ -231,6 +231,8 @@ Local root diagnosis/planning composition: production local診断へ同梱helper
 
 Local root Apply composition: local/root-only ChangeSetをprivate user state、Secret Service backup、固定systemd allowlist、user staging、pkexec-only runner、helper二重readiness、runtime validation、journal、redacted audit、別rollback requestへ束ねるtask factoryを追加した。local user/root routerはmixed privilegeを拒否する。privileged coordinatorのaudit portをapproved/backup/commit/rollback終端へ接続した。sandbox compositionと既存PolicyKit coreを含むfocused 18件が成功した。production entrypointへrouterは注入したが`local_root` availabilityは未公開である。次はUbuntu 26.04/PySide6 sandbox GUI Results Gateで全終端とdeny/cancelを検証する。
 
+Local root Qt Gate preparation: fake helperと一時stateだけを使うQt Results testを追加した。main hostではPySide6不在のためskipし、既存Ubuntu VMはguest agent無応答かつlease addressのSSH拒否で到達できなかった。VM設定やsystem policyを変更せずGateを保留し、`local_root` availabilityは未公開を維持する。
+
 ## Post-MVP
 
 優先候補:

@@ -429,6 +429,110 @@ class QtRuntimeTests(unittest.TestCase):
             finally:
                 window.close()
 
+    def test_results_runs_local_root_composition_with_sandbox_helper(self) -> None:
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import MagicMock
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.apply_availability import (
+            ApplyRoute,
+            AssessProductionApplyAvailability,
+        )
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.application.optimization import stable_hash
+        from llm_manager.domain.enums import HostKind
+        from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
+        from llm_manager.ui.composition import LocalRootApplyTaskFactory
+        from llm_manager.ui.qt_window import MainWindow
+        from llm_manager.ui.workflow import GuiPresenter, GuiState, GuiStep, WorkflowStatus
+        from tests.fixtures import report
+        from tests.test_privileged_apply import (
+            _BackupStore,
+            _RuntimeValidator,
+            _WorkflowInvoker,
+            _approved,
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            observed = report()
+            current, approval, _ = _approved()
+            changes = replace(current.change_set, host_id=observed.host.host_id)
+            current = replace(
+                current,
+                report_id=observed.report_id,
+                report_hash=stable_hash(observed),
+                change_set=changes,
+            )
+            approval = replace(
+                approval,
+                report_hash=current.report_hash,
+                change_set_hash=changes.content_hash,
+            )
+            backend = _WorkflowInvoker(None)
+            probe = MagicMock()
+            probe.inspect.return_value.root_apply_allowed = True
+            apply_factory = LocalRootApplyTaskFactory(
+                (HostCandidate(observed.host.host_id, HostKind.LOCAL, "Local"),),
+                SubprocessRunner(ProcessPolicy(frozenset())),
+                SubprocessRunner(ProcessPolicy(frozenset())),
+                root / "state",
+                root / "runtime" / "helper",
+                probe,
+                backup_store_factory=lambda store_root, _allowed, _cipher: _BackupStore(
+                    backend, store_root
+                ),
+                runtime_validator_factory=lambda _host: _RuntimeValidator(True),
+                invoker_factory=lambda _staging, _runner: backend,
+            )
+            presenter = GuiPresenter()
+            window = MainWindow(
+                lambda _host: lambda _token: observed,
+                presenter=presenter,
+                apply_task_factory=apply_factory,
+                apply_availability_service=AssessProductionApplyAvailability(
+                    frozenset({ApplyRoute.LOCAL_ROOT})
+                ),
+            )
+            try:
+                presenter._state = GuiState(
+                    step=GuiStep.RESULTS,
+                    status=WorkflowStatus.SUCCESS,
+                    selected_host_id=observed.host.host_id,
+                    report=observed,
+                    plan_hash=changes.content_hash,
+                    approved_plan_hash=changes.content_hash,
+                    approval_id=approval.approval_id,
+                )
+                window._recommendation_plan = current
+                window._approval_record = approval
+                window._render()
+                run_apply = window.findChild(QPushButton, "run-sandbox-apply")
+                summary = window.findChild(QLabel, "results-summary")
+                self.assertTrue(run_apply.isEnabled())
+                run_apply.click()
+                loop = QEventLoop()
+
+                def finish() -> None:
+                    if "committed" in summary.text():
+                        loop.quit()
+                    else:
+                        QTimer.singleShot(5, finish)
+
+                QTimer.singleShot(0, finish)
+                QTimer.singleShot(2000, loop.quit)
+                loop.exec()
+                self.assertIn("committed", summary.text())
+                state = root / "state" / "llm-manager"
+                self.assertTrue((state / "audit" / "HEAD").is_file())
+                self.assertTrue(any((state / "journal").glob("*.json")))
+                self.assertEqual(probe.inspect.call_count, 2)
+            finally:
+                window.close()
+
     def test_results_shows_rollback_and_recovery_required_from_local_composition(self) -> None:
         import hashlib
         import tempfile
