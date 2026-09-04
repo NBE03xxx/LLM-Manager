@@ -533,6 +533,90 @@ class QtRuntimeTests(unittest.TestCase):
             finally:
                 window.close()
 
+    def test_results_routes_report_bound_ssh_user_apply_and_renders_commit(self) -> None:
+        from unittest.mock import MagicMock
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.apply_availability import (
+            ApplyRoute,
+            AssessProductionApplyAvailability,
+        )
+        from llm_manager.application.optimization import stable_hash
+        from llm_manager.domain.enums import HostKind, PlanStatus
+        from llm_manager.infrastructure.safe_apply import ApplyOutcome
+        from llm_manager.ui.qt_window import MainWindow
+        from llm_manager.ui.workflow import GuiPresenter, GuiState, GuiStep, WorkflowStatus
+        from tests.fixtures import plan, report
+
+        observed = report()
+        ssh_host = replace(
+            observed.host,
+            host_id="ssh:gate-box",
+            kind=HostKind.SSH,
+            ssh_alias="gate-box",
+            fingerprint="SHA256:" + "a" * 43,
+        )
+        observed = replace(observed, host=ssh_host)
+        current = plan()
+        changes = replace(current.change_set, host_id=ssh_host.host_id)
+        current = replace(
+            current,
+            report_id=observed.report_id,
+            report_hash=stable_hash(observed),
+            change_set=changes,
+        )
+        approval = MagicMock()
+        approval.approval_id = "approval-ssh-gate"
+        calls = []
+
+        def apply_factory(received_plan, received_report, received_approval):
+            calls.append((received_plan, received_report, received_approval))
+            return lambda _token: ApplyOutcome(PlanStatus.COMMITTED, None)
+
+        presenter = GuiPresenter()
+        window = MainWindow(
+            lambda _host: lambda _token: observed,
+            presenter=presenter,
+            apply_task_factory=apply_factory,
+            apply_availability_service=AssessProductionApplyAvailability(
+                frozenset({ApplyRoute.SSH_USER})
+            ),
+        )
+        try:
+            presenter._state = GuiState(
+                step=GuiStep.RESULTS,
+                status=WorkflowStatus.SUCCESS,
+                selected_host_id=ssh_host.host_id,
+                report=observed,
+                plan_hash=changes.content_hash,
+                approved_plan_hash=changes.content_hash,
+                approval_id=approval.approval_id,
+            )
+            window._recommendation_plan = current
+            window._approval_record = approval
+            window._render()
+            run_apply = window.findChild(QPushButton, "run-sandbox-apply")
+            summary = window.findChild(QLabel, "results-summary")
+            self.assertTrue(run_apply.isEnabled())
+            run_apply.click()
+            loop = QEventLoop()
+
+            def finish() -> None:
+                if PlanStatus.COMMITTED.value in summary.text():
+                    loop.quit()
+                else:
+                    QTimer.singleShot(5, finish)
+
+            QTimer.singleShot(0, finish)
+            QTimer.singleShot(2000, loop.quit)
+            loop.exec()
+            self.assertIn(PlanStatus.COMMITTED.value, summary.text())
+            self.assertEqual(calls, [(current, observed, approval)])
+        finally:
+            window.close()
+
     def test_results_shows_rollback_and_recovery_required_from_local_composition(self) -> None:
         import hashlib
         import tempfile

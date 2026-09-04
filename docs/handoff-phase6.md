@@ -16,12 +16,12 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最初の作業
 
-Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、remote home/global config discovery、recommendation、fresh read、diff生成、unprivileged fixed Apply/rollback protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy preparation、Apply/validate/rollback coordinatorは追加済みだが、availabilityはまだ未公開。
+Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行した。SSH diagnosis、remote home/global config discovery、recommendation、fresh read、diff生成、unprivileged fixed Apply/rollback protocol、request-last OpenSSH transport、同一resultのread-only reconciliation、stable remote snapshot、dual-copy preparation、Apply/validate/rollback coordinator、Qt Results Gateまで完了し、SSH user availabilityを公開した。
 
-1. PySide6 sandbox GUI Gateは24件成功、実SSH Apply→validation failure→自動rollback Gate、Apply/rollbackの実transport disconnect reconciliation Gateも成功済み。次は保持中Gate evidenceのexact cleanupとGUI Results Gateを行う。
+1. PySide6 sandbox GUI Gate、実SSH Apply→validation failure→自動rollback Gate、Apply/rollbackの実transport disconnect reconciliation Gate、全Gate evidenceのexact cleanup、SSH user GUI Results Gateが成功済み。
 2. VMにOpenCode本体はないため追加済みGate専用runtime validator seamを使用し、production既定`ProductRuntimeValidator`は変更しない。切断時は同一immutable resultを再照合し、mutationを自動retryしない。
-3. 実SSH Gateでは未作成の`/home/yoshimi/.config/opencode/opencode.jsonc`だけを一時対象とし、最終不存在を確認した。現在root recovery copy 1件、remote key、helper deb、SSH Server/公開鍵を保持している。次にlocal/remote backup、root key、user staging、helper deb、Gate artifactをexact cleanupし、SSH Server/公開鍵の扱いはユーザーへ確認する。
-4. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
+3. 実SSH Gateのlocal/remote backup、root key、user staging、helper package/deb、target、Gate用空directoryはcleanup済み。SSH Server/公開鍵だけは意図的に保持し、扱いをユーザーへ確認する。
+4. `ssh_user` availabilityは公開済み。全必須検査後にcommitして`origin/main`へpushし、次は未完了route/Release監査へ進む。
 
 ## Phase 6残件分類
 

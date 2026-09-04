@@ -105,7 +105,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ssh_user_apply_tasks = SshUserApplyTaskFactory.production(tasks)
     apply_tasks = ProductionApplyTaskFactory(local_apply_tasks, ssh_user_apply_tasks)
     apply_availability = AssessProductionApplyAvailability(
-        frozenset({ApplyRoute.LOCAL_USER})
+        frozenset({ApplyRoute.LOCAL_USER, ApplyRoute.SSH_USER})
     )
     backup_inventory_tasks = LocalBackupInventoryTaskFactory.production(hosts)
     restore_tasks = LocalUserRestoreTaskFactory.production(hosts)

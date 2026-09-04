@@ -32,6 +32,20 @@ Applyとrollbackはいずれもinvoke回数は1回で、例外後は同じreques
 
 Gate専用Apply/rollback stagingは固定cleanup経路で削除し、両operation directory不在を実SSHで確認した。root recovery copyやkeyはこのuser-only transport Gateでは変更していない。
 
+## Exact Gate cleanup
+
+全実SSH Gate後、固定backup path、`remote-master-v1.key`、remote helper package/metadata、VM/host両方のdeb、Apply/rollback staging、Gate target、Gateで作成した空OpenCode directoryを削除し、不存在を個別に確認した。空directoryは`rmdir`だけを使い、予期しない内容があれば削除しない境界とした。
+
+SSH ServerとVM userの`authorized_keys`は製品外の接続環境であるため自動削除せず、稼働・残存を確認してユーザー判断待ちとした。
+
+## Qt Results Gate and availability
+
+Results画面で`SSH_USER`だけを明示的に有効化したsandbox testを追加した。report-bound SSH planとapprovalを設定するとApply buttonが有効になり、workerへ同一`plan/report/approval`が渡され、`COMMITTED`結果が表示されることを検証する。SSH rootとmixed privilegeのfail-closed境界は変更していない。
+
+artifact SHA-256 `823c9d072c6cfb8f52971f541a5a05578a751865893f90e38d530d283c28872f`をUbuntu 26.04 VMへ転送し、Python 3.14 / PySide6 6.10.2 / offscreen環境で対象1件が0.108秒で成功した。VM/hostのGate artifactは終了後に削除して不存在を確認した。
+
+実Apply/automatic rollback、Apply/rollback両方のdisconnect reconciliation、exact cleanup、Qt Results routingがすべて成功したため、production availabilityへ`SSH_USER`を追加した。remote helperが未導入・不正、fingerprint変更、認証不可、sudo不可、Secret Service不可、root changeでは既存の各境界が引き続きfail closedとなる。
+
 ## Observed fail-closed preflight
 
 最初に`yoshimi@192.168.122.48`をaliasとして試した際、`@`を許可しないremote protocol host ID境界がrequest生成前に拒否し、local backupだけを残してApplyしなかった。SSH configを変更せず、同名local/remote userのsystem OpenSSH既定を使ってaliasを`192.168.122.48`へ限定し、protocol-safe host IDで再実行した。これはdisposable Gateに限った便宜であり、local/remote user名の一致は製品要件ではない。productionでは`User`、`HostName`、`IdentityFile`をsystem OpenSSH configの安全なaliasへ保持し、LLM-Managerには`@`を含まないaliasだけを渡す。失敗時local artifactは削除済みで、remote staging、root backup、key、target mutationは発生しなかった。
