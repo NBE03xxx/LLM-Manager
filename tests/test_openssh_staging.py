@@ -25,6 +25,7 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
             staging.upload_private_file(f"{PATH}/request.json", b"secret backup content")
             staging.invoke_recovery_helper("backup-1", "b" * 64, CancellationToken())
             staging.invoke_user_apply("apply-1", "c" * 64, CancellationToken())
+            staging.invoke_user_rollback("rollback-1", "d" * 64, CancellationToken())
             self.assertEqual(staging.read_private_file(f"{PATH}/result.json", 1024), b"receipt")
             staging.remove_private_tree(PATH)
             prepare = process.requests[0].argv
@@ -38,7 +39,9 @@ class OpenSshUserStagingRunnerTests(unittest.TestCase):
             user_apply = process.requests[2].argv
             self.assertEqual(user_apply[:6], ("ssh", "-S", "/tmp/llm-manager-cm", "-o", "BatchMode=yes", "--"))
             self.assertIn("user-apply apply-1", user_apply[-1])
-            self.assertEqual(staging.readiness_gate.calls, 3)
+            user_rollback = process.requests[3].argv
+            self.assertIn("user-rollback rollback-1", user_rollback[-1])
+            self.assertEqual(staging.readiness_gate.calls, 4)
             self.assertEqual((Path(directory) / "runtime").stat().st_mode & 0o777, 0o700)
 
     def test_rejects_alias_path_and_invocation_injection(self) -> None:

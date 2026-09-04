@@ -33,3 +33,9 @@ mutationを行わない`PrepareSshUserApply`を追加した。exact report/plan/
 sandbox root recovery storeを使う統合caseを含むfocused 4件で、local captured copy、独立remote AES-GCM key scope、両copy verify、remote failure、report/fingerprint/target/stale bindingを確認した。preparation serviceはApply transportを保持せず、rollback protocolが完成するまでmutationを構造的に開始できない。
 
 次は同じmanifest/requestへ束縛したSSH user rollback protocolと、Apply result・runtime validation・rollback終端を管理するcoordinatorを構築する。
+
+## Fixed rollback protocol and transport
+
+unprivileged remote helperへ固定`user-rollback` operationを追加した。canonical rollback requestはApply request hash、plan/change set、backup/local manifest、host ID/fingerprint、target、期待する現在のafter hash、元の存在有無・content hash・mode、短いexpiryを束縛する。現在hashがApply結果から変わっていればmutation前に停止する。元が存在した場合はlocal正本由来payloadをrequest-last staging後に元modeでatomic replaceし、元が不存在なら単一unlink＋directory fsyncを行う。
+
+OpenSSH transportは固定helper argvだけを呼び、bounded canonical resultの全bindingを照合する。切断後は同一requestのresultをread-only取得し、rollbackを自動再実行しない。existing/created target、stale、payload/tamper、root拒否、取消、reconciliationを含むfocused 11件が成功した。次はpreparationが保持するmanifestからrollback requestを生成し、Apply・validation・rollback終端をcoordinatorへ接続する。

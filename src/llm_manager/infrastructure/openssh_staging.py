@@ -103,6 +103,20 @@ class OpenSshUserStagingRunner:
             "ssh.user_apply.invoke",
         )
 
+    def invoke_user_rollback(
+        self, request_id: str, request_hash: str, cancellation: CancellationToken
+    ) -> None:
+        if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
+            raise AdapterError("invalid_remote_invocation", "remote helper identity is invalid")
+        if cancellation.cancelled:
+            from llm_manager.application.errors import OperationCancelled
+            raise OperationCancelled("remote user rollback cancelled")
+        self.readiness_gate.assert_ready(cancellation)
+        self._ssh(
+            (REMOTE_HELPER, "user-rollback", request_id, request_hash),
+            "ssh.user_rollback.invoke",
+        )
+
     def read_private_file(self, relative_path: str, max_bytes: int) -> bytes:
         path = _relative_path(relative_path)
         if max_bytes <= 0:

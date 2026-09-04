@@ -239,6 +239,8 @@ SSH remote snapshot local backup: SSH host ID/fingerprintをbackup直前に再�
 
 SSH user dual-copy preparation: exact report/plan/approval、SSH fingerprint、単一allowlist済みnon-root targetを再検証し、local captured storeと既存root-owned remote recovery storeの全verification成功後だけ、local正本からpayloadとmanifest-bound canonical Apply requestを生成するmutation-free serviceを追加した。片側copy失敗ではrestore-items/request生成へ進まない。sandboxの実local manifest＋remote AES-GCM recovery storeを通し、remote key scopeが`remote_root`であることも含むfocused 4件が成功した。serviceはApply transportを持たないため、rollback protocol完成前のmutationは構造的に不能である。次はmanifest/request-bound SSH user rollbackとApply/validate/rollback coordinatorを構築する。
 
+SSH user fixed rollback protocol/transport: Apply request hash、plan/change set、backup/local manifest、host/fingerprint、target、期待する現在after hash、元の存在/hash/mode、expiryをcanonical requestへ束縛するunprivileged `user-rollback` helperを追加した。stale targetと不正payloadをmutation前に拒否し、既存fileは元modeでatomic replace、Applyが作成したfileは単一unlink＋directory fsyncで戻す。OpenSSH transportはpayload-first/request-last、固定argv、bounded result完全照合を行い、切断後は同一resultのread-only再取得だけを許す。focused 11件が成功した。次はmanifestからrollback requestを生成し、Apply/runtime validation/rollback/journal/audit coordinatorへ接続する。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP
