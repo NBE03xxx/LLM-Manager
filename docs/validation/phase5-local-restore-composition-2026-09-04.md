@@ -21,10 +21,14 @@ local userの単一OpenCode config targetに限り、既存restore coreをproduc
 
 restore/preflight/execution/inventoryを合わせたfocused 20件が0.023秒で成功した。実`~/.config/opencode`、Ollama、systemd、SSH設定は変更していない。
 
-main hostの全443件は0.508秒で成功し、PySide6依存11件は未導入のためskipした。compileall、local/remote packaging shell構文、`git diff --check`も成功した。
+main hostの全444件は0.515秒で成功し、PySide6依存11件と明示desktop Gate 1件の計12件はskipした。compileall、local/remote packaging shell構文、`git diff --check`も成功した。
 
-既存`ubuntu26.04` VMは稼働中だがQEMU guest agentが応答せず、DHCP leaseの`192.168.122.48`ではSSH serviceがlistenしていなかった。このためdesktop session内のSecret Service Gateは今回未実施であり、sandbox結果を実desktop evidenceとは扱わない。
+## Ubuntu desktop Secret Service Gate
+
+既存`ubuntu26.04` VMはQEMU guest agentとSSH serviceを利用できなかったため、ログイン済みdesktop terminalへlibvirt keyboard入力し、hostの一時HTTP artifactをVMの`/tmp/llm-manager-restore-gate`へ取得した。artifact SHA-256は`baed286e62ad4477240f9663cb8f0ec912557e099a329e27da18bd318894d98b`で一致した。
+
+desktop sessionの実Secret Service providerでGate専用keyを作成し、VMの一時config/stateだけを対象に暗号化backup、metadata-only preview、approval、preflight、production factory restoreを実行した。1件が0.080秒で成功し、復元内容、COMMITTED evidence、暗号化envelope、Secret Service item 1件を確認後、finally cleanupでGate keyが0件になったことを確認した。VMの一時Gate directoryも削除した。実`~/.config/opencode`、systemd、SSH設定は変更していない。
 
 ## Next
 
-GUI execution controlはまだ追加しない。次はGate専用一時XDG rootと既存Ubuntu desktop VMのSecret Serviceを使い、production factoryの暗号化restore compositionを実desktopで検証する。
+GUI execution controlはまだ追加しない。次はrestore authorizationをQt workerへ渡す直前のUI失効・二重実行防止境界を監査する。

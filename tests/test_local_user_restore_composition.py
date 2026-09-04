@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import tempfile
 import unittest
+import uuid
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
@@ -14,6 +16,7 @@ from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
 from llm_manager.infrastructure.backup import LocalBackupStore
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 from llm_manager.infrastructure.restore_execution import RestoreExecutionState, RestoreExecutionStore
+from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider, SecretStorageBackend
 from llm_manager.ui.composition import LocalUserRestoreTaskFactory
 
 
@@ -111,6 +114,74 @@ class LocalUserRestoreTaskFactoryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "requires_local"):
                 factory.prepare("ssh:test", "backup", object(), object())
             self.assertFalse((root / "state" / "llm-manager").exists())
+
+
+@unittest.skipUnless(
+    os.environ.get("LLM_MANAGER_SECRET_SERVICE_GATE") == "1",
+    "explicit Secret Service desktop Gate is disabled",
+)
+class LocalUserRestoreSecretServiceGateTests(unittest.TestCase):
+    def test_real_secret_service_encrypted_restore_and_key_cleanup(self) -> None:
+        import secretstorage
+
+        reference = f"phase5-local-restore-gate-{uuid.uuid4().hex}"
+        attributes = {
+            "application": "llm-manager",
+            "purpose": "backup-encryption",
+            "key-reference": reference,
+        }
+        connection = secretstorage.dbus_init()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                config = root / "config"
+                target_root = config / "opencode"
+                target_root.mkdir(parents=True)
+                target = target_root / "opencode.json"
+                target.write_text("old", encoding="utf-8")
+                state = root / "state" / "llm-manager"
+                state.mkdir(parents=True, mode=0o700)
+                state.chmod(0o700)
+                change = Change(
+                    "change", str(target), ChangeOperation.REPLACE_FILE, "old", "new",
+                    hashlib.sha256(b"old").hexdigest(), "masked", source_span=(0, 3),
+                    replacement_text="new",
+                )
+                changes = ChangeSet("changes", "local:test", (change,), "c" * 64)
+                encryption = EncryptionInfo(
+                    True, "AES-256-GCM", 1, reference, "local_secret_service"
+                )
+                provider = SecretServiceKeyProvider(SecretStorageBackend())
+                store = LocalBackupStore(
+                    state / "backups", (target_root,), AesGcmBackupCipher(provider)
+                )
+                manifest = store.create(BackupRequest(
+                    "backup-1", "plan-1", "local:test", None, changes, encryption
+                ), CancellationToken())
+                target.write_text("new", encoding="utf-8")
+                preview = CreateRestorePreview().execute(manifest)
+                approval = CreateRestoreApproval().execute(
+                    preview, "restore-approval", "desktop-gate", True
+                )
+                factory = LocalUserRestoreTaskFactory(
+                    (HostCandidate("local:test", HostKind.LOCAL, "Local"),),
+                    config, root / "state",
+                )
+                authorization = factory.prepare(
+                    manifest.host_id, manifest.backup_id, preview, approval
+                )(CancellationToken())
+
+                evidence = factory(authorization)(CancellationToken())
+
+                self.assertEqual(evidence.state, RestoreExecutionState.COMMITTED)
+                self.assertEqual(target.read_text(encoding="utf-8"), "old")
+                self.assertEqual(len(list(secretstorage.search_items(connection, attributes))), 1)
+                envelope = next((state / "backups").rglob("*.enc")).read_bytes()
+                self.assertNotIn(b"old", envelope)
+        finally:
+            for item in secretstorage.search_items(connection, attributes):
+                item.delete()
+            self.assertEqual(list(secretstorage.search_items(connection, attributes)), [])
 
 
 if __name__ == "__main__":

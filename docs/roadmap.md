@@ -201,6 +201,8 @@ Restore execution restart inventory: store全entryをstrict検証し、未知ent
 
 Local user restore production composition: local hostと単一OpenCode config targetに限定し、既存Secret Service provider、strict preflight、復号前後のtarget再検証、分離した0700/0600 execution store、hash-chain auditを一つのfactoryへ束ねた。attempt保存と開始auditより前にmutationせず、失敗・attempt-only・UNKNOWNから自動retryしない。sandbox production-root overrideで暗号化restore、外部変更拒否、immutable replay拒否をGateした。GUI実行controlと実config mutationは未接続を維持する。
 
+Local restore desktop Gate: Ubuntu 26.04のログイン済みdesktop sessionで実Secret ServiceとGate専用key、一時config/stateを使い、暗号化backupからproduction factoryで単一targetを復元した。COMMITTED evidence/audit、暗号化envelope、key cleanupを確認し、1件が0.080秒で成功した。実OpenCode設定は変更していない。次はQt実行境界の失効・二重実行防止監査である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

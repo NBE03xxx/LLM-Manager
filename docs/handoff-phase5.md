@@ -92,7 +92,8 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新validation
 
-- main host全test: 443件成功、PySide6依存11件skip
+- main host全test: 444件成功、PySide6依存11件と明示desktop Gate 1件の計12件skip
+- Ubuntu 26.04 desktop Secret Service restore Gate: 1件、0.080秒、成功。Gate keyと一時directoryはcleanup済み
 - Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
 - 直前artifact SHA-256: `11fe7441870b0f259c56d10132224f03339e52e68ed39f3bda49865c71b7539b`
 - ユーザー側`/tmp/llm-manager-ui-gate`は未cleanupの可能性あり
@@ -111,20 +112,13 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 次の作業
 
-まずlocal production restore compositionのdesktop Gate可否を監査する。
+まずlocal production restoreのQt実行境界を監査する。
 
-1. sandbox composition testとproduction factory、既存Secret Service desktop Gateを照合
-2. productionで次を同時に満たせるか判定
-   - local user、単一OpenCode config targetだけ
-   - encrypted backupは既存Secret Service providerを使用
-   - state root配下のrestore execution store/auditを0700/0600で分離
-   - preview/approval/preflight authorizationの短いexpiry
-   - mutation直前のstrict再検証
-   - attempt保存・開始audit成功前にmutationしない
-   - attempt-only/UNKNOWNから自動retryしない
-3. GUI実行buttonはまだ追加しない。Gate専用一時XDG rootで実desktop Gateする
-4. materialな仕様変更が不要ならevidenceを更新し、全必須検査、commit/push
-5. 実configを変更するdesktop Gateが必要ならGate専用一時XDG rootだけを使う。実`~/.config/opencode`は変更しない
+1. preview/approval/preflight authorizationとQt host lock、worker、expiry timerを照合
+2. host/refresh/selection/timer失効後にauthorizationを生成・実行できないことを判定
+3. double click、worker中のhost変更、完了後replayをfail closedにする契約を設計
+4. GUI実行buttonを接続する場合もsandbox factoryから先にGateし、production既定は監査完了まで公開しない
+5. materialな仕様変更が不要なら実装し、全必須検査、commit/push
 
 ## 重要な安全境界
 
