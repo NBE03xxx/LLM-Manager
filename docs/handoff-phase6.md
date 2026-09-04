@@ -12,17 +12,17 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - branch: `main`
 - Phase 0〜5完了。Phase 5 closure根拠は`docs/validation/phase5-closure-audit-2026-09-04.md`
 - production GUIで完成・公開済みのmutation routeはlocal user Applyと単一OpenCode target restoreだけ
-- local root、SSH user、SSH rootは固定理由でI/O前にfail closed
+- local root、SSH user、SSH rootは固定理由でI/O前にfail closed。local rootはcomposition/Gate済みだが、根拠あるactionable Ollama rule確定まで公開を保留する
 
 ## 最初の作業
 
-Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planning、production local helper診断、target別GUI planning、local root Apply task compositionは完了済み。availabilityはまだ未公開。
+Phase 6のSSH user production Apply経路を続ける。ユーザー判断によりlocal rootは安全にfail closedのまま後続へ送り、SSH userを先行する。SSH diagnosis、recommendation、fresh read、diff生成は既存実装で完了している。最初のunprivileged fixed Apply protocolとsandbox executorは追加済みだが、availabilityはまだ未公開。
 
-1. default rule catalog、optimization要件、setting allowlist、Ollama plannerを照合し、root Ollama recommendationをGUIで生成できるかDoD監査する。
-2. 根拠のない「最適値」を追加せず、既存の検証済みruleだけで閉じられる最小sliceを決める。materialな推奨仕様変更が必要ならユーザーへ確認する。
-3. 実PolicyKit Gateが必要な場合は既存Gate専用targetだけを使い、実Ollama/OpenCode設定や既存systemd unitを変更しない。
-4. root recommendation→Review→Applyの全経路Gate完了後だけ`local_root` availabilityを公開する。
-5. 全必須検査後、commitして`origin/main`へpushする。
+1. `remote_user_apply.py`のcanonical request/executorと`user-apply` helper commandへ、固定OpenSSH staging/invoke/result transportを接続する。
+2. local authoritative backupとremote user-owned recovery copyの双方をApply前に検証し、host fingerprint・manifest・request identityを一貫して束縛する。
+3. SSH切断時は同一immutable request/resultを再照合し、Applyを自動retryしない。rollback、runtime validation、journal/audit終端までsandbox故障注入で閉じる。
+4. 実SSH Gateが必要になった時点でVMへのSSH Server導入をユーザーへ依頼する。それまでは実VMや実OpenCode設定を変更しない。
+5. GUI Results Gate完了後だけ`ssh_user` availabilityを公開し、全必須検査後にcommitして`origin/main`へpushする。
 
 ## Phase 6残件分類
 

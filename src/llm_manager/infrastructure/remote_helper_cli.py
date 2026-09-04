@@ -20,6 +20,7 @@ from .backup import _within
 from .remote_journal import RemoteRootJournalEvidenceStore, decode_remote_journal_evidence
 from .remote_retention import RemoteRetentionHelperExecutor
 from .remote_deletion import RemoteDeletionHelperExecutor
+from .remote_user_apply import RemoteUserApplyExecutor
 
 
 REMOTE_USER_ROOT = PurePosixPath(".local/state/llm-manager/remote-helper")
@@ -60,6 +61,18 @@ def run_remote_helper(
             else:
                 _cleanup(home, relative, uid)
             return 0, _result(True, argv[0])
+        if len(argv) == 3 and argv[0] == "user-apply":
+            if euid != uid or euid == 0:
+                raise AdapterError("invalid_remote_user", "user apply requires an unprivileged user")
+            request_id, request_hash = argv[1:]
+            if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
+                raise AdapterError("invalid_remote_user_apply_invocation", "apply identity is invalid")
+            home = _safe_home(home_lookup(uid))
+            staging_root = home / Path(REMOTE_USER_ROOT.as_posix())
+            content = RemoteUserApplyExecutor(staging_root, home, uid).execute(
+                request_id, request_hash, token
+            )
+            return 0, content
         if len(argv) == 3 and argv[0] == "invoke-recovery":
             if euid != 0:
                 raise AdapterError("root_required", "remote recovery invocation requires root")
