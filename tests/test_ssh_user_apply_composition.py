@@ -151,6 +151,19 @@ class SshUserApplyTaskFactoryTests(unittest.TestCase):
                 0o700,
             )
 
+    def test_runtime_validator_is_injectable_without_changing_production_default(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            factory = self._factory(Path(directory))
+            validator = MagicMock()
+            build_validator = MagicMock(return_value=validator)
+            factory.runtime_validator_factory = build_validator
+            coordinator = factory._coordinator(
+                MagicMock(), "remote", None,
+                {ABSOLUTE: ".config/opencode/opencode.jsonc"},
+            )
+            self.assertIs(coordinator.validator, validator)
+            self.assertEqual(build_validator.call_args.args[1], (ABSOLUTE,))
+
     def test_missing_terminal_blocks_composition_before_backup_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

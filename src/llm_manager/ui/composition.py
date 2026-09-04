@@ -486,6 +486,11 @@ class SshUserApplyTaskFactory:
         SecretStorageBackend()
     )
     remote_key_reference: str = "remote-master-v1"
+    runtime_validator_factory: Callable[
+        [OpenSshHostAdapter, tuple[str, ...]], RuntimeValidatorPort
+    ] = lambda host, candidates: ProductRuntimeValidator(
+        host, OllamaReadOnlyAdapter(), OpenCodeReadOnlyAdapter(candidates)
+    )
 
     @classmethod
     def production(cls, diagnostics: DiagnosticTaskFactory) -> "SshUserApplyTaskFactory":
@@ -617,9 +622,7 @@ class SshUserApplyTaskFactory:
         )
         backups = DualCopyPrivilegedBackupStore(captured, remote)
         candidates = tuple(target_map)
-        validator = ProductRuntimeValidator(
-            host, OllamaReadOnlyAdapter(), OpenCodeReadOnlyAdapter(candidates)
-        )
+        validator = self.runtime_validator_factory(host, candidates)
         return SshUserSafeApplyCoordinator(
             PrepareSshUserApply(backups, target_map),
             PrepareSshUserRollback(backups),

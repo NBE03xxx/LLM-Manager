@@ -67,9 +67,10 @@ class PrepareSshUserApply:
         cancellation: CancellationToken,
     ) -> PreparedSshUserApply:
         _cancel(cancellation)
+        now = self.clock()
         if (
             plan.change_set is None
-            or not approval.is_valid_for(plan)
+            or not approval.is_valid_for(plan, now)
             or plan.report_id != report.report_id
             or plan.report_hash != stable_hash(report)
             or plan.change_set.host_id != report.host.host_id
@@ -111,7 +112,6 @@ class PrepareSshUserApply:
         payload = render_file_changes(content, list(changes))
         if len(payload) > MAX_ITEM_BYTES:
             raise AdapterError("item_too_large", "rendered SSH target exceeds 16 MiB")
-        now = self.clock()
         request = RemoteUserApplyRequest(
             REMOTE_USER_APPLY_PROTOCOL_VERSION,
             REMOTE_USER_APPLY_OPERATION,

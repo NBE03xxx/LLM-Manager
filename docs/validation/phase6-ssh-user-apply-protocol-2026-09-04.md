@@ -79,3 +79,9 @@ GUI Apply factory契約を`plan/report/approval`へ変更し、presenterが保�
 desktop VM `ubuntu26.04`、Python 3.14、PySide6 6.10.2、`QT_QPA_PLATFORM=offscreen`で`tests.test_ui_qt_runtime`、`tests.test_ui_qt_app`、`tests.test_ssh_user_apply_composition`の24件を実行し、0.903秒で全件成功した。実Qt worker上の既存local user/root Apply回帰、production entrypointのreport-bound router構成、stale report/SSH rootの事前拒否、SSH userへの同一report dispatchを確認した。
 
 Gate artifact SHA-256は`bff341f0c5699e8a69abe169c610da458dc484d5ac56e9ac15c4092857305b35`。転送・展開先はVMの`/tmp/llm-manager-ssh-user-gui-gate*`だけで、実OpenCode設定、Secret Service、SSH設定、systemdは変更していない。ホストの一時HTTP serverを停止し、VMとホスト双方のartifact不在を終了コード0で確認した。availabilityは実SSH Gateまで閉じたままにする。
+
+## Real SSH Gate preparation
+
+VMのOpenSSH Serverを起動し、`yoshimi@192.168.122.48`へ公開鍵BatchMode接続した。guest agentで取得したED25519 fingerprintとnetwork提示値はともに`SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA`、remote UIDは1000、hostnameは`KVM-PC`。remote helper artifact SHA-256 `a86c6d6c7c02fb437af59442738a07623ce003e9bff35be99f6d531239a11acf`を導入後、production strict probeはpackage `llm-manager-remote-helper`、version `0.1.0~dev0`、protocol 1で`READY`を返した。
+
+VMにOpenCode本体はないため、SSH factoryへGate用runtime validator注入点を追加した。production既定は実`ProductRuntimeValidator`のままである。同時に`PrepareSshUserApply`がrequest生成には注入clock、approval検証には実時計を使っていた差異を修正し、一回取得した同じclock値で双方を検証する。日付境界後もpreparation/coordinator/composition focused 22件が成功した。
