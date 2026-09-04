@@ -753,6 +753,108 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_restore_worker_locks_host_rejects_double_click_and_consumes_review(self) -> None:
+        from types import SimpleNamespace
+
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QCheckBox, QComboBox, QLabel, QListWidget, QPushButton
+
+        from llm_manager.application.restore_preview import RestorePreview, RestorePreviewItem
+        from llm_manager.domain.models import utc_now
+        from llm_manager.ui.qt_window import MainWindow
+
+        now = utc_now()
+        preview = RestorePreview(
+            "local", "backup-worker", "a" * 64, now,
+            now + timedelta(seconds=5), False,
+            (RestorePreviewItem("/tmp/config.json", True, "b" * 64, 0o600),),
+        ).with_hash()
+        item = SimpleNamespace(
+            backup_id="backup-worker", state="committed",
+            local_presence="present", remote_presence="absent",
+            protected=False, requires_attention=False, allowed_actions=(),
+        )
+        started = threading.Event()
+        release = threading.Event()
+        calls = []
+
+        def restore_factory(host_id, backup_id, bound_preview, approval):
+            calls.append((host_id, backup_id, bound_preview.preview_hash, approval.preview_hash))
+
+            def execute(_cancellation):
+                started.set()
+                release.wait(2)
+                return SimpleNamespace(state="committed")
+
+            return execute
+
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            backup_inventory_task_factory=lambda _host: lambda _token: (item,),
+            restore_preview_task_factory=lambda _host, _backup: lambda _token: preview,
+            restore_task_factory=restore_factory,
+        )
+        try:
+            refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+            inventory = window.findChild(QListWidget, "backup-inventory-list")
+            approval = window.findChild(QCheckBox, "approve-restore-preview")
+            run = window.findChild(QPushButton, "run-restore")
+            host = window.findChild(QComboBox, "host-selector")
+            status = window.findChild(QLabel, "restore-approval-status")
+            refresh.click()
+            ready = QEventLoop()
+
+            def approve_when_ready() -> None:
+                if inventory.count() == 1 and inventory.currentRow() < 0:
+                    inventory.setCurrentRow(0)
+                if approval.isEnabled():
+                    approval.click()
+                    ready.quit()
+                else:
+                    QTimer.singleShot(5, approve_when_ready)
+
+            QTimer.singleShot(0, approve_when_ready)
+            QTimer.singleShot(2000, ready.quit)
+            ready.exec()
+            self.assertTrue(run.isEnabled())
+            run.click()
+            run.click()
+
+            running = QEventLoop()
+
+            def finish_when_started() -> None:
+                if started.is_set():
+                    running.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_started)
+
+            QTimer.singleShot(0, finish_when_started)
+            QTimer.singleShot(2000, running.quit)
+            running.exec()
+            self.assertEqual(len(calls), 1)
+            self.assertFalse(run.isEnabled())
+            self.assertFalse(host.isEnabled())
+            self.assertIn("running", status.text().lower())
+            release.set()
+
+            completed = QEventLoop()
+
+            def finish_when_complete() -> None:
+                if host.isEnabled() and "completed" in status.text().lower():
+                    completed.quit()
+                else:
+                    QTimer.singleShot(5, finish_when_complete)
+
+            QTimer.singleShot(0, finish_when_complete)
+            QTimer.singleShot(2000, completed.quit)
+            completed.exec()
+            self.assertFalse(approval.isChecked())
+            self.assertFalse(run.isEnabled())
+            self.assertEqual(len(calls), 1)
+        finally:
+            release.set()
+            window.close()
+
 
 if __name__ == "__main__":
     unittest.main()

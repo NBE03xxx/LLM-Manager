@@ -104,6 +104,24 @@ class LocalUserRestoreTaskFactoryTests(unittest.TestCase):
                 factory(authorization)(CancellationToken())
             self.assertEqual(replay.exception.code, "restore_authorization_consumed")
 
+    def test_worker_task_keeps_authorization_internal(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            factory, manifest, _preview, _approval, target, _state = self._fixture(
+                Path(directory)
+            )
+            target.write_text("new", encoding="utf-8")
+            preview = CreateRestorePreview().execute(manifest)
+            approval = CreateRestoreApproval().execute(
+                preview, "restore-approval-worker", "tester", True
+            )
+
+            evidence = factory.task(
+                manifest.host_id, manifest.backup_id, preview, approval
+            )(CancellationToken())
+
+            self.assertEqual(evidence.state, RestoreExecutionState.COMMITTED)
+            self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
     def test_rejects_remote_host_before_state_or_secret_access(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -203,6 +203,8 @@ Local user restore production composition: local hostと単一OpenCode config ta
 
 Local restore desktop Gate: Ubuntu 26.04のログイン済みdesktop sessionで実Secret ServiceとGate専用key、一時config/stateを使い、暗号化backupからproduction factoryで単一targetを復元した。COMMITTED evidence/audit、暗号化envelope、key cleanupを確認し、1件が0.080秒で成功した。実OpenCode設定は変更していない。次はQt実行境界の失効・二重実行防止監査である。
 
+Qt restore execution boundary: authorizationをQt stateへ保持せず、exact preview/approvalを注入taskへ渡して単一worker内でpreflightからexecutionまで行う。実行中はhost、inventory refresh、approval、runをロックし、double clickを1回に限定する。完了・失敗・cancelでpreview/approvalを消費し、同じreviewから再実行できない。production `main()`はrestore taskを注入せずfail closedを維持する。Ubuntu 26.04/PySide6 6.10.2で1件が0.114秒で成功した。次はproduction公開可否と実行結果表示・再読込境界の監査である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

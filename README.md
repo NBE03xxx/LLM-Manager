@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜4を完了し、現在は **Phase 5（PySide6 GUI）**です。Qt非依存presenter/view-model、optional QThreadPool worker、Hosts/Diagnose/Recommendations/Review/Results widget、`~/.ssh/config`のread-only alias discovery、Local/OpenSSH診断composition、system OpenSSHによるhost-key fingerprint自動解決と外部terminal ControlMaster境界を実装しました。推奨選択後は同じhost lockのworkerでreport/host/configを再検証し、OpenCodeのbefore-hash付きChangeSetとmasked diffをReviewへ表示します。production Applyはlocal user経路を接続し、他の経路はfail closed表示します。Backup/Rollback画面はstrict inventory、metadata-only preview、exact approval、restart execution evidenceを表示します。local userの単一OpenCode target restoreはSecret Service、短命preflight、mutation前attempt/audit、immutable resultを束ねたproduction compositionまで接続しましたが、GUI実行controlには未接続です。productionの実設定mutationはまだ開始しません。Ubuntu 26.04 disposable VMのPySide6 6.10.2でUI vertical sliceを検証済みです。Phase 4の詳細は[closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
+Phase 0〜4を完了し、現在は **Phase 5（PySide6 GUI）**です。Qt非依存presenter/view-model、optional QThreadPool worker、Hosts/Diagnose/Recommendations/Review/Results widget、`~/.ssh/config`のread-only alias discovery、Local/OpenSSH診断composition、system OpenSSHによるhost-key fingerprint自動解決と外部terminal ControlMaster境界を実装しました。推奨選択後は同じhost lockのworkerでreport/host/configを再検証し、OpenCodeのbefore-hash付きChangeSetとmasked diffをReviewへ表示します。production Applyはlocal user経路を接続し、他の経路はfail closed表示します。Backup/Rollback画面はstrict inventory、metadata-only preview、exact approval、restart execution evidenceを表示します。local userの単一OpenCode target restoreはSecret Service、短命preflight、mutation前attempt/audit、immutable resultを束ねたproduction compositionまで接続しました。Qt実行controlは注入したsandbox taskだけで使用でき、authorizationをUIへ保持せず単一worker内でpreflightから実行し、host lockとapproval一回消費を行います。production `main()`にはrestore taskを未接続であり、実設定mutationはまだ開始しません。Ubuntu 26.04 disposable VMのPySide6 6.10.2でUI vertical sliceを検証済みです。Phase 4の詳細は[closure audit](docs/validation/phase4-closure-audit-2026-09-01.md)を参照してください。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
@@ -55,6 +55,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [Phase 5 sandbox Apply Results validation](docs/validation/phase5-sandbox-apply-results-2026-09-04.md)
 - [Phase 5 production Apply connection audit](docs/validation/phase5-production-apply-audit-2026-09-04.md)
 - [Phase 5 local restore production composition](docs/validation/phase5-local-restore-composition-2026-09-04.md)
+- [Phase 5 Qt restore execution boundary](docs/validation/phase5-qt-restore-execution-2026-09-04.md)
 - [SSH transfer disconnect validation](docs/validation/ssh-transfer-disconnect-2026-08-30.md)
 - [SSH remote journal reconciliation validation](docs/validation/ssh-remote-journal-reconciliation-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)

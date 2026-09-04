@@ -93,7 +93,8 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新validation
 
-- main host全test: 444件成功、PySide6依存11件と明示desktop Gate 1件の計12件skip
+- main host全test: 446件成功、PySide6依存11件と明示Secret Service Gate 2件の計13件skip
+- Ubuntu 26.04/PySide6 Qt restore worker Gate: 1件、0.114秒、成功。一時directoryはcleanup済み
 - Ubuntu 26.04 desktop Secret Service restore Gate: 1件、0.080秒、成功。Gate keyと一時directoryはcleanup済み
 - Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
 - 直前artifact SHA-256: `11fe7441870b0f259c56d10132224f03339e52e68ed39f3bda49865c71b7539b`
@@ -103,6 +104,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 - `docs/validation/phase5-local-restore-preview-2026-09-04.md`
 - `docs/validation/phase5-local-restore-composition-2026-09-04.md`
+- `docs/validation/phase5-qt-restore-execution-2026-09-04.md`
 - `docs/validation/phase5-backup-inventory-ui-2026-09-04.md`
 - `docs/validation/phase5-local-user-apply-sandbox-2026-09-04.md`
 - `docs/validation/phase5-production-apply-audit-2026-09-04.md`
@@ -113,12 +115,12 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 次の作業
 
-まずlocal production restoreのQt実行境界を監査する。
+まずlocal production restoreのQt結果表示・再読込境界を監査する。
 
-1. preview/approval/preflight authorizationとQt host lock、worker、expiry timerを照合
-2. host/refresh/selection/timer失効後にauthorizationを生成・実行できないことを判定
-3. double click、worker中のhost変更、完了後replayをfail closedにする契約を設計
-4. GUI実行buttonを接続する場合もsandbox factoryから先にGateし、production既定は監査完了まで公開しない
+1. COMMITTED/FAILED/UNKNOWN evidenceとQt表示model、明示inventory refreshを照合
+2. cancel/error後のhost unlock、approval消費、同じreviewからのreplay拒否をruntime Gateする
+3. result表示がmutation成功を推測せずevidence stateをそのまま示すことを確認
+4. production restore taskは結果境界の監査完了まで`main()`へ接続しない
 5. materialな仕様変更が不要なら実装し、全必須検査、commit/push
 
 ## 重要な安全境界

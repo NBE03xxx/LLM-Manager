@@ -385,6 +385,22 @@ class LocalUserRestoreTaskFactory:
 
         return execute
 
+    def task(
+        self,
+        host_id: str,
+        backup_id: str,
+        preview: RestorePreview,
+        approval: RestoreApproval,
+    ):
+        """Keep the short-lived authorization inside one worker invocation."""
+        self._local_candidate(host_id)
+
+        def execute(cancellation: CancellationToken):
+            authorization = self.prepare(host_id, backup_id, preview, approval)(cancellation)
+            return self(authorization)(cancellation)
+
+        return execute
+
     def _local_candidate(self, host_id: str) -> HostCandidate:
         candidate = next((item for item in self.hosts if item.host_id == host_id), None)
         if candidate is None or candidate.kind is not HostKind.LOCAL:

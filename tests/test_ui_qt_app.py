@@ -36,6 +36,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertIs(keywords["change_plan_task_factory"], change_tasks)
         self.assertIs(keywords["backup_inventory_task_factory"], inventory_tasks)
         self.assertIs(keywords["restore_preview_task_factory"], inventory_tasks.preview)
+        self.assertNotIn("restore_task_factory", keywords)
 
 
 if __name__ == "__main__":
