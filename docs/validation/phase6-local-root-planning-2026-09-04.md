@@ -12,5 +12,6 @@ focused 4件で既存drop-in、未作成drop-in、host変更、helper unavailabl
 
 ## Remaining boundary
 
-production診断compositionへのlocal helper probe、OpenCode/Ollamaを選択targetで分岐するGUI planning factory、local root Apply task factory、PolicyKit sandbox GUI Results Gateの順に接続する。これらが揃うまで`local_root` availabilityはfail closedを維持する。
+production診断compositionへlocal package/version/protocol/owner/modeを検査するhelper probeを接続した。SSH診断へlocal probeを誤注入しない。GUI planning factoryは選択target集合をI/O前に分類し、local `ollama.systemd`だけを専用plannerへ渡す。OpenCodeとの混在とSSH root planningは固定理由で拒否し、外部terminalやSSH接続を開始しない。関連31件が成功した。
 
+残りはlocal root Apply task factoryとPolicyKit sandbox GUI Results Gateである。これらが揃うまで`local_root` availabilityはfail closedを維持する。

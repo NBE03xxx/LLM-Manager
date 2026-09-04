@@ -227,6 +227,8 @@ Exit: Definition of Done と release checklist を満たす。
 
 Local root planning boundary: local root production Apply監査で、GUI planningがOpenCode専用でOllama root ChangeSetへ到達不能なことを確認した。最初のsliceとして、plan/report/selection/host identityを再検証し、互換local helperをread-only再probeした後だけ固定Ollama drop-inをbounded readしてbefore hash付きChangeSetを生成するapplication serviceを追加した。既存fileなし、host/helper/target変更、非root selectionを含むsandbox 4件に成功した。local root routeはまだ公開せず、次はproduction診断へのhelper capabilityとtarget別planning factoryを接続する。
 
+Local root diagnosis/planning composition: production local診断へ同梱helperのpackage/version/protocol/owner/mode probeを接続し、reportの`can_elevate`をread-only evidenceから設定する。SSH診断へlocal probeは渡さない。planning factoryは選択targetをI/O前に分類し、local Ollamaだけをroot planner、OpenCodeを既存plannerへ渡す。混在targetとSSH root planningは接続・terminal起動前に拒否する。関連31件が成功した。次はlocal root Apply task factoryを構成し、availability公開前にsandbox GUI Results Gateを完了する。
+
 ## Post-MVP
 
 優先候補:

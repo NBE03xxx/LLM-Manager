@@ -16,11 +16,11 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最初の作業
 
-Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planningのapplication境界は完了済み。
+Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planning、production local helper診断、target別GUI planning分岐は完了済み。
 
-1. production診断compositionへlocal helper compatibility probeを接続し、診断snapshotの`can_elevate`を確定する。
-2. OpenCodeとOllamaを選択targetで安全に分岐するGUI planning factoryへ`BuildSelectedOllamaChangePlan`を接続する。
-3. local userと混同せず、root-only ChangeSet、helper readiness再検証、backup、Apply/Validate/Rollback、journal/resultを束ねる最小compositionを決める。
+1. local userと混同せず、root-only ChangeSet、helper readiness再検証、backup、Apply/Validate/Rollback、journal/resultを束ねるlocal root Apply task factoryを構成する。
+2. routing factoryでlocal user/local rootを明示分岐し、まだ`local_root` availabilityは公開しない。
+3. sandbox GUI ResultsでCOMMITTED/ROLLED_BACK/RECOVERY_REQUIREDとPolicyKit deny/cancelを検証する。
 4. まずsandbox/fake、次に既存Ubuntu 26.04 VMのGate専用targetで検証する。実Ollama/OpenCode設定や既存systemd unitは変更しない。
 5. materialなPolicyKit/system policy変更が必要なら実行前にユーザー承認を得る。
 6. 全必須検査後、commitして`origin/main`へpushする。

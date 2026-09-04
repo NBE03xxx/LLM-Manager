@@ -154,6 +154,13 @@ def remote_helper_compatibility_probe(
     )
 
 
+def local_helper_compatibility_probe(
+    compatible_versions: frozenset[str],
+) -> HelperCompatibilityProbe:
+    """Build the strict probe for the helper installed with the local package."""
+    return HelperCompatibilityProbe("llm-manager", compatible_versions)
+
+
 def _text(value: dict[str, object], key: str) -> str:
     item = value[key]
     if not isinstance(item, str) or not item:

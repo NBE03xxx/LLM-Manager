@@ -34,6 +34,8 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         self.assertEqual(remote_service.host.alias, "development")
         self.assertIs(local_service.host.runner, self.local_runner)
         self.assertIs(remote_service.host.runner, self.ssh_runner)
+        self.assertIsNone(local_service.helper_probe)
+        self.assertIsNone(remote_service.helper_probe)
 
     def test_verified_fingerprint_is_injected_only_for_ssh(self) -> None:
         fingerprint = "SHA256:" + "A" * 43
@@ -110,6 +112,9 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         self.assertIn("lscpu", factory.local_runner.policy.allowed_executables)
         self.assertIn("curl", factory.local_runner.policy.allowed_executables)
         self.assertEqual(factory.ssh_runner.policy.allowed_executables, frozenset({"ssh"}))
+        self.assertIsNotNone(factory.local_helper_probe)
+        self.assertIs(factory._service(self.local).helper_probe, factory.local_helper_probe)
+        self.assertIsNone(factory._service(self.remote).helper_probe)
 
     def test_production_factory_maps_discovered_ids_to_tasks(self) -> None:
         factory = DiagnosticTaskFactory.production((self.local, self.remote))
@@ -161,6 +166,58 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         ), self.assertRaisesRegex(RuntimeError, "planning failed"):
             change_factory(plan(), remote_report)(CancellationToken())
         broker.close.assert_called_once_with(session, ANY)
+
+    def test_change_plan_factory_routes_local_ollama_to_privileged_planner(self) -> None:
+        from tests.test_ollama_change_planning import selected_plan
+
+        current, selected = selected_plan()
+        current = replace(current, host=replace(current.host, host_id=self.local.host_id))
+        ollama = MagicMock()
+        expected = object()
+        ollama.execute.return_value = expected
+        change_factory = ChangePlanTaskFactory(
+            self.factory, MagicMock(), ollama_service=ollama
+        )
+
+        result = change_factory(selected, current)(CancellationToken())
+
+        self.assertIs(result, expected)
+        ollama.execute.assert_called_once()
+        change_factory.service.execute.assert_not_called()
+
+    def test_change_plan_factory_rejects_ssh_and_mixed_root_targets_before_io(self) -> None:
+        from tests.test_ollama_change_planning import selected_plan
+
+        current, selected = selected_plan()
+        remote_report = replace(
+            current,
+            host=replace(
+                current.host,
+                host_id=self.remote.host_id,
+                kind=HostKind.SSH,
+                ssh_alias=self.remote.ssh_alias,
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "ssh_root_planning_protocol_missing"):
+            ChangePlanTaskFactory(
+                self.factory, MagicMock(), ollama_service=MagicMock()
+            )(selected, remote_report)
+        second = replace(
+            selected.recommendations[0],
+            recommendation_id="opencode-rec",
+            target="/tmp/opencode.jsonc",
+            requires_root=False,
+        )
+        mixed = replace(
+            selected,
+            recommendations=selected.recommendations + (second,),
+            selected_ids=selected.selected_ids + (second.recommendation_id,),
+        )
+        current = replace(current, host=replace(current.host, host_id=self.local.host_id))
+        with self.assertRaisesRegex(ValueError, "mixed_planning_targets_unsupported"):
+            ChangePlanTaskFactory(
+                self.factory, MagicMock(), ollama_service=MagicMock()
+            )(mixed, current)
 
 
 if __name__ == "__main__":

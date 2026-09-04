@@ -11,7 +11,10 @@ from llm_manager.adapters.host.local import LocalHostAdapter
 from llm_manager.adapters.host.openssh import OpenSshHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
-from llm_manager.application.change_planning import BuildSelectedOpenCodeChangePlan
+from llm_manager.application.change_planning import (
+    BuildSelectedOllamaChangePlan,
+    BuildSelectedOpenCodeChangePlan,
+)
 from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import BackupStorePort, CancellationToken, RuntimeValidatorPort
 from llm_manager.application.restore_preflight import PrepareLocalRestore
@@ -25,6 +28,10 @@ from llm_manager.infrastructure.audit import LocalAuditLog
 from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
 from llm_manager.infrastructure.journal import LocalOperationJournal
+from llm_manager.infrastructure.helper_compat import (
+    HelperCompatibilityProbe,
+    local_helper_compatibility_probe,
+)
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
 from llm_manager.infrastructure.local_restore import SingleTargetLocalRestoreExecutor
 from llm_manager.infrastructure.restore_execution import (
@@ -56,6 +63,7 @@ class DiagnosticTaskFactory:
     local_config_candidates: tuple[str, ...]
     remote_config_candidates: tuple[str, ...] = ()
     ssh_auth_broker: ExternalTerminalSshBroker | None = None
+    local_helper_probe: HelperCompatibilityProbe | None = None
 
     @classmethod
     def production(cls, hosts: tuple[HostCandidate, ...]) -> "DiagnosticTaskFactory":
@@ -70,6 +78,9 @@ class DiagnosticTaskFactory:
             local_runner=SubprocessRunner(ProcessPolicy(_LOCAL_EXECUTABLES)),
             ssh_runner=ssh_runner,
             local_config_candidates=_local_opencode_candidates(),
+            local_helper_probe=local_helper_compatibility_probe(
+                frozenset({"0.1.0~dev0"})
+            ),
             ssh_auth_broker=(
                 ExternalTerminalSshBroker(ssh_runner, runtime_root / "llm-manager", terminal)
                 if terminal is not None
@@ -141,6 +152,7 @@ class DiagnosticTaskFactory:
             ollama=OllamaReadOnlyAdapter(),
             client=OpenCodeReadOnlyAdapter(configs),
             system_probe=LinuxSystemProbe(),
+            helper_probe=self.local_helper_probe if candidate.kind is HostKind.LOCAL else None,
         )
 
 
@@ -148,6 +160,13 @@ class DiagnosticTaskFactory:
 class ChangePlanTaskFactory:
     diagnostics: DiagnosticTaskFactory
     service: BuildSelectedOpenCodeChangePlan = BuildSelectedOpenCodeChangePlan()
+    ollama_service: BuildSelectedOllamaChangePlan | None = None
+
+    def __post_init__(self) -> None:
+        if self.ollama_service is None and self.diagnostics.local_helper_probe is not None:
+            self.ollama_service = BuildSelectedOllamaChangePlan(
+                self.diagnostics.local_helper_probe
+            )
 
     def __call__(self, plan: OptimizationPlan, report: DiagnosticReport):
         candidate = next(
@@ -155,12 +174,20 @@ class ChangePlanTaskFactory:
         )
         if candidate is None:
             raise ValueError("unknown_host_candidate")
+        route = _selected_planning_route(plan)
+        if route == "ollama" and candidate.kind is not HostKind.LOCAL:
+            raise ValueError("ssh_root_planning_protocol_missing")
+        if route == "ollama" and self.ollama_service is None:
+            raise ValueError("local_root_planning_unavailable")
 
         def execute(cancellation: CancellationToken) -> OptimizationPlan:
             if candidate.kind is HostKind.LOCAL:
                 host = LocalHostAdapter(
                     self.diagnostics.local_runner, display_name=candidate.display_name
                 )
+                if route == "ollama":
+                    assert self.ollama_service is not None
+                    return self.ollama_service.execute(plan, report, host, cancellation)
                 return self.service.execute(plan, report, host, cancellation)
             return self._execute_ssh(candidate, plan, report, cancellation)
 
@@ -465,6 +492,23 @@ def _local_opencode_candidates() -> tuple[str, ...]:
     root = _local_config_root()
     directory = root / "opencode"
     return tuple(str(directory / name) for name in ("opencode.jsonc", "opencode.json", "config.json"))
+
+
+def _selected_planning_route(plan: OptimizationPlan) -> str:
+    recommendations = {item.recommendation_id: item for item in plan.recommendations}
+    try:
+        targets = {recommendations[item_id].target for item_id in plan.selected_ids}
+    except KeyError as error:
+        raise ValueError("selection_invalid") from error
+    if not targets:
+        # Preserve application-layer validation and avoid selecting a privileged
+        # route without an explicit root recommendation.
+        return "opencode"
+    if targets == {"ollama.systemd"}:
+        return "ollama"
+    if all(target != "ollama.systemd" for target in targets):
+        return "opencode"
+    raise ValueError("mixed_planning_targets_unsupported")
 
 
 def _local_config_root() -> Path:
