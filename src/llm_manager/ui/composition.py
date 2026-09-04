@@ -12,7 +12,7 @@ from llm_manager.adapters.host.openssh import OpenSshHostAdapter
 from llm_manager.adapters.ollama.readonly import OllamaReadOnlyAdapter
 from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.change_planning import BuildSelectedOpenCodeChangePlan
-from llm_manager.application.errors import AdapterError
+from llm_manager.application.errors import AdapterError, OperationCancelled
 from llm_manager.application.ports import BackupStorePort, CancellationToken, RuntimeValidatorPort
 from llm_manager.application.restore_preflight import PrepareLocalRestore
 from llm_manager.application.restore_preview import RestoreApproval, RestorePreview
@@ -29,6 +29,8 @@ from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventory
 from llm_manager.infrastructure.local_restore import SingleTargetLocalRestoreExecutor
 from llm_manager.infrastructure.restore_execution import (
     LocalRestoreCoordinator,
+    RestoreExecutionEvidence,
+    RestoreExecutionPersistenceError,
     RestoreExecutionStore,
 )
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
@@ -336,6 +338,21 @@ class LocalBackupInventoryTaskFactory:
         return execute
 
 
+@dataclass(frozen=True, slots=True)
+class LocalRestoreTaskResult:
+    evidence: RestoreExecutionEvidence
+    persisted: bool
+    persistence_error: str | None = None
+
+    @property
+    def state(self):
+        return self.evidence.state
+
+    @property
+    def error_code(self) -> str | None:
+        return self.evidence.error_code or self.persistence_error
+
+
 @dataclass(slots=True)
 class LocalUserRestoreTaskFactory:
     """Compose the non-privileged local OpenCode restore route without exposing it to Qt."""
@@ -397,9 +414,30 @@ class LocalUserRestoreTaskFactory:
 
         def execute(cancellation: CancellationToken):
             authorization = self.prepare(host_id, backup_id, preview, approval)(cancellation)
-            return self(authorization)(cancellation)
+            try:
+                evidence = self(authorization)(cancellation)
+                return LocalRestoreTaskResult(evidence, True)
+            except RestoreExecutionPersistenceError as error:
+                persisted = self._persisted_evidence(authorization.authorization_hash)
+                return LocalRestoreTaskResult(error.evidence, persisted, error.cause_code)
+            except (AdapterError, OSError, OperationCancelled) as error:
+                evidence = self._load_evidence(authorization.authorization_hash)
+                if evidence is None:
+                    raise error
+                return LocalRestoreTaskResult(evidence, True)
 
         return execute
+
+    def _load_evidence(self, authorization_hash: str) -> RestoreExecutionEvidence | None:
+        try:
+            return RestoreExecutionStore(
+                self.state_root / "restore-executions"
+            ).load_evidence(authorization_hash)
+        except AdapterError:
+            return None
+
+    def _persisted_evidence(self, authorization_hash: str) -> bool:
+        return self._load_evidence(authorization_hash) is not None
 
     def _local_candidate(self, host_id: str) -> HostCandidate:
         candidate = next((item for item in self.hosts if item.host_id == host_id), None)

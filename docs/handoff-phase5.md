@@ -94,7 +94,8 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新validation
 
-- main host全test: 446件成功、PySide6依存11件と明示Secret Service Gate 2件の計13件skip
+- main host全test: 448件成功、PySide6依存12件と明示Secret Service Gate 2件の計14件skip
+- Ubuntu 26.04/PySide6 Qt restore result Gate: worker/result 2件、成功。初回表示不具合修正後に再Gate済み
 - Ubuntu 26.04/PySide6 Qt restore worker Gate: 1件、0.114秒、成功。一時directoryはcleanup済み
 - Ubuntu 26.04 desktop Secret Service restore Gate: 1件、0.080秒、成功。Gate keyと一時directoryはcleanup済み
 - Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
@@ -106,6 +107,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - `docs/validation/phase5-local-restore-preview-2026-09-04.md`
 - `docs/validation/phase5-local-restore-composition-2026-09-04.md`
 - `docs/validation/phase5-qt-restore-execution-2026-09-04.md`
+- `docs/validation/phase5-qt-restore-results-2026-09-04.md`
 - `docs/validation/phase5-backup-inventory-ui-2026-09-04.md`
 - `docs/validation/phase5-local-user-apply-sandbox-2026-09-04.md`
 - `docs/validation/phase5-production-apply-audit-2026-09-04.md`
@@ -116,12 +118,12 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 次の作業
 
-まずlocal production restoreのQt結果表示・再読込境界を監査する。
+まずlocal production restore結果後の明示inventory refresh境界を監査する。
 
-1. COMMITTED/FAILED/UNKNOWN evidenceとQt表示model、明示inventory refreshを照合
-2. cancel/error後のhost unlock、approval消費、同じreviewからのreplay拒否をruntime Gateする
-3. result表示がmutation成功を推測せずevidence stateをそのまま示すことを確認
-4. production restore taskは結果境界の監査完了まで`main()`へ接続しない
+1. production factoryのCOMMITTED/FAILED evidenceとLocalApplyInventoryServiceのrestart viewを照合
+2. Qt結果後の明示refreshで最新restore state/attentionが一覧へ反映されることをsandbox Gateする
+3. refreshをmutation retry authorityにせず、次のpreview/approvalを新規生成することを確認
+4. Gate後にlocal user production restore taskを`main()`へ公開できるか判定する
 5. materialな仕様変更が不要なら実装し、全必須検査、commit/push
 
 ## 重要な安全境界

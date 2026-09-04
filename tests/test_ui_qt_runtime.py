@@ -784,7 +784,7 @@ class QtRuntimeTests(unittest.TestCase):
             def execute(_cancellation):
                 started.set()
                 release.wait(2)
-                return SimpleNamespace(state="committed")
+                return SimpleNamespace(state="committed", persisted=True, error_code=None)
 
             return execute
 
@@ -840,7 +840,7 @@ class QtRuntimeTests(unittest.TestCase):
             completed = QEventLoop()
 
             def finish_when_complete() -> None:
-                if host.isEnabled() and "completed" in status.text().lower():
+                if host.isEnabled() and "committed" in status.text().lower():
                     completed.quit()
                 else:
                     QTimer.singleShot(5, finish_when_complete)
@@ -851,8 +851,44 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertFalse(approval.isChecked())
             self.assertFalse(run.isEnabled())
             self.assertEqual(len(calls), 1)
+            self.assertIn("persisted: true", status.text().lower())
         finally:
             release.set()
+            window.close()
+
+    def test_restore_result_renders_only_explicit_evidence_state(self) -> None:
+        from types import SimpleNamespace
+
+        from PySide6.QtWidgets import QLabel
+
+        from llm_manager.ui.qt_window import MainWindow
+
+        window = MainWindow(lambda _host: lambda _token: None)
+        try:
+            status = window.findChild(QLabel, "restore-approval-status")
+            summary = window.findChild(QLabel, "restore-preview-summary")
+            cases = (
+                ("committed", True, None),
+                ("failed", True, "stale_restore_target"),
+                ("unknown", True, "audit_failed"),
+                ("committed", False, "result_store_failed"),
+            )
+            for state, persisted, error in cases:
+                window._restore_active_host_id = "local"
+                window._restore_finished(SimpleNamespace(
+                    state=state, persisted=persisted, error_code=error
+                ))
+                window._restore_worker_done()
+                self.assertIn(state, status.text())
+                self.assertIn(f"persisted: {str(persisted).lower()}", status.text())
+                self.assertIn(error or "none", status.text())
+
+            window._restore_active_host_id = "local"
+            window._restore_finished(SimpleNamespace(state="success"))
+            window._restore_worker_done()
+            self.assertIn("invalid_restore_result", summary.text())
+            self.assertNotIn("committed", status.text())
+        finally:
             window.close()
 
 

@@ -120,7 +120,32 @@ class LocalUserRestoreTaskFactoryTests(unittest.TestCase):
             )(CancellationToken())
 
             self.assertEqual(evidence.state, RestoreExecutionState.COMMITTED)
+            self.assertTrue(evidence.persisted)
             self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
+    def test_worker_task_returns_persisted_failed_evidence_without_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            factory, manifest, preview, approval, target, _state = self._fixture(Path(directory))
+            target.write_text("new", encoding="utf-8")
+            preview = CreateRestorePreview().execute(manifest)
+            approval = CreateRestoreApproval().execute(
+                preview, "restore-approval-failure", "tester", True
+            )
+
+            class ChangingKeys:
+                def get_key(self, _key_reference: str, _key_scope: str) -> bytes:
+                    target.write_text("external", encoding="utf-8")
+                    return b"k" * 32
+
+            factory.key_provider_factory = ChangingKeys
+            task = factory.task(manifest.host_id, manifest.backup_id, preview, approval)
+
+            result = task(CancellationToken())
+
+            self.assertEqual(result.state, RestoreExecutionState.FAILED)
+            self.assertEqual(result.error_code, "stale_restore_target")
+            self.assertTrue(result.persisted)
+            self.assertEqual(target.read_text(encoding="utf-8"), "external")
 
     def test_rejects_remote_host_before_state_or_secret_access(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

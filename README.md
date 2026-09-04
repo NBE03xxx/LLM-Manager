@@ -56,6 +56,7 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 - [Phase 5 production Apply connection audit](docs/validation/phase5-production-apply-audit-2026-09-04.md)
 - [Phase 5 local restore production composition](docs/validation/phase5-local-restore-composition-2026-09-04.md)
 - [Phase 5 Qt restore execution boundary](docs/validation/phase5-qt-restore-execution-2026-09-04.md)
+- [Phase 5 Qt restore result evidence](docs/validation/phase5-qt-restore-results-2026-09-04.md)
 - [SSH transfer disconnect validation](docs/validation/ssh-transfer-disconnect-2026-08-30.md)
 - [SSH remote journal reconciliation validation](docs/validation/ssh-remote-journal-reconciliation-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)

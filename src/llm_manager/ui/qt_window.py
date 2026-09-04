@@ -703,8 +703,14 @@ else:
 
         @Slot(object)
         def _restore_finished(self, result: object) -> None:
-            self._restore_outcome = result
-            self._invalidate_restore_preview()
+            state = getattr(getattr(result, "state", None), "value", getattr(result, "state", None))
+            persisted = getattr(result, "persisted", None)
+            if state not in {"committed", "failed", "unknown"} or type(persisted) is not bool:
+                self._restore_outcome = None
+                self._invalidate_restore_preview(error="invalid_restore_result")
+            else:
+                self._restore_outcome = result
+                self._invalidate_restore_preview()
             self._render()
 
         @Slot(object)
@@ -862,6 +868,8 @@ else:
         def _render_restore_preview(self) -> None:
             self._restore_preview_list.clear()
             preview = self._restore_preview
+            outcome_state = getattr(self._restore_outcome, "state", None)
+            outcome_state = getattr(outcome_state, "value", outcome_state) or "none"
             if self._restore_preview_error is not None:
                 self._restore_preview_summary.setText(self._catalog.text(
                     "restore_preview.failed", code=self._restore_preview_error
@@ -883,9 +891,12 @@ else:
             self._restore_approval_checkbox.setEnabled(enabled and self._restore_active_host_id is None)
             self._restore_approval_status.setText(self._catalog.text(
                 "restore_preview.running" if self._restore_active_host_id is not None
-                else "restore_preview.completed" if self._restore_outcome is not None
+                else "restore_preview.result" if self._restore_outcome is not None
                 else "restore_preview.approved" if self._restore_approval is not None
-                else "restore_preview.approval_required"
+                else "restore_preview.approval_required",
+                state=outcome_state,
+                error=getattr(self._restore_outcome, "error_code", None) or "none",
+                persisted=str(bool(getattr(self._restore_outcome, "persisted", False))).lower(),
             ))
             self._run_restore_button.setEnabled(
                 self._restore_task_factory is not None

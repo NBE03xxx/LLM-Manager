@@ -205,6 +205,8 @@ Local restore desktop Gate: Ubuntu 26.04のログイン済みdesktop sessionで�
 
 Qt restore execution boundary: authorizationをQt stateへ保持せず、exact preview/approvalを注入taskへ渡して単一worker内でpreflightからexecutionまで行う。実行中はhost、inventory refresh、approval、runをロックし、double clickを1回に限定する。完了・失敗・cancelでpreview/approvalを消費し、同じreviewから再実行できない。production `main()`はrestore taskを注入せずfail closedを維持する。Ubuntu 26.04/PySide6 6.10.2で1件が0.114秒で成功した。次はproduction公開可否と実行結果表示・再読込境界の監査である。
 
+Qt restore result evidence: production taskは正常COMMITTEDだけでなく、永続済みFAILED/UNKNOWNと専用persistence errorが公開するevidenceをbounded resultへ変換する。Qtは`committed/failed/unknown`、error、persistedをそのまま表示し、未知stateやevidence不在を成功と推測しない。結果後はpreview/approvalを消費し、明示inventory refreshまで再実行しない。Ubuntu 26.04/PySide6 6.10.2でworker lockと全result state表示の2件が成功した。production `main()`へのrestore接続は引き続き未実施である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証
