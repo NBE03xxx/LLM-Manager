@@ -199,6 +199,8 @@ Restore execution evidence: authorization hashごとのattemptをmutation前にi
 
 Restore execution restart inventory: store全entryをstrict検証し、未知entry、symlink、metadata/canonical/hash/filename/binding不一致、orphan resultを一覧全体で拒否する。attempt-onlyはattentionとして既存local inventoryへ結合し、restore stateを英日表示するが自動retry actionは追加しない。restore evidenceだけのbackup IDも表示対象にする。Ubuntu 26.04/PySide6 6.10.2でQt/restart/tamper/fault injectionを含む12件が0.091秒で成功した。次はproduction composition可否監査である。
 
+Local user restore production composition: local hostと単一OpenCode config targetに限定し、既存Secret Service provider、strict preflight、復号前後のtarget再検証、分離した0700/0600 execution store、hash-chain auditを一つのfactoryへ束ねた。attempt保存と開始auditより前にmutationせず、失敗・attempt-only・UNKNOWNから自動retryしない。sandbox production-root overrideで暗号化restore、外部変更拒否、immutable replay拒否をGateした。GUI実行controlと実config mutationは未接続を維持する。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

@@ -14,6 +14,8 @@ from llm_manager.application.host_discovery import HostCandidate
 from llm_manager.application.change_planning import BuildSelectedOpenCodeChangePlan
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.ports import BackupStorePort, CancellationToken, RuntimeValidatorPort
+from llm_manager.application.restore_preflight import PrepareLocalRestore
+from llm_manager.application.restore_preview import RestoreApproval, RestorePreview
 from llm_manager.application.services import DiagnoseHost
 from llm_manager.application.validation import ProductRuntimeValidator
 from llm_manager.diagnostics.linux import LinuxSystemProbe
@@ -24,7 +26,11 @@ from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
 from llm_manager.infrastructure.journal import LocalOperationJournal
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
-from llm_manager.infrastructure.restore_execution import RestoreExecutionStore
+from llm_manager.infrastructure.local_restore import SingleTargetLocalRestoreExecutor
+from llm_manager.infrastructure.restore_execution import (
+    LocalRestoreCoordinator,
+    RestoreExecutionStore,
+)
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
 from llm_manager.infrastructure.safe_apply import AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider, SecretStorageBackend
@@ -328,6 +334,77 @@ class LocalBackupInventoryTaskFactory:
             return service.preview_restore(host_id, backup_id, cancellation)
 
         return execute
+
+
+@dataclass(slots=True)
+class LocalUserRestoreTaskFactory:
+    """Compose the non-privileged local OpenCode restore route without exposing it to Qt."""
+
+    hosts: tuple[HostCandidate, ...]
+    config_root: Path
+    state_root: Path
+    key_provider_factory: Callable[[], BackupKeyProvider] = lambda: SecretServiceKeyProvider(
+        SecretStorageBackend()
+    )
+
+    @classmethod
+    def production(cls, hosts: tuple[HostCandidate, ...]) -> "LocalUserRestoreTaskFactory":
+        return cls(hosts, _local_config_root(), _local_state_root())
+
+    def __post_init__(self) -> None:
+        self.config_root = _safe_application_root(self.config_root, "opencode")
+        self.state_root = _safe_application_root(self.state_root, "llm-manager") / "llm-manager"
+
+    def prepare(
+        self,
+        host_id: str,
+        backup_id: str,
+        preview: RestorePreview,
+        approval: RestoreApproval,
+    ):
+        self._local_candidate(host_id)
+
+        def execute(cancellation: CancellationToken):
+            return PrepareLocalRestore(self._stores(read_content=False)).execute(
+                host_id, backup_id, preview, approval, cancellation
+            )
+
+        return execute
+
+    def __call__(self, authorization):
+        self._local_candidate(authorization.host_id)
+
+        def execute(cancellation: CancellationToken):
+            backups = self._stores(read_content=True)
+            coordinator = LocalRestoreCoordinator(
+                SingleTargetLocalRestoreExecutor(backups),
+                RestoreExecutionStore(self.state_root / "restore-executions"),
+                LocalAuditLog(self.state_root / "audit"),
+            )
+            return coordinator.execute(authorization, cancellation)
+
+        return execute
+
+    def _local_candidate(self, host_id: str) -> HostCandidate:
+        candidate = next((item for item in self.hosts if item.host_id == host_id), None)
+        if candidate is None or candidate.kind is not HostKind.LOCAL:
+            raise ValueError("local_user_restore_requires_local_host")
+        return candidate
+
+    def _stores(self, *, read_content: bool) -> LocalBackupStore:
+        if not self.state_root.exists() and not self.state_root.is_symlink():
+            raise AdapterError("backup_not_found", "backup is unavailable for restore")
+        _validate_private_state_root(self.state_root)
+        for child in (
+            self.state_root / "backups",
+            self.state_root / "audit",
+            self.state_root / "restore-executions",
+        ):
+            if child.is_symlink():
+                raise ValueError("application_root_symlink_rejected")
+        allowed_root = self.config_root / "opencode"
+        cipher = AesGcmBackupCipher(self.key_provider_factory()) if read_content else None
+        return LocalBackupStore(self.state_root / "backups", (allowed_root,), cipher)
 
 
 def _local_opencode_candidates() -> tuple[str, ...]:

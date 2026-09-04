@@ -71,7 +71,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 - immutable restore attempt/result、authorization一回消費、開始/完了audit
 - commit後audit失敗は`UNKNOWN`、result保存失敗は生成済み`COMMITTED` evidenceを公開
 - restore restart inventory: attempt-onlyをattention表示、自動retryなし、unknown/orphan/tamper拒否
-- production restore compositionとGUI実行buttonは未接続
+- local user production restore compositionは接続済み。GUI実行buttonは未接続
 
 ## 最新commit
 
@@ -91,7 +91,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 最新validation
 
-- main host全test: 440件成功、PySide6依存11件skip
+- main host全test: 443件成功、PySide6依存11件skip
 - Ubuntu 26.04/PySide6 restore restart inventory Gate: 12件、0.091秒、全成功
 - 直前artifact SHA-256: `11fe7441870b0f259c56d10132224f03339e52e68ed39f3bda49865c71b7539b`
 - ユーザー側`/tmp/llm-manager-ui-gate`は未cleanupの可能性あり
@@ -99,6 +99,7 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 主要evidence:
 
 - `docs/validation/phase5-local-restore-preview-2026-09-04.md`
+- `docs/validation/phase5-local-restore-composition-2026-09-04.md`
 - `docs/validation/phase5-backup-inventory-ui-2026-09-04.md`
 - `docs/validation/phase5-local-user-apply-sandbox-2026-09-04.md`
 - `docs/validation/phase5-production-apply-audit-2026-09-04.md`
@@ -109,9 +110,9 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
 
 ## 次の作業
 
-まずlocal production restore composition可否を監査する。
+まずlocal production restore compositionのdesktop Gate可否を監査する。
 
-1. restore preview/preflight/executor/evidence、local inventory、UI composition、関連testを照合
+1. sandbox composition testとproduction factory、既存Secret Service desktop Gateを照合
 2. productionで次を同時に満たせるか判定
    - local user、単一OpenCode config targetだけ
    - encrypted backupは既存Secret Service providerを使用
@@ -120,8 +121,8 @@ LLM-Managerの作業を引き継ぎ、Phase 5 PySide6 GUIのlocal production res
    - mutation直前のstrict再検証
    - attempt保存・開始audit成功前にmutationしない
    - attempt-only/UNKNOWNから自動retryしない
-3. compositionを接続してもGUI実行buttonはまだ追加しない。sandbox production-root overrideで先にGateする
-4. materialな仕様変更が不要なら実装し、全必須検査、commit/push
+3. GUI実行buttonはまだ追加しない。Gate専用一時XDG rootで実desktop Gateする
+4. materialな仕様変更が不要ならevidenceを更新し、全必須検査、commit/push
 5. 実configを変更するdesktop Gateが必要ならGate専用一時XDG rootだけを使う。実`~/.config/opencode`は変更しない
 
 ## 重要な安全境界
