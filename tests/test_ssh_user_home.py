@@ -23,6 +23,26 @@ class ResolveSshUserHomeTests(unittest.TestCase):
         )
         self.assertEqual(host.argv, [("id", "-u"), ("getent", "passwd", "1000")])
 
+    def test_maps_only_exact_candidates_to_fixed_home_relative_targets(self) -> None:
+        home = ResolveSshUserHome().execute(
+            _Host("1000\n", "alice:x:1000:1000::/home/alice:/bin/sh\n"),
+            CancellationToken(),
+        )
+        target = "/home/alice/.config/opencode/opencode.jsonc"
+        self.assertEqual(
+            home.helper_target_map((target,)),
+            {target: ".config/opencode/opencode.jsonc"},
+        )
+        for targets in (
+            (),
+            (target, target),
+            ("/home/alice/.config/opencode/opencode.jsonc.backup",),
+            ("/home/alice-other/.config/opencode/opencode.jsonc",),
+        ):
+            with self.subTest(targets=targets), self.assertRaises(AdapterError) as caught:
+                home.helper_target_map(targets)
+            self.assertEqual(caught.exception.code, "ssh_user_config_not_allowed")
+
     def test_rejects_root_relative_ambiguous_and_uid_mismatch(self) -> None:
         cases = (
             ("0\n", "root:x:0:0:root:/root:/bin/bash", "ssh_user_identity_invalid"),

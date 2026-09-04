@@ -18,6 +18,24 @@ class RemoteUserHome:
         root = PurePosixPath(self.home, ".config/opencode")
         return tuple(str(root / name) for name in ("opencode.jsonc", "opencode.json", "config.json"))
 
+    def helper_target_map(self, targets: tuple[str, ...]) -> dict[str, str]:
+        """Map exact diagnosed targets to the helper's fixed home-relative allowlist."""
+        candidates = self.opencode_candidates
+        if not targets or len(set(targets)) != len(targets):
+            raise AdapterError(
+                "ssh_user_config_not_allowed", "SSH user targets must be non-empty and unique"
+            )
+        if any(target not in candidates for target in targets):
+            raise AdapterError(
+                "ssh_user_config_not_allowed",
+                "SSH user target is outside the remote user allowlist",
+            )
+        base = PurePosixPath(self.home)
+        return {
+            target: PurePosixPath(target).relative_to(base).as_posix()
+            for target in targets
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class ResolveSshUserHome:

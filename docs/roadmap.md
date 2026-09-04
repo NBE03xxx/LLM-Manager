@@ -247,6 +247,8 @@ SSH production home/config discovery: 空だったproduction remote config candi
 
 SSH remote sudo completion: 外部端末でremote recovery helperのsudo認証を行う経路に、request ID/hashから導出したimmutable `result.json`だけをread-only確認するcompletion probeを追加した。未作成結果だけをpendingとし、oversize、不正identity、cancelはfail closedで伝播する。focused 11件が成功した。次はこのprobeを含むproduction SSH user task factoryの構成へ進む。
 
+SSH user target mapping: 解決済みremote homeが生成する3つのabsolute OpenCode候補との完全一致だけを、helperの固定home-relative allowlistへ変換する境界を追加した。空集合、重複、接尾辞付き類似名、別homeを拒否し、文字列prefix除去に依存しない。protocol/preparationを含むfocused 19件が成功した。次はproduction factoryでこのmappingを再構築して各transportへ接続する。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP

@@ -59,3 +59,7 @@ production `remote_config_candidates`が空で、SSH診断がOpenCode設定を�
 ## Interactive remote sudo completion
 
 外部端末でsudo認証を行った後の完了判定を、request ID/hashに束縛されたimmutable `result.json`のread-only取得として実装した。結果未作成に対応する固定transport failureだけをpendingとし、oversize、不正identity、cancelは呼び出し元へ伝播する。mutationの再送や任意remote pathのprobeは行わない。SSH stagingとsudo focused 11件が成功した。
+
+## Exact target mapping
+
+解決済みremote homeから得た3候補との完全一致だけを、`.config/opencode/{opencode.jsonc,opencode.json,config.json}`というhelper用home-relative targetへ変換する。空・重複・接尾辞付き類似パス・別homeは拒否し、文字列prefix除去による境界誤認を避ける。home discovery、remote protocol、preparationを含むfocused 19件が成功した。
