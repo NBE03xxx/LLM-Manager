@@ -229,6 +229,8 @@ Local root planning boundary: local root production Apply監査で、GUI plannin
 
 Local root diagnosis/planning composition: production local診断へ同梱helperのpackage/version/protocol/owner/mode probeを接続し、reportの`can_elevate`をread-only evidenceから設定する。SSH診断へlocal probeは渡さない。planning factoryは選択targetをI/O前に分類し、local Ollamaだけをroot planner、OpenCodeを既存plannerへ渡す。混在targetとSSH root planningは接続・terminal起動前に拒否する。関連31件が成功した。次はlocal root Apply task factoryを構成し、availability公開前にsandbox GUI Results Gateを完了する。
 
+Local root Apply composition: local/root-only ChangeSetをprivate user state、Secret Service backup、固定systemd allowlist、user staging、pkexec-only runner、helper二重readiness、runtime validation、journal、redacted audit、別rollback requestへ束ねるtask factoryを追加した。local user/root routerはmixed privilegeを拒否する。privileged coordinatorのaudit portをapproved/backup/commit/rollback終端へ接続した。sandbox compositionと既存PolicyKit coreを含むfocused 18件が成功した。production entrypointへrouterは注入したが`local_root` availabilityは未公開である。次はUbuntu 26.04/PySide6 sandbox GUI Results Gateで全終端とdeny/cancelを検証する。
+
 ## Post-MVP
 
 優先候補:

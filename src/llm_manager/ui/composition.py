@@ -29,9 +29,11 @@ from llm_manager.infrastructure.backup import LocalBackupStore, _within
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher, BackupKeyProvider
 from llm_manager.infrastructure.journal import LocalOperationJournal
 from llm_manager.infrastructure.helper_compat import (
+    HelperCompatibilityApplyGate,
     HelperCompatibilityProbe,
     local_helper_compatibility_probe,
 )
+from llm_manager.infrastructure.helper_staging import HelperStagingStore
 from llm_manager.infrastructure.local_apply_inventory import LocalApplyInventoryService
 from llm_manager.infrastructure.local_restore import SingleTargetLocalRestoreExecutor
 from llm_manager.infrastructure.restore_execution import (
@@ -41,6 +43,12 @@ from llm_manager.infrastructure.restore_execution import (
     RestoreExecutionStore,
 )
 from llm_manager.infrastructure.process import ProcessPolicy, SubprocessRunner
+from llm_manager.infrastructure.policykit import LocalPolicyKitInvoker, PKEXEC
+from llm_manager.infrastructure.privileged_apply import (
+    ApprovedHelperRequestFactory,
+    PrivilegedRollbackRequestFactory,
+    PrivilegedSafeApplyCoordinator,
+)
 from llm_manager.infrastructure.safe_apply import AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from llm_manager.infrastructure.secret_service import SecretServiceKeyProvider, SecretStorageBackend
 from llm_manager.infrastructure.openssh_identity import OpenSshHostIdentityResolver
@@ -308,6 +316,118 @@ class LocalUserApplyTaskFactory:
             )
 
         return execute
+
+
+@dataclass(slots=True)
+class LocalRootApplyTaskFactory:
+    """Compose the fixed local Ollama PolicyKit Safe Apply route."""
+
+    hosts: tuple[HostCandidate, ...]
+    local_runner: SubprocessRunner
+    privilege_runner: SubprocessRunner
+    state_root: Path
+    staging_root: Path
+    helper_probe: HelperCompatibilityProbe
+    key_provider_factory: Callable[[], BackupKeyProvider] = lambda: SecretServiceKeyProvider(
+        SecretStorageBackend()
+    )
+    backup_store_factory: Callable[
+        [Path, tuple[Path, ...], AesGcmBackupCipher | None], BackupStorePort
+    ] = LocalBackupStore
+    runtime_validator_factory: Callable[
+        [LocalHostAdapter], RuntimeValidatorPort
+    ] = lambda host: ProductRuntimeValidator(
+        host, OllamaReadOnlyAdapter(), OpenCodeReadOnlyAdapter(())
+    )
+    invoker_factory: Callable[
+        [HelperStagingStore, SubprocessRunner], object
+    ] = lambda staging, runner: LocalPolicyKitInvoker(staging, runner)
+
+    @classmethod
+    def production(
+        cls,
+        hosts: tuple[HostCandidate, ...],
+        local_runner: SubprocessRunner,
+        helper_probe: HelperCompatibilityProbe,
+    ) -> "LocalRootApplyTaskFactory":
+        runtime_base = os.environ.get("XDG_RUNTIME_DIR")
+        runtime_root = (
+            Path(runtime_base)
+            if runtime_base and Path(runtime_base).is_absolute()
+            else Path(f"/run/user/{os.getuid()}")
+        )
+        return cls(
+            hosts,
+            local_runner,
+            SubprocessRunner(ProcessPolicy(frozenset({PKEXEC}))),
+            _local_state_root(),
+            runtime_root / "llm-manager" / "helper",
+            helper_probe,
+        )
+
+    def __post_init__(self) -> None:
+        self.state_root = _safe_application_root(self.state_root, "llm-manager") / "llm-manager"
+        if not self.staging_root.is_absolute() or self.staging_root == Path("/"):
+            raise ValueError("helper_staging_root_unsafe")
+
+    def __call__(self, plan: OptimizationPlan, approval: ApprovalRecord):
+        change_set = plan.change_set
+        if change_set is None or not change_set.changes:
+            raise ValueError("change_set_empty")
+        candidate = next(
+            (item for item in self.hosts if item.host_id == change_set.host_id), None
+        )
+        if candidate is None or candidate.kind is not HostKind.LOCAL:
+            raise ValueError("local_root_apply_requires_local_host")
+        if any(not change.requires_root for change in change_set.changes):
+            raise ValueError("local_root_apply_requires_root_changes")
+
+        def execute(cancellation: CancellationToken):
+            if not approval.is_valid_for(plan):
+                raise AdapterError("invalid_approval", "approval does not match the current plan")
+            _prepare_private_state_root(self.state_root)
+            host = LocalHostAdapter(self.local_runner, display_name=candidate.display_name)
+            readiness = HelperCompatibilityApplyGate(host, self.helper_probe)
+            cipher = None
+            if plan.backup_policy.enabled:
+                cipher = AesGcmBackupCipher(self.key_provider_factory())
+            system_root = Path("/etc/systemd/system")
+            backups = self.backup_store_factory(
+                self.state_root / "backups", (system_root,), cipher
+            )
+            staging = HelperStagingStore(self.staging_root, owner_uid=os.getuid())
+            invoker = self.invoker_factory(staging, self.privilege_runner)
+            coordinator = PrivilegedSafeApplyCoordinator(
+                backups,
+                ApprovedHelperRequestFactory(),
+                PrivilegedRollbackRequestFactory(),
+                invoker,  # type: ignore[arg-type]
+                self.runtime_validator_factory(host),
+                LocalOperationJournal(self.state_root / "journal", (system_root,)),
+                readiness,
+                LocalAuditLog(self.state_root / "audit"),
+            )
+            return coordinator.execute(
+                plan, approval, f"local-root-{uuid.uuid4().hex}", cancellation
+            )
+
+        return execute
+
+
+@dataclass(frozen=True, slots=True)
+class LocalApplyTaskFactory:
+    """Route local plans without allowing privilege mixing."""
+
+    user: LocalUserApplyTaskFactory
+    root: LocalRootApplyTaskFactory
+
+    def __call__(self, plan: OptimizationPlan, approval: ApprovalRecord):
+        if plan.change_set is None or not plan.change_set.changes:
+            raise ValueError("change_set_empty")
+        privilege = {change.requires_root for change in plan.change_set.changes}
+        if len(privilege) != 1:
+            raise ValueError("mixed_privilege_plan_unsupported")
+        return self.root(plan, approval) if privilege == {True} else self.user(plan, approval)
 
 
 @dataclass(slots=True)

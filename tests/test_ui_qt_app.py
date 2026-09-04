@@ -13,6 +13,8 @@ class QtProductionCompositionTests(unittest.TestCase):
         diagnostic_tasks = MagicMock()
         change_tasks = MagicMock()
         apply_tasks = MagicMock()
+        root_apply_tasks = MagicMock()
+        routed_apply_tasks = MagicMock()
         inventory_tasks = MagicMock()
         restore_tasks = MagicMock()
         backup_policy = EncryptionInfo(enabled=False)
@@ -20,6 +22,10 @@ class QtProductionCompositionTests(unittest.TestCase):
             qt_app.DiagnosticTaskFactory, "production", return_value=diagnostic_tasks
         ), patch.object(qt_app, "ChangePlanTaskFactory", return_value=change_tasks), patch.object(
             qt_app.LocalUserApplyTaskFactory, "production", return_value=apply_tasks
+        ), patch.object(
+            qt_app.LocalRootApplyTaskFactory, "production", return_value=root_apply_tasks
+        ) as root_production, patch.object(
+            qt_app, "LocalApplyTaskFactory", return_value=routed_apply_tasks
         ), patch.object(
             qt_app.LocalBackupInventoryTaskFactory,
             "production",
@@ -32,11 +38,15 @@ class QtProductionCompositionTests(unittest.TestCase):
             qt_app.BackupSettingsStore, "load", return_value=backup_policy
         ), patch.object(qt_app, "run_gui", return_value=0) as run_gui:
             discover.return_value.execute.return_value = hosts
+            diagnostic_tasks.local_helper_probe = MagicMock()
 
             self.assertEqual(qt_app.main(("llm-manager",)), 0)
 
         keywords = run_gui.call_args.kwargs
-        self.assertIs(keywords["apply_task_factory"], apply_tasks)
+        self.assertIs(keywords["apply_task_factory"], routed_apply_tasks)
+        root_production.assert_called_once_with(
+            hosts, diagnostic_tasks.local_runner, diagnostic_tasks.local_helper_probe
+        )
         service = keywords["apply_availability_service"]
         self.assertEqual(service.available_routes, frozenset({ApplyRoute.LOCAL_USER}))
         self.assertIs(keywords["change_plan_task_factory"], change_tasks)

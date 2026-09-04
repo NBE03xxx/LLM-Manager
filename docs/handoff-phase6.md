@@ -16,14 +16,13 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最初の作業
 
-Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planning、production local helper診断、target別GUI planning分岐は完了済み。
+Phase 6の最初のMVP blockerであるlocal root production Apply経路を続ける。Ollama root planning、production local helper診断、target別GUI planning、local root Apply task compositionは完了済み。availabilityはまだ未公開。
 
-1. local userと混同せず、root-only ChangeSet、helper readiness再検証、backup、Apply/Validate/Rollback、journal/resultを束ねるlocal root Apply task factoryを構成する。
-2. routing factoryでlocal user/local rootを明示分岐し、まだ`local_root` availabilityは公開しない。
-3. sandbox GUI ResultsでCOMMITTED/ROLLED_BACK/RECOVERY_REQUIREDとPolicyKit deny/cancelを検証する。
-4. まずsandbox/fake、次に既存Ubuntu 26.04 VMのGate専用targetで検証する。実Ollama/OpenCode設定や既存systemd unitは変更しない。
-5. materialなPolicyKit/system policy変更が必要なら実行前にユーザー承認を得る。
-6. 全必須検査後、commitして`origin/main`へpushする。
+1. Ubuntu 26.04/PySide6 sandbox GUI ResultsでCOMMITTED/ROLLED_BACK/RECOVERY_REQUIREDとPolicyKit deny/cancelを検証する。
+2. 実PolicyKit Gateが必要な場合は既存Gate専用targetだけを使い、実Ollama/OpenCode設定や既存systemd unitを変更しない。
+3. materialなPolicyKit/system policy変更が必要なら実行前にユーザー承認を得る。
+4. Gate完了後だけ`local_root` availability公開可否を判断する。
+5. 全必須検査後、commitして`origin/main`へpushする。
 
 ## Phase 6残件分類
 

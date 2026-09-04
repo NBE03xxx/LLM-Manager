@@ -22,7 +22,9 @@ from .qt_window import DiagnosisTaskFactory, MainWindow
 from .composition import (
     ChangePlanTaskFactory,
     DiagnosticTaskFactory,
+    LocalApplyTaskFactory,
     LocalBackupInventoryTaskFactory,
+    LocalRootApplyTaskFactory,
     LocalUserApplyTaskFactory,
     LocalUserRestoreTaskFactory,
 )
@@ -91,7 +93,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         config_root / "llm-manager" / "backup.json"
     ).load(mode)
     actor = pwd.getpwuid(os.getuid()).pw_name
-    apply_tasks = LocalUserApplyTaskFactory.production(hosts, tasks.local_runner)
+    user_apply_tasks = LocalUserApplyTaskFactory.production(hosts, tasks.local_runner)
+    if tasks.local_helper_probe is None:
+        raise RuntimeError("local_helper_probe_unavailable")
+    root_apply_tasks = LocalRootApplyTaskFactory.production(
+        hosts, tasks.local_runner, tasks.local_helper_probe
+    )
+    apply_tasks = LocalApplyTaskFactory(user_apply_tasks, root_apply_tasks)
     apply_availability = AssessProductionApplyAvailability(
         frozenset({ApplyRoute.LOCAL_USER})
     )

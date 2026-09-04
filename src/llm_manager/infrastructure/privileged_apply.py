@@ -194,6 +194,7 @@ class PrivilegedSafeApplyCoordinator:
         manifest: BackupManifest | None = None
         apply_request: HelperRequest | None = None
         try:
+            self._audit("apply.approved", plan, (("approval_id", approval.approval_id),))
             self.readiness.assert_ready(cancellation)
             manifest = self.backups.create(BackupRequest(
                 operation_id, plan.plan_id, plan.change_set.host_id, None,
@@ -201,7 +202,9 @@ class PrivilegedSafeApplyCoordinator:
             ), cancellation)
             checks = self.backups.verify(manifest, cancellation)
             if not _passed(checks):
+                self._audit("backup.failed", plan, (("backup_id", manifest.backup_id),))
                 return ApplyOutcome(PlanStatus.APPROVED, manifest, checks, "backup verification failed")
+            self._audit("backup.verified", plan, (("backup_id", manifest.backup_id),))
             try:
                 self.readiness.assert_ready(cancellation)
             except (AdapterError, OSError, OperationCancelled) as error:
@@ -225,6 +228,7 @@ class PrivilegedSafeApplyCoordinator:
             self.journal.update(operation_id, JournalStatus.VALIDATING)
             validations = self.validator.validate(plan.change_set, cancellation)
             if _passed(validations):
+                self._audit("apply.committed", plan, (("backup_id", manifest.backup_id),))
                 self.journal.update(operation_id, JournalStatus.COMMITTED)
                 return ApplyOutcome(PlanStatus.COMMITTED, manifest, validations)
             return self._rollback(plan, approval, manifest, prepared.request, operation_id, validations, "runtime validation failed", cancellation)
@@ -254,11 +258,31 @@ class PrivilegedSafeApplyCoordinator:
         except (AdapterError, OSError, OperationCancelled) as rollback_error:
             restored = (_validation("rollback.exception", False, getattr(rollback_error, "code", type(rollback_error).__name__)),)
             status = PlanStatus.RECOVERY_REQUIRED
+        event_type = "rollback.completed" if status is PlanStatus.ROLLED_BACK else "rollback.recovery_required"
+        try:
+            self._audit(event_type, plan, (("backup_id", manifest.backup_id),))
+        except (AdapterError, OSError):
+            status = PlanStatus.RECOVERY_REQUIRED
         try:
             self.journal.update(operation_id, JournalStatus.ROLLED_BACK if status is PlanStatus.ROLLED_BACK else JournalStatus.RECOVERY_REQUIRED)
         except (AdapterError, OSError):
             status = PlanStatus.RECOVERY_REQUIRED
         return ApplyOutcome(status, manifest, validations + restored, error)
+
+    def _audit(
+        self,
+        event_type: str,
+        plan: OptimizationPlan,
+        fields: tuple[tuple[str, object], ...],
+    ) -> None:
+        if self.audit is None:
+            return
+        host_id = plan.change_set.host_id if plan.change_set is not None else None
+        self.audit.append(
+            event_type,
+            plan.plan_id,
+            (("plan_id", plan.plan_id), ("host_id", host_id)) + fields,
+        )
 
 
 def _validate_manifest_binding(plan, approval, manifest, operation_id):
