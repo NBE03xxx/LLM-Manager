@@ -17,6 +17,7 @@ from llm_manager.infrastructure.remote_helper import (
 from llm_manager.infrastructure.ssh_remote_staging import (
     MAX_REMOTE_RECEIPT_BYTES,
     REMOTE_USER_STAGING_ROOT,
+    RemoteRecoveryResultCompletionProbe,
     UserOnlySshRecoveryTransport,
 )
 
@@ -78,10 +79,36 @@ class UserOnlySshRecoveryTransportTests(unittest.TestCase):
             UserOnlySshRecoveryTransport(runner, clock=lambda: NOW).read_recovery_receipt(content, CancellationToken())
 
 
+class RemoteRecoveryResultCompletionProbeTests(unittest.TestCase):
+    def test_checks_only_the_bound_immutable_result_path(self) -> None:
+        runner = _Runner(result=b"result")
+        probe = RemoteRecoveryResultCompletionProbe(runner)
+        self.assertTrue(probe.completed("backup-1", "a" * 64, CancellationToken()))
+        self.assertEqual(
+            runner.calls,
+            [("read", f"{REMOTE_USER_STAGING_ROOT}/backup-1/{'a' * 64}/result.json",
+              MAX_REMOTE_RECEIPT_BYTES)],
+        )
+
+    def test_missing_is_pending_but_other_failures_and_cancel_propagate(self) -> None:
+        runner = _Runner(read_error="remote_staging_failed")
+        probe = RemoteRecoveryResultCompletionProbe(runner)
+        self.assertFalse(probe.completed("backup-1", "b" * 64, CancellationToken()))
+        runner.read_error = "remote_result_too_large"
+        with self.assertRaises(AdapterError) as caught:
+            probe.completed("backup-1", "b" * 64, CancellationToken())
+        self.assertEqual(caught.exception.code, "remote_result_too_large")
+        with self.assertRaises(OperationCancelled):
+            probe.completed("backup-1", "b" * 64, CancellationToken(True))
+        with self.assertRaises(AdapterError):
+            probe.completed("../backup", "b" * 64, CancellationToken())
+
+
 class _Runner:
-    def __init__(self, *, result=b"", cancel_after_upload=False):
+    def __init__(self, *, result=b"", cancel_after_upload=False, read_error=None):
         self.result = result
         self.cancel_after_upload = cancel_after_upload
+        self.read_error = read_error
         self.calls = []
         self.token = None
 
@@ -98,6 +125,8 @@ class _Runner:
 
     def read_private_file(self, relative_path, max_bytes):
         self.calls.append(("read", relative_path, max_bytes))
+        if self.read_error is not None:
+            raise AdapterError(self.read_error, "fake read failure")
         if len(self.result) > max_bytes:
             raise AdapterError("remote_result_too_large", "fake bounded read rejected result")
         return self.result

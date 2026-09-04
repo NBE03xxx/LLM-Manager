@@ -55,3 +55,7 @@ production `remote_config_candidates`が空で、SSH診断がOpenCode設定を�
 診断では解決したhome配下の`.config/opencode/{opencode.jsonc,opencode.json,config.json}`だけをadapter候補に渡す。planning時も同じControlMaster sessionでhomeを再解決し、診断済みactive configが候補集合に含まれなければfresh read前に停止する。固定command、root/relative/ambiguous/mismatched passwd拒否、診断/planning compositionを含むfocused 19件が成功した。
 
 `OPENCODE_CONFIG`やremote `XDG_CONFIG_HOME`によるhome外targetは現在のhelper allowlist外としてfail closedであり、MVPでは自動拡張しない。次はhelper readiness、Secret Service、remote sudo recovery authorization、private state/runtime rootsをproduction SSH user task factoryへ構成する。
+
+## Interactive remote sudo completion
+
+外部端末でsudo認証を行った後の完了判定を、request ID/hashに束縛されたimmutable `result.json`のread-only取得として実装した。結果未作成に対応する固定transport failureだけをpendingとし、oversize、不正identity、cancelは呼び出し元へ伝播する。mutationの再送や任意remote pathのprobeは行わない。SSH stagingとsudo focused 11件が成功した。

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import PurePosixPath
@@ -15,6 +16,8 @@ from .remote_helper import decode_remote_request
 
 REMOTE_USER_STAGING_ROOT = ".local/state/llm-manager/remote-helper"
 MAX_REMOTE_RECEIPT_BYTES = 1024 * 1024
+_IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
+_DIGEST = re.compile(r"[0-9a-f]{64}")
 
 
 class RemoteUserStagingRunner(Protocol):
@@ -105,7 +108,34 @@ class UserOnlySshRecoveryTransport:
         return decode_remote_request(content, expected_hash=expected_hash, now=self.clock())
 
 
+@dataclass(frozen=True, slots=True)
+class RemoteRecoveryResultCompletionProbe:
+    """Poll only the immutable result path for an interactive sudo request."""
+
+    runner: RemoteUserStagingRunner
+
+    def completed(
+        self,
+        request_id: str,
+        request_hash: str,
+        cancellation: CancellationToken,
+    ) -> bool:
+        _cancel(cancellation)
+        try:
+            self.runner.read_private_file(
+                f"{_operation_path(request_id, request_hash)}/result.json",
+                MAX_REMOTE_RECEIPT_BYTES,
+            )
+        except AdapterError as error:
+            if error.code == "remote_staging_failed":
+                return False
+            raise
+        return True
+
+
 def _operation_path(request_id: str, request_hash: str) -> str:
+    if not _IDENTIFIER.fullmatch(request_id) or not _DIGEST.fullmatch(request_hash):
+        raise AdapterError("invalid_remote_staging_path", "remote staging identity is unsafe")
     path = PurePosixPath(REMOTE_USER_STAGING_ROOT, request_id, request_hash)
     if path.is_absolute() or ".." in path.parts:
         raise AdapterError("invalid_remote_staging_path", "remote staging path is unsafe")

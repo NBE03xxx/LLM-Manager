@@ -245,6 +245,8 @@ SSH user Apply coordinator: Prepared Applyとreport/approval/change set/manifest
 
 SSH production home/config discovery: 空だったproduction remote config candidatesを、固定`id -u`と`getent passwd <uid>`によるnon-root UID/home解決へ接続した。shell展開や任意commandを使わず、root、relative home、複数行、UID不一致を拒否する。診断時はhome配下の3つのOpenCode global configだけを候補とし、planning時も同じControlMaster sessionで再解決して診断済みactive configが集合外ならfresh read前に停止する。focused 19件が成功した。`OPENCODE_CONFIG`やhome外XDG configはhelper allowlist外としてfail closedを維持する。次はhelper readiness、Secret Service、remote sudo recovery、private state/runtime rootsをproduction SSH user task factoryへ構成する。
 
+SSH remote sudo completion: 外部端末でremote recovery helperのsudo認証を行う経路に、request ID/hashから導出したimmutable `result.json`だけをread-only確認するcompletion probeを追加した。未作成結果だけをpendingとし、oversize、不正identity、cancelはfail closedで伝播する。focused 11件が成功した。次はこのprobeを含むproduction SSH user task factoryの構成へ進む。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
 
 ## Post-MVP
