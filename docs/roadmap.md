@@ -207,6 +207,8 @@ Qt restore execution boundary: authorizationをQt stateへ保持せず、exact p
 
 Qt restore result evidence: production taskは正常COMMITTEDだけでなく、永続済みFAILED/UNKNOWNと専用persistence errorが公開するevidenceをbounded resultへ変換する。Qtは`committed/failed/unknown`、error、persistedをそのまま表示し、未知stateやevidence不在を成功と推測しない。結果後はpreview/approvalを消費し、明示inventory refreshまで再実行しない。Ubuntu 26.04/PySide6 6.10.2でworker lockと全result state表示の2件が成功した。production `main()`へのrestore接続は引き続き未実施である。
 
+Local restore explicit refresh and production publication: sandboxの実backup/journal、production inventory/restore factory、Qt workerをend-to-end接続した。COMMITTED直後は旧inventoryをmutation結果として自動更新せず、明示refresh後だけstrict execution storeから`restore: committed`、attention falseを表示し、同じapprovalからrunを再有効化しない。Ubuntu 26.04/PySide6 6.10.2で1件が0.143秒で成功した。local user単一OpenCode target経路の全境界が閉じたためproduction `main()`へrestore taskを接続した。local root・SSH restoreは未接続である。
+
 ## Phase 6: Hardening と MVP Release
 
 - 対応環境 matrix の実機検証

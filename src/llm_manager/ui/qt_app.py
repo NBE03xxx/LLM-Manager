@@ -20,6 +20,7 @@ from .composition import (
     DiagnosticTaskFactory,
     LocalBackupInventoryTaskFactory,
     LocalUserApplyTaskFactory,
+    LocalUserRestoreTaskFactory,
 )
 
 
@@ -89,6 +90,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         frozenset({ApplyRoute.LOCAL_USER})
     )
     backup_inventory_tasks = LocalBackupInventoryTaskFactory.production(hosts)
+    restore_tasks = LocalUserRestoreTaskFactory.production(hosts)
     import locale as system_locale
 
     locale_name = system_locale.getlocale()[0] or "en"
@@ -104,6 +106,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         apply_availability_service=apply_availability,
         backup_inventory_task_factory=backup_inventory_tasks,
         restore_preview_task_factory=backup_inventory_tasks.preview,
+        restore_task_factory=restore_tasks.task,
     )
 
 

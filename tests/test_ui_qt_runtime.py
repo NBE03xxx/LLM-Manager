@@ -1,9 +1,12 @@
+import hashlib
 import os
+import tempfile
 import threading
 import time
 import unittest
 from dataclasses import replace
 from datetime import timedelta
+from pathlib import Path
 
 from llm_manager.ui.qt_worker import PYSIDE_AVAILABLE
 
@@ -890,6 +893,124 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertNotIn("committed", status.text())
         finally:
             window.close()
+
+    def test_restore_completion_requires_explicit_refresh_to_load_execution_inventory(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QCheckBox, QLabel, QListWidget, QPushButton
+
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.application.ports import BackupRequest, CancellationToken
+        from llm_manager.domain.enums import ChangeOperation, HostKind
+        from llm_manager.domain.models import Change, ChangeSet, EncryptionInfo
+        from llm_manager.infrastructure.backup import LocalBackupStore
+        from llm_manager.infrastructure.journal import JournalStatus, JournalTarget, LocalOperationJournal
+        from llm_manager.ui.composition import (
+            LocalBackupInventoryTaskFactory,
+            LocalUserRestoreTaskFactory,
+        )
+        from llm_manager.ui.qt_window import MainWindow
+
+        class TestKeys:
+            def get_key(self, _reference, _scope):
+                return b"k" * 32
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "config"
+            target_root = config / "opencode"
+            target_root.mkdir(parents=True)
+            target = target_root / "opencode.json"
+            target.write_text("old", encoding="utf-8")
+            state = root / "state" / "llm-manager"
+            state.mkdir(parents=True, mode=0o700)
+            state.chmod(0o700)
+            before = hashlib.sha256(b"old").hexdigest()
+            after = hashlib.sha256(b"new").hexdigest()
+            change = Change(
+                "change", str(target), ChangeOperation.REPLACE_FILE, "old", "new",
+                before, "masked", source_span=(0, 3), replacement_text="new",
+            )
+            changes = ChangeSet("changes", "local:test", (change,), "c" * 64)
+            LocalBackupStore(state / "backups", (target_root,)).create(BackupRequest(
+                "backup-1", "plan-1", "local:test", None, changes,
+                EncryptionInfo(enabled=False),
+            ), CancellationToken())
+            journal = LocalOperationJournal(state / "journal", (target_root,))
+            journal.create(
+                "backup-1", "plan-1", "local:test", changes.content_hash,
+                (JournalTarget(str(target), before, after),),
+            )
+            journal.update("backup-1", JournalStatus.VALIDATING)
+            journal.update("backup-1", JournalStatus.COMMITTED)
+            target.write_text("new", encoding="utf-8")
+            hosts = (HostCandidate("local:test", HostKind.LOCAL, "Local"),)
+            inventory_factory = LocalBackupInventoryTaskFactory(
+                hosts, config, root / "state"
+            )
+            restore_factory = LocalUserRestoreTaskFactory(
+                hosts, config, root / "state", TestKeys
+            )
+            window = MainWindow(
+                lambda _host: lambda _token: None,
+                hosts=hosts,
+                backup_inventory_task_factory=inventory_factory,
+                restore_preview_task_factory=inventory_factory.preview,
+                restore_task_factory=restore_factory.task,
+            )
+            try:
+                refresh = window.findChild(QPushButton, "refresh-backup-inventory")
+                inventory = window.findChild(QListWidget, "backup-inventory-list")
+                approval = window.findChild(QCheckBox, "approve-restore-preview")
+                run = window.findChild(QPushButton, "run-restore")
+                status = window.findChild(QLabel, "restore-approval-status")
+                refresh.click()
+                ready = QEventLoop()
+
+                def approve_when_ready() -> None:
+                    if inventory.count() == 1 and inventory.currentRow() < 0:
+                        inventory.setCurrentRow(0)
+                    if approval.isEnabled():
+                        approval.click()
+                        ready.quit()
+                    else:
+                        QTimer.singleShot(5, approve_when_ready)
+
+                QTimer.singleShot(0, approve_when_ready)
+                QTimer.singleShot(2000, ready.quit)
+                ready.exec()
+                run.click()
+                completed = QEventLoop()
+
+                def finish_when_committed() -> None:
+                    if "committed" in status.text() and refresh.isEnabled():
+                        completed.quit()
+                    else:
+                        QTimer.singleShot(5, finish_when_committed)
+
+                QTimer.singleShot(0, finish_when_committed)
+                QTimer.singleShot(2000, completed.quit)
+                completed.exec()
+                self.assertEqual(target.read_text(encoding="utf-8"), "old")
+                self.assertNotIn("restore: committed", inventory.item(0).text())
+                self.assertFalse(run.isEnabled())
+
+                refresh.click()
+                refreshed = QEventLoop()
+
+                def finish_when_refreshed() -> None:
+                    if inventory.count() == 1 and "restore: committed" in inventory.item(0).text():
+                        refreshed.quit()
+                    else:
+                        QTimer.singleShot(5, finish_when_refreshed)
+
+                QTimer.singleShot(0, finish_when_refreshed)
+                QTimer.singleShot(2000, refreshed.quit)
+                refreshed.exec()
+                self.assertIn("restore: committed", inventory.item(0).text())
+                self.assertIn("restore attention: false", inventory.item(0).text())
+                self.assertFalse(run.isEnabled())
+            finally:
+                window.close()
 
 
 if __name__ == "__main__":

@@ -7,12 +7,13 @@ from llm_manager.ui import qt_app
 
 
 class QtProductionCompositionTests(unittest.TestCase):
-    def test_main_exposes_only_local_user_apply_route(self) -> None:
+    def test_main_exposes_only_local_user_apply_and_restore_routes(self) -> None:
         hosts = (MagicMock(),)
         diagnostic_tasks = MagicMock()
         change_tasks = MagicMock()
         apply_tasks = MagicMock()
         inventory_tasks = MagicMock()
+        restore_tasks = MagicMock()
         backup_policy = EncryptionInfo(enabled=False)
         with patch.object(qt_app, "DiscoverHosts") as discover, patch.object(
             qt_app.DiagnosticTaskFactory, "production", return_value=diagnostic_tasks
@@ -22,6 +23,10 @@ class QtProductionCompositionTests(unittest.TestCase):
             qt_app.LocalBackupInventoryTaskFactory,
             "production",
             return_value=inventory_tasks,
+        ), patch.object(
+            qt_app.LocalUserRestoreTaskFactory,
+            "production",
+            return_value=restore_tasks,
         ), patch.object(
             qt_app.BackupSettingsStore, "load", return_value=backup_policy
         ), patch.object(qt_app, "run_gui", return_value=0) as run_gui:
@@ -36,7 +41,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertIs(keywords["change_plan_task_factory"], change_tasks)
         self.assertIs(keywords["backup_inventory_task_factory"], inventory_tasks)
         self.assertIs(keywords["restore_preview_task_factory"], inventory_tasks.preview)
-        self.assertNotIn("restore_task_factory", keywords)
+        self.assertIs(keywords["restore_task_factory"], restore_tasks.task)
 
 
 if __name__ == "__main__":
