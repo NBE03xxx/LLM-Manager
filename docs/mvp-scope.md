@@ -84,7 +84,7 @@ MVP は「単一 Linux ホストの Ollama/OpenCode 環境を、安全に診断�
 
 - 正式対象OSはUbuntu 26.04とDebian 13とする。それ以外のUbuntu/Debianリリースは検出できても正式対応と表示しない。
 - Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25を最初の検証基準版とする。
-- PySide6最低版は公式にPython 3.14対応が明記された6.8.6とする。配布時はPython 3.14.4とのwheel/import/plugin検証済みversionへpinする。
+- Python 3.14環境のPySide6最低版は、公式にPython 3.14対応が明記された6.8.6とする。Debian 13 system Python 3.13ではOS提供PySide6 6.8.2.1を別の検証済み組合せとして許可する。配布時はOS/Pythonごとのimport/plugin検証済みversionへ制約する。
 - Ollama/OpenCodeは「診断対応」と「自動変更対応」を別に宣言する。
 - 自動変更対応は、設定schema、優先順位、runtime検証、rollback fixtureが確認済みのversion rangeに限定する。
 - 未知major versionはread-only、未知minor/patchはfixture互換性を確認できるまでactionable recommendationを抑止する。

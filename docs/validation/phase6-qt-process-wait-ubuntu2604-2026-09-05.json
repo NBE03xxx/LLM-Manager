@@ -1,0 +1,140 @@
+{
+  "python": "3.14.4",
+  "pyside6": "6.10.2",
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "scope": "offscreen Qt + production SubprocessRunner; synthetic finite child; cumulative parent RSS",
+  "samples": [
+    {
+      "mode": "complete",
+      "elapsed_ms": 317.47,
+      "ticks": 31,
+      "max_event_gap_ms": 10.308,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 5.44,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "complete",
+      "elapsed_ms": 321.363,
+      "ticks": 32,
+      "max_event_gap_ms": 10.241,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 3.994,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "complete",
+      "elapsed_ms": 320.143,
+      "ticks": 32,
+      "max_event_gap_ms": 10.205,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 4.421,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "timeout",
+      "elapsed_ms": 501.914,
+      "ticks": 50,
+      "max_event_gap_ms": 10.425,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 7.627,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "timeout",
+      "elapsed_ms": 501.677,
+      "ticks": 50,
+      "max_event_gap_ms": 10.283,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 7.421,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "timeout",
+      "elapsed_ms": 501.545,
+      "ticks": 50,
+      "max_event_gap_ms": 10.254,
+      "cancel_to_reaped_ms": null,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 6.989,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "cancel",
+      "elapsed_ms": 5080.409,
+      "ticks": 508,
+      "max_event_gap_ms": 10.84,
+      "cancel_to_reaped_ms": 49.78,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 69.512,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "cancel",
+      "elapsed_ms": 5031.068,
+      "ticks": 503,
+      "max_event_gap_ms": 10.957,
+      "cancel_to_reaped_ms": 10.164,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 64.628,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "cancel",
+      "elapsed_ms": 5080.799,
+      "ticks": 508,
+      "max_event_gap_ms": 10.438,
+      "cancel_to_reaped_ms": 50.116,
+      "close_to_hidden_ms": null,
+      "parent_cpu_ms": 62.971,
+      "parent_peak_rss_kib": 61172,
+      "reaped": true
+    },
+    {
+      "mode": "close",
+      "elapsed_ms": 5090.364,
+      "ticks": 509,
+      "max_event_gap_ms": 10.618,
+      "cancel_to_reaped_ms": 50.497,
+      "close_to_hidden_ms": 59.754,
+      "parent_cpu_ms": 66.635,
+      "parent_peak_rss_kib": 76576,
+      "reaped": true
+    },
+    {
+      "mode": "close",
+      "elapsed_ms": 5040.841,
+      "ticks": 504,
+      "max_event_gap_ms": 10.771,
+      "cancel_to_reaped_ms": 5.152,
+      "close_to_hidden_ms": 10.218,
+      "parent_cpu_ms": 68.648,
+      "parent_peak_rss_kib": 76728,
+      "reaped": true
+    },
+    {
+      "mode": "close",
+      "elapsed_ms": 5090.969,
+      "ticks": 509,
+      "max_event_gap_ms": 10.791,
+      "cancel_to_reaped_ms": 50.011,
+      "close_to_hidden_ms": 60.346,
+      "parent_cpu_ms": 68.179,
+      "parent_peak_rss_kib": 76728,
+      "reaped": true
+    }
+  ]
+}

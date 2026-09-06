@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=LLM-Manager
+Name[ja]=LLM-Manager
+Comment=Safely diagnose and optimize Ollama and OpenCode hosts
+Comment[ja]=Ollama と OpenCode ホストを安全に診断・最適化します
+Exec=/usr/bin/llm-manager
+TryExec=/usr/bin/llm-manager
+Icon=io.github.nbe03xxx.llm-manager
+Terminal=false
+Categories=System;
+Keywords=Ollama;OpenCode;LLM;SSH;
+StartupNotify=true

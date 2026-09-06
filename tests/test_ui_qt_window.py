@@ -55,6 +55,29 @@ class QtWindowBoundaryTests(unittest.TestCase):
         )
         self.assertFalse(any(module.startswith(forbidden) for module in modules))
 
+    def test_pages_are_scrollable_and_close_waits_for_workers(self) -> None:
+        source = QT_WINDOW.read_text(encoding="utf-8")
+        self.assertIn("QScrollArea", source)
+        self.assertIn("scroll.setWidgetResizable(True)", source)
+        self.assertIn("label.setWordWrap(True)", source)
+        self.assertIn("def closeEvent", source)
+        self.assertIn("self._coordinator.cancel(host_id)", source)
+        self.assertIn("QTimer.singleShot(0, self.close)", source)
+        self.assertIn('"status.closing_wait" if self._close_pending', source)
+        self.assertIn("remaining_ms = max(1, int(remaining_seconds * 1000))", source)
+
+    def test_accessible_names_follow_localized_visible_text(self) -> None:
+        source = QT_WINDOW.read_text(encoding="utf-8")
+        self.assertIn("def _refresh_accessible_names", source)
+        self.assertIn("widget.setAccessibleName(widget.text())", source)
+        self.assertIn("label.setAccessibleName(label.text())", source)
+
+    def test_root_restore_entry_is_guarded_by_separate_root_availability_check(self) -> None:
+        source = QT_WINDOW.read_text(encoding="utf-8")
+        self.assertIn('setObjectName("open-root-restore")', source)
+        self.assertIn("self._root_restore_route_unavailable() is not None", source)
+        self.assertIn("service.execute(host.kind, True)", source)
+
 
 if __name__ == "__main__":
     unittest.main()

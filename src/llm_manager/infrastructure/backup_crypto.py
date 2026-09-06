@@ -95,7 +95,7 @@ class AesGcmBackupCipher:
             raise AdapterError("authentication_failed", "backup envelope authentication failed") from error
 
     def _key(self, key_reference: str, key_scope: str) -> bytes:
-        if not key_reference or key_scope not in {"local_secret_service", "remote_root"}:
+        if not key_reference or key_scope not in {"local_secret_service", "remote_root", "local_root"}:
             raise AdapterError("invalid_key_reference", "backup key reference or scope is invalid")
         key = self.keys.get_key(key_reference, key_scope)
         if not isinstance(key, bytes) or len(key) != 32:

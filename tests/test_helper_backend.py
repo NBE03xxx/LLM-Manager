@@ -1,9 +1,11 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from llm_manager.application.errors import AdapterError
-from llm_manager.infrastructure.helper_backend import LocalSystemHelperBackend, SYSTEMCTL
+from llm_manager.infrastructure.helper_backend import LocalSystemHelperBackend, SYSTEMCTL, _run_service_command
 from llm_manager.planning.ollama import DROP_IN_PATH
 
 
@@ -41,6 +43,14 @@ class LocalSystemHelperBackendTests(unittest.TestCase):
         )
         with self.assertRaises(AdapterError):
             self.backend.restart_unit("ssh.service")
+
+    def test_production_service_runner_discards_unused_output(self) -> None:
+        with patch("llm_manager.infrastructure.helper_backend.subprocess.run") as run:
+            run.return_value.returncode = 0
+            self.assertEqual(_run_service_command((SYSTEMCTL, "daemon-reload")), 0)
+        arguments = run.call_args.kwargs
+        self.assertEqual(arguments["stdout"], subprocess.DEVNULL)
+        self.assertEqual(arguments["stderr"], subprocess.DEVNULL)
 
     def test_rejects_path_metadata_symlink_and_failed_service(self) -> None:
         with self.assertRaises(AdapterError):

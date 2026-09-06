@@ -9,7 +9,11 @@ _SECRET_KEY = re.compile(
 )
 _ASSIGNMENT = re.compile(
     r"(?i)\b(authorization|api[-_]?key|token|password|secret|credential|auth[-_]?token)"
-    r"(\s*[:=]\s*)([^\s,;]+)"
+    r"([\"']?\s*[:=]\s*)"
+    # Consume the entire quoted value, including escaped quotes and whitespace.
+    # A truncated diagnostic may omit the closing quote: hide through EOF then.
+    r"(?:\"(?:\\[\s\S]|[^\"\\])*(?:\"|\Z)"
+    r"|'(?:\\[\s\S]|[^'\\])*(?:'|\Z)|[^\s,;]+)"
 )
 _BEARER = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]+")
 _URL_USERINFO = re.compile(r"(?P<scheme>https?://)[^/@\s]+@")

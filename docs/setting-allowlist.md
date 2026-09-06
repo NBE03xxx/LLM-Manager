@@ -21,6 +21,8 @@ allowlistは「推奨可能」ではなく「自動Changeを生成可能」な�
 
 `OLLAMA_CONTEXT_LENGTH × OLLAMA_NUM_PARALLEL`がmemoryを増加させるため、これらは同一ChangeSetで再評価する。`OLLAMA_HOST`のnon-loopback、wildcard、hostname/IPによる外部bindはMVP denylistとし、自動Changeを生成しない。必要な利用者には認証・TLSを備えたreverse proxy等の手動設計を案内する。
 
+既存の専用drop-inは、単一`[Service]`とallowlisted keyのliteral `Environment="KEY=value"`、LF、コメント・空行の形式に限定して編集する。未選択の設定・コメントは保持し、選択行だけを置換または末尾へ追記する。未知directive、重複key、Environment reset、escape/specifier展開、継続行などを検出した場合は計画生成を拒否し、自動で全体を作り直さない。未選択の既存値の保持は、その値を推奨・性能検証済みとするものではない。
+
 Apply後は`systemctl daemon-reload`, `restart ollama.service`, service status, API, effective environmentの順で検証する。drop-inが元から存在しなければrollbackは削除、存在すれば元content/metadataへ復元する。
 
 ## 3. OpenCode 1.18.25

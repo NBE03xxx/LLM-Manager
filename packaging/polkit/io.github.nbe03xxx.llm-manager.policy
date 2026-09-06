@@ -15,4 +15,24 @@
     </defaults>
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-helper</annotate>
   </action>
+  <action id="io.github.nbe03xxx.llm-manager.review-system-restore">
+    <description>Review an LLM-Manager system backup for restoration</description>
+    <message>Authentication is required to inspect and save an Ollama restore review; this does not restore settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-restore-review</annotate>
+  </action>
+  <action id="io.github.nbe03xxx.llm-manager.execute-system-restore">
+    <description>Execute an approved LLM-Manager system restore</description>
+    <message>Authentication is required to restore the approved Ollama system settings</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-restore-execute</annotate>
+  </action>
 </policyconfig>

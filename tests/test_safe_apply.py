@@ -16,8 +16,19 @@ from llm_manager.infrastructure.backup import LocalBackupStore, MAX_ITEM_BYTES
 from llm_manager.infrastructure.audit import LocalAuditLog
 from llm_manager.infrastructure.backup_crypto import AesGcmBackupCipher
 from llm_manager.infrastructure.journal import JournalStatus, LocalOperationJournal, ReconciliationState
-from llm_manager.infrastructure.safe_apply import AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
+from llm_manager.infrastructure.safe_apply import ApplyOutcome, AppliedFile, AtomicFileExecutor, FileValidator, SafeApplyCoordinator
 from tests.fixtures import plan
+
+
+class ApplyOutcomeTests(unittest.TestCase):
+    def test_redacts_and_bounds_error_before_it_reaches_the_ui(self) -> None:
+        outcome = ApplyOutcome(
+            PlanStatus.RECOVERY_REQUIRED,
+            None,
+            error='{"password": "sentinel secret"}' + "x" * 5000,
+        )
+        self.assertNotIn("sentinel", outcome.error or "")
+        self.assertLessEqual(len(outcome.error or ""), 4096)
 
 
 def _change_set(path: Path, content: str, changes: tuple[Change, ...] | None = None) -> ChangeSet:

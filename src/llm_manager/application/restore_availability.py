@@ -35,7 +35,7 @@ class AssessProductionRestoreAvailability:
         }[(host_kind, requires_root)]
         reason = {
             RestoreRoute.LOCAL_USER: "local_user_restore_composition_missing",
-            RestoreRoute.LOCAL_ROOT: "local_root_restore_protocol_missing",
+            RestoreRoute.LOCAL_ROOT: "local_root_restore_release_gate_pending",
             RestoreRoute.SSH_USER: "ssh_user_restore_protocol_missing",
             RestoreRoute.SSH_ROOT: "ssh_root_restore_protocol_missing",
         }[route]

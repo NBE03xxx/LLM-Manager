@@ -1,0 +1,7 @@
+#!/usr/bin/python3 -I
+"""Dedicated root review entry; installed with its own PolicyKit action."""
+import sys
+sys.dont_write_bytecode = True
+from llm_manager.infrastructure.root_restore_review_cli import main
+if __name__ == '__main__':
+    raise SystemExit(main())

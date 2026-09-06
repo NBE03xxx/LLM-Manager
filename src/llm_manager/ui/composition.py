@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import stat
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -97,10 +98,12 @@ class DiagnosticTaskFactory:
     ssh_auth_broker: ExternalTerminalSshBroker | None = None
     local_helper_probe: HelperCompatibilityProbe | None = None
     discover_remote_home: bool = False
+    local_opencode_binary: str = "opencode"
 
     @classmethod
     def production(cls, hosts: tuple[HostCandidate, ...]) -> "DiagnosticTaskFactory":
         ssh_runner = SubprocessRunner(ProcessPolicy(frozenset({"ssh"})))
+        opencode_binary = _local_opencode_binary()
         terminal = detect_terminal()
         runtime_base = os.environ.get("XDG_RUNTIME_DIR")
         runtime_root = Path(runtime_base) if runtime_base and Path(runtime_base).is_absolute() else Path(
@@ -108,7 +111,9 @@ class DiagnosticTaskFactory:
         )
         return cls(
             hosts=hosts,
-            local_runner=SubprocessRunner(ProcessPolicy(_LOCAL_EXECUTABLES)),
+            local_runner=SubprocessRunner(
+                ProcessPolicy(_LOCAL_EXECUTABLES | frozenset({opencode_binary}))
+            ),
             ssh_runner=ssh_runner,
             local_config_candidates=_local_opencode_candidates(),
             local_helper_probe=local_helper_compatibility_probe(
@@ -120,6 +125,7 @@ class DiagnosticTaskFactory:
                 else None
             ),
             discover_remote_home=True,
+            local_opencode_binary=opencode_binary,
         )
 
     def __call__(self, host_id: str):
@@ -193,7 +199,10 @@ class DiagnosticTaskFactory:
         return DiagnoseHost(
             host=host,
             ollama=OllamaReadOnlyAdapter(),
-            client=OpenCodeReadOnlyAdapter(configs),
+            client=OpenCodeReadOnlyAdapter(
+                configs,
+                binary=(self.local_opencode_binary if candidate.kind is HostKind.LOCAL else "opencode"),
+            ),
             system_probe=LinuxSystemProbe(),
             helper_probe=self.local_helper_probe if candidate.kind is HostKind.LOCAL else None,
         )
@@ -303,7 +312,18 @@ class LocalUserApplyTaskFactory:
     def production(
         cls, hosts: tuple[HostCandidate, ...], local_runner: SubprocessRunner
     ) -> "LocalUserApplyTaskFactory":
-        return cls(hosts, local_runner, _local_config_root(), _local_state_root())
+        opencode_binary = _local_opencode_binary()
+        return cls(
+            hosts,
+            local_runner,
+            _local_config_root(),
+            _local_state_root(),
+            runtime_validator_factory=lambda host, candidates: ProductRuntimeValidator(
+                host,
+                OllamaReadOnlyAdapter(),
+                OpenCodeReadOnlyAdapter(candidates, binary=opencode_binary),
+            ),
+        )
 
     def __post_init__(self) -> None:
         self.config_root = _safe_application_root(self.config_root, "opencode")
@@ -854,6 +874,27 @@ def _local_opencode_candidates() -> tuple[str, ...]:
     root = _local_config_root()
     directory = root / "opencode"
     return tuple(str(directory / name) for name in ("opencode.jsonc", "opencode.json", "config.json"))
+
+
+def _local_opencode_binary(home: Path | None = None) -> str:
+    """Select only OpenCode's fixed per-user install path outside the fixed system PATH."""
+    install_root = (home or Path.home()) / ".opencode"
+    binary_root = install_root / "bin"
+    candidate = binary_root / "opencode"
+    try:
+        if install_root.is_symlink() or binary_root.is_symlink():
+            return "opencode"
+        metadata = candidate.lstat()
+    except OSError:
+        return "opencode"
+    if (
+        stat.S_ISREG(metadata.st_mode)
+        and metadata.st_uid == os.getuid()
+        and metadata.st_mode & 0o100
+        and not metadata.st_mode & 0o022
+    ):
+        return str(candidate)
+    return "opencode"
 
 
 def _selected_planning_route(plan: OptimizationPlan) -> str:

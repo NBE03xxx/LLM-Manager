@@ -60,6 +60,7 @@ RestorePreviewTaskFactory = Callable[
 RestoreTaskFactory = Callable[
     [str, str, RestorePreview, RestoreApproval], Callable[[CancellationToken], object]
 ]
+RootRestoreWorkflow = Callable[[HostCandidate, str, object], None]
 
 
 if not PYSIDE_AVAILABLE:
@@ -79,6 +80,7 @@ else:
         QListWidgetItem,
         QMainWindow,
         QPushButton,
+        QScrollArea,
         QStackedWidget,
         QVBoxLayout,
         QWidget,
@@ -104,6 +106,7 @@ else:
             restore_approval_service: CreateRestoreApproval = CreateRestoreApproval(),
             restore_task_factory: RestoreTaskFactory | None = None,
             restore_availability_service: AssessProductionRestoreAvailability | None = None,
+            root_restore_workflow: RootRestoreWorkflow | None = None,
         ) -> None:
             super().__init__()
             self._task_factory = diagnosis_task_factory
@@ -111,6 +114,8 @@ else:
             self._coordinator = coordinator or QtWorkerCoordinator()
             self._catalog = Catalog(locale)
             self._active_host_id: str | None = None
+            self._active_worker_hosts: set[str] = set()
+            self._close_pending = False
             self._nav_items: dict[GuiStep, QListWidgetItem] = {}
             self._hosts = hosts or (HostCandidate("local", HostKind.LOCAL, "Local"),)
             self._recommendation_plan_factory = recommendation_plan_factory
@@ -127,6 +132,8 @@ else:
             self._restore_approval_service = restore_approval_service
             self._restore_task_factory = restore_task_factory
             self._restore_availability_service = restore_availability_service
+            self._root_restore_workflow = root_restore_workflow
+            self._root_restore_error: str | None = None
             self._apply_outcome: object | None = None
             self._backup_inventory_items: tuple[object, ...] = ()
             self._backup_inventory_error: str | None = None
@@ -237,6 +244,24 @@ else:
             self._cancel_restore_button = QPushButton()
             self._cancel_restore_button.setObjectName("cancel-restore")
             self._cancel_restore_button.setAccessibleName("cancel-restore")
+            self._root_restore_summary = QLabel()
+            self._root_restore_summary.setObjectName("root-restore-summary")
+            self._root_restore_summary.setAccessibleName("root-restore-summary")
+            self._root_restore_button = QPushButton()
+            self._root_restore_button.setObjectName("open-root-restore")
+            self._root_restore_button.setAccessibleName("open-root-restore")
+            for label in (
+                self._recommendation_summary,
+                self._review_summary,
+                self._backup_summary,
+                self._approval_status,
+                self._results_summary,
+                self._backup_inventory_summary,
+                self._restore_preview_summary,
+                self._restore_approval_status,
+                self._root_restore_summary,
+            ):
+                label.setWordWrap(True)
 
             root = QWidget()
             layout = QHBoxLayout(root)
@@ -249,7 +274,7 @@ else:
                 item.setData(256, step.value)
                 self._navigation.addItem(item)
                 self._nav_items[step] = item
-                self._pages.addWidget(self._make_page(step))
+                self._pages.addWidget(self._scrollable_page(step))
 
             self._navigation.currentRowChanged.connect(self._pages.setCurrentIndex)
             self._language.currentIndexChanged.connect(self._change_language)
@@ -269,6 +294,7 @@ else:
             self._restore_approval_checkbox.toggled.connect(self._toggle_restore_approval)
             self._run_restore_button.clicked.connect(self._run_restore)
             self._cancel_restore_button.clicked.connect(self._cancel_restore)
+            self._root_restore_button.clicked.connect(self._open_root_restore)
             self._navigation.setCurrentRow(0)
             self._language.setCurrentIndex(1 if self._catalog.locale == "ja" else 0)
             self._presenter.select_host(self._hosts[0].host_id)
@@ -316,6 +342,8 @@ else:
                 layout.addWidget(self._restore_approval_status)
                 layout.addWidget(self._run_restore_button)
                 layout.addWidget(self._cancel_restore_button)
+                layout.addWidget(self._root_restore_summary)
+                layout.addWidget(self._root_restore_button)
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
@@ -323,6 +351,42 @@ else:
                 layout.addWidget(placeholder)
             layout.addStretch(1)
             return page
+
+        def _scrollable_page(self, step: GuiStep) -> QScrollArea:
+            scroll = QScrollArea()
+            scroll.setObjectName(f"scroll-{step.value}")
+            scroll.setAccessibleName(f"scroll-{step.value}")
+            scroll.setWidgetResizable(True)
+            scroll.setWidget(self._make_page(step))
+            return scroll
+
+        def _start_runner(self, host_id: str, runner: QtTaskRunner[object]) -> None:
+            runner.signals.finished.connect(
+                lambda host=host_id: self._worker_finished(host)
+            )
+            self._active_worker_hosts.add(host_id)
+            try:
+                self._coordinator.start(host_id, runner)
+            except Exception:
+                self._active_worker_hosts.discard(host_id)
+                raise
+
+        def _worker_finished(self, host_id: str) -> None:
+            self._active_worker_hosts.discard(host_id)
+            if self._close_pending and not self._active_worker_hosts:
+                QTimer.singleShot(0, self.close)
+
+        def closeEvent(self, event) -> None:
+            if not self._active_worker_hosts:
+                event.accept()
+                return
+            self._close_pending = True
+            for host_id in tuple(self._active_worker_hosts):
+                self._coordinator.cancel(host_id)
+            if self._presenter.state.busy:
+                self._presenter.request_cancel()
+            self._render()
+            event.ignore()
 
         @Slot()
         def _change_language(self) -> None:
@@ -338,6 +402,7 @@ else:
                 self._presenter.select_host(host_id)
                 self._backup_inventory_items = ()
                 self._backup_inventory_error = None
+                self._root_restore_error = None
                 self._invalidate_restore_preview()
                 self._render()
 
@@ -353,7 +418,7 @@ else:
                 runner.signals.result.connect(self._diagnosis_finished)
                 runner.signals.error.connect(self._diagnosis_failed)
                 runner.signals.cancelled.connect(self._diagnosis_cancelled)
-                self._coordinator.start(host_id, runner)
+                self._start_runner(host_id, runner)
             except (ApplicationError, RuntimeError, ValueError) as error:
                 self._presenter.fail_diagnosis(str(error))
             self._active_host_id = host_id
@@ -414,7 +479,7 @@ else:
                 runner.signals.error.connect(self._change_plan_failed)
                 runner.signals.cancelled.connect(self._change_plan_cancelled)
                 self._active_host_id = report.host.host_id
-                self._coordinator.start(report.host.host_id, runner)
+                self._start_runner(report.host.host_id, runner)
             except (RuntimeError, ValueError) as error:
                 self._presenter.fail_change_plan(str(error))
                 self._active_host_id = None
@@ -541,7 +606,7 @@ else:
                 runner.signals.error.connect(self._apply_failed)
                 runner.signals.cancelled.connect(self._apply_cancelled)
                 self._active_host_id = plan.change_set.host_id if plan.change_set is not None else ""
-                self._coordinator.start(self._active_host_id, runner)
+                self._start_runner(self._active_host_id, runner)
             except (ApplicationError, RuntimeError, ValueError) as error:
                 self._presenter.fail_apply(str(getattr(error, "code", error)))
                 self._active_host_id = None
@@ -603,7 +668,7 @@ else:
                 runner = QtTaskRunner(self._backup_inventory_task_factory(host_id))
                 runner.signals.result.connect(self._backup_inventory_finished)
                 runner.signals.error.connect(self._backup_inventory_failed)
-                self._coordinator.start(host_id, runner)
+                self._start_runner(host_id, runner)
             except (ApplicationError, RuntimeError, ValueError) as error:
                 self._backup_inventory_error = str(getattr(error, "code", error))
             self._render_backups()
@@ -640,7 +705,7 @@ else:
                 runner = QtTaskRunner(self._restore_preview_task_factory(host_id, backup_id))
                 runner.signals.result.connect(self._restore_preview_finished)
                 runner.signals.error.connect(self._restore_preview_failed)
-                self._coordinator.start(host_id, runner)
+                self._start_runner(host_id, runner)
             except (ApplicationError, RuntimeError, ValueError) as error:
                 self._restore_preview_error = str(getattr(error, "code", error))
             self._render_backups()
@@ -703,7 +768,7 @@ else:
                 runner.signals.error.connect(self._restore_failed)
                 runner.signals.cancelled.connect(self._restore_cancelled)
                 runner.signals.finished.connect(self._restore_worker_done)
-                self._coordinator.start(host_id, runner)
+                self._start_runner(host_id, runner)
                 self._restore_active_host_id = host_id
                 self._restore_outcome = None
                 self._restore_preview_error = None
@@ -716,6 +781,23 @@ else:
             host_id = self._restore_active_host_id
             if host_id is not None:
                 self._coordinator.cancel(host_id)
+
+        @Slot()
+        def _open_root_restore(self) -> None:
+            host = self._selected_host()
+            if (
+                host is None
+                or self._root_restore_workflow is None
+                or self._root_restore_route_unavailable() is not None
+                or self._ui_busy()
+            ):
+                return
+            self._root_restore_error = None
+            try:
+                self._root_restore_workflow(host, self._catalog.locale, self)
+            except (ApplicationError, RuntimeError, ValueError) as error:
+                self._root_restore_error = str(getattr(error, "code", error))
+            self._render_backups()
 
         @Slot(object)
         def _restore_finished(self, result: object) -> None:
@@ -761,7 +843,11 @@ else:
             self._restore_approval_checkbox.blockSignals(False)
 
         def _ui_busy(self) -> bool:
-            return self._presenter.state.busy or self._restore_active_host_id is not None
+            return (
+                self._close_pending
+                or self._presenter.state.busy
+                or self._restore_active_host_id is not None
+            )
 
         def _invalidate_review(self) -> None:
             self._stale_timer.stop()
@@ -776,17 +862,23 @@ else:
             self._stale_timer.stop()
             if plan.expires_at is None:
                 return
-            remaining_ms = int((plan.expires_at - utc_now()).total_seconds() * 1000)
-            if remaining_ms <= 0:
+            remaining_seconds = (plan.expires_at - utc_now()).total_seconds()
+            if remaining_seconds <= 0:
                 self._expire_review()
             else:
+                # A positive sub-millisecond remainder must stay asynchronous.
+                # Calling _expire_review synchronously here can observe the plan
+                # as still live and recurse back into this method.
+                remaining_ms = max(1, int(remaining_seconds * 1000))
                 self._stale_timer.start(min(remaining_ms, 2_147_483_647))
 
         def _render(self) -> None:
             state = self._presenter.state
             self.setWindowTitle(self._catalog.text("app.title"))
             self._host_label.setText(self._host_selector.currentText())
-            self._status_label.setText(self._catalog.text(f"status.{state.status.value}"))
+            self._status_label.setText(self._catalog.text(
+                "status.closing_wait" if self._close_pending else f"status.{state.status.value}"
+            ))
             self._diagnose_button.setText(self._catalog.text("action.diagnose"))
             self._cancel_button.setText(self._catalog.text("action.cancel"))
             self._review_button.setText(self._catalog.text("action.review_selected"))
@@ -799,6 +891,7 @@ else:
             self._restore_approval_checkbox.setText(self._catalog.text("action.approve_restore"))
             self._run_restore_button.setText(self._catalog.text("action.run_restore"))
             self._cancel_restore_button.setText(self._catalog.text("action.cancel"))
+            self._root_restore_button.setText(self._catalog.text("action.root_restore"))
             self._diagnose_button.setEnabled(not state.busy)
             self._cancel_button.setEnabled(state.busy)
             self._host_selector.setEnabled(not self._ui_busy())
@@ -821,6 +914,59 @@ else:
             self._render_approval()
             self._render_results()
             self._render_backups()
+            if self._close_pending:
+                self._cancel_button.setEnabled(False)
+                self._apply_cancel_button.setEnabled(False)
+                self._cancel_restore_button.setEnabled(False)
+            self._refresh_accessible_names()
+
+        def _refresh_accessible_names(self) -> None:
+            self._navigation.setAccessibleName(self._catalog.text("app.title"))
+            self._host_selector.setAccessibleName(self._catalog.text("nav.hosts"))
+            self._language.setAccessibleName("English / 日本語")
+            self._profile_selector.setAccessibleName(
+                self._catalog.text("nav.recommendations")
+            )
+            self._recommendation_list.setAccessibleName(
+                self._catalog.text("nav.recommendations")
+            )
+            self._review_list.setAccessibleName(self._catalog.text("nav.review"))
+            self._backup_inventory_list.setAccessibleName(
+                self._catalog.text("nav.backups")
+            )
+            self._restore_preview_list.setAccessibleName(
+                self._catalog.text("action.approve_restore")
+            )
+            for widget in (
+                self._diagnose_button,
+                self._cancel_button,
+                self._review_button,
+                self._approval_checkbox,
+                self._plaintext_ack,
+                self._prepare_apply_button,
+                self._run_apply_button,
+                self._apply_cancel_button,
+                self._refresh_backups_button,
+                self._restore_approval_checkbox,
+                self._run_restore_button,
+                self._cancel_restore_button,
+                self._root_restore_button,
+            ):
+                widget.setAccessibleName(widget.text())
+            for label in (
+                self._host_label,
+                self._status_label,
+                self._recommendation_summary,
+                self._review_summary,
+                self._backup_summary,
+                self._approval_status,
+                self._results_summary,
+                self._backup_inventory_summary,
+                self._restore_preview_summary,
+                self._restore_approval_status,
+                self._root_restore_summary,
+            ):
+                label.setAccessibleName(label.text())
 
         def _render_backups(self) -> None:
             selected = (
@@ -893,6 +1039,32 @@ else:
             self._backup_inventory_list.blockSignals(False)
             self._render_restore_preview()
 
+        def _render_root_restore(self) -> None:
+            unavailable = self._root_restore_route_unavailable()
+            enabled = (
+                self._root_restore_workflow is not None
+                and unavailable is None
+                and not self._ui_busy()
+            )
+            self._root_restore_button.setEnabled(enabled)
+            if self._root_restore_error is not None:
+                self._root_restore_summary.setText(self._catalog.text(
+                    "root_restore.failed", code=self._root_restore_error
+                ))
+            elif unavailable is not None:
+                route, reason = unavailable
+                self._root_restore_summary.setText(self._catalog.text(
+                    "root_restore.unavailable",
+                    route=self._catalog.text(f"restore.route.{route}"),
+                    reason=self._catalog.text(f"restore.reason.{reason}"),
+                ))
+            elif self._root_restore_workflow is None:
+                self._root_restore_summary.setText(
+                    self._catalog.text("root_restore.unavailable_unregistered")
+                )
+            else:
+                self._root_restore_summary.setText(self._catalog.text("root_restore.ready"))
+
         def _render_restore_preview(self) -> None:
             self._restore_preview_list.clear()
             preview = self._restore_preview
@@ -933,6 +1105,7 @@ else:
                 and enabled
             )
             self._cancel_restore_button.setEnabled(self._restore_active_host_id is not None)
+            self._render_root_restore()
 
         def _restore_route_unavailable(self) -> tuple[str, str] | None:
             service = self._restore_availability_service
@@ -943,6 +1116,22 @@ else:
             if host is None:
                 return ("ssh_user", "ssh_user_restore_protocol_missing")
             availability = service.execute(host.kind, False)
+            if availability.available:
+                return None
+            return (availability.route.value, availability.reason_code)
+
+        def _selected_host(self) -> HostCandidate | None:
+            host_id = self._presenter.state.selected_host_id
+            return next((candidate for candidate in self._hosts if candidate.host_id == host_id), None)
+
+        def _root_restore_route_unavailable(self) -> tuple[str, str] | None:
+            service = self._restore_availability_service
+            host = self._selected_host()
+            if host is None:
+                return ("local_root", "local_root_restore_release_gate_pending")
+            if service is None:
+                service = AssessProductionRestoreAvailability()
+            availability = service.execute(host.kind, True)
             if availability.available:
                 return None
             return (availability.route.value, availability.reason_code)

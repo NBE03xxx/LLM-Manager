@@ -1,1 +1,4 @@
 packaging/man/llm-manager-helper.8
+packaging/man/llm-manager-restore-review.8
+packaging/man/llm-manager-restore-execute.8
+packaging/man/llm-manager-restore-setup.8

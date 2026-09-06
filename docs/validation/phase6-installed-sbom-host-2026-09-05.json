@@ -1,0 +1,25 @@
+{
+  "environment": "host Ubuntu 26.04; tool smoke only, not clean release environment",
+  "packages": 2519,
+  "copyright_collected": 2514,
+  "exit_code": 2,
+  "schema_validation": "CycloneDX 1.6 Draft7 PASS",
+  "missing_copyright": [
+    "brave-browser",
+    "brave-keyring",
+    "code",
+    "gh",
+    "google-chrome-stable"
+  ],
+  "files": {
+    "environment.cdx.json": "eae8d0c5d0e927d7848a297ab17ae3e95bc85a0cd21af88beef0c829cf0a4680",
+    "inventory.json": "3fa83f79a5b07c51454a60dad6d69fe81054d74ce92499f049c9009d8185f6ac",
+    "SHA256SUMS": "1614a5ce4b3a8fe0c7dc114a12397cc97c1711e0b9901f27ed5ac9eed0c37944"
+  },
+  "qt_copyright": {
+    "libqt6core6t64:amd64.txt": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961",
+    "libqt6gui6:amd64.txt": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961",
+    "libqt6widgets6:amd64.txt": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+  },
+  "release_gate_complete": false
+}

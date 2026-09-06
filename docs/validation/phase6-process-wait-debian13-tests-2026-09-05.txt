@@ -1,0 +1,20 @@
+test_cancel_remains_active_after_both_output_streams_close (tests.test_redaction_and_process.ProcessRunnerTests.test_cancel_remains_active_after_both_output_streams_close) ... ok
+test_cancels_running_process (tests.test_redaction_and_process.ProcessRunnerTests.test_cancels_running_process) ... ok
+test_collects_both_streams_and_redacts_stderr (tests.test_redaction_and_process.ProcessRunnerTests.test_collects_both_streams_and_redacts_stderr) ... ok
+test_fails_closed_while_stderr_is_over_limit (tests.test_redaction_and_process.ProcessRunnerTests.test_fails_closed_while_stderr_is_over_limit) ... ok
+test_fails_closed_while_stdout_is_over_limit (tests.test_redaction_and_process.ProcessRunnerTests.test_fails_closed_while_stdout_is_over_limit) ... ok
+test_honours_pre_cancelled_token (tests.test_redaction_and_process.ProcessRunnerTests.test_honours_pre_cancelled_token) ... ok
+test_rejects_command_outside_allowlist (tests.test_redaction_and_process.ProcessRunnerTests.test_rejects_command_outside_allowlist) ... ok
+test_rejects_non_positive_output_limit (tests.test_redaction_and_process.ProcessRunnerTests.test_rejects_non_positive_output_limit) ... ok
+test_timeout_remains_active_after_both_output_streams_close (tests.test_redaction_and_process.ProcessRunnerTests.test_timeout_remains_active_after_both_output_streams_close) ... ok
+test_timeout_returns_only_already_bounded_output (tests.test_redaction_and_process.ProcessRunnerTests.test_timeout_returns_only_already_bounded_output) ... ok
+test_token_can_be_cancelled_after_creation (tests.test_redaction_and_process.ProcessRunnerTests.test_token_can_be_cancelled_after_creation) ... ok
+test_redacts_common_secret_forms (tests.test_redaction_and_process.RedactionTests.test_redacts_common_secret_forms) ... ok
+test_redacts_environment_by_key (tests.test_redaction_and_process.RedactionTests.test_redacts_environment_by_key) ... ok
+test_redacts_quoted_assignments_without_leaking_value_tails (tests.test_redaction_and_process.RedactionTests.test_redacts_quoted_assignments_without_leaking_value_tails) ... ok
+test_redacts_separate_argv_value (tests.test_redaction_and_process.RedactionTests.test_redacts_separate_argv_value) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.441s
+
+OK

@@ -19,6 +19,7 @@ from llm_manager.infrastructure.backup_settings import BackupSettingsStore, Buil
 from .qt_worker import PYSIDE_AVAILABLE, QtUnavailableError
 from .qt_window import ChangePlanTaskFactory as QtChangePlanTaskFactory
 from .qt_window import DiagnosisTaskFactory, MainWindow
+from .root_restore_inventory import run_production_restore_workflow
 from .composition import (
     ChangePlanTaskFactory,
     DiagnosticTaskFactory,
@@ -46,6 +47,7 @@ def run_gui(
     restore_preview_task_factory=None,
     restore_task_factory=None,
     restore_availability_service: AssessProductionRestoreAvailability | None = None,
+    root_restore_workflow=None,
 ) -> int:
     if not PYSIDE_AVAILABLE:
         raise QtUnavailableError("pyside6_unavailable")
@@ -65,6 +67,7 @@ def run_gui(
         restore_preview_task_factory=restore_preview_task_factory,
         restore_task_factory=restore_task_factory,
         restore_availability_service=restore_availability_service,
+        root_restore_workflow=root_restore_workflow,
     )
     window.resize(960, 640)
     window.show()
@@ -129,6 +132,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         restore_preview_task_factory=backup_inventory_tasks.preview,
         restore_task_factory=restore_tasks.task,
         restore_availability_service=restore_availability,
+        root_restore_workflow=lambda host, locale, parent: run_production_restore_workflow(
+            host, locale=locale, parent=parent
+        ),
     )
 
 

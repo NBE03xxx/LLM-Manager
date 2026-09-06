@@ -5,7 +5,7 @@ import unittest
 import uuid
 from dataclasses import replace
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.application.host_discovery import HostCandidate
@@ -23,6 +23,14 @@ class _TestKeys:
 
 
 class LocalUserApplyTaskFactoryTests(unittest.TestCase):
+    def test_production_runtime_uses_fixed_user_opencode_binary(self) -> None:
+        binary = "/home/test/.opencode/bin/opencode"
+        runner = SubprocessRunner(ProcessPolicy({binary}))
+        with patch("llm_manager.ui.composition._local_opencode_binary", return_value=binary):
+            factory = LocalUserApplyTaskFactory.production((), runner)
+        runtime = factory.runtime_validator_factory(MagicMock(), ())
+        self.assertEqual(runtime.client.binary, binary)
+
     def test_encrypted_sandbox_apply_writes_backup_audit_and_journal(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

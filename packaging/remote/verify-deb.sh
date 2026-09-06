@@ -14,17 +14,29 @@ dpkg-deb --extract "$package" "$extract_root"
 helper="$extract_root/usr/bin/llm-manager-remote-helper"
 metadata="$extract_root/usr/share/llm-manager-remote-helper/helper-metadata.json"
 runtime="$extract_root/usr/lib/llm-manager-remote-helper/llm_manager"
+copyright="$extract_root/usr/share/doc/llm-manager-remote-helper/copyright"
+notices="$extract_root/usr/share/doc/llm-manager-remote-helper/THIRD_PARTY_NOTICES.md"
+sbom="$extract_root/usr/share/doc/llm-manager-remote-helper/sbom.cdx.json"
 
 [ -f "$helper" ]
 [ -f "$metadata" ]
 [ -f "$runtime/infrastructure/remote_helper_cli.py" ]
+[ -f "$copyright" ]
+[ -f "$notices" ]
+[ -f "$sbom" ]
 [ "$(stat -c %a "$helper")" = 755 ]
 [ "$(stat -c %a "$metadata")" = 644 ]
 [ "$(stat -c %a "$runtime/infrastructure/remote_helper_cli.py")" = 644 ]
+[ "$(stat -c %a "$copyright")" = 644 ]
+[ "$(stat -c %a "$notices")" = 644 ]
+[ "$(stat -c %a "$sbom")" = 644 ]
 [ "$(sed -n '1p' "$helper")" = '#!/usr/bin/python3 -I' ]
 grep -Fq 'sys.dont_write_bytecode = True' "$helper"
 grep -Fq 'sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")' "$helper"
 grep -Fxq '{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
+grep -Fq 'Copyright: 2026 NBE03xxx' "$copyright"
+python3 -m json.tool "$sbom" >/dev/null
+grep -Fq 'pkg:deb/llm-manager-remote-helper@0.1.0~dev0' "$sbom"
 
 [ ! -e "$extract_root/usr/bin/llm-manager-helper" ]
 [ ! -e "$extract_root/usr/share/polkit-1" ]
@@ -38,6 +50,9 @@ contents=$(dpkg-deb --contents "$package")
 printf '%s\n' "$contents" | grep -Eq '^-rwxr-xr-x root/root +[0-9]+ .* ./usr/bin/llm-manager-remote-helper$'
 printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/share/llm-manager-remote-helper/helper-metadata.json$'
 printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/lib/llm-manager-remote-helper/llm_manager/infrastructure/remote_helper_cli.py$'
+printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/share/doc/llm-manager-remote-helper/copyright$'
+printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/share/doc/llm-manager-remote-helper/THIRD_PARTY_NOTICES.md$'
+printf '%s\n' "$contents" | grep -Eq '^-rw-r--r-- root/root +[0-9]+ .* ./usr/share/doc/llm-manager-remote-helper/sbom.cdx.json$'
 
 [ "$(dpkg-deb --field "$package" Package)" = llm-manager-remote-helper ]
 depends=$(dpkg-deb --field "$package" Depends)

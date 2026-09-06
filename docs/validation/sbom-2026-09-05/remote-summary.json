@@ -1,0 +1,36 @@
+{
+  "scope": "Ubuntu 26.04 remote helper dev composition; all installed packages superset",
+  "release_candidate": false,
+  "artifact": {
+    "sha256": "259eb7e11cd912bf0eddd287413e3183f57cd0cfcbe290616933724816f88bb7",
+    "identity": "llm-manager-remote-helper 0.1.0~dev0 all installed",
+    "collector_exit": 2,
+    "release_candidate": false
+  },
+  "archive_sha256": "560c9d43f5d397a1511dd06d4b30b01108b651e58a30172e96636c7831a8cc24",
+  "schema_validation": "CycloneDX 1.6 PASS",
+  "evidence_files_verified": 1938,
+  "installed_payload_files_verified": 109,
+  "review": {
+    "package_count": 1908,
+    "missing_copyright": [
+      "brave-browser",
+      "brave-keyring"
+    ],
+    "license_review_complete": false,
+    "release_gate_complete": false
+  },
+  "before_package_count": 1907,
+  "added_packages": [
+    "llm-manager-remote-helper"
+  ],
+  "removed_packages": [],
+  "changed_package_versions": [],
+  "cleanup": {
+    "vm": "ubuntu26.04",
+    "package_and_manual_equal": true,
+    "guest_artifacts_absent": true,
+    "final_state": "shut off",
+    "snapshot_deleted": true
+  }
+}

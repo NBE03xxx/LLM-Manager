@@ -1,0 +1,12 @@
+#!/usr/bin/python3 -I
+"""Distribution-owned, isolated launcher for the unprivileged desktop GUI."""
+
+import sys
+
+sys.dont_write_bytecode = True
+
+from llm_manager.ui.qt_app import main
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

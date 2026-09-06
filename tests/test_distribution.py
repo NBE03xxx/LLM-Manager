@@ -1,3 +1,4 @@
+import json
 import stat
 import subprocess
 import tempfile
@@ -26,16 +27,41 @@ class DebianPackagingTests(unittest.TestCase):
         self.assertNotIn("[project.scripts]", pyproject)
         self.assertNotIn("llm-manager-helper =", pyproject)
 
-    def test_deb_installs_only_reviewed_privilege_boundary_files(self) -> None:
+    def test_deb_installs_reviewed_gui_and_privilege_boundary_files(self) -> None:
         install = (ROOT / "debian/llm-manager.install").read_text(encoding="utf-8").splitlines()
         self.assertEqual(
             install,
             [
+                "THIRD_PARTY_NOTICES.md usr/share/doc/llm-manager",
+                "packaging/bin/llm-manager usr/bin",
                 "packaging/bin/llm-manager-helper usr/bin",
+                "packaging/desktop/io.github.nbe03xxx.llm-manager.desktop usr/share/applications",
+                "packaging/icons/io.github.nbe03xxx.llm-manager.svg usr/share/icons/hicolor/scalable/apps",
+                "packaging/sbom/llm-manager.cdx.json usr/share/doc/llm-manager",
                 "packaging/helper-metadata.json usr/share/llm-manager",
                 "packaging/polkit/io.github.nbe03xxx.llm-manager.policy usr/share/polkit-1/actions",
+                "packaging/bin/llm-manager-restore-review usr/bin",
+                "packaging/bin/llm-manager-restore-execute usr/bin",
+                "packaging/bin/llm-manager-restore-setup usr/bin",
             ],
         )
+        launcher = ROOT / "packaging/bin/llm-manager"
+        self.assertEqual(launcher.read_text(encoding="utf-8").splitlines()[0], "#!/usr/bin/python3 -I")
+        self.assertIn("llm_manager.ui.qt_app import main", launcher.read_text(encoding="utf-8"))
+        self.assertEqual(stat.S_IMODE(launcher.stat().st_mode), 0o755)
+
+        desktop = dict(
+            line.split("=", 1)
+            for line in (ROOT / "packaging/desktop/io.github.nbe03xxx.llm-manager.desktop")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if "=" in line
+        )
+        self.assertEqual(desktop["Type"], "Application")
+        self.assertEqual(desktop["Exec"], "/usr/bin/llm-manager")
+        self.assertEqual(desktop["TryExec"], "/usr/bin/llm-manager")
+        self.assertEqual(desktop["Icon"], "io.github.nbe03xxx.llm-manager")
+        self.assertEqual(desktop["Terminal"], "false")
         policy = ROOT / "packaging/polkit/io.github.nbe03xxx.llm-manager.policy"
         action = ET.parse(policy).getroot().find("action")
         annotations = {item.attrib["key"]: item.text for item in action.findall("annotate")}
@@ -49,7 +75,11 @@ class DebianPackagingTests(unittest.TestCase):
         for dependency in (
             "python3-all (>= 3.13)",
             "python3-cryptography (>= 43.0.0)",
+            "python3-cryptography (<< 47)",
             "python3-secretstorage (>= 3.3.3)",
+            "python3-secretstorage (<< 4)",
+            "python3-pyside6.qtcore (>= 6.8.2.1)",
+            "python3-pyside6.qtwidgets (>= 6.8.2.1)",
             "openssh-client",
             "pkexec",
             "polkitd",
@@ -69,6 +99,7 @@ class DebianPackagingTests(unittest.TestCase):
         verifier_text = verifier.read_text(encoding="utf-8")
         self.assertIn("#!/usr/bin/python3 -I", verifier_text)
         self.assertIn("root/root", verifier_text)
+        self.assertIn("io.github.nbe03xxx.llm-manager.desktop", verifier_text)
 
     def test_remote_helper_package_is_separate_and_isolated(self) -> None:
         helper = ROOT / "packaging/remote/bin/llm-manager-remote-helper"
@@ -94,13 +125,45 @@ class DebianPackagingTests(unittest.TestCase):
         self.assertIn("Package: llm-manager-remote-helper", control)
         self.assertIn("python3 (>= 3.13)", control)
         self.assertIn("python3-cryptography (>= 43.0.0)", control)
+        self.assertIn("python3-cryptography (<< 47)", control)
         self.assertIn("sudo", control)
         for forbidden in ("python3-secretstorage", "openssh-client", "policykit-1", "pkexec", "polkitd"):
             self.assertNotIn(forbidden, control)
 
+    def test_direct_dependency_sboms_are_cyclonedx_and_match_packages(self) -> None:
+        expected = {
+            "llm-manager.cdx.json": {
+                "llm-manager",
+                "python3",
+                "cryptography",
+                "SecretStorage",
+                "PySide6",
+                "OpenSSH client",
+                "pkexec / polkit",
+                "systemd",
+            },
+            "llm-manager-remote-helper.cdx.json": {
+                "llm-manager-remote-helper",
+                "python3",
+                "cryptography",
+                "sudo",
+            },
+        }
+        for filename, names in expected.items():
+            with self.subTest(filename=filename):
+                document = json.loads(
+                    (ROOT / "packaging/sbom" / filename).read_text(encoding="utf-8")
+                )
+                self.assertEqual(document["bomFormat"], "CycloneDX")
+                self.assertEqual(document["specVersion"], "1.6")
+                actual = {document["metadata"]["component"]["name"]}
+                actual.update(component["name"] for component in document["components"])
+                self.assertEqual(actual, names)
+
     def test_remote_helper_deb_artifact_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifact = Path(temp_dir) / "llm-manager-remote-helper.deb"
+            second = Path(temp_dir) / "llm-manager-remote-helper-second.deb"
             subprocess.run(
                 [str(ROOT / "packaging/remote/build-deb.sh"), str(artifact)],
                 cwd=ROOT,
@@ -108,6 +171,14 @@ class DebianPackagingTests(unittest.TestCase):
                 capture_output=True,
                 text=True,
             )
+            subprocess.run(
+                [str(ROOT / "packaging/remote/build-deb.sh"), str(second)],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(artifact.read_bytes(), second.read_bytes())
             subprocess.run(
                 [str(ROOT / "packaging/remote/verify-deb.sh"), str(artifact)],
                 cwd=ROOT,

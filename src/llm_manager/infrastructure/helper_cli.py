@@ -13,7 +13,8 @@ from llm_manager.domain.models import utc_now
 
 from .helper_backend import LocalSystemHelperBackend
 from .helper_executor import DeclaredHelperExecutor, HelperExecutionBackend, HelperOperationResult
-from .helper_protocol import MAX_REQUEST_BYTES, decode_request
+from .helper_protocol import MAX_REQUEST_BYTES, decode_request, HelperOperationKind
+from .root_apply_capture import capture_before_replace, validate_capture_request
 from .helper_receipts import HelperReceiptStore
 from .helper_staging import HelperStagingStore
 
@@ -70,7 +71,12 @@ def run_helper(
     request = decode_request(content, expected_hash=expected_hash, now=utc_now())
     if request.operation_id != operation_id:
         raise AdapterError("operation_mismatch", "request does not match the invoked operation")
-    executor = DeclaredHelperExecutor(staging, backend or LocalSystemHelperBackend())
+    before_replace = None
+    if backend is None and any(op.kind is HelperOperationKind.ATOMIC_REPLACE for op in request.operations):
+        validate_capture_request(request, host_id='local:' + os.uname().nodename)
+        before_replace = capture_before_replace
+    executor = DeclaredHelperExecutor(staging, backend or LocalSystemHelperBackend(),
+                                      before_replace=before_replace)
     receipt_store = receipts or HelperReceiptStore()
     receipt_store.begin(request)
     results = executor.execute(request, expected_hash)

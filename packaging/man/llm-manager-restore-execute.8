@@ -1,0 +1,31 @@
+.TH LLM-MANAGER-RESTORE-EXECUTE 8 "2026-09-06" "LLM-Manager" "System Administration"
+.SH NAME
+llm-manager-restore-execute \- execute one approved fixed-target system restore
+.SH SYNOPSIS
+.B pkexec /usr/bin/llm-manager-restore-execute
+.I request-sha256 canonical-request-hex
+.SH DESCRIPTION
+This dedicated privileged entry executes one previously saved, unexpired and
+unused LLM-Manager local root restore review for the fixed Ollama drop-in.
+It independently verifies caller identity, host, request, review, encrypted
+root-owned backup, current target, expiry and immutable execution history.
+.PP
+The canonical request is limited to 16 KiB before lowercase hexadecimal
+encoding and contains metadata only. It does not contain settings plaintext.
+The operation records an attempt before mutation, holds the shared target lock,
+restores one fixed file, reloads and restarts the fixed Ollama unit, validates
+the service, and persists a terminal result. It never retries automatically.
+.SH SECURITY
+This command requires the dedicated execute-system-restore PolicyKit action.
+Authentication for review or ordinary Apply is not execution authority.
+All stores, keys, audit directories and the target parent must already exist
+with safe root ownership and permissions; this command does not provision them.
+.PP
+If execution is interrupted or reported as unconfirmed, do not invoke it again.
+Use the read-only status command of llm-manager-restore-review with the exact
+request ID and SHA-256. Missing or incomplete evidence is not proof that no
+mutation occurred.
+.SH EXIT STATUS
+0 means a terminal result was persisted; inspect its state because it may be
+failed or unknown. 1 means rejected, unavailable or unconfirmed execution and
+must not be treated as safe to retry. 2 indicates invalid CLI syntax.

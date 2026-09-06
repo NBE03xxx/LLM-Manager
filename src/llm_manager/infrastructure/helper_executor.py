@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Protocol
+from contextlib import AbstractContextManager
+from typing import Protocol, Callable
 
 from llm_manager.application.errors import AdapterError
 from llm_manager.domain.models import utc_now
@@ -13,6 +14,8 @@ from .helper_staging import HelperStagingStore
 
 class HelperExecutionBackend(Protocol):
     """Fixed-operation backend implemented by the packaged privileged helper."""
+
+    def locked(self) -> AbstractContextManager[int | None]: ...
 
     def read_file(self, target: str) -> bytes | None: ...
 
@@ -36,16 +39,29 @@ class HelperOperationResult:
 class DeclaredHelperExecutor:
     """Executes only decoded, allowlisted helper operations in declared order."""
 
-    def __init__(self, staging: HelperStagingStore, backend: HelperExecutionBackend) -> None:
+    def __init__(self, staging: HelperStagingStore, backend: HelperExecutionBackend, *,
+                 before_replace: Callable[[HelperRequest, int], None] | None = None) -> None:
         self.staging = staging
         self.backend = backend
+        self.before_replace = before_replace
 
     def execute(self, request: HelperRequest, expected_hash: str) -> tuple[HelperOperationResult, ...]:
         validate_request(request, expected_hash, now=utc_now())
+        try:
+            with self.backend.locked() as target_fd:
+                validate_request(request, expected_hash, now=utc_now())
+                return self._execute_locked(request, target_fd)
+        except (AdapterError, OSError) as error:
+            code = error.code if isinstance(error, AdapterError) else 'helper_operation_failed'
+            return tuple(HelperOperationResult(item.operation_id, item.kind, False,
+                                               code if index == 0 else 'not_executed')
+                         for index, item in enumerate(request.operations))
+
+    def _execute_locked(self, request: HelperRequest, target_fd=None) -> tuple[HelperOperationResult, ...]:
         results: list[HelperOperationResult] = []
         for index, operation in enumerate(request.operations):
             try:
-                self._execute(operation, request)
+                self._execute(operation, request, target_fd)
             except AdapterError as error:
                 results.append(HelperOperationResult(operation.operation_id, operation.kind, False, error.code))
                 results.extend(
@@ -65,7 +81,7 @@ class DeclaredHelperExecutor:
             results.append(HelperOperationResult(operation.operation_id, operation.kind, True))
         return tuple(results)
 
-    def _execute(self, operation: HelperOperation, request: HelperRequest) -> None:
+    def _execute(self, operation: HelperOperation, request: HelperRequest, target_fd=None) -> None:
         if operation.kind in {
             HelperOperationKind.ATOMIC_REPLACE,
             HelperOperationKind.RESTORE_FILE,
@@ -74,6 +90,12 @@ class DeclaredHelperExecutor:
             self._verify_before(operation)
         if operation.kind in {HelperOperationKind.ATOMIC_REPLACE, HelperOperationKind.RESTORE_FILE}:
             content = self.staging.verify(request, operation)
+            if operation.kind is HelperOperationKind.ATOMIC_REPLACE and self.before_replace is not None:
+                if type(target_fd) is not int:
+                    raise AdapterError('root_capture_lock_missing', 'capture requires the locked target directory')
+                self.before_replace(request, target_fd)
+                validate_request(request, request.request_hash, now=utc_now())
+                self._verify_before(operation)
             self.backend.atomic_write(
                 operation.target,  # type: ignore[arg-type]
                 content,

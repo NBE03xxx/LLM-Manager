@@ -215,6 +215,18 @@ Closure audit: 6工程、AC-05のReview表示、AC-09のQt非blocking/cancel/終
 
 ## Phase 6: Hardening と MVP Release
 
+Security/privacy code review: 引用符付きsecret値のredaction、subprocess出力の受信中上限と超過時fail-closed回収、GUI Apply errorのredaction/4 KiB上限、root helperの未使用出力破棄を実装した。全521 test（18 skip）に加え、Ubuntu 26.04/Python 3.14.4とDebian 13/Python 3.13.5でfocused 13 testが成功。次sliceは利用者向けbackup/rollback/recovery文書。詳細は[security/privacy review](validation/phase6-security-privacy-review-2026-09-05.md)。
+
+利用者向けrecovery guide: 公開済みlocal user/SSH user Apply、自動rollback、local user単一target手動restore、`recovery_required`/`unknown`、鍵喪失、保持、upgrade/uninstall、未完成routeを[Backup・Rollback・Recoveryガイド](recovery-guide.md)へ記載した。次sliceはSBOM/license/署名release checklist。
+
+SBOM/license/release checklist: project copyright表記をLICENSEへ合わせ、third-party notices、local/remote別CycloneDX 1.6直接依存SBOM、両debへのcopyright/notices/SBOM収録とverify Gateを追加した。Python dependencyのsource上限をdebにも反映した。[MVP Release Checklist](release-checklist.md)はresolved dependency SBOM、Qt license、最終artifact lifecycle、署名鍵/fingerprint、checksum/tag/公開後検証を未完了blockerとして追跡する。次sliceは更新後debのcomposition buildとarchive検証。
+
+SBOM/license deb composition: `0.1.0~dev0` local deb `5c286c…def2`、remote helper deb `d6fcbe…4ab2`をbuild・verifyし、両方の同一snapshot rebuild一致を確認した。remote helperのbuild timestamp非決定性は`SOURCE_DATE_EPOCH`で修正した。全522 test（18 skip）成功。これはrelease候補ではない。詳細は[composition記録](validation/phase6-sbom-license-deb-composition-2026-09-05.md)。次sliceはhostで可能なperformance/long-running/layout hardening。
+
+Qt layout/close/long-running hardening: 6工程をresizable scroll areaへ収め、主要な長文summaryを折り返す。全Qt taskをactive worker追跡へ通し、window close時はcancelを送り、workerの`finished`後まで破棄を待つ。cancelまで継続するworkerでもQt eventを20回以上処理し、協力的fake taskがcancelを0.5秒以内に観測するGateを追加した。Ubuntu 26.04/PySide6のoffscreen Gateは23件（1 expected skip）が成功した。実display accessibilityと実production backend負荷は未評価。有限のcancel非協力区間の終了待機UXは後続Gateで完了した。詳細は[Qt hardening記録](validation/phase6-qt-hardening-2026-09-05.md)。次sliceは実負荷performanceの計測境界、またはログイン済みDebian desktopでの実display/menu Gate。
+
+Production local diagnosis performance baseline: Ubuntu 26.04 VMで実`DiagnosticTaskFactory.production`のread-only local診断をQt workerから実行した。runtime/client不在を含む`partial`へ25.234 msで終端し、10 ms sentinelの最大event gapは10.383 ms、process内最大RSSは67,352 KiB、worker leakなしだった。単一sampleかつcomplete診断ではないためrelease SLOとは扱わない。詳細は[performance Gate](validation/phase6-production-diagnosis-performance-2026-09-05.md)。次sliceはcomplete/SSH/Apply系の複数sample、またはDebian実display Gate。
+
 - local root・SSH user/rootのproduction Apply/手動restore経路を安全な固定protocolと実機Gateで完成
 - 対応環境 matrix の実機検証
 - security/privacy review
@@ -259,7 +271,19 @@ SSH VM Gate preparation: Ubuntu VMへOpenSSH Serverと検証済みremote helper 
 
 SSH user real Apply/rollback Gate: Ubuntu 26.04 VMへproduction SSH compositionで接続し、stable snapshot、local encrypted backup、対話sudo remote-root recovery copy、unprivileged fixed Apply、remote payload validation、別request rollbackを実行した。未作成OpenCode configだけを一時作成し、validatorで31 byte payloadを確認後に意図的FAILEDとして自動削除した。`ROLLED_BACK`、apply observed、target absentを確認し、local/user stagingをcleanupした。root recovery/key/helper/SSH trustは後続disconnect Gate用に保持する。
 
+GUI deb composition and OS lifecycle: 非特権`/usr/bin/llm-manager` launcher、desktop entry、scalable icon、PySide6 QtCore/QtWidgets依存をlocal debへ追加した。GUI launcherと特権helperはいずれもdistribution-owned `python3 -I` wrapperだが、PolicyKit actionは引き続きhelperだけを許可し、GUI全体をrootで起動しない。build中の全unit testとartifact archive Gateに成功した。Ubuntu 26.04 VMではAPT install、UID 1000からの実Wayland日本語GUI描画、同版reinstall、purge、snapshot完全復元を完了した。Debian 13 stockのPython 3.13.5/PySide6 6.8.2.1をsystem-package限定のsupported組合せへ追加し、APT install、UID 1000 offscreen起動、同版reinstall、purge、全package集合の完全復元を完了した。Debian VMはログイン済みgraphical sessionがないため、実displayとdesktop menu起動だけが残る。
+
 Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ubuntu 26.04 VMへartifactを転送し、PySide6 6.10.2上のQt workerからfake helper付き実compositionを実行した。COMMITTED、audit、journal、helper二重readinessを0.195秒で確認し、artifact/serverをcleanupした。PolicyKit deny/helper launch failureはmutation未開始として再度helperを起動せず、audit/journalをterminalへ閉じるよう修正した。default rule catalogからroot Ollama recommendationを生成する経路の監査が残るため、availabilityは未公開を維持する。
+
+Phase 6 subprocess終了待機追記: stdout/stderr EOF後にchildが生存する場合の無期限waitを修正し、cancel/deadline監視を維持した。実childのregression 2件と通常終了/timeout/cancel各5 sampleで回収を確認。hostのcancel→回収は4.096–48.433 ms。Qt・実Agent・対応VMの性能完了とは扱わない。詳細は[終了待機Gate](validation/phase6-process-wait-2026-09-05.md)。
+
+Phase 6 対応VM＋Qt終了待機: Ubuntu/Debianで同一artifactのprocess回帰と計30 sample、Ubuntu実Qtで5秒継続後のcancel/closeを含む12 sampleを確認した。最大event gap 10.957 ms、close→非表示最大60.346 ms、全child回収済み。keyboard focus testのQtTest依存をQtGuiへ置換し実Qtで成功。実Agent/complete/SSH/Apply負荷とDebian実displayは残る。有限の非協力task UXは後続Gateで完了。詳細は[対応VM＋Qt Gate](validation/phase6-qt-process-wait-2026-09-05.md)。
+
+Phase 6 cancel非協力区間UX: close要求後にworkerを強制終了せず、英日で安全停止待機を明示し、accessible name同期と重複cancel無効を追加した。300 ms token非確認taskでもeventを処理し、終端後だけ閉じることをUbuntu実PySide6で確認。永久に戻らないin-process taskを中断する根拠にはしない。詳細は[終了待機UX Gate](validation/phase6-close-wait-ux-2026-09-05.md)。
+
+Phase 6 local user Apply複数sample: production compositionをhost/Ubuntu/Debianの一時rootで実行し、commit/rollback/recovery-requiredを各環境5回ずつ、全45 sampleで期待終端とbackup/audit/journalを確認した。単一小容量JSON、固定Gate key、注入failureによるmicrobenchmarkでrelease SLOではない。詳細は[local user Apply Gate](validation/phase6-local-user-apply-performance-2026-09-05.md)。
+
+Phase 6 complete local診断: 固定PATH外の標準user OpenCode配置をowner/mode/symlink検査後だけabsolute allowlistへ加え、診断とlocal user Apply validationへ接続した。実Ollama 0.33.2/OpenCode 1.18.25のproduction read-only診断5 sampleは全`complete`、434.000–509.774 ms。詳細は[complete診断Gate](validation/phase6-complete-local-diagnosis-performance-2026-09-05.md)。
 
 ## Post-MVP
 
@@ -281,3 +305,118 @@ Local root Qt Gate: ユーザーが導入したqemu guest agent経由で既存Ub
 ## 継続的な設計管理
 
 重要判断は `docs/adr/` に ADR として追加する。最低限、OpenSSH 採用、Rule format、Qt concurrency、privilege helper、backup placement、supported version policy を記録対象とする。要件 ID、test ID、release checklist を相互参照可能にする。
+
+Phase 6 remote helper SBOM: Ubuntu 26.04の一時snapshot内で修正後dev debを導入し、通常userで1908 packageの環境SBOMを採取した。CycloneDX 1.6、1938 evidence checksum、109 installed payload fileのdeb照合に成功。snapshot復元後のpackage版/manual一覧一致とartifact不在を確認し停止済み。最終release検証とは区別する。[検証記録](validation/phase6-remote-sbom-2026-09-05.md)。
+
+Phase 6 root planning保全: Ollama専用drop-inの部分変更で未選択設定が失われる不具合を修正。literal assignment・コメント・改行を保持し、未対応構文と重複keyは計画生成を拒否する。planner/applicationの新規7 testと全544 test（23 skip）が成功。root route公開とscope変更は行っていない。[検証記録](validation/phase6-root-drop-in-preservation-2026-09-05.md)。
+
+Phase 6 local root restore契約: [専用intent protocol](local-root-restore-protocol.md)とcodecを追加。固定target、UID/host、backup/current state、review binding、有効期間を検証する。新規9 testと全553 test（23 skip）が成功。codecはauthorityを発行せず、privileged inventory/preflight/executor/resultは未接続。[検証記録](validation/phase6-local-root-restore-protocol-2026-09-05.md)。
+
+Phase 6 local root restore preflight: 専用requestとtrusted review/backup/current/attemptのread-only照合を追加。新規10 testで偽要求、stale state、全7 read直後のcancel/期限、例外を検証。全563 test（23 skip）が成功。root store/復号/lock/executorは未接続で、戻り値はauthorityではない。[検証記録](validation/phase6-local-root-restore-preflight-2026-09-05.md)。
+
+Phase 6 root backup evidence reader: origin recordと固定保存先を定義し、owner/group/mode/no-follow/hardlink/size/inode変更/ciphertext hashを検証するreaderを追加。実一時fileの新規12 testと全575 test（23 skip）が成功。producer/鍵/復号/preflight接続は未完了。[検証記録](validation/phase6-root-backup-evidence-reader-2026-09-05.md)。
+
+Phase 6 root origin capture: 固定target採取、strict root key read、AES-GCM/AAD/復号照合、payload先行/record最後の排他公開を追加。新規14 testと全589 test（23 skip）が成功。中断保存/最終fsync失敗は成功扱いせず、既存IDを上書きしない。production未接続。[検証記録](validation/phase6-root-backup-capture-2026-09-05.md)。
+
+Phase 6 root key/origin: 明示key provisioning・ready marker・strict key read、origin参照付きreview、実復号/再読込verifierを追加。provisioningからpreflightのsandbox統合と全600 test（23 skip）が成功。review/attemptの実storeとproduction接続は未完了。[検証記録](validation/phase6-root-key-origin-preflight-2026-09-05.md)。
+
+Phase 6 root restore store: review/attempt/resultの不変保存とstrict read、期限/履歴分離、再実行拒否を追加。統合preflightは実storeを使用。新規14 testと全614 test（23 skip）が成功。対象lock/audit/executor/production認可は未接続。[検証記録](validation/phase6-root-restore-store-2026-09-05.md)。
+
+Phase 6 root restore execution: target flock、永続attempt/start audit、最終照合/期限guard、単一復元とterminal evidenceを実装。実一時fileの新規14 testと全628 test（23 skip）が成功。実service/認可/privileged dispatch/他mutator排他/OS Gateは未完了。[検証記録](validation/phase6-root-restore-execution-2026-09-05.md)。
+
+Phase 6 root restore service (2026-09-06): 固定source openerとsystemctl/curl validationを追加。effective env、service state、loopback/HTTP200/API schema、timeout/cancelを模擬commandで検証。新規11 testと全639 test（23 skip）が成功。実service/認可/privileged composition/OS Gateは未完了。[検証記録](validation/phase6-root-restore-service-2026-09-06.md)。
+
+
+## Root restore review producer（2026-09-06）
+
+root側review再計算producerを追加。独立caller/host、root-owned origin、現在のtarget、AEADを照合して専用reviewを保存する。元Apply manifest hashをoriginとAEADへ追加。新規14 test、全653 test（630成功・23 skip）、compileall/shell/desktop/diff成功。詳細: `docs/validation/phase6-root-restore-review-2026-09-06.md`。専用PolicyKit action/CLIとGUI consentは未接続であり、既存Apply actionを流用しない。次もPhase 6: 専用認可/dispatch、全製品mutatorの同一target lock、PolicyKit/OS/Qt Gate。実設定・service・VM・SSH未操作、root route非公開、変更は未コミット。
+
+
+## Root restore review CLI（2026-09-06）
+
+専用root restore review CLIと固定dir_fd composition、独立PolicyKit action review-system-restore、isolated launcher、deb install/manpage/検証scriptを追加。preview/approveのみで復元実行はない。全661 test（638成功・23 skip）、compileall/shell/desktop/diff成功。詳細: `docs/validation/phase6-root-restore-review-cli-2026-09-06.md`。実PolicyKit/installed deb/GUIは未検証。次もPhase 6: GUI consentと呼出し、専用実行認可/CLI、全mutator lock統合、OS/Qt Gate。root mutation route非公開、実設定・service・VM・SSH未操作、全変更未コミット。
+
+
+## Root restore review client（2026-09-06）
+
+root復元レビュー専用CLIを呼ぶ非特権clientを追加。固定pkexec/専用entry、120秒timeout、32 KiB応答上限、canonical応答、UID/host/対象/期限/hash、保存receiptを検証する。自動retryなし。実CLIと一時root storeの往復を含む新規9 test、全670 test（647成功・23 skip）、compileall/shell/desktop/diff成功。詳細: `docs/validation/phase6-root-restore-review-client-2026-09-06.md`。GUI consent/production composition、実PolicyKit、専用実行認可、全mutator lock、OS/Qt Gateは未完了。root mutation route非公開、実設定・service・VM・SSH未操作、全変更未コミット。次もPhase 6。
+
+
+## Root restore review consent dialog（2026-09-06）
+
+root復元レビュー専用の同意sessionとQt dialogを追加。現在/backup metadata・期限・hashを表示し、明示同意後に専用clientでレビューのみ保存する。期限/同意解除/失敗/closeで無効化、重複保存と自動retryを抑止。通常メニューは未公開。host全683 test（654成功・29 skip）、Ubuntu 26.04/PySide6 6.10.2のoffscreen関連22 test（21成功・1 expected skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-review-dialog-2026-09-06.md`。実PolicyKit/installed deb・実display・Debian Gate、root専用実行認可/CLI、全mutator lock、provisioningは未完了。次もPhase 6。実設定・service・SSH変更なし、VM検証物cleanup済み、全変更未コミット。
+
+
+## Shared helper / root restore target lock（2026-09-06）
+
+既存Apply helperと専用root復元を同じtarget directory flockへ接続。helper要求内のbefore-hash確認・書込み・rollback operation・service操作を排他し、競合/中断staging/取得後期限切れを拒否する。実flock・別process・CLI receipt/replayを含む新規10 test、host全693 test（664成功・29 skip）、必須検査成功。詳細: `docs/validation/phase6-root-target-lock-2026-09-06.md`。排他はhelperの1要求単位で、backup採取〜外部validation〜別rollback要求をまたぐtransaction、origin capture接続、旧版/外部mutator協調は未完了。専用root実行認可/CLI・provisioning・PolicyKit/OS Gateも残件。root route非公開、実設定/service/SSH/VM状態変更なし、全変更未コミット。現在・次ともPhase 6。
+
+
+## Root restore history reconciliation（2026-09-06）
+
+専用review CLIへread-only `status request-id request-sha256`とstore reconciliationを追加。独立caller UID/host/要求hashを同一shared lock下で照合し、期限切れ後も履歴を読む。鍵/backup/current target不要、attempt-onlyはunknown、欠落/破損を未実行扱いせず、自動retryなし。新規8 test、host全701 test（672成功・29 skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-status-2026-09-06.md`。専用実行認可/CLI・production audit・非特権status client/GUI・要求間排他・provisioning・PolicyKit/OS Gateは残件。root mutation非公開、実環境変更なし、全変更未コミット。現在・次ともPhase 6。
+
+
+## Root restore status client（2026-09-06）
+
+root復元の非特権status clientを追加。exact intentのUID/host/hashと応答schema・時刻・attempt/result digest・state/attentionを検証し、期限切れ履歴を単発照会する。新規7 test（実CLI＋一時store統合含む）、host全708 test（679成功・29 skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-status-client-2026-09-06.md`。GUI接続、専用実行認可/CLI・production audit・要求間排他・provisioning・PolicyKit/OS Gateは残件。root mutation非公開、実環境変更なし、全変更未コミット。現在・次ともPhase 6。
+
+
+## Root review dialog history lookup（2026-09-06）
+
+非公開root review dialogへ明示・単発の履歴照会ボタンを追加。保存成功/結果不明後にexact requestでstatus clientを非同期呼出しし、重複操作・再送・遅延成功を抑止。英日で履歴/unknown/照会失敗を区別する。新規session 3 test成功、Qt 2 testはhost PySide6不在で未実行。host全713 test（682成功・31 skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-status-gui-2026-09-06.md`。次は対応VMでQt Gate。専用実行認可/CLI・production audit・要求間排他・provisioning・PolicyKit/OS Gateも残件。通常menu/root mutation非公開、実環境変更なし、全変更未コミット。現在・次ともPhase 6。
+
+
+## Ubuntu Qt Gate追記（2026-09-06）
+
+Ubuntu 26.04/Python 3.14.4/PySide6 6.10.2でoffscreen関連52 testを実行、51成功・1 expected skip。新規GUI 2件（履歴照会の重複抑止、照会中close/遅延結果破棄）も成功。詳細: `docs/validation/phase6-root-status-qt-ubuntu2604-2026-09-06.md`。package追加なし、host/guest検証物cleanup済み、両VM shut off確認。実PolicyKit/installed deb/実display/Debian Qt Gateは未完了。次もPhase 6: 専用実行認可/CLI・production audit・要求間排他・provisioning・最終Gate。root mutation非公開、全変更未コミット。
+
+
+## Strict root restore audit（2026-09-06）
+
+root復元専用audit adapterと固定openerを追加。root metadata/no-follow、hash chain/HEAD、request開始終了対応、排他、event先行/fsync/HEAD更新、中断証拠のfail closedを実装。新規9 test（実一時復元coordinator接続含む）、host全722 test（691成功・31 skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-audit-2026-09-06.md`。専用実行認可/CLIのproduction composition、要求間排他、provisioning、実PolicyKit/installed deb/OS Gateは残件。root mutation非公開、実環境変更なし、全変更未コミット。現在・次ともPhase 6。
+
+
+## Fixed root restore composition（2026-09-06）
+
+root復元の固定production compositionとStoredRootRestorePreflightを追加。backup/key/source/store/audit/serviceを接続し、root guard・audit chain事前検査・全FDの例外時解放を実装。新規6 test（実store/復号/target/auditを使うport統合含む）、host全728 test（697成功・31 skip）、必須検査成功。詳細: `docs/validation/phase6-root-restore-composition-2026-09-06.md`。compositionは認可ではなく、専用実行CLIは未公開。要求間排他・provisioning・PolicyKit/installed deb/OS Gateも残件。実環境変更なし、全変更未コミット。現在・次ともPhase 6。
+
+## Dedicated root restore execution CLI（2026-09-06）
+
+専用execute CLI/action/launcher/manpageとdeb収録を追加。保存済みresultのbindingを検査し、
+unconfirmed時は自動retryしない。通常GUIは未接続でroute非公開。詳細は
+`docs/validation/phase6-root-restore-execute-cli-2026-09-06.md`。
+
+## Root restore execution client（2026-09-06）
+
+非特権one-shot clientとunconfirmed/no-retry境界を追加。正常resultだけを厳密復号し、
+中断時はstatus照合へ送る。詳細は
+`docs/validation/phase6-root-restore-execute-client-2026-09-06.md`。
+
+## Root restore final consent（2026-09-06）
+
+保存済みreviewからlive exact requestだけを渡す境界、request hashへ束縛した一回限りの
+最終同意session、非公開Qt dialogを追加した。unconfirmedだけが単発read-only status照会へ
+進み、executeを再送しない。host全758 test（722成功・35 expected skip）と必須検査成功。
+Ubuntu 26.04/Python 3.14.4/PySide6 6.10.2でもQt runtime 4件成功。詳細は
+`docs/validation/phase6-root-restore-final-consent-2026-09-06.md`。fresh dev debのbuild/
+verifyと新規module収録も成功。実PolicyKit/installed OS/provisioning Gate完了まで
+production routeは公開しない。
+
+## Root restore installed deny/provisioning Gate（2026-09-06）
+
+Ubuntu 26.04 snapshot内でfresh dev debを導入し、installed file integrity、独立PolicyKit
+action、inactive-session deny、privileged entryの不正request拒否を確認した。明示key
+provisioningは`/tmp`のroot-owned fixtureだけで作成・再読込・重複拒否・cleanupに成功。
+revert後に旧packageとproduction target/state不在を確認しVMを停止。一時snapshotも削除した。
+詳細は`docs/validation/phase6-root-restore-installed-deny-provisioning-2026-09-06.md`。
+active desktopのinteractive PolicyKit認証と最終route公開reviewは残件。
+
+## Root restore valid OS mutation/service Gate（2026-09-06）
+
+Ubuntu 26.04 snapshot内で暗号化origin→trusted review→canonical request→installed execute
+entry→固定target復元→実systemd restart→loopback API→immutable result/audit/statusを完走した。
+committed後の同一request replayも拒否され、target/result不変を確認。snapshot revertで旧packageと
+全fixture不在へ復帰した。詳細は
+`docs/validation/phase6-root-restore-valid-os-gate-2026-09-06.md`。active desktopの
+interactive PolicyKit認証と最終route公開reviewは残件。

@@ -1,0 +1,7 @@
+{
+  "vm": "ubuntu26.04",
+  "package_and_manual_equal": true,
+  "guest_artifacts_absent": true,
+  "final_state": "shut off",
+  "snapshot_deleted": true
+}

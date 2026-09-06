@@ -11,7 +11,7 @@ class ProductionRestoreAvailabilityTests(unittest.TestCase):
     def test_all_four_routes_fail_closed_with_specific_reason(self) -> None:
         expected = {
             (HostKind.LOCAL, False): (RestoreRoute.LOCAL_USER, "local_user_restore_composition_missing"),
-            (HostKind.LOCAL, True): (RestoreRoute.LOCAL_ROOT, "local_root_restore_protocol_missing"),
+            (HostKind.LOCAL, True): (RestoreRoute.LOCAL_ROOT, "local_root_restore_release_gate_pending"),
             (HostKind.SSH, False): (RestoreRoute.SSH_USER, "ssh_user_restore_protocol_missing"),
             (HostKind.SSH, True): (RestoreRoute.SSH_ROOT, "ssh_root_restore_protocol_missing"),
         }

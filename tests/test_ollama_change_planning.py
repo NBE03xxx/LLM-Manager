@@ -75,6 +75,34 @@ class BuildSelectedOllamaChangePlanTests(unittest.TestCase):
         self.assertIsNone(result.change_set.changes[0].before_hash)
         self.assertEqual([call[0] for call in host.calls], ["identify", "stat"])
 
+    def test_existing_settings_survive_report_bound_planning(self):
+        current, plan = selected_plan()
+        content = (
+            b'[Service]\nEnvironment="OLLAMA_HOST=127.0.0.1:11434"\n'
+            b'Environment="OLLAMA_FLASH_ATTENTION=0"\n'
+        )
+        host = _Host(current.host, {DROP_IN_PATH: content})
+        result = BuildSelectedOllamaChangePlan(_HelperProbe()).execute(
+            plan, current, host, CancellationToken()
+        )
+        self.assertEqual(
+            result.change_set.changes[0].replacement_text.encode(),
+            content.replace(b'ATTENTION=0', b'ATTENTION=1'),
+        )
+        self.assertEqual(host.files[DROP_IN_PATH], content)
+
+    def test_unsupported_existing_directive_stops_plan_without_changing_file(self):
+        current, plan = selected_plan()
+        content = b'[Service]\nEnvironmentFile=/etc/ollama.env\n'
+        host = _Host(current.host, {DROP_IN_PATH: content})
+        with self.assertRaises(AdapterError) as caught:
+            BuildSelectedOllamaChangePlan(_HelperProbe()).execute(
+                plan, current, host, CancellationToken()
+            )
+        self.assertEqual(caught.exception.code, "unsupported_existing_drop_in")
+        self.assertEqual(host.files[DROP_IN_PATH], content)
+        self.assertIsNone(plan.change_set)
+
     def test_rejects_stale_identity_unready_helper_and_unsafe_target(self):
         current, plan = selected_plan()
         changed = replace(current.host, host_id="local:changed")

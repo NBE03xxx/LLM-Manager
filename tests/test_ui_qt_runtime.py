@@ -83,6 +83,60 @@ class QtRuntimeTests(unittest.TestCase):
         self.assertTrue(observed["cancelled"])
         self.assertFalse(coordinator.is_active("host-1"))
 
+    def test_long_running_task_keeps_processing_events_and_cancels_promptly(self) -> None:
+        from PySide6.QtCore import QEventLoop, QThread, QTimer
+
+        from llm_manager.application.errors import OperationCancelled
+        from llm_manager.ui.qt_worker import QtTaskRunner, QtWorkerCoordinator
+
+        main_thread = QThread.currentThread()
+        observed = {
+            "cancelled": False,
+            "cancel_requested_at": None,
+            "cancel_observed_at": None,
+            "ticks": 0,
+            "worker_thread": None,
+        }
+
+        def task(cancellation):
+            observed["worker_thread"] = QThread.currentThread()
+            while not cancellation.cancelled:
+                time.sleep(0.005)
+            observed["cancel_observed_at"] = time.monotonic()
+            raise OperationCancelled("cancelled at safe point")
+
+        loop = QEventLoop()
+        runner = QtTaskRunner(task)
+        runner.signals.cancelled.connect(
+            lambda: observed.__setitem__("cancelled", True)
+        )
+        runner.signals.finished.connect(loop.quit)
+        coordinator = QtWorkerCoordinator()
+        coordinator.start("agent-host", runner)
+
+        def tick_until_cancel() -> None:
+            observed["ticks"] += 1
+            if observed["ticks"] >= 20:
+                observed["cancel_requested_at"] = time.monotonic()
+                coordinator.cancel("agent-host")
+                return
+            QTimer.singleShot(10, tick_until_cancel)
+
+        QTimer.singleShot(0, tick_until_cancel)
+        QTimer.singleShot(2000, loop.quit)
+        loop.exec()
+
+        self.assertGreaterEqual(observed["ticks"], 20)
+        self.assertTrue(observed["cancelled"])
+        self.assertIsNot(observed["worker_thread"], main_thread)
+        self.assertIsNotNone(observed["cancel_requested_at"])
+        self.assertIsNotNone(observed["cancel_observed_at"])
+        self.assertLess(
+            observed["cancel_observed_at"] - observed["cancel_requested_at"],
+            0.5,
+        )
+        self.assertFalse(coordinator.is_active("agent-host"))
+
     def test_minimal_window_constructs_and_switches_language(self) -> None:
         from PySide6.QtWidgets import QComboBox, QLabel, QPushButton
 
@@ -98,12 +152,161 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertIsNotNone(status)
             self.assertIsNotNone(language)
             self.assertEqual(diagnose.text(), "Diagnose")
+            self.assertEqual(diagnose.accessibleName(), "Diagnose")
+            self.assertEqual(window.findChild(QComboBox, "host-selector").accessibleName(), "Hosts")
             language.setCurrentIndex(1)
             self.application.processEvents()
             self.assertEqual(diagnose.text(), "診断する")
+            self.assertEqual(diagnose.accessibleName(), "診断する")
+            self.assertEqual(window.findChild(QComboBox, "host-selector").accessibleName(), "ホスト")
             self.assertEqual(status.text(), "準備完了")
+            self.assertEqual(status.accessibleName(), "準備完了")
         finally:
             window.close()
+
+    def test_all_pages_scroll_and_long_summary_labels_wrap(self) -> None:
+        from PySide6.QtWidgets import QLabel, QScrollArea
+
+        from llm_manager.ui.qt_window import MainWindow
+
+        window = MainWindow(lambda _host_id: lambda _token: None, locale="ja")
+        try:
+            window.resize(480, 320)
+            window.show()
+            self.application.processEvents()
+            scrolls = window.findChildren(QScrollArea)
+            self.assertEqual(len(scrolls), 6)
+            self.assertTrue(all(scroll.widgetResizable() for scroll in scrolls))
+            for name in (
+                "recommendation-summary",
+                "review-summary",
+                "results-summary",
+                "backup-inventory-summary",
+                "restore-preview-summary",
+            ):
+                label = window.findChild(QLabel, name)
+                self.assertIsNotNone(label)
+                self.assertTrue(label.wordWrap())
+        finally:
+            window.close()
+
+    def test_hosts_page_has_logical_keyboard_focus_order(self) -> None:
+        from PySide6.QtCore import QEvent, Qt
+        from PySide6.QtGui import QKeyEvent
+        from PySide6.QtWidgets import QComboBox
+
+        from llm_manager.ui.qt_window import MainWindow
+
+        window = MainWindow(lambda _host_id: lambda _token: None, locale="ja")
+        try:
+            window.show()
+            host = window.findChild(QComboBox, "host-selector")
+            language = window.findChild(QComboBox, "language-selector")
+            host.setFocus()
+            self.application.processEvents()
+            self.assertTrue(host.hasFocus())
+            self.application.sendEvent(host, QKeyEvent(QEvent.KeyPress, Qt.Key_Tab, Qt.NoModifier))
+            self.application.sendEvent(host, QKeyEvent(QEvent.KeyRelease, Qt.Key_Tab, Qt.NoModifier))
+            self.application.processEvents()
+            self.assertTrue(language.hasFocus())
+        finally:
+            window.close()
+
+    def test_close_requests_cancel_and_waits_for_worker_completion(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QPushButton
+
+        from llm_manager.application.errors import OperationCancelled
+        from llm_manager.ui.qt_window import MainWindow
+
+        started = threading.Event()
+        observed = {"visible_after_close_request": False}
+
+        def task_factory(_host_id):
+            def task(cancellation):
+                started.set()
+                while not cancellation.cancelled:
+                    time.sleep(0.005)
+                time.sleep(0.05)
+                raise OperationCancelled("cancelled at safe point")
+
+            return task
+
+        window = MainWindow(task_factory)
+        window.show()
+        window.findChild(QPushButton, "start-diagnosis").click()
+        loop = QEventLoop()
+
+        def request_close_when_started() -> None:
+            if not started.is_set():
+                QTimer.singleShot(5, request_close_when_started)
+                return
+            window.close()
+            observed["visible_after_close_request"] = window.isVisible()
+
+        def finish_when_closed() -> None:
+            if window.isVisible():
+                QTimer.singleShot(5, finish_when_closed)
+            else:
+                loop.quit()
+
+        QTimer.singleShot(0, request_close_when_started)
+        QTimer.singleShot(0, finish_when_closed)
+        QTimer.singleShot(2000, loop.quit)
+        loop.exec()
+        self.assertTrue(observed["visible_after_close_request"])
+        self.assertFalse(window.isVisible())
+
+    def test_close_explains_wait_for_task_that_does_not_poll_cancel_promptly(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.errors import OperationCancelled
+        from llm_manager.ui.qt_window import MainWindow
+
+        started = threading.Event()
+        observed = {"ticks_while_waiting": 0, "wait_state_seen": False}
+
+        def task_factory(_host_id):
+            def task(_cancellation):
+                started.set()
+                time.sleep(0.3)  # Simulate a finite backend section without a cancel safe point.
+                raise OperationCancelled("cancelled after the safe point")
+
+            return task
+
+        window = MainWindow(task_factory, locale="ja")
+        window.show()
+        window.findChild(QPushButton, "start-diagnosis").click()
+        loop = QEventLoop()
+
+        def request_close_when_started() -> None:
+            if not started.is_set():
+                QTimer.singleShot(5, request_close_when_started)
+                return
+            window.close()
+            status = window.findChild(QLabel, "workflow-status")
+            observed["wait_state_seen"] = (
+                window.isVisible()
+                and status.text() == "現在の処理が安全に停止するまで終了を待っています…"
+                and status.accessibleName() == status.text()
+                and not window.findChild(QPushButton, "cancel-operation").isEnabled()
+            )
+            QTimer.singleShot(10, count_waiting_tick)
+
+        def count_waiting_tick() -> None:
+            if not window.isVisible():
+                loop.quit()
+                return
+            observed["ticks_while_waiting"] += 1
+            QTimer.singleShot(10, count_waiting_tick)
+
+        QTimer.singleShot(0, request_close_when_started)
+        QTimer.singleShot(2000, loop.quit)
+        loop.exec()
+        self.assertTrue(observed["wait_state_seen"])
+        self.assertGreaterEqual(observed["ticks_while_waiting"], 10)
+        self.assertFalse(window.isVisible())
 
     def test_diagnose_button_runs_worker_and_advances_to_recommendations(self) -> None:
         from PySide6.QtCore import QEventLoop, Qt, QTimer
@@ -320,6 +523,22 @@ class QtRuntimeTests(unittest.TestCase):
             )
             window._render_results()
             self.assertTrue(run_apply.isEnabled())
+        finally:
+            window.close()
+
+    def test_submillisecond_plan_expiry_is_rescheduled_without_recursion(self) -> None:
+        from llm_manager.domain.models import utc_now
+        from llm_manager.ui.qt_window import MainWindow
+        from tests.fixtures import plan
+
+        window = MainWindow(lambda _host: lambda _token: None)
+        try:
+            expiring = replace(
+                plan(), expires_at=utc_now() + timedelta(microseconds=500)
+            )
+            window._schedule_stale_expiry(expiring)
+            self.assertTrue(window._stale_timer.isActive())
+            self.assertEqual(window._stale_timer.interval(), 1)
         finally:
             window.close()
 
@@ -836,6 +1055,97 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertIn("protocol is incomplete", summary.text())
             refresh.click()
             self.assertEqual(calls, [])
+        finally:
+            window.close()
+
+    def test_root_restore_main_window_entry_is_registered_but_availability_gated(self) -> None:
+        from unittest.mock import MagicMock
+
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.application.restore_availability import (
+            AssessProductionRestoreAvailability,
+            RestoreRoute,
+        )
+        from llm_manager.domain.enums import HostKind
+        from llm_manager.ui.qt_window import MainWindow
+
+        host = HostCandidate("local:test", HostKind.LOCAL, "Local")
+        workflow = MagicMock()
+        unavailable = MainWindow(
+            lambda _host: lambda _token: None,
+            hosts=(host,),
+            root_restore_workflow=workflow,
+            restore_availability_service=AssessProductionRestoreAvailability(
+                frozenset({RestoreRoute.LOCAL_USER})
+            ),
+        )
+        try:
+            button = unavailable.findChild(QPushButton, "open-root-restore")
+            summary = unavailable.findChild(QLabel, "root-restore-summary")
+            self.assertFalse(button.isEnabled())
+            self.assertIn("supported-OS and publication gates are pending", summary.text())
+            button.click()
+            workflow.assert_not_called()
+        finally:
+            unavailable.close()
+
+        default_closed = MainWindow(
+            lambda _host: lambda _token: None,
+            hosts=(host,),
+            root_restore_workflow=workflow,
+        )
+        try:
+            button = default_closed.findChild(QPushButton, "open-root-restore")
+            self.assertFalse(button.isEnabled())
+            button.click()
+            workflow.assert_not_called()
+        finally:
+            default_closed.close()
+
+        available = MainWindow(
+            lambda _host: lambda _token: None,
+            locale="ja",
+            hosts=(host,),
+            root_restore_workflow=workflow,
+            restore_availability_service=AssessProductionRestoreAvailability(
+                frozenset({RestoreRoute.LOCAL_USER, RestoreRoute.LOCAL_ROOT})
+            ),
+        )
+        try:
+            button = available.findChild(QPushButton, "open-root-restore")
+            summary = available.findChild(QLabel, "root-restore-summary")
+            self.assertTrue(button.isEnabled())
+            self.assertIn("管理者認証と明示同意", summary.text())
+            button.click()
+            workflow.assert_called_once_with(host, "ja", available)
+        finally:
+            available.close()
+
+    def test_root_restore_entry_rejects_ssh_even_if_no_availability_service_is_supplied(self) -> None:
+        from unittest.mock import MagicMock
+
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.host_discovery import HostCandidate
+        from llm_manager.domain.enums import HostKind
+        from llm_manager.ui.qt_window import MainWindow
+
+        host = HostCandidate("ssh:test", HostKind.SSH, "test", "test")
+        workflow = MagicMock()
+        window = MainWindow(
+            lambda _host: lambda _token: None,
+            hosts=(host,),
+            root_restore_workflow=workflow,
+        )
+        try:
+            button = window.findChild(QPushButton, "open-root-restore")
+            summary = window.findChild(QLabel, "root-restore-summary")
+            self.assertFalse(button.isEnabled())
+            self.assertIn("SSH root", summary.text())
+            button.click()
+            workflow.assert_not_called()
         finally:
             window.close()
 

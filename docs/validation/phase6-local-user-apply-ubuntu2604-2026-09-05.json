@@ -1,0 +1,142 @@
+{
+  "python": "3.14.4",
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "scope": "production LocalUserApplyTaskFactory; temporary roots; injected key and failure paths",
+  "samples": [
+    {
+      "status": "committed",
+      "elapsed_ms": 5.141,
+      "process_cpu_ms": 4.892,
+      "process_peak_rss_kib": 49900,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "committed",
+      "elapsed_ms": 1.893,
+      "process_cpu_ms": 1.889,
+      "process_peak_rss_kib": 49900,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "committed",
+      "elapsed_ms": 1.673,
+      "process_cpu_ms": 1.673,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "committed",
+      "elapsed_ms": 1.663,
+      "process_cpu_ms": 1.663,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "committed",
+      "elapsed_ms": 1.672,
+      "process_cpu_ms": 1.672,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "rolled_back",
+      "elapsed_ms": 2.219,
+      "process_cpu_ms": 2.212,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "original"
+    },
+    {
+      "status": "rolled_back",
+      "elapsed_ms": 2.155,
+      "process_cpu_ms": 2.15,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "original"
+    },
+    {
+      "status": "rolled_back",
+      "elapsed_ms": 2.181,
+      "process_cpu_ms": 2.181,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "original"
+    },
+    {
+      "status": "rolled_back",
+      "elapsed_ms": 2.179,
+      "process_cpu_ms": 2.169,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "original"
+    },
+    {
+      "status": "rolled_back",
+      "elapsed_ms": 2.185,
+      "process_cpu_ms": 2.181,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "original"
+    },
+    {
+      "status": "recovery_required",
+      "elapsed_ms": 1.967,
+      "process_cpu_ms": 1.961,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "recovery_required",
+      "elapsed_ms": 1.929,
+      "process_cpu_ms": 1.925,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "recovery_required",
+      "elapsed_ms": 2.043,
+      "process_cpu_ms": 2.034,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "recovery_required",
+      "elapsed_ms": 1.966,
+      "process_cpu_ms": 1.953,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    },
+    {
+      "status": "recovery_required",
+      "elapsed_ms": 1.935,
+      "process_cpu_ms": 1.936,
+      "process_peak_rss_kib": 50028,
+      "encrypted_backups": 1,
+      "journal_records": 1,
+      "target_state": "replacement"
+    }
+  ]
+}

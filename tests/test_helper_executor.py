@@ -1,4 +1,5 @@
 import hashlib
+from contextlib import nullcontext
 import tempfile
 import unittest
 from dataclasses import dataclass, field
@@ -39,6 +40,9 @@ class _Backend:
     content: bytes | None
     fail_on: str | None = None
     calls: list[str] = field(default_factory=list)
+
+    def locked(self):
+        return nullcontext()
 
     def read_file(self, target):
         self.calls.append("read_file")

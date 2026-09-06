@@ -61,13 +61,19 @@ class OllamaDropInPlanner:
         ]
         settings: list[tuple[str, str]] = []
         for item in selected:
+            if any(key == item.setting_key for key, _value in settings):
+                raise AdapterError("duplicate_setting", "selected Ollama setting is duplicated")
             if item.setting_key not in _KEYS:
                 raise AdapterError("setting_not_allowed", f"setting is not allowlisted: {item.setting_key}")
             settings.append((item.setting_key, self._validate(item.setting_key, item.recommended_value)))
         if not settings:
             changes: tuple[Change, ...] = ()
         else:
-            rendered = render_drop_in(settings)
+            rendered = (
+                render_drop_in(settings)
+                if existing_content is None
+                else _update_drop_in(existing_content, settings)
+            )
             before_hash = (
                 hashlib.sha256(existing_content.encode("utf-8")).hexdigest()
                 if existing_content is not None
@@ -143,6 +149,56 @@ class OllamaDropInPlanner:
         if type(value) is not int or not bounds[0] <= value <= bounds[1]:
             raise AdapterError("invalid_recommendation", f"{key} is outside verified bounds")
         return str(value)
+
+
+def _update_drop_in(content: str, settings: list[tuple[str, str]]) -> str:
+    """Edit only literal assignments in the dedicated, supported drop-in form.
+
+    Unselected values are preserved, not recommended or re-tuned. Refuse
+    systemd syntax whose effect would require interpreting other directives,
+    resets, continuations, escapes, or specifier expansion.
+    """
+    replacements = dict(settings)
+    if any(ord(character) < 32 and character not in "\n\t" for character in content):
+        raise AdapterError("unsupported_existing_drop_in", "unsupported existing Ollama drop-in")
+    seen: set[str] = set()
+    section_seen = False
+    lines: list[str] = []
+    for raw in content.splitlines(keepends=True):
+        line = raw.removesuffix("\n")
+        if line.rstrip().endswith("\\"):
+            raise AdapterError("unsupported_existing_drop_in", "unsupported existing Ollama drop-in")
+        if not line.strip() or line.lstrip().startswith(("#", ";")):
+            lines.append(raw)
+            continue
+        if line == "[Service]" and not section_seen:
+            section_seen = True
+            lines.append(raw)
+            continue
+        assignment = re.fullmatch(r'Environment="([A-Z_]+)=([A-Za-z0-9_.:\[\]+-]+)"', line)
+        if (
+            not section_seen
+            or assignment is None
+            or assignment[1] not in _KEYS
+            or assignment[1] in seen
+        ):
+            raise AdapterError("unsupported_existing_drop_in", "unsupported existing Ollama drop-in")
+        key = assignment[1]
+        seen.add(key)
+        if key in replacements:
+            replacement = render_drop_in([(key, replacements[key])]).split("\n", 1)[1]
+            lines.append(replacement if raw.endswith("\n") else replacement.removesuffix("\n"))
+        else:
+            lines.append(raw)
+    if not section_seen:
+        raise AdapterError("unsupported_existing_drop_in", "unsupported existing Ollama drop-in")
+    result = "".join(lines)
+    missing = [(key, value) for key, value in settings if key not in seen]
+    if missing:
+        if not result.endswith("\n"):
+            result += "\n"
+        result += render_drop_in(missing).split("\n", 1)[1]
+    return result
 
 
 def render_drop_in(settings: list[tuple[str, str]]) -> str:

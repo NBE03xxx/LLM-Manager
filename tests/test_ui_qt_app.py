@@ -42,11 +42,19 @@ class QtProductionCompositionTests(unittest.TestCase):
             return_value=restore_tasks,
         ), patch.object(
             qt_app.BackupSettingsStore, "load", return_value=backup_policy
-        ), patch.object(qt_app, "run_gui", return_value=0) as run_gui:
+        ), patch.object(
+            qt_app, "run_production_restore_workflow"
+        ) as root_workflow, patch.object(
+            qt_app, "run_gui", return_value=0
+        ) as run_gui:
             discover.return_value.execute.return_value = hosts
             diagnostic_tasks.local_helper_probe = MagicMock()
 
             self.assertEqual(qt_app.main(("llm-manager",)), 0)
+            registered = run_gui.call_args.kwargs["root_restore_workflow"]
+            host, parent = MagicMock(), MagicMock()
+            registered(host, "ja", parent)
+            root_workflow.assert_called_once_with(host, locale="ja", parent=parent)
 
         keywords = run_gui.call_args.kwargs
         self.assertIsInstance(keywords["apply_task_factory"], ProductionApplyTaskFactory)
@@ -68,6 +76,7 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertEqual(
             restore_service.available_routes, frozenset({RestoreRoute.LOCAL_USER})
         )
+        self.assertTrue(callable(keywords["root_restore_workflow"]))
 
 
 if __name__ == "__main__":

@@ -1,3 +1,11 @@
+THIRD_PARTY_NOTICES.md usr/share/doc/llm-manager
+packaging/bin/llm-manager usr/bin
 packaging/bin/llm-manager-helper usr/bin
+packaging/desktop/io.github.nbe03xxx.llm-manager.desktop usr/share/applications
+packaging/icons/io.github.nbe03xxx.llm-manager.svg usr/share/icons/hicolor/scalable/apps
+packaging/sbom/llm-manager.cdx.json usr/share/doc/llm-manager
 packaging/helper-metadata.json usr/share/llm-manager
 packaging/polkit/io.github.nbe03xxx.llm-manager.policy usr/share/polkit-1/actions
+packaging/bin/llm-manager-restore-review usr/bin
+packaging/bin/llm-manager-restore-execute usr/bin
+packaging/bin/llm-manager-restore-setup usr/bin

@@ -1,0 +1,25 @@
+.TH LLM-MANAGER-RESTORE-SETUP 8 "2026-09-06" "LLM-Manager"
+.SH NAME
+llm-manager-restore-setup \- explicitly initialize local root backup storage
+.SH SYNOPSIS
+.B llm-manager-restore-setup initialize
+.SH DESCRIPTION
+Run explicitly as an administrator with effective UID 0.
+Creates only fixed root-owned private directories beneath
+/var/lib/llm-manager/local-root-restore and a random local-root-v1 key.
+No password, key content, key name, or pathname is accepted as input.
+There is no automatic setup during installation, Apply, review, or restore.
+.PP
+Existing keys, backups, history, unexpected entries, and interrupted key
+publication cause refusal. No rotation, replacement, repair, or deletion is
+performed. Retain existing evidence and seek administrator review on failure.
+An incomplete directory-only initialization can be retried while all state
+directories are empty and their ownership and permissions remain valid.
+.PP
+This entry is administrator-only and has no PolicyKit action or GUI launcher.
+Initializing storage does not enable the normal GUI root route.
+.SH EXIT STATUS
+0 indicates initialization completed; 1 indicates rejection or an incomplete
+operation. Output is bounded metadata JSON and never includes key bytes.
+.SH SEE ALSO
+llm-manager-helper(8), llm-manager-restore-review(8), llm-manager-restore-execute(8)

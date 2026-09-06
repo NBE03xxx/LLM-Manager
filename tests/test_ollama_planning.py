@@ -85,6 +85,72 @@ class OllamaDropInPlannerTests(unittest.TestCase):
                 report(), (recommendation("OLLAMA_CONTEXT_LENGTH", 8192),), None
             )
 
+    def test_selected_change_preserves_other_settings_and_comments(self) -> None:
+        content = (
+            '# Existing configuration\n[Service]\n'
+            'Environment="OLLAMA_HOST=127.0.0.1:11434"\n\n'
+            'Environment="OLLAMA_FLASH_ATTENTION=0"\n'
+            '; Keep the established capacity\n'
+            'Environment="OLLAMA_NUM_PARALLEL=2"\n'
+        )
+        change = OllamaDropInPlanner().plan(
+            report(), (recommendation("OLLAMA_FLASH_ATTENTION", True),), content
+        ).changes[0]
+        self.assertEqual(
+            change.replacement_text, content.replace('ATTENTION=0', 'ATTENTION=1')
+        )
+        self.assertEqual(change.after, (("OLLAMA_FLASH_ATTENTION", "1"),))
+
+    def test_adds_selected_setting_without_removing_existing_last_line(self) -> None:
+        content = '[Service]\nEnvironment="OLLAMA_HOST=127.0.0.1:11434"'
+        change = OllamaDropInPlanner().plan(
+            report(), (recommendation("OLLAMA_FLASH_ATTENTION", True),), content
+        ).changes[0]
+        self.assertEqual(
+            change.replacement_text,
+            content + '\nEnvironment="OLLAMA_FLASH_ATTENTION=1"\n',
+        )
+
+    def test_ambiguous_or_unsupported_existing_content_is_rejected(self) -> None:
+        for content in (
+            '[Service]\nExecStart=/usr/bin/ollama serve\n',
+            '[Service]\nEnvironment="UNREVIEWED_KEY=value"\n',
+            '[Service]\nEnvironment="OLLAMA_FLASH_ATTENTION=0"\n'
+            'Environment="OLLAMA_FLASH_ATTENTION=1"\n',
+            '[Service]\nEnvironment=\n',
+            '[Service]\nEnvironment="OLLAMA_HOST=%H:11434"\n',
+            '[Service]\nEnvironment="OLLAMA_KEEP_ALIVE=5m"\\\n',
+            '[Service]\n# ambiguous continuation\\\n',
+            '[Service]\r\nEnvironment="OLLAMA_FLASH_ATTENTION=0"\r\n',
+            '[Service]\n# comment\x00\n',
+            '[Service]\n[Service]\n',
+            'Environment="OLLAMA_FLASH_ATTENTION=0"\n',
+            '',
+        ):
+            with self.subTest(content=content):
+                with self.assertRaises(AdapterError) as caught:
+                    OllamaDropInPlanner().plan(
+                        report(), (recommendation("OLLAMA_FLASH_ATTENTION", True),), content
+                    )
+                self.assertEqual(caught.exception.code, "unsupported_existing_drop_in")
+
+    def test_duplicate_selected_key_is_rejected(self) -> None:
+        with self.assertRaises(AdapterError) as caught:
+            OllamaDropInPlanner().plan(
+                report(),
+                (recommendation("OLLAMA_FLASH_ATTENTION", True),
+                 recommendation("OLLAMA_FLASH_ATTENTION", False)),
+                None,
+            )
+        self.assertEqual(caught.exception.code, "duplicate_setting")
+
+    def test_only_selected_last_line_is_replaced_without_adding_newline(self) -> None:
+        content = '[Service]\nEnvironment="OLLAMA_FLASH_ATTENTION=0"'
+        change = OllamaDropInPlanner().plan(
+            report(), (recommendation("OLLAMA_FLASH_ATTENTION", True),), content
+        ).changes[0]
+        self.assertEqual(change.replacement_text, content.replace('ATTENTION=0', 'ATTENTION=1'))
+
     def test_numeric_setting_respects_injected_bounds(self) -> None:
         planner = OllamaDropInPlanner(
             OllamaSettingPolicy((("OLLAMA_CONTEXT_LENGTH", 2048, 32768),))

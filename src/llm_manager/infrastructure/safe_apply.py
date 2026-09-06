@@ -14,6 +14,7 @@ from llm_manager.planning.opencode import locate_scalar_spans
 
 from .backup import MAX_ITEM_BYTES, _atomic_write, _fsync_directory, _within
 from .journal import JournalStatus, JournalTarget, LocalOperationJournal
+from .redaction import redact_text
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,6 +157,10 @@ class ApplyOutcome:
     manifest: BackupManifest | None
     validations: tuple[ValidationResult, ...] = ()
     error: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.error is not None:
+            object.__setattr__(self, "error", redact_text(self.error)[:4096])
 
 
 class SafeApplyCoordinator:

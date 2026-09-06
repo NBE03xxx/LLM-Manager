@@ -14,6 +14,7 @@ from llm_manager.ui.composition import (
     ChangePlanTaskFactory,
     DiagnosticTaskFactory,
     _local_opencode_candidates,
+    _local_opencode_binary,
 )
 
 
@@ -115,6 +116,34 @@ class DiagnosticTaskFactoryTests(unittest.TestCase):
         self.assertIsNotNone(factory.local_helper_probe)
         self.assertIs(factory._service(self.local).helper_probe, factory.local_helper_probe)
         self.assertIsNone(factory._service(self.remote).helper_probe)
+
+    def test_production_uses_valid_fixed_user_opencode_binary(self) -> None:
+        binary = "/home/test/.opencode/bin/opencode"
+        with patch("llm_manager.ui.composition._local_opencode_binary", return_value=binary):
+            factory = DiagnosticTaskFactory.production((self.local,))
+        self.assertIn(binary, factory.local_runner.policy.allowed_executables)
+        self.assertEqual(factory._service(self.local).client.binary, binary)
+
+    def test_user_opencode_binary_rejects_symlink_and_writable_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            binary = home / ".opencode" / "bin" / "opencode"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("binary", encoding="utf-8")
+            binary.chmod(0o755)
+            self.assertEqual(_local_opencode_binary(home), str(binary))
+            binary.chmod(0o775)
+            self.assertEqual(_local_opencode_binary(home), "opencode")
+            binary.unlink()
+            target = home / "target"
+            target.write_text("binary", encoding="utf-8")
+            target.chmod(0o755)
+            binary.symlink_to(target)
+            self.assertEqual(_local_opencode_binary(home), "opencode")
+            binary.unlink()
+            binary.parent.rmdir()
+            binary.parent.symlink_to(home)
+            self.assertEqual(_local_opencode_binary(home), "opencode")
 
     def test_production_factory_maps_discovered_ids_to_tasks(self) -> None:
         factory = DiagnosticTaskFactory.production((self.local, self.remote))

@@ -30,6 +30,15 @@ class LocalAuditLogTests(unittest.TestCase):
         with self.assertRaises(AdapterError):
             self.audit.append("apply", "plan", (("config_content", "secret"),))
 
+    def test_redacts_quoted_secrets_in_persisted_error_metadata(self) -> None:
+        self.audit.append("apply.failed", "plan", (
+            ("error", '{"password": "sentinel secret tail", "status": "failed"}'),
+        ))
+        event = self.audit.read_all()[0]
+        self.assertNotIn("sentinel", dict(event.fields)["error"])
+        self.assertNotIn("secret tail", dict(event.fields)["error"])
+        self.assertNotIn("sentinel", (self.root / "00000000000000000001.json").read_text())
+
     def test_detects_event_tamper(self) -> None:
         self.audit.append("one", "plan", ())
         self.audit.append("two", "plan", ())

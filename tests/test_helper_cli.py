@@ -1,4 +1,5 @@
 import hashlib
+from contextlib import nullcontext
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
@@ -16,6 +17,9 @@ class _Backend:
     def __init__(self):
         self.content = None
         self.calls = []
+
+    def locked(self):
+        return nullcontext()
 
     def read_file(self, target):
         return self.content

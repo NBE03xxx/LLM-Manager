@@ -1,0 +1,26 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:5752a77c-639e-4a79-882e-9e04c557d179",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-05T00:00:00Z",
+    "component": {
+      "type": "application",
+      "bom-ref": "pkg:deb/llm-manager@0.1.0~dev0",
+      "name": "llm-manager",
+      "version": "0.1.0~dev0",
+      "licenses": [{"license": {"id": "MIT"}}]
+    }
+  },
+  "components": [
+    {"type":"framework","bom-ref":"runtime:python3","name":"python3","scope":"required","licenses":[{"license":{"id":"PSF-2.0"}}],"properties":[{"name":"llm-manager:declared-version","value":">=3.13"},{"name":"llm-manager:distribution-package","value":"python3"}]},
+    {"type":"library","bom-ref":"runtime:cryptography","name":"cryptography","scope":"required","licenses":[{"expression":"Apache-2.0 OR BSD-3-Clause"}],"properties":[{"name":"llm-manager:declared-version","value":">=43.0.0,<47"},{"name":"llm-manager:distribution-package","value":"python3-cryptography"}]},
+    {"type":"library","bom-ref":"runtime:secretstorage","name":"SecretStorage","scope":"required","licenses":[{"license":{"id":"BSD-3-Clause"}}],"properties":[{"name":"llm-manager:declared-version","value":">=3.3.3,<4"},{"name":"llm-manager:distribution-package","value":"python3-secretstorage"}]},
+    {"type":"library","bom-ref":"runtime:pyside6","name":"PySide6","scope":"required","licenses":[{"expression":"LGPL-3.0-only OR (GPL-3.0-only WITH Qt-GPL-exception-1.0)"}],"properties":[{"name":"llm-manager:declared-version","value":">=6.8.2.1 (Debian system package)"},{"name":"llm-manager:distribution-package","value":"python3-pyside6.qtcore, python3-pyside6.qtwidgets"}]},
+    {"type":"application","bom-ref":"runtime:openssh-client","name":"OpenSSH client","scope":"required","properties":[{"name":"llm-manager:distribution-package","value":"openssh-client"},{"name":"llm-manager:license-source","value":"installed distribution copyright metadata"}]},
+    {"type":"application","bom-ref":"runtime:pkexec","name":"pkexec / polkit","scope":"required","properties":[{"name":"llm-manager:distribution-package","value":"pkexec, polkitd"},{"name":"llm-manager:license-source","value":"installed distribution copyright metadata"}]},
+    {"type":"operating-system","bom-ref":"runtime:systemd","name":"systemd","scope":"required","properties":[{"name":"llm-manager:distribution-package","value":"systemd"},{"name":"llm-manager:license-source","value":"installed distribution copyright metadata"}]}
+  ],
+  "dependencies": [{"ref":"pkg:deb/llm-manager@0.1.0~dev0","dependsOn":["runtime:python3","runtime:cryptography","runtime:secretstorage","runtime:pyside6","runtime:openssh-client","runtime:pkexec","runtime:systemd"]}]
+}

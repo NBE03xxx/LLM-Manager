@@ -1,0 +1,53 @@
+.TH LLM-MANAGER-RESTORE-REVIEW 8 "2026-09-06" "LLM-Manager" "System Administration"
+.SH NAME
+llm-manager-restore-review \- inspect and save a system restore review
+.SH SYNOPSIS
+.B pkexec /usr/bin/llm-manager-restore-review list
+.PP
+.B pkexec /usr/bin/llm-manager-restore-review preview
+.I backup-id
+.PP
+.B pkexec /usr/bin/llm-manager-restore-review approve
+.I request-sha256 canonical-request-hex
+.PP
+.B pkexec /usr/bin/llm-manager-restore-review status
+.I request-id request-sha256
+.SH DESCRIPTION
+This dedicated privileged entry inspects an existing root-owned Ollama backup
+and current fixed drop-in, or saves a matching immutable review.
+It does not restore settings or restart services.
+The request is the dedicated manual-restore protocol, encoded as lowercase hex,
+limited to 16 KiB before encoding. Arguments contain metadata, never settings.
+The helper independently validates caller identity, host, origin, encrypted
+backup, target state, hashes and expiry. Hashes alone do not authorize execution.
+.PP
+List returns at most 32 canonical root-owned backup summaries for the independently
+resolved local host, sorted by backup ID. It reads no key or current target and
+returns no ciphertext hash, key ID or payload. Orphan, partial, unknown, changing
+or excessive store entries reject the entire inventory; results are never silently
+truncated. Selecting a summary is not review or execution authority.
+.PP
+Status reads immutable execution history after checking the independently
+resolved caller UID, host and exact request hash under one shared store lock.
+Expired reviews remain readable. Status needs only the execution store, not
+keys, backup payloads or the current target. It never reserves or retries work.
+Review-only means no attempt record was observed; it is not execution authority.
+An attempt without a result is unknown and requires attention. Missing, unsafe
+or incomplete evidence is an error, never proof that no mutation occurred.
+Committed describes the recorded outcome, not current service health.
+.SH SECURITY
+The review-system-restore PolicyKit action requires fresh administrator
+authentication for an active session. The Apply action is not used.
+Only the package-installed isolated Python launcher should be used.
+Root-owned stores and keys must already exist; no directories or keys are
+created by this command. Missing or unsafe stores fail closed.
+The explicit GUI workflow keeps inventory selection, review consent and final
+execution consent as separate steps. The normal production route remains gated.
+.SH FILES
+.TP
+.I /var/lib/llm-manager/local-root-restore
+Fixed root-owned backup, key and execution stores.
+.SH EXIT STATUS
+0 indicates a preview, saved review or successful history read. Inspect the
+returned state; a successful status command does not imply a committed restore.
+1 indicates a rejected or unavailable review; 2 indicates invalid CLI syntax.

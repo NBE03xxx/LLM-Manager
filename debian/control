@@ -20,9 +20,13 @@ Depends:
  pkexec,
  polkitd,
  python3-cryptography (>= 43.0.0),
+ python3-cryptography (<< 47),
+ python3-pyside6.qtcore (>= 6.8.2.1),
+ python3-pyside6.qtwidgets (>= 6.8.2.1),
  python3-secretstorage (>= 3.3.3),
+ python3-secretstorage (<< 4),
  systemd
 Description: safely manage local and remote Ollama and OpenCode settings
  LLM-Manager diagnoses Linux hosts and applies explicitly approved settings
- through a narrowly scoped privileged helper. This development package does
- not yet include the Phase 5 graphical interface.
+ through a narrowly scoped privileged helper. It provides a PySide6 desktop
+ interface while keeping all privileged work outside the GUI process.

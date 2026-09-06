@@ -4,6 +4,7 @@ import os
 import stat
 import subprocess
 from collections.abc import Callable
+from contextlib import contextmanager
 from pathlib import Path
 
 from llm_manager.application.errors import AdapterError
@@ -11,6 +12,8 @@ from llm_manager.planning.ollama import DROP_IN_PATH
 
 from .backup import MAX_ITEM_BYTES, _atomic_write, _fsync_directory, _within
 from .helper_protocol import OLLAMA_UNIT
+from .root_backup_evidence import _open_fixed_directory
+from .root_target_lock import locked_root_target
 
 SYSTEMCTL = "/usr/bin/systemctl"
 ServiceRunner = Callable[[tuple[str, ...]], int]
@@ -33,6 +36,41 @@ class LocalSystemHelperBackend:
         if not sandbox and os.geteuid() != 0:
             raise AdapterError("root_required", "packaged helper backend requires root")
         self.service_runner = service_runner or _run_service_command
+
+    @contextmanager
+    def locked(self):
+        """Hold across before-hash checks, all writes and service commands.
+
+        Only the fixed drop-in directory may be created for first Apply. The
+        production ancestor walk is root-owned and no-follow, including before
+        mkdir. Restore uses this same directory inode as its lock authority.
+        """
+        parent = self._target(DROP_IN_PATH).parent
+        if self.sandbox:
+            self._prepare_parent(parent)
+            fd = os.open(parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        else:
+            ancestor = _open_fixed_directory(str(parent.parent), private=False)
+            try:
+                try:
+                    os.mkdir(parent.name, 0o755, dir_fd=ancestor)
+                    os.fsync(ancestor)
+                except FileExistsError:
+                    pass
+                fd = os.open(parent.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC,
+                             dir_fd=ancestor)
+            finally:
+                os.close(ancestor)
+        try:
+            metadata = os.fstat(fd)
+            if stat.S_IMODE(metadata.st_mode) & 0o022 or (
+                not self.sandbox and (metadata.st_uid, metadata.st_gid) != (0, 0)
+            ):
+                raise AdapterError('unsafe_target', 'helper target parent is unsafe')
+            with locked_root_target(fd, busy_code='helper_target_busy'):
+                yield fd
+        finally:
+            os.close(fd)
 
     def read_file(self, target: str) -> bytes | None:
         path = self._target(target)
@@ -125,8 +163,8 @@ def _run_service_command(argv: tuple[str, ...]) -> int:
     completed = subprocess.run(
         argv,
         stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         shell=False,
         timeout=30,
         check=False,
