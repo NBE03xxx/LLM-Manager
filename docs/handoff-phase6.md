@@ -10,7 +10,7 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - branch: `main`
-- last commit: `5d3a384 Complete Phase 6 root restore hardening and gated GUI workflow`
+- latest commit: 文書自身のcommitで変わるため、再開時に`git log -1 --oneline`で確認する
 - Phase 0〜5完了。Phase 5 closure根拠は`docs/validation/phase5-closure-audit-2026-09-04.md`
 - 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
 - 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
