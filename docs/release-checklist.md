@@ -79,7 +79,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
 - [ ] release scopeに残る全root/restore経路でprotocol、fault injection、実機Gateを完了する。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。
-- [ ] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順をacceptance reviewする。
+- [x] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順を[acceptance review](validation/phase6-recovery-procedure-acceptance-2026-09-07.md)する。
 
 ## 6. Checksum、署名、公開
 

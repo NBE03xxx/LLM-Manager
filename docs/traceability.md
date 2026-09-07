@@ -201,3 +201,11 @@ prompt/cancel/auth evidenceが未取得のため`LOCAL_ROOT`は非公開継続�
 `docs/validation/phase6-root-restore-publication-review-2026-09-07.md`。公開境界は
 `tests/test_ui_qt_app.py`、`tests/test_ui_qt_runtime.py`、
 `tests/test_ui_qt_window.py`、`tests/test_restore_availability.py`で追跡する。
+
+## Recovery procedure acceptance review（2026-09-07）
+
+利用者向け`docs/recovery-guide.md`をApply `recovery_required`、restore
+`failed`/`unknown`、backup key喪失、片側copy/key喪失の実装状態機械と照合した。
+mutation/cleanup停止、evidence保全、before/after hash照合、自動retry禁止、健全側の
+copy/keyを同一IDで再生成しない境界を確認した。詳細は
+`docs/validation/phase6-recovery-procedure-acceptance-2026-09-07.md`。

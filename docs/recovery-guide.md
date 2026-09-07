@@ -45,7 +45,9 @@ SSH切断後にLLM-Managerが同じimmutable resultをread-onlyで再確認す�
 
 host変更、一覧再読込、選択変更、期限切れでプレビューと承認は失効します。`failed`または`unknown`では自動retryせず、Recovery手順へ進んでください。
 
-## `recovery_required` / `unknown`時の手順
+restoreの`failed`は、失敗を示すterminal evidenceが保存された状態です。`unknown`はmutation後の中断やterminal evidenceの保存失敗などにより、結果を成功・失敗のどちらとも断定できない状態です。`failed`でもtargetやserviceが利用可能とは推測せず、`unknown`では特に再実行で上書きしないでください。
+
+## `recovery_required` / `failed` / `unknown`時の手順
 
 1. そのhostに対するApply、restore、backup cleanupを止めます。アプリを何度も再実行しないでください。
 2. host ID、SSHの場合はfingerprint、Plan/backup ID、target、状態、error codeを記録します。設定本文やsecretは記録へ貼り付けないでください。
@@ -73,6 +75,8 @@ local暗号鍵はSecret Serviceにあり、backup fileやmanifestには鍵本体
 - local/remote両方の鍵またはcopyを失った場合、LLM-Managerから設定本文を復元することはできません。
 
 鍵を新規作成しても過去のbackupは復号できません。紛失した鍵と同じ名前の新しい鍵で復旧を試みないでください。
+
+片側のcopyまたは鍵だけを失った場合は、健全な側のcopy、manifest、receipt、鍵をそのまま保全し、backup cleanupや同じIDでの再作成を停止してください。失われた側を空fileや新しい鍵で補わず、host ID、fingerprint、backup ID、各copyのhashとpresenceを管理者が照合します。SSH手動restoreは現行GUIで未提供のため、健全な片側が残っていても未公開helperを直接実行しないでください。
 
 ## 保持、upgrade、uninstall
 
