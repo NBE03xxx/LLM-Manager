@@ -209,3 +209,11 @@ prompt/cancel/auth evidenceが未取得のため`LOCAL_ROOT`は非公開継続�
 mutation/cleanup停止、evidence保全、before/after hash照合、自動retry禁止、健全側の
 copy/keyを同一IDで再生成しない境界を確認した。詳細は
 `docs/validation/phase6-recovery-procedure-acceptance-2026-09-07.md`。
+
+## Public route documentation audit（2026-09-07）
+
+READMEとrecovery guideの現行route説明をproduction availabilityと照合し、local root
+手動restoreをprotocol未完成ではなく「専用実装・disposable OS Gate済み、active
+desktop PolicyKit公開Gate待ち」として明確化した。local root Applyのactionable rule待ち、
+SSH root ApplyとSSH user/root restoreのprotocol待ちは区別して維持する。詳細は
+`docs/validation/phase6-public-route-documentation-audit-2026-09-07.md`。

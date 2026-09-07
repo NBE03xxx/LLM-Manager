@@ -2,7 +2,7 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜5を完了し、現在は **Phase 6（Hardening と MVP Release）**です。Phase 5ではQt非依存presenter/view-model、optional QThreadPool worker、6工程widget、Local/OpenSSH診断、Reviewとexact approval、local user Apply/restoreのproduction vertical sliceを完成させました。local root・SSH user/rootのmutation経路はMVP blockerとしてPhase 6へ引き継ぎ、安全なprotocol完成まで固定理由でI/O前にfail closedとします。実Ollama/OpenCode設定を使うGateは実施していません。詳細は[Phase 5 closure audit](docs/validation/phase5-closure-audit-2026-09-04.md)を参照してください。
+Phase 0〜5を完了し、現在は **Phase 6（Hardening と MVP Release）**です。Phase 5ではQt非依存presenter/view-model、optional QThreadPool worker、6工程widget、Local/OpenSSH診断、Reviewとexact approval、local user Apply/restoreのproduction vertical sliceを完成させました。Phase 6ではlocal user/SSH user Applyとlocal user手動restoreを公開し、local root手動restoreの専用protocol・実装・disposable OS Gateまでを完成させました。local root手動restoreはactive desktop PolicyKit公開Gate待ち、local root Applyは根拠あるactionable Ollama rule待ち、SSH root ApplyとSSH user/root手動restoreは専用protocol未完成のため、各経路を固定理由でI/O前にfail closedとしています。詳細は[Phase 5 closure audit](docs/validation/phase5-closure-audit-2026-09-04.md)と[Phase 6 root restore publication review](docs/validation/phase6-root-restore-publication-review-2026-09-07.md)を参照してください。
 
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 

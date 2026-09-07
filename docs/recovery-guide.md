@@ -11,7 +11,7 @@
 | SSH user OpenCode設定 | 利用可能 | 利用不可 |
 | SSH root設定 | 利用不可 | 利用不可 |
 
-利用不可の経路は、専用protocolが完成するまでI/O前に固定理由を表示して停止します。別経路のhelperやbackupを流用して復元しないでください。
+利用不可の経路は、経路ごとのprotocolと公開Gateが完了するまでI/O前に固定理由を表示して停止します。local root手動restoreは専用実装済みですがactive desktop PolicyKit公開Gate待ちであり、SSH手動restoreは専用protocol未完成です。別経路のhelperやbackupを流用して復元しないでください。
 
 ## Apply前に確認すること
 
@@ -55,7 +55,7 @@ restoreの`failed`は、失敗を示すterminal evidenceが保存された状態
 4. SSHの場合はknown-host fingerprintと接続先を管理者が確認します。fingerprintが変わっている場合、変更理由が確認できるまで接続や復元を進めません。
 5. 対象設定の現在hashが、画面や保存済みevidenceのbefore hash、after hashのどちらに一致するかを確認します。どちらにも一致しない場合は外部変更または破損として扱い、上書きしません。
 6. 現行GUIが対応するlocal user単一targetなら、Backup画面をread-only再読込し、整合したbackupから上記の手動restoreを行います。
-7. local rootまたはSSHの手動restoreは現行MVPで未提供です。対象サービスの管理者が、保存済みevidenceと別途保有する運用backupを照合して手動復旧します。LLM-Managerの未完成helper protocolを直接呼ばないでください。
+7. local rootまたはSSHの手動restoreは現行MVPで未提供です。対象サービスの管理者が、保存済みevidenceと別途保有する運用backupを照合して手動復旧します。LLM-Managerの非公開helperや未完成protocolを直接呼ばないでください。
 
 対象設定を手動で調査・退避する場合も秘密情報を含むものとして扱い、一般ユーザーから読める場所やsupport ticketへ平文で置かないでください。
 
