@@ -10,12 +10,14 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 - `/home/yoshimi/WorkSpace/LLM-Manager`
 - branch: `main`
-- last commit: `6821e9d Refresh Phase 6 handoff prompt`
+- last commit: `5d3a384 Complete Phase 6 root restore hardening and gated GUI workflow`
 - Phase 0〜5完了。Phase 5 closure根拠は`docs/validation/phase5-closure-audit-2026-09-04.md`
-- Phase 6の変更は**すべて未コミット**。GUI deb、hardening、process待機、OpenCode discovery、各validation文書を含む。既存変更を破棄・resetしない
-- worktreeには大きな一連の変更がある。開始時に`git status --short`とdiffを確認し、現在の成果をそのまま保持する
+- 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
+- 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
 
-## 2026-09-06 最新再開サマリー
+## 最新再開サマリー
+
+- **2026-09-07 publication review（再開時は本項を優先）**: commit `5d3a384` を `origin/main` へpush済みでworktreeはclean。通常画面登録、production allowlist、既定拒否、SSH拒否、PolicyKit action/launcher、package検証を横断reviewし、`LOCAL_ROOT`手動restoreはactive desktop PolicyKit prompt/auth/cancel evidenceが揃うまで非公開継続と確定した。2026-09-07確認時、Ubuntu 26.04はrunningだがguest-agentのlogged-in userは0、Debian 13は`shut off`。passwordやsynthetic loginを使わずGateを保留した。host SSH configは依然`nobody:nogroup`・0777で、`-F /dev/null`をproduction根拠にしていない。package/target/service/root state/key/PolicyKit/SSH変更なし。詳細: `docs/validation/phase6-root-restore-publication-review-2026-09-07.md`。次は通常ログイン済みactive desktopでreview/execute各actionのprompt/cancel/authとimmutable status照合を実施する。現在・次ともPhase 6。
 
 - **最新slice（gated main window＋Ubuntu Qt）**: 通常Backup画面へ専用system restore workflow callbackを登録したが、別の`requires_root=True` availability Gateを必須化し、省略時も既定拒否、production allowlistは`LOCAL_USER`のみを維持。入口はI/O前に無効で、拒否理由を実装済みprotocolに合わせ`local_root_restore_release_gate_pending`へ更新した。Ubuntu 26.04実PySide6 Gate初回で既存change-plan期限のsub-ms切捨て同期再帰を検出し、正の残時間は最低1ms timerへ修正。最終source artifact SHA-256 `63a7887ec1550ea613ba0fb4ee29fdbffbef5ad2c3092bcef510907e6787e82c`、UID 1000 offscreen Qt 42件（40成功・inverse boundary 2 skip）、host全789件（751成功・38 PySide6 skip）、必須静的検査成功。fresh dev deb build/verifyと収録確認も成功、SHA-256 `0ee77ebd3389e0120d3c037dd48c3246a0c90adda4b4190532277a62f21913d5`。active user desktopはなくmanager session＋GDM greeterのみのためinteractive PolicyKitは未実施。artifact/server/build copy cleanup済み、Ubuntu/Debianとも`shut off`、package/target/service/root state/SSH未変更。詳細: `docs/validation/phase6-root-restore-main-window-qt-2026-09-06.md`。次はactive desktop interactive PolicyKit prompt/auth/cancel Gateと最終公開review。通常root routeは非公開、全変更未コミット。現在・次ともPhase 6。
 

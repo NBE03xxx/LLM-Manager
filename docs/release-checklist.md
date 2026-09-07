@@ -65,13 +65,13 @@ git diff --check
 
 ## 5. Functionalとsecurity Gate
 
-2026-09-06追加: [認可Apply内のorigin採取と管理者専用setup](validation/phase6-root-apply-capture-setup-2026-09-06.md)を接続し、774件のbuild内testとdev deb verifyに成功した。[Ubuntu installed OS Gate](validation/phase6-root-apply-capture-installed-os-gate-2026-09-06.md)で明示setup、再初期化拒否、認可Apply前の暗号化採取・復号、terminal receipt、replay拒否とsnapshot cleanupも完了。以下の過去reviewで残件だったApply採取・明示setup入口は実装・installed検証済み。要求間排他、通常GUI接続、interactive PolicyKitは未完了。
+2026-09-06追加: [認可Apply内のorigin採取と管理者専用setup](validation/phase6-root-apply-capture-setup-2026-09-06.md)を接続し、774件のbuild内testとdev deb verifyに成功した。[Ubuntu installed OS Gate](validation/phase6-root-apply-capture-installed-os-gate-2026-09-06.md)で明示setup、再初期化拒否、認可Apply前の暗号化採取・復号、terminal receipt、replay拒否とsnapshot cleanupも完了。以下の過去reviewで残件だったApply採取・明示setup入口は実装・installed検証済み。
 
-2026-09-06追加: [root所有backupのbounded inventoryと明示GUI workflow](validation/phase6-root-restore-inventory-workflow-2026-09-06.md)を実装。各mutationをone-shot lock/hash/receiptで直列化し、外部validationから別rollbackまでを長時間特権lockでatomicとは扱わない方針を確定した。一覧→review→最終同意のsession接続は完了したが、通常main window登録、対応OS Qt Gate、active desktop PolicyKit prompt/cancelと公開判定は未完了。
+2026-09-06追加: [root所有backupのbounded inventoryと明示GUI workflow](validation/phase6-root-restore-inventory-workflow-2026-09-06.md)を実装。各mutationをone-shot lock/hash/receiptで直列化し、外部validationから別rollbackまでを長時間特権lockでatomicとは扱わない方針を確定した。一覧→review→最終同意のsession接続、通常main windowへのavailability-gated登録、Ubuntu Qt Gateは完了した。
 
-2026-09-06現在: root restoreは専用origin/key/store/coordinator/executor/service、review/execute CLIとclient、独立PolicyKit action、最終同意Qt境界まで実装済み。UbuntuのQt runtime Gate、[installed deny/provisioning Gate](validation/phase6-root-restore-installed-deny-provisioning-2026-09-06.md)、[valid requestによるdisposable OS mutation/service Gate](validation/phase6-root-restore-valid-os-gate-2026-09-06.md)も完了した。active desktop PolicyKit認証と通常GUI route公開判定は未完了であり、root/restore完了checkboxは維持する。
+2026-09-07現在: root restoreは専用origin/key/store/coordinator/executor/service、review/execute CLIとclient、独立PolicyKit action、最終同意Qt境界まで実装済み。UbuntuのQt runtime Gate、[installed deny/provisioning Gate](validation/phase6-root-restore-installed-deny-provisioning-2026-09-06.md)、[valid requestによるdisposable OS mutation/service Gate](validation/phase6-root-restore-valid-os-gate-2026-09-06.md)も完了した。[publication review](validation/phase6-root-restore-publication-review-2026-09-07.md)ではactive desktop PolicyKit prompt/auth/cancel evidence不足により非公開継続と判定した。production allowlistは`LOCAL_USER`のみで、root/restore完了checkboxは維持する。
 
-local root手動restoreの公開条件を[コードと照合](validation/phase6-root-restore-route-review-2026-09-06.md)した。専用backup証拠、preflight adapter、executor、immutable result、fixtureによるinstalled OS Gateは実装・検証済み。製品のApplyからのorigin採取、明示provisioning入口、要求間の排他、通常GUIでの選択から最終同意までの接続、interactive PolicyKitと完成経路のOS Gateは未完了である。以下のroot/restore完了項目は未チェックのまま維持する。
+local root手動restoreの公開条件を[コードと照合](validation/phase6-root-restore-route-review-2026-09-06.md)した。専用backup証拠、preflight adapter、executor、immutable result、製品Applyからのorigin採取、明示provisioning、mutation単位の排他、通常GUIでの選択から最終同意までの接続、installed OS Gateは実装・検証済みである。active desktop PolicyKit prompt/auth/cancelと、その認証を通した完成経路のevidence照合だけが公開前に残る。以下のroot/restore完了項目は未チェックのまま維持する。
 
 - [x] security/privacy code reviewでsecret redaction、audit非露出、bounded subprocess output、GUI error上限、root helper出力破棄を確認した。
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。

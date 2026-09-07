@@ -191,3 +191,13 @@ installed origin capture/key/review/request/execute、固定target postcondition
 loopback API、immutable result、strict audit、status reconciliation、replay拒否を
 `docs/validation/phase6-root-restore-valid-os-gate-2026-09-06.md`のUbuntu snapshot Gateで
 追跡する。interactive PolicyKit promptはこのGateの対象外として明示的に未完了を維持する。
+
+## Local-root restore publication review（2026-09-07）
+
+production allowlistが`LOCAL_USER`のみであること、availability省略時の既定拒否、
+`requires_root=True`によるlocal/SSH分離、workflow呼出し前のGate、専用PolicyKit
+action/isolated launcher/package検証をコード横断で再照合した。active desktopの
+prompt/cancel/auth evidenceが未取得のため`LOCAL_ROOT`は非公開継続と判定した。詳細は
+`docs/validation/phase6-root-restore-publication-review-2026-09-07.md`。公開境界は
+`tests/test_ui_qt_app.py`、`tests/test_ui_qt_runtime.py`、
+`tests/test_ui_qt_window.py`、`tests/test_restore_availability.py`で追跡する。
