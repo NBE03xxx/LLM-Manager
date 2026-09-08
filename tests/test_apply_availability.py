@@ -14,7 +14,7 @@ class ProductionApplyAvailabilityTests(unittest.TestCase):
     def test_all_four_routes_fail_closed_with_specific_reason(self) -> None:
         expected = {
             (HostKind.LOCAL, False): (ApplyRoute.LOCAL_USER, "local_user_apply_composition_missing"),
-            (HostKind.LOCAL, True): (ApplyRoute.LOCAL_ROOT, "local_root_apply_composition_missing"),
+            (HostKind.LOCAL, True): (ApplyRoute.LOCAL_ROOT, "local_root_apply_rule_pending"),
             (HostKind.SSH, False): (ApplyRoute.SSH_USER, "ssh_user_apply_validation_pending"),
             (HostKind.SSH, True): (ApplyRoute.SSH_ROOT, "ssh_root_apply_protocol_missing"),
         }

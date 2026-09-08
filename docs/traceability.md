@@ -217,3 +217,12 @@ READMEとrecovery guideの現行route説明をproduction availabilityと照合�
 desktop PolicyKit公開Gate待ち」として明確化した。local root Applyのactionable rule待ち、
 SSH root ApplyとSSH user/root restoreのprotocol待ちは区別して維持する。詳細は
 `docs/validation/phase6-public-route-documentation-audit-2026-09-07.md`。
+
+## Local-root Apply refusal reason audit（2026-09-08）
+
+local root ApplyのPolicyKit/composition/rollback/origin capture/installed OS境界は完成済みだが、
+production rule catalogに根拠あるactionable Ollama推奨がないことを再確認した。
+availabilityの拒否理由を不正確な`local_root_apply_composition_missing`から
+`local_root_apply_rule_pending`へ更新し、英日表示と4 route testを同期した。
+production allowlistは変更せずfail closedを維持する。詳細は
+`docs/validation/phase6-local-root-apply-reason-audit-2026-09-08.md`。

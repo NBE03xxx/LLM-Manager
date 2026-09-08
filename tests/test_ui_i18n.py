@@ -22,6 +22,12 @@ class UiI18nTests(unittest.TestCase):
         self.assertEqual(Catalog("de").locale, "en")
         self.assertEqual(Catalog("de").text("nav.hosts"), "Hosts")
 
+    def test_local_root_apply_refusal_describes_pending_rule_not_composition(self) -> None:
+        key = "apply.reason.local_root_apply_rule_pending"
+        self.assertIn("actionable Ollama setting rule", Catalog("en").text(key))
+        self.assertIn("Ollama設定ルール", Catalog("ja").text(key))
+        self.assertNotIn("composition", Catalog("en").text(key))
+
 
 if __name__ == "__main__":
     unittest.main()

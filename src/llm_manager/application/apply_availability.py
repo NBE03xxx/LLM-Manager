@@ -52,7 +52,7 @@ class AssessProductionApplyAvailability:
         }[(report.host.kind, requires_root)]
         reason = {
             ApplyRoute.LOCAL_USER: "local_user_apply_composition_missing",
-            ApplyRoute.LOCAL_ROOT: "local_root_apply_composition_missing",
+            ApplyRoute.LOCAL_ROOT: "local_root_apply_rule_pending",
             ApplyRoute.SSH_USER: "ssh_user_apply_validation_pending",
             ApplyRoute.SSH_ROOT: "ssh_root_apply_protocol_missing",
         }[route]

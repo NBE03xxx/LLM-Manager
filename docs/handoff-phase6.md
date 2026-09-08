@@ -17,6 +17,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-08 local root Apply理由監査（再開時は本項を優先）**: 両VMは`shut off`でactive desktop PolicyKit Gateは保留。local root ApplyのPolicyKit/composition/rollback/origin capture/installed OS境界は完成済みなのに拒否理由が`composition_missing`のままだったため、実際のblockerに合わせ`local_root_apply_rule_pending`へ変更し英日表示・4 route testを同期した。設定allowlistは推奨根拠ではなく、未検証閾値やhardware/runtime根拠なしにOllama設定ruleを追加していない。production allowlistは`LOCAL_USER`/`SSH_USER`のみでfail closedを維持。全790件（752成功・38 expected skip）と必須静的検査成功。詳細: `docs/validation/phase6-local-root-apply-reason-audit-2026-09-08.md`。現在・次ともPhase 6。
+
 - **2026-09-07 publication review（再開時は本項を優先）**: commit `5d3a384` を `origin/main` へpush済みでworktreeはclean。通常画面登録、production allowlist、既定拒否、SSH拒否、PolicyKit action/launcher、package検証を横断reviewし、`LOCAL_ROOT`手動restoreはactive desktop PolicyKit prompt/auth/cancel evidenceが揃うまで非公開継続と確定した。2026-09-07確認時、Ubuntu 26.04はrunningだがguest-agentのlogged-in userは0、Debian 13は`shut off`。passwordやsynthetic loginを使わずGateを保留した。host SSH configは依然`nobody:nogroup`・0777で、`-F /dev/null`をproduction根拠にしていない。package/target/service/root state/key/PolicyKit/SSH変更なし。詳細: `docs/validation/phase6-root-restore-publication-review-2026-09-07.md`。次は通常ログイン済みactive desktopでreview/execute各actionのprompt/cancel/authとimmutable status照合を実施する。現在・次ともPhase 6。
 
 - **2026-09-07 recovery手順acceptance**: Apply `recovery_required`、restore `failed`/`unknown`、backup key喪失、片側copy/key喪失を実装状態機械と利用者ガイドで照合した。`failed`と`unknown`の意味、健全側の保全、mutation/cleanup停止、同一IDや新規keyでの再生成禁止を明確化し、release checklist項目を完了した。focused 81件は80成功・明示Secret Service desktop Gate 1 expected skip。詳細: `docs/validation/phase6-recovery-procedure-acceptance-2026-09-07.md`。production routeや実環境は変更していない。
