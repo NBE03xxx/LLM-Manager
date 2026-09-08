@@ -125,7 +125,7 @@ class LocalRootRestoreProtocolTests(unittest.TestCase):
             with self.subTest(length=len(content)), self.assertRaises(AdapterError):
                 decode(content)
 
-    def test_legacy_apply_protocol_and_production_route_remain_closed(self):
+    def test_legacy_apply_protocol_rejects_restore_and_default_availability_is_closed(self):
         base = request()
         with self.assertRaises(AdapterError):
             helper_protocol.decode_request(

@@ -1,23 +1,20 @@
-# Local root manual restore protocol — staged implementation
+# Local root manual restore protocol
 
 ## Status and scope
 
-Latest connection (2026-09-06): [authenticated Apply origin capture and explicit
-administrator setup](validation/phase6-root-apply-capture-setup-2026-09-06.md) are
-implemented and tested. Capture holds the helper's target lock through the write
-and declared service operations. No automatic provisioning or key replacement is
-performed. Installed validation of this new path, cross-request transactions,
-normal GUI integration and interactive PolicyKit remain outstanding. Historical
-slice notes below describe their state at the time, not the current connection.
+2026-09-08現在、[authenticated Apply origin capture and explicit administrator
+setup](validation/phase6-root-apply-capture-setup-2026-09-06.md)、bounded root-owned
+inventory、review/execute/statusの独立PolicyKit dispatch、復号、mutation、audit、明示GUI
+workflowを実装済みである。[active desktop interactive PolicyKit Gate](validation/phase6-root-restore-interactive-policykit-2026-09-08.md)
+でcancel/auth、正規要求のcommitted結果、read-only statusとexact cleanupを完了し、production
+allowlistへ`LOCAL_ROOT`を公開した。availability serviceの既定空集合とSSH routeはfail closedを
+維持する。
 
-The subsequent [bounded inventory and explicit GUI workflow handoff](validation/phase6-root-restore-inventory-workflow-2026-09-06.md)
-lists only canonical root-owned summaries for the current host and binds selection
-to review and final execution sessions. It remains outside the normal production
-menu pending Qt and active-desktop PolicyKit Gates. Cross-request atomic locking
-is not claimed; each mutation is independently locked and hash-checked, and an
-unsafe later rollback must enter recovery-required handling.
-
-Phase 6の専用契約。request codec、固定root-owned inventory、read-only preflight、review/execute/statusの独立PolicyKit dispatch、復号、mutation、audit、明示GUI workflowまで実装し、installed valid OS Gateも完了した。通常GUIにはavailability Gate付きで登録したが、production allowlistでは`LOCAL_ROOT`を公開せず`local_root_restore_release_gate_pending`で拒否する。active desktop interactive PolicyKit Gateと最終公開reviewが完了するまで、この拒否を解除しない。
+Captureはhelperのtarget lockをwriteと宣言済みservice operationまで保持する。自動provisioning、
+鍵の置換、任意backup importは行わない。cross-request全体を単一transactionとは扱わず、各
+mutationを独立lock/hash/immutable receiptで照合する。不安全な後続rollbackや結果不明は
+recovery-required/attentionとして自動retryしない。以下の各sliceは実装当時の状態を残す履歴で、
+本節と2026-09-08 Gateを現在状態として優先する。
 
 初期対象はlocal hostの単一`/etc/systemd/system/ollama.service.d/90-llm-manager.conf`。SSH、任意path/unit、複数file、root以外のowner、0644以外のmodeを含めない。既存Apply rollbackの`HelperOperationKind.RESTORE_FILE`とは別protocolであり、retention/deletion/recovery commandも流用しない。
 
@@ -30,8 +27,8 @@ Phase 6の専用契約。request codec、固定root-owned inventory、read-only 
 | `request_id` | 後続のimmutable attempt/resultを識別する一意ID |
 | `host_id`, `caller_uid` | 独立して観測したlocal hostと非root呼出元UIDに一致すること |
 | `backup_id`, `manifest_hash` | 利用者が選択したbackupのexact manifest |
-| `inventory_hash` | レビュー対象となった特権側inventory証拠のhash。producerは未実装 |
-| `preview_hash`, `approval_id` | 専用previewと明示承認へのbinding。特権側照合は未実装 |
+| `inventory_hash` | レビュー対象となった特権側selected-origin inventory証拠のhash |
+| `preview_hash`, `approval_id` | 専用previewと明示承認へのbinding |
 | `target` | 上記固定drop-in以外は拒否 |
 | `current` | レビュー時点の現在targetの存在/hash/mode/UID/GID |
 | `backup` | 復元先の存在/hash/mode/UID/GID |
@@ -61,15 +58,15 @@ requestとその全hashは呼出元が自由に作成できる。codecの成功�
 7. 固定Ollama unitのdaemon-reload/restartとruntime検証を行う。disk復元成功とservice検証成功を区別してresultへ保存する。失敗時に元Applyのrollback commandを再利用したり、自動再試行したりしない。
 8. resultをimmutable保存し、read-only再照合だけで確認できるようにする。mutation後の例外/通信断/永続化失敗は成功とも未実行とも推測せずunknown/attentionを維持する。
 
-上記は後続実装の要件である。専用result schema、root証拠store、lock/crash recovery、read-only照合protocolとCLI引数は未実装。これらの設計・fault injection・実PolicyKit/Qt Gateが揃うまでroute availabilityを変更しない。
+上記はproduction実装の必須境界である。専用result schema、root証拠store、lock/crash handling、read-only照合protocolとCLI、fault injection、PolicyKit/Qt/installed OS Gateを実装・検証済みである。
 
 ## Acceptance gates
 
 - codec: replace/create/remove往復、全hash binding、UID/host不一致、期限境界、型、metadata、no-op、unknown/duplicate/noncanonical/oversized/malformed入力。実装済み。
-- legacy separation: 既存Apply decoderが本要求を拒否し、production root restoreが非公開であること。実装済み。
-- preflight: rehash済み偽要求、証拠欠落/改変、stale target、期限切れのorchestrationをsandbox検証済み。実root証拠・symlink/親差替え・ownerを検査するproduction adapterは未実装。
-- execution: attempt/audit保存失敗、復号前後の変更、競合実行、各crash点、結果保存失敗、service失敗、replay/別hash同IDを検証。未実装。
-- integration: sandbox→PolicyKit deny/cancel→両OS→Qt result/再読込を順に検証。実設定は明示された専用Gate以外では変更しない。未実装。
+- legacy separation: 既存Apply decoderが本要求を拒否し、専用review/execute actionだけが扱うこと。実装済み。
+- preflight: rehash済み偽要求、証拠欠落/改変、stale target、期限切れ、実root証拠・symlink/親差替え・ownerを検査するproduction adapter。実装・検証済み。
+- execution: attempt/audit保存失敗、復号前後の変更、競合実行、各crash点、結果保存失敗、service失敗、replay/別hash同ID。実装・検証済み。
+- integration: sandbox、PolicyKit deny/cancel/auth、installed OS mutation/service、Qt result/statusを検証済み。実設定は明示されたsnapshot Gate以外では変更しない。
 
 ## Read-only preflight orchestration (2026-09-05)
 

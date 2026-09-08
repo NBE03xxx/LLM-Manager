@@ -7,11 +7,11 @@
 | 対象 | Apply失敗時の自動rollback | Backup画面からの手動restore |
 |---|---|---|
 | local user OpenCode設定 | 利用可能 | 利用可能（単一target） |
-| local root Ollama設定 | productionでは利用不可 | 利用不可 |
+| local root Ollama設定 | productionでは利用不可 | 利用可能（事前に採取済みのroot backup） |
 | SSH user OpenCode設定 | 利用可能 | 利用不可 |
 | SSH root設定 | 利用不可 | 利用不可 |
 
-利用不可の経路は、経路ごとのprotocolと公開Gateが完了するまでI/O前に固定理由を表示して停止します。local root手動restoreは専用実装済みですがactive desktop PolicyKit公開Gate待ちであり、SSH手動restoreは専用protocol未完成です。別経路のhelperやbackupを流用して復元しないでください。
+利用不可の経路は、経路ごとのprotocolと公開Gateが完了するまでI/O前に固定理由を表示して停止します。local root手動restoreは各工程でPolicyKit管理者認証と明示同意を要求します。SSH手動restoreは専用protocol未完成です。別経路のhelperやbackupを流用して復元しないでください。
 
 ## Apply前に確認すること
 
@@ -45,6 +45,19 @@ SSH切断後にLLM-Managerが同じimmutable resultをread-onlyで再確認す�
 
 host変更、一覧再読込、選択変更、期限切れでプレビューと承認は失効します。`failed`または`unknown`では自動retryせず、Recovery手順へ進んでください。
 
+## local root backupを手動restoreする
+
+local hostを選択し、Backup画面の「システム設定を復元」から、採取済みのroot所有Ollama backupを復元できます。root stateが未初期化、backupがない、またはevidenceが不整合の場合は、管理者認証後もfail closedで停止します。
+
+1. 「システム設定を復元」を開き、管理者認証でroot backupのメタデータ一覧を取得します。
+2. backup ID、採取日時、元ファイルの存在とSHA-256を確認し、1件を選択します。
+3. 別の管理者認証でpreviewを取得し、現在値と復元値、host、target、期限を確認します。
+4. 明示同意を選択し、別の管理者認証でreviewを保存します。reviewだけでは復元されません。
+5. 最終確認画面で復元を実行し、専用execute認証を完了します。
+6. `committed`と`requires_attention: false`を確認します。中断や応答不明時は同じ要求を再送せず、「保存済み結果を確認」でread-only statusを照合します。
+
+認証ダイアログのキャンセル、期限切れ、対象hash変更では復元を開始しません。`failed`はterminal evidenceを保存済み、`unknown`または`requires_attention: true`は管理者照合が必要な状態です。いずれも自動retryしないでください。
+
 restoreの`failed`は、失敗を示すterminal evidenceが保存された状態です。`unknown`はmutation後の中断やterminal evidenceの保存失敗などにより、結果を成功・失敗のどちらとも断定できない状態です。`failed`でもtargetやserviceが利用可能とは推測せず、`unknown`では特に再実行で上書きしないでください。
 
 ## `recovery_required` / `failed` / `unknown`時の手順
@@ -55,7 +68,7 @@ restoreの`failed`は、失敗を示すterminal evidenceが保存された状態
 4. SSHの場合はknown-host fingerprintと接続先を管理者が確認します。fingerprintが変わっている場合、変更理由が確認できるまで接続や復元を進めません。
 5. 対象設定の現在hashが、画面や保存済みevidenceのbefore hash、after hashのどちらに一致するかを確認します。どちらにも一致しない場合は外部変更または破損として扱い、上書きしません。
 6. 現行GUIが対応するlocal user単一targetなら、Backup画面をread-only再読込し、整合したbackupから上記の手動restoreを行います。
-7. local rootまたはSSHの手動restoreは現行MVPで未提供です。対象サービスの管理者が、保存済みevidenceと別途保有する運用backupを照合して手動復旧します。LLM-Managerの非公開helperや未完成protocolを直接呼ばないでください。
+7. local rootは上記の専用画面で保存済みstatusを照合します。SSHの手動restoreは現行MVPで未提供のため、対象サービスの管理者が保存済みevidenceと別途保有する運用backupを照合して手動復旧します。非公開helperや未完成protocolを直接呼ばないでください。
 
 対象設定を手動で調査・退避する場合も秘密情報を含むものとして扱い、一般ユーザーから読める場所やsupport ticketへ平文で置かないでください。
 
@@ -87,7 +100,8 @@ debのupgrade、remove、purgeはpackage管理対象のlauncher、helper、deskt
 ## 既知の制限
 
 - local root Applyは実装済み内部compositionを公開しておらず、根拠あるactionable Ollama recommendationが確定するまでfail closedです。
-- local root、SSH user、SSH rootの手動restoreは利用できません。
+- local root手動restoreには、事前初期化とLLM-Managerが採取した互換root backupが必要です。任意のbackup importや自動鍵再作成は行いません。
+- SSH user、SSH rootの手動restoreは利用できません。
 - SSH切断時の結果照合は自動mutation retryの許可ではありません。
 - audit hash chainは偶発的な改変検出用で、同じuser権限を完全に侵害した攻撃者に対する外部署名ではありません。
 - 未知のsecret形式を自動redactionで完全に検出する保証はありません。診断・復旧情報を共有する前に利用者自身でも確認してください。

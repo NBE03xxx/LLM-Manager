@@ -226,3 +226,13 @@ availabilityの拒否理由を不正確な`local_root_apply_composition_missing`
 `local_root_apply_rule_pending`へ更新し、英日表示と4 route testを同期した。
 production allowlistは変更せずfail closedを維持する。詳細は
 `docs/validation/phase6-local-root-apply-reason-audit-2026-09-08.md`。
+
+## Local-root restore interactive PolicyKit publication Gate（2026-09-08）
+
+Ubuntu 26.04の通常ログイン済みactive Wayland sessionで、review/execute各actionの
+prompt、明示cancel、管理者認証成功、正規requestのcommitted結果、期限後も読める
+read-only statusをinstalled dev debで追跡した。固定target、systemd、loopback API、
+root-owned immutable evidence、strict audit chain、snapshotによるexact cleanupを照合した。
+production entrypointの公開集合は`LOCAL_USER`と`LOCAL_ROOT`、availability省略時は空集合、
+SSH routeは非公開のままである。詳細は
+`docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md`。

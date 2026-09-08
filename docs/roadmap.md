@@ -420,3 +420,11 @@ committed後の同一request replayも拒否され、target/result不変を確�
 全fixture不在へ復帰した。詳細は
 `docs/validation/phase6-root-restore-valid-os-gate-2026-09-06.md`。active desktopの
 interactive PolicyKit認証と最終route公開reviewは残件。
+
+## Local-root restore interactive PolicyKit publication（2026-09-08）
+
+Ubuntu 26.04 active Wayland desktopでinstalled review/execute actionのcancelと認証成功、
+正規requestの復元・systemd/API検証・immutable status/audit照合を完了した。一時snapshot
+復元で旧packageと全fixture不在へ戻した。production restore allowlistへ`LOCAL_ROOT`を
+追加し、既定拒否、local root Apply、SSH restore/root Applyのfail-closedは維持した。
+詳細は`docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md`。

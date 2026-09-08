@@ -17,6 +17,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-08 local root手動restore公開（再開時は本項を優先）**: commit `9fe071d` のfresh dev deb（SHA-256 `6e2a70515f38554bc35e5151ff6cc847fc26d4a2d864ba0226c975925d89d984`）をUbuntu 26.04一時snapshotへ導入し、UID 1000 active Wayland sessionでreview/execute各PolicyKit actionの明示cancel（126）と認証成功を確認した。正規request `3e5fcea00d06ee7fab8f34a3938ba13900b4bdd3e23974c0deb2d7b639e6fa1a`は復元・systemd restart・loopback API検証を完了して`committed`、read-only statusも同一resultを返した。root-owned 0600 review/attempt/result、strict 4-event audit chain、target root:root 0644と元hashを照合。最初の`Type=simple` fixtureは起動直後のAPI競合を`service_validation_failed`として正しく記録し再送せず、`Type=notify`の別backup/requestで完走した。snapshot復元後、旧package `0.1.0~dev0-1`と全fixture不在、port 11434不在を確認し、両VMを`shut off`、一時snapshotを削除。production restore allowlistへ`LOCAL_ROOT`を追加し、local root ApplyとSSH restore/root Applyはfail closedを維持。公開後は全790件（752成功・38 expected skip）と必須静的検査、fresh dev deb build/verifyに成功し、archive内allowlistを確認。最終dev deb SHA-256 `7da8c5965e0c4e205dad1a82a6cf1cfdd21dae4d9b4f6fdc8479fa96a6876e3c`。詳細: `docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md`。現在・次ともPhase 6。
+
 - **2026-09-08 local root Apply理由監査（再開時は本項を優先）**: 両VMは`shut off`でactive desktop PolicyKit Gateは保留。local root ApplyのPolicyKit/composition/rollback/origin capture/installed OS境界は完成済みなのに拒否理由が`composition_missing`のままだったため、実際のblockerに合わせ`local_root_apply_rule_pending`へ変更し英日表示・4 route testを同期した。設定allowlistは推奨根拠ではなく、未検証閾値やhardware/runtime根拠なしにOllama設定ruleを追加していない。production allowlistは`LOCAL_USER`/`SSH_USER`のみでfail closedを維持。全790件（752成功・38 expected skip）と必須静的検査成功。詳細: `docs/validation/phase6-local-root-apply-reason-audit-2026-09-08.md`。現在・次ともPhase 6。
 
 - **2026-09-07 publication review（再開時は本項を優先）**: commit `5d3a384` を `origin/main` へpush済みでworktreeはclean。通常画面登録、production allowlist、既定拒否、SSH拒否、PolicyKit action/launcher、package検証を横断reviewし、`LOCAL_ROOT`手動restoreはactive desktop PolicyKit prompt/auth/cancel evidenceが揃うまで非公開継続と確定した。2026-09-07確認時、Ubuntu 26.04はrunningだがguest-agentのlogged-in userは0、Debian 13は`shut off`。passwordやsynthetic loginを使わずGateを保留した。host SSH configは依然`nobody:nogroup`・0777で、`-F /dev/null`をproduction根拠にしていない。package/target/service/root state/key/PolicyKit/SSH変更なし。詳細: `docs/validation/phase6-root-restore-publication-review-2026-09-07.md`。次は通常ログイン済みactive desktopでreview/execute各actionのprompt/cancel/authとimmutable status照合を実施する。現在・次ともPhase 6。
@@ -101,9 +103,9 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 完成済みproduction routeと安全境界
 
-- production GUIで公開済み: local user Apply、SSH user Apply、単一local OpenCode target手動restore
+- production GUIで公開済み: local user Apply、SSH user Apply、単一local OpenCode target手動restore、local root Ollama手動restore
 - local root ApplyはcompositionとQt Gate済みだが、default rule catalogから根拠あるactionable Ollama recommendationへ到達する規則が未確定のためfail closedを維持する
-- SSH root Apply、local root restore、SSH user/root restoreは専用protocol不足の固定理由でI/O前にfail closed
+- SSH root ApplyとSSH user/root restoreは専用protocol不足の固定理由でI/O前にfail closed
 - SSH root/restoreを既存SSH user protocolの単純拡張として推測実装しない
 - SSH切断時は同一immutable resultだけをread-only再照合し、mutationを自動retryしない
 

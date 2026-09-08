@@ -113,7 +113,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     backup_inventory_tasks = LocalBackupInventoryTaskFactory.production(hosts)
     restore_tasks = LocalUserRestoreTaskFactory.production(hosts)
     restore_availability = AssessProductionRestoreAvailability(
-        frozenset({RestoreRoute.LOCAL_USER})
+        frozenset({RestoreRoute.LOCAL_USER, RestoreRoute.LOCAL_ROOT})
     )
     import locale as system_locale
 

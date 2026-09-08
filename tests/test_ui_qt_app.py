@@ -9,7 +9,7 @@ from llm_manager.ui.composition import ProductionApplyTaskFactory
 
 
 class QtProductionCompositionTests(unittest.TestCase):
-    def test_main_exposes_local_and_ssh_user_apply_but_only_local_restore(self) -> None:
+    def test_main_exposes_completed_apply_and_restore_routes(self) -> None:
         hosts = (MagicMock(),)
         diagnostic_tasks = MagicMock()
         change_tasks = MagicMock()
@@ -74,7 +74,8 @@ class QtProductionCompositionTests(unittest.TestCase):
         self.assertIs(keywords["restore_task_factory"], restore_tasks.task)
         restore_service = keywords["restore_availability_service"]
         self.assertEqual(
-            restore_service.available_routes, frozenset({RestoreRoute.LOCAL_USER})
+            restore_service.available_routes,
+            frozenset({RestoreRoute.LOCAL_USER, RestoreRoute.LOCAL_ROOT}),
         )
         self.assertTrue(callable(keywords["root_restore_workflow"]))
 

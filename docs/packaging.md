@@ -26,6 +26,8 @@ helperはpipのconsole scriptとして導入しない。特権境界はpackage m
 
 build dependencyを確認し、workspace外の一時copyでbinary packageを構築する。
 
+source archiveはGit indexの実行bitを保持したまま`umask 0022`で展開する。`umask 0002`等で展開してpackage-owned launcher/scriptが0775になると、source mode Gateが意図どおり失敗するため、そのcopyをrelease buildへ使わない。
+
 ```bash
 dpkg-checkbuilddeps
 dpkg-buildpackage -us -uc -b

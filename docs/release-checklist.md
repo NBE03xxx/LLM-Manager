@@ -69,15 +69,15 @@ git diff --check
 
 2026-09-06追加: [root所有backupのbounded inventoryと明示GUI workflow](validation/phase6-root-restore-inventory-workflow-2026-09-06.md)を実装。各mutationをone-shot lock/hash/receiptで直列化し、外部validationから別rollbackまでを長時間特権lockでatomicとは扱わない方針を確定した。一覧→review→最終同意のsession接続、通常main windowへのavailability-gated登録、Ubuntu Qt Gateは完了した。
 
-2026-09-07現在: root restoreは専用origin/key/store/coordinator/executor/service、review/execute CLIとclient、独立PolicyKit action、最終同意Qt境界まで実装済み。UbuntuのQt runtime Gate、[installed deny/provisioning Gate](validation/phase6-root-restore-installed-deny-provisioning-2026-09-06.md)、[valid requestによるdisposable OS mutation/service Gate](validation/phase6-root-restore-valid-os-gate-2026-09-06.md)も完了した。[publication review](validation/phase6-root-restore-publication-review-2026-09-07.md)ではactive desktop PolicyKit prompt/auth/cancel evidence不足により非公開継続と判定した。production allowlistは`LOCAL_USER`のみで、root/restore完了checkboxは維持する。
+2026-09-08現在: root restoreは専用origin/key/store/coordinator/executor/service、review/execute CLIとclient、独立PolicyKit action、最終同意Qt境界まで実装済み。UbuntuのQt runtime Gate、[installed deny/provisioning Gate](validation/phase6-root-restore-installed-deny-provisioning-2026-09-06.md)、[valid requestによるdisposable OS mutation/service Gate](validation/phase6-root-restore-valid-os-gate-2026-09-06.md)に加え、[active desktop interactive PolicyKit Gate](validation/phase6-root-restore-interactive-policykit-2026-09-08.md)を完了した。production allowlistへ`LOCAL_ROOT`を追加し、既定空集合とSSH routeのfail-closedは維持した。
 
-local root手動restoreの公開条件を[コードと照合](validation/phase6-root-restore-route-review-2026-09-06.md)した。専用backup証拠、preflight adapter、executor、immutable result、製品Applyからのorigin採取、明示provisioning、mutation単位の排他、通常GUIでの選択から最終同意までの接続、installed OS Gateは実装・検証済みである。active desktop PolicyKit prompt/auth/cancelと、その認証を通した完成経路のevidence照合だけが公開前に残る。以下のroot/restore完了項目は未チェックのまま維持する。
+local root手動restoreの公開条件を[コードと照合](validation/phase6-root-restore-route-review-2026-09-06.md)した。専用backup証拠、preflight adapter、executor、immutable result、製品Applyからのorigin採取、明示provisioning、mutation単位の排他、通常GUIでの選択から最終同意までの接続、installed OS Gate、active desktop PolicyKit prompt/cancel/auth、正規要求とstatus照合まで完了した。
 
 - [x] security/privacy code reviewでsecret redaction、audit非露出、bounded subprocess output、GUI error上限、root helper出力破棄を確認した。
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
-- [ ] release scopeに残る全root/restore経路でprotocol、fault injection、実機Gateを完了する。
+- [ ] release scopeに残るroot ApplyとSSH restore経路でprotocol、fault injection、実機Gateを完了する。local root手動restoreは完了済み。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。
 - [x] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順を[acceptance review](validation/phase6-recovery-procedure-acceptance-2026-09-07.md)する。
 
