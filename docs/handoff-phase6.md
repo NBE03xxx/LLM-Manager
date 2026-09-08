@@ -14,8 +14,11 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - Phase 0〜5完了。Phase 5 closure根拠は`docs/validation/phase5-closure-audit-2026-09-04.md`
 - 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
 - 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
+- 2026-09-08 MVP route freezeはlocal commit済み。host system SSH configのowner/mode不正で通常の`git push origin main`がfail closedとなったため、`origin/main`には未反映。`-F /dev/null`で迂回しない
 
 ## 最新再開サマリー
+
+- **2026-09-08 MVP production route freeze（再開時は本項を優先）**: MVP releaseのmutation scopeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama ruleなし、SSH root ApplyとSSH user/root restoreは専用protocol未完成のためscope外とし、実装とproduction allowlistのI/O前fail-closedを維持。requirements、MVP scope、README、roadmap、traceability、release checklistを同期した。focused 12件と全790件（752成功・38 expected skip）、必須静的検査は成功。両VMは`shut off`、host SSH configは依然`nobody:nogroup`/0777のため実機Gateは行っていない。詳細: `docs/validation/phase6-mvp-route-scope-freeze-2026-09-08.md`。現在・次ともPhase 6。
 
 - **2026-09-08 local root手動restore公開（再開時は本項を優先）**: commit `9fe071d` のfresh dev deb（SHA-256 `6e2a70515f38554bc35e5151ff6cc847fc26d4a2d864ba0226c975925d89d984`）をUbuntu 26.04一時snapshotへ導入し、UID 1000 active Wayland sessionでreview/execute各PolicyKit actionの明示cancel（126）と認証成功を確認した。正規request `3e5fcea00d06ee7fab8f34a3938ba13900b4bdd3e23974c0deb2d7b639e6fa1a`は復元・systemd restart・loopback API検証を完了して`committed`、read-only statusも同一resultを返した。root-owned 0600 review/attempt/result、strict 4-event audit chain、target root:root 0644と元hashを照合。最初の`Type=simple` fixtureは起動直後のAPI競合を`service_validation_failed`として正しく記録し再送せず、`Type=notify`の別backup/requestで完走した。snapshot復元後、旧package `0.1.0~dev0-1`と全fixture不在、port 11434不在を確認し、両VMを`shut off`、一時snapshotを削除。production restore allowlistへ`LOCAL_ROOT`を追加し、local root ApplyとSSH restore/root Applyはfail closedを維持。公開後は全790件（752成功・38 expected skip）と必須静的検査、fresh dev deb build/verifyに成功し、archive内allowlistを確認。最終dev deb SHA-256 `7da8c5965e0c4e205dad1a82a6cf1cfdd21dae4d9b4f6fdc8479fa96a6876e3c`。詳細: `docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md`。現在・次ともPhase 6。
 
@@ -263,7 +266,7 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 ## Phase 6残件分類
 
 - 完了: 利用者向けbackup/rollback/recovery文書、security/privacy review、直接依存SBOM/license notice、local user/SSH user Apply、local user restore、主要performance sample、長文layout、協力的workerと有限のcancel非協力区間のclose待機UX
-- MVP blocker: local root/SSH root Applyとlocal root/SSH user/root restoreのroute判断、Debian実display/menu Gate、resolved-environment SBOM、Qt package license review、final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
+- MVP blocker: Debian実display/menu Gate、resolved-environment SBOM、Qt package license review、final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
 - acceptance/hardening: 実Agent相当の長時間負荷、実display/screen reader accessibility、host SSH config修復後の完成GUI SSH切断再Gate
 - Post-MVP: 複数host、自動benchmark、追加client/runtime、telemetry履歴、外部rule配布
 

@@ -4,7 +4,7 @@
 
 ## 1. Scopeとversion freeze
 
-- [ ] MVPで完成させるproduction routeを確定する。現行scopeどおりならlocal root/SSH root Applyとlocal root/SSH user/root手動restoreを完成させる。scopeを縮小する場合はrequirements、MVP scope、README、route availability、受け入れ条件を同じcommitで更新する。
+- [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [ ] Debian 13 desktopへ通常ログインし、desktop menuからlocal debの実display起動を確認する。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。SSH Applyと実displayは未完了。
   - Ubuntu 26.04のproduction local read-only診断で単一sample基準値を取得済み。`partial`、25.234 ms、最大event gap 10.383 ms、最大RSS 67,352 KiB。complete/SSH/Apply系の複数sampleとhardware基準は未完了。
@@ -77,7 +77,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
-- [ ] release scopeに残るroot ApplyとSSH restore経路でprotocol、fault injection、実機Gateを完了する。local root手動restoreは完了済み。
+- [x] release scope外のlocal root/SSH root ApplyとSSH user/root restoreがproduction allowlistに含まれず、経路別の固定理由でI/O前にfail closedとなることを確認した。local root手動restoreは公開Gate完了済み。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。
 - [x] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順を[acceptance review](validation/phase6-recovery-procedure-acceptance-2026-09-07.md)する。
 

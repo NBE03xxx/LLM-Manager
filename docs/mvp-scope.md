@@ -16,7 +16,7 @@ MVP は「単一 Linux ホストの Ollama/OpenCode 環境を、安全に診断�
 | Optimization | Balanced/Coding/Agent、明示 Rule Engine、説明可能な Recommendation |
 | Planning | 設定 schema に基づく ChangeSet、diff、競合、root/restart/risk |
 | Safety | approval、backup、precondition、apply、validate、automatic/manual rollback、audit |
-| Privileged changes | systemd drop-inを含むroot必須変更、PolicyKitまたはSSH sudo |
+| Privileged changes | local root Ollama backupの手動restoreをPolicyKitで実行。root ApplyとSSH restoreはMVPで非公開 |
 | Helper prerequisite | Localは本体deb同梱、SSH先はremote helper debの事前導入が必要 |
 | GUI | 6 工程、非同期実行、進捗、キャンセル、部分失敗 |
 | Testing | domain/rule/parser/adapter contract/workflow/fault injection |
@@ -24,6 +24,17 @@ MVP は「単一 Linux ホストの Ollama/OpenCode 環境を、安全に診断�
 | Language | ユーザーlocaleに基づく日本語・英語、設定による切替、英語fallback |
 
 設定変更の正確なキーは、対応する Ollama/OpenCode version matrix と公式 schema を実装前に確定した範囲に限定する。未知版は診断のみまたは警告付き read-only とする。
+
+MVP releaseのproduction mutation routeは次の固定matrixとする。実装コードが存在しても、このmatrixで非公開の経路は入出力開始前にfail closedとする。
+
+| 対象 | Apply / automatic rollback | manual restore |
+|---|---|---|
+| local user OpenCode | 公開 | 公開（単一target） |
+| local root Ollama | 非公開 | 公開（採取済みroot backup） |
+| SSH user OpenCode | 公開 | 非公開 |
+| SSH root | 非公開 | 非公開 |
+
+local root Applyは専用compositionとrollback境界を保持するが、根拠あるactionable Ollama設定ruleがないためMVP release scopeから外す。SSH root ApplyとSSH user/root manual restoreは専用protocolが完成していないため外す。対応根拠と独立した検証Gateが揃うまで既存経路の拡張で代用しない。
 
 ## 3. Best-effort / Optional in MVP
 
@@ -49,6 +60,8 @@ MVP は「単一 Linux ホストの Ollama/OpenCode 環境を、安全に診断�
 - llama.cpp、vLLM、他 runtime
 - Windows/macOS の正式対応
 - Web UI、multi-user server、remote daemon
+- local root Ollama設定のApply（actionable ruleと公開Gateが揃うまで）
+- SSH root Apply、SSH user/root backupの手動restore
 
 対象外機能を検出・案内することはできるが、実行ボタンは提供しない。
 
@@ -64,6 +77,7 @@ MVP は「単一 Linux ホストの Ollama/OpenCode 環境を、安全に診断�
 8. 対応version matrix外では自動Changeが生成されず、read-onlyへ縮退する。
 9. 設定allowlist外のpath/keyをChange Plannerと特権helperの双方が拒否する。
 10. 要件・受け入れ条件・test caseのトレーサビリティに欠落がない。
+11. production mutation routeが上記matrixと一致し、非公開routeは固定理由でI/O前にfail closedとなる。
 
 ## 6. スコープ変更規則
 

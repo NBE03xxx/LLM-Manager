@@ -4,6 +4,11 @@ LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先に�
 
 Phase 0〜5を完了し、現在は **Phase 6（Hardening と MVP Release）**です。Phase 5ではQt非依存presenter/view-model、optional QThreadPool worker、6工程widget、Local/OpenSSH診断、Reviewとexact approval、local user Apply/restoreのproduction vertical sliceを完成させました。Phase 6ではlocal user/SSH user Apply、local user手動restore、local root手動restoreを公開しました。local root手動restoreは専用protocol・実装・disposable OS Gateに加え、Ubuntu 26.04 active desktopでPolicyKitのcancel/auth/正規要求/status Gateを完了しています。local root Applyは根拠あるactionable Ollama rule待ち、SSH root ApplyとSSH user/root手動restoreは専用protocol未完成のため、各経路を固定理由でI/O前にfail closedとしています。詳細は[Phase 5 closure audit](docs/validation/phase5-closure-audit-2026-09-04.md)と[Phase 6 interactive PolicyKit Gate](docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md)を参照してください。
 
+MVP releaseのmutation scopeはこの4経路で固定しています。非公開経路の内部実装は将来検証用であり、現行MVPの実行権限ではありません。
+
+- Apply: local user OpenCode、SSH user OpenCode
+- Manual restore: local user OpenCode、local root Ollama
+
 MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
 
 UIはユーザーlocaleを初期値として日本語・英語を提供し、未対応localeは英語へフォールバックする。

@@ -45,6 +45,7 @@ MVP の成功は「対象環境を勝手に変更しない」「同じ入力と�
 | FR-VALIDATE-01 | ファイル内容、サービス状態、Ollama API、OpenCode 接続設定を段階的に検証する |
 | FR-ROLLBACK-01 | Apply/Validate 失敗時にバックアップから復元し、復元後検証を行う |
 | FR-AUDIT-01 | 診断、計画、承認、実行、検証、復元の結果を秘密情報を除外して記録する |
+| FR-ROUTE-01 | MVP releaseではlocal user/SSH user Applyとlocal user/local root manual restoreだけを公開し、local root/SSH root ApplyとSSH user/root manual restoreはI/O前に固定理由で拒否する |
 | FR-I18N-01 | ユーザーlocaleから日本語または英語を初期選択し、設定から変更できる |
 | FR-I18N-02 | 未対応localeでは英語へフォールバックし、診断・安全操作を継続できる |
 
@@ -101,7 +102,7 @@ MVP の成功は「対象環境を勝手に変更しない」「同じ入力と�
 - 3 用途プロファイル
 - 明示的 Rule Engine
 - GUI によるワークフローとローカル監査ログ
-- systemd drop-inを含むroot権限変更
+- PolicyKit管理下のlocal root Ollama backup手動restore。root Applyは根拠あるactionable ruleが揃うまで非公開
 - 開発中のソース起動と、一般ユーザー向けリリース時のdebパッケージ
 
 詳細な境界は [mvp-scope.md](mvp-scope.md) を参照する。
@@ -127,6 +128,7 @@ Ollama、GPU driver、ROCm、CUDA のインストール、model download、SSH �
 - AC-13: 対応version matrix外またはallowlist外の設定から自動Changeが生成されない。
 - AC-14: 未完了Applyを検出した場合、再適用前にjournal、host identity、before/after hashから状態照合する。
 - AC-15: 日本語・英語の両localeで全MVP画面、安全警告、主要エラーを表示でき、未対応localeでは英語で起動する。
+- AC-16: productionで公開する経路はlocal user/SSH user Applyとlocal user/local root manual restoreだけであり、その他のmutation routeは対応factoryが存在してもI/O前にfail closedとなる。
 
 ## 12. 設計判断・残存検証事項
 

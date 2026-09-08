@@ -227,7 +227,7 @@ Qt layout/close/long-running hardening: 6工程をresizable scroll areaへ収め
 
 Production local diagnosis performance baseline: Ubuntu 26.04 VMで実`DiagnosticTaskFactory.production`のread-only local診断をQt workerから実行した。runtime/client不在を含む`partial`へ25.234 msで終端し、10 ms sentinelの最大event gapは10.383 ms、process内最大RSSは67,352 KiB、worker leakなしだった。単一sampleかつcomplete診断ではないためrelease SLOとは扱わない。詳細は[performance Gate](validation/phase6-production-diagnosis-performance-2026-09-05.md)。次sliceはcomplete/SSH/Apply系の複数sample、またはDebian実display Gate。
 
-- local root・SSH user/rootのproduction Apply/手動restore経路を安全な固定protocolと実機Gateで完成
+- MVP mutation scopeをlocal user/SSH user Applyとlocal user/local root手動restoreに固定し、その他の経路をI/O前にfail closedとする
 - 対応環境 matrix の実機検証
 - security/privacy review
 - ソース起動手順、deb packaging、upgrade/uninstall、backup retention、recovery guide
