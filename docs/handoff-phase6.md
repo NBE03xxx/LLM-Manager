@@ -15,6 +15,7 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
 - 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
 - 2026-09-09にhost system SSH configのroot ownershipが管理者により復旧され、MVP route freeze commit `8854232`を通常のsystem SSHで`origin/main`へpush済み
+- 2026-09-09終了時の最新push済みcommitは`c204f34`（Debian lifecycle Gate）。その直前は`68ad48d`（Ubuntu lifecycle Gate）、`f32ec6b`（再現可能candidate build）。引き継ぎ文書更新commitはこの行の後に増えるため、再開時にHEADと`origin/main`の一致を確認する
 
 ## 最新再開サマリー
 
@@ -104,15 +105,16 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 - 追加slice: `packaging/collect-installed-sbom.py`を整備。host全2519 packageを採取しcopyright欠落5件を検出（期待exit 2）、CycloneDX 1.6 schema検証成功。全537 test（514成功・23 skip）。これはhost smokeであり対象VMのresolved-environment release SBOM/Qt license reviewは未完了。詳細: `docs/validation/phase6-installed-sbom-2026-09-05.md`。次は最終artifactとの紐付け採取とQt原文review。VMは停止のまま、SSH configも未変更。
 
-- 現在・次の作業はPhase 6。利用枠の次回リセット後、新しいチャットでこのファイルを基点に再開する
-- 最新の全検査は534件完走（511成功・23 skip）。skipは主にhostにPySide6 runtimeがないため。compileall、local/remote packaging shell syntax、desktop validation、全Phase 6 JSON parse、`git diff --check`も成功
+- 現在・次の作業はPhase 6。2026-09-09のチャット移行後はこのファイルを基点に再開する
+- 最新の全検査は791件完走（753成功・38 expected skip）。compileall、local/remote packaging shell syntax、desktop validation、両SBOM JSON parse、`git diff --check`も成功。以後のUbuntu/Debian lifecycle sliceは文書変更だけで、各commit前に`git diff --check`成功
 - hostの実稼働Ollama 0.33.2 / OpenCode 1.18.25を使ったread-only production local診断は5/5 sampleが`complete`。実設定、service、model、SSHは変更していない
 - 安全検査済みの`~/.opencode/bin/opencode`をproduction discoveryとlocal user Apply validationへ追加した。任意PATH、root、SSH経路へは拡張していない
 - local user Applyはhost・Ubuntu 26.04・Debian 13でcommit/rollback/recovery-requiredを各5回、計45 sample成功。各環境はexact cleanup済み
 - subprocessのstdout/stderr EOF後にもcancel/deadlineを監視する修正と、有限のcancel非協力区間に対するGUI終了待機表示・操作抑止を実装し、実Qt Gateまで完了
-- Ubuntu 26.04とDebian 13 VMは現在ともに`shut off`。一時artifact、測定用HTTP server、Gateで追加したpackageはcleanup済み
-- production system SSHは`/etc/ssh/ssh_config.d/20-systemd-ssh-proxy.conf`が`nobody:nogroup`・0777のためfail closed中。管理者修復前は`-F /dev/null`を製品根拠にせず、このファイルも無断変更しない
-- 外部状態を待たず着手できる次の候補はresolved-environment SBOMとQt package license review。Debian desktopがログイン済みなら実display/menu Gate、SSH設定が管理者により直っていれば完成GUI SSH disconnect/reconciliation Gateを優先する
+- Ubuntu 26.04 VMは`running`、Debian 13 VMは`shut off`。UbuntuのPhase 6一時snapshotは削除し既存`phase4-pre-local-deb-20260831`だけを保持。Debianの内部snapshotはpflash NVRAM非QCOW2のため変更前に拒否され、作成されていない。両Gateの一時artifactと追加packageはexact cleanup済み
+- production system SSHは管理者により正常化済み。実host名前空間でconfig drop-inはsystemd配下へのroot所有symlink、targetはroot:root 0644、`ssh -G github.com`成功。以後も`-F /dev/null`を製品根拠にせず、SSH設定を無断変更しない
+- commit `4722cfa`由来の採用candidateはhostの`/tmp/llm-manager-release-candidate-4722cfa/`にlocal/remote各1 artifactだけを0644で保持。local SHA-256 `25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remote `45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`
+- 外部状態を待たず着手できる次の優先項目は、同じcandidate setに紐付けたUbuntu local/remote・Debian local resolved-environment SBOMとQt package license review。Debian desktopが通常ログイン済みになれば実display/menu Gate、Ubuntuでは通常system SSHを使う完成GUI SSH disconnect/reconciliation Gateも残る
 
 ## 完成済みproduction routeと安全境界
 
@@ -267,17 +269,18 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 
 1. `git status --short`と未コミットdiffを確認し、Phase 6の既存変更をすべて保持する
 2. VMを使う場合は現在state/IP/guest-agent疎通をread-only確認する。電源断後のIPを固定値として扱わない
-3. host SSH configが管理者により修復済みなら、通常のproduction system `ssh`で完成GUI SSH user Apply disconnect/reconciliation Gateを行う。未修復なら保留し、`-F /dev/null`を代替根拠にしない
-4. Debian desktopがログイン済みなら、artifactを再build・hash検証後、desktop menuからの実display起動を限定Gateとして行い、追加packageをexact cleanupする
-5. 3・4が外部状態待ちなら、resolved-environment SBOMとQt package license reviewを進める。その後、final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証をrelease checklistに沿って行う。署名鍵は自動選択しない
-6. local root/SSH root Applyとlocal root/SSH user/root restoreは専用protocolと根拠が揃うまでfail closedを維持する。既存protocolから推測実装しない
-7. 合成layout/close Gateを実display accessibility完了とは扱わず、cancelを確認しないtaskを強制終了しない
+3. host `/tmp/llm-manager-release-candidate-4722cfa/`のlocal/remote artifact hashを上記値と再照合し、同じcandidate setに紐付けたUbuntu local/remote・Debian local resolved-environment SBOMとQt package license reviewを進める。VMごとに開始package集合を保存し、Ubuntuは一時snapshot、Debianは追加packageの固定名によるexact cleanupを使う
+4. 通常のproduction system `ssh`でUbuntuの完成GUI SSH user Apply disconnect/reconciliation Gateを行う。`-F /dev/null`を代替根拠にせず、実設定・backup・keyを使う場合は一時snapshot内のdisposable targetに限定する
+5. Debian desktopが通常ログイン済みなら、candidate hash検証後、desktop menuからの実display起動を限定Gateとして行う。ログインがなければpasswordやsynthetic loginを使わず保留する
+6. resolved-environment SBOM、Qt license review、実display/SSH Gate後に`debian/changelog`の`UNRELEASED`解除を判断し、最終commitから両artifactを再buildする。final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証をrelease checklistに沿って行う。署名鍵は自動選択しない
+7. local root/SSH root Applyとlocal root/SSH user/root restoreは専用protocolと根拠が揃うまでfail closedを維持する。既存protocolから推測実装しない
+8. 合成layout/close Gateを実display accessibility完了とは扱わず、cancelを確認しないtaskを強制終了しない
 
 ## Phase 6残件分類
 
 - 完了: 利用者向けbackup/rollback/recovery文書、security/privacy review、直接依存SBOM/license notice、local user/SSH user Apply、local user restore、主要performance sample、長文layout、協力的workerと有限のcancel非協力区間のclose待機UX
-- MVP blocker: Debian実display/menu Gate、resolved-environment SBOM、Qt package license review、final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
-- acceptance/hardening: 実Agent相当の長時間負荷、実display/screen reader accessibility、host SSH config修復後の完成GUI SSH切断再Gate
+- MVP blocker: Debian実display/menu Gate、resolved-environment SBOM、Qt package license review、`UNRELEASED`解除後のfinal lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
+- acceptance/hardening: 実Agent相当の長時間負荷、実display/screen reader accessibility、通常system SSHによる完成GUI SSH切断再Gate
 - Post-MVP: 複数host、自動benchmark、追加client/runtime、telemetry履歴、外部rule配布
 
 ## 安全境界
