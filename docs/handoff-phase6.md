@@ -15,7 +15,7 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
 - 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
 - 2026-09-09にhost system SSH configのroot ownershipが管理者により復旧され、MVP route freeze commit `8854232`を通常のsystem SSHで`origin/main`へpush済み
-- 2026-09-09終了時の最新push済みcommitは`c204f34`（Debian lifecycle Gate）。その直前は`68ad48d`（Ubuntu lifecycle Gate）、`f32ec6b`（再現可能candidate build）。引き継ぎ文書更新commitはこの行の後に増えるため、再開時にHEADと`origin/main`の一致を確認する
+- 2026-09-09の最新push済み検証commitは`b6ffee1`（candidate environment SBOM / Qt review）。その前は`c204f34`（Debian lifecycle Gate）、`68ad48d`（Ubuntu lifecycle Gate）、`f32ec6b`（再現可能candidate build）。引き継ぎ文書更新commitはこの行の後に増えるため、再開時にHEADと`origin/main`の一致を確認する
 
 ## 最新再開サマリー
 
