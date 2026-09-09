@@ -18,6 +18,8 @@
 
 - [x] local dev compositionの両VM installed環境SBOM/copyrightとQt package metadataを採取・reviewし、[証拠を保存](validation/phase6-vm-sbom-qt-review-2026-09-05.md)。PySide6のGPL例外表記を補正。これは最終release、remote helper環境、全license obligationの完了を意味しない。
 
+- [x] version freeze後の同一`0.1.0` candidate setでUbuntu local/remoteとDebian localのinstalled環境SBOM/copyrightを採取し、[Qt package license reviewと証拠を保存](validation/phase6-0.1.0-candidate-environment-sbom-qt-2026-09-09.md)。Debianはcopyright欠落なし。Ubuntuの欠落2件は開始前からある非依存application。`UNRELEASED` candidateのpre-final evidenceであり、下記final artifact項目は完了にしない。
+
 - [x] project-owned sourceとassetsをMITとし、`LICENSE`と`debian/copyright`のholderを`NBE03xxx`へ一致させた。
 - [x] vendored third-party codeがないことをtracked file一覧とpackage構成で確認した。
 - [x] runtime直接依存とupstream license sourceを`THIRD_PARTY_NOTICES.md`へ記録した。
@@ -27,6 +29,8 @@
 - [ ] 最終binary debを展開し、未申告の実行形式、共有library、vendored module、生成assetがないことを確認する。
 
 採取ツール`packaging/collect-installed-sbom.py`と[手順](validation/phase6-installed-sbom-2026-09-05.md)は整備済み。host smoke、両VMのlocal dev composition、Ubuntu remote helper dev compositionの採取を完了。全installed packageのsupersetを採取するため、artifact同一性・APT logとの関連付け・対象OSのmanual license reviewは別途必要。
+
+2026-09-09のcandidate Gateではartifact identity、APT log、前後inventory、Qt/PySide6 package/file/copyrightを同じarchiveへ固定した。Debian fresh installの追加12件はAPT simulation済み差分と一致。Ubuntu localは既存dev版からのupgrade、remoteはhelper 1件追加であり、clean minimal OSの新規dependency解決とは表現しない。公開用final commitから再採取するため、final checklistは未完了のままとする。
 
 直接依存SBOMは依存制約を表し、APTが選ぶ推移依存の正確なversion一覧ではない。release時は両方を添付する。
 

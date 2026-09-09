@@ -1,0 +1,17 @@
+{
+  "source_commit": "4722cfa5238af507deee0831bdf8a0cbe517fe99",
+  "release_status": "UNRELEASED candidate; pre-final evidence only",
+  "artifacts": {
+    "local": {"name": "llm-manager_0.1.0_all.deb", "sha256": "25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181"},
+    "remote": {"name": "llm-manager-remote-helper_0.1.0_all.deb", "sha256": "45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1"}
+  },
+  "environments": {
+    "debian13-local": {"archive_sha256": "538495818f83c898447fea0aaac3b7095021f648334bb05fd277ef7910d99b57", "installed_package_count": 2248, "missing_copyright": [], "qt_selected_package_count": 23, "pyside_runtime_package_count": 2, "qt_elf_count": 25, "qt_runtime_file_count": 56, "collector_exit": 0},
+    "ubuntu26.04-local": {"archive_sha256": "a9597ac5b9a4386e379c4b8c03b077aeb41ed8735f491f8f4cc1818afa82d9cb", "installed_package_count": 1907, "missing_copyright": ["brave-browser", "brave-keyring"], "qt_selected_package_count": 23, "pyside_runtime_package_count": 2, "qt_elf_count": 24, "qt_runtime_file_count": 53, "collector_exit": 2},
+    "ubuntu26.04-remote": {"archive_sha256": "d0a3435396f5501b7c352cf67cd736aab184d3075b63189f3f35dd8df3687701", "installed_package_count": 1908, "missing_copyright": ["brave-browser", "brave-keyring"], "qt_selected_package_count": 23, "pyside_runtime_package_count": 2, "qt_elf_count": 24, "qt_runtime_file_count": 53, "collector_exit": 2}
+  },
+  "cleanup": {
+    "ubuntu26.04": "temporary snapshot reverted and deleted; VM returned to running",
+    "debian13": "candidate and fixed 11 dependencies explicitly purged; no autoremove; 2236-package baseline and sorted name/version SHA-256 restored; VM returned to shut off"
+  }
+}
