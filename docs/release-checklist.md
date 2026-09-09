@@ -1,6 +1,6 @@
 # MVP Release Checklist
 
-このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。`0.1.0~dev0`と`UNRELEASED`のまま一般配布しない。
+このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`へ固定済みだが、`UNRELEASED`のまま一般配布しない。
 
 ## 1. Scopeとversion freeze
 
@@ -58,6 +58,8 @@ git diff --check
 ## 4. OS lifecycle Gate
 
 各VMの開始stateとpackage集合を保存し、Gateが追加したartifact/packageだけを明示cleanupする。利用者data、Secret Service、SSH trust、既存systemd unitをpurge対象へ含めない。
+
+2026-09-09にcommit `4722cfa`由来の`0.1.0` local candidateをUbuntu 26.04一時snapshotで検証した。旧`0.1.0~dev0-1`からのupgrade、reinstall、remove、fresh install、purge、`dpkg -V`、隔離import、通常user offscreen Qt起動、owner/mode、dpkg管理外backup保持に成功した。snapshot復元後はpackage集合・旧package・backup hashが開始値と一致し、一時snapshot/artifact/logを削除した。Wayland実display/menuと`UNRELEASED`解除後の最終artifact再実行が残るため、下記項目は未完了のままとする。詳細は[Ubuntu lifecycle記録](validation/phase6-0.1.0-ubuntu-lifecycle-2026-09-09.md)を参照する。
 
 - [ ] Ubuntu 26.04: local debのfresh install、Wayland通常user起動、menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。
 - [ ] Debian 13: stock Python/PySide6でfresh install、通常userの実display/menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。

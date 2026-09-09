@@ -43,4 +43,4 @@ local/remoteのpackage name/version/architecture/dependency、root owner/mode、
 
 失敗build root、重複build root、展開監査rootは限定pathから削除し、採用2 artifactだけを保持した。VM、host package、実設定、service、backup/keyは変更していない。
 
-`UNRELEASED`解除とrelease note更新は後続commitになるため、公閍用の最終artifact setはそのcommitから再buildする。現在・次ともPhase 6。次はこのcandidateを使いUbuntu/Debian lifecycle、resolved-environment SBOM、Qt license reviewのGateを進める。
+`UNRELEASED`解除とrelease note更新は後続commitになるため、公開用の最終artifact setはそのcommitから再buildする。Ubuntu local candidateのpre-final lifecycle Gateは[別記録](phase6-0.1.0-ubuntu-lifecycle-2026-09-09.md)で完了した。現在・次ともPhase 6。次はこのcandidateを使いDebian lifecycle、resolved-environment SBOM、Qt license reviewのGateを進める。
