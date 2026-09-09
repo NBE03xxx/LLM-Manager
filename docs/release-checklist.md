@@ -61,6 +61,8 @@ git diff --check
 
 2026-09-09にcommit `4722cfa`由来の`0.1.0` local candidateをUbuntu 26.04一時snapshotで検証した。旧`0.1.0~dev0-1`からのupgrade、reinstall、remove、fresh install、purge、`dpkg -V`、隔離import、通常user offscreen Qt起動、owner/mode、dpkg管理外backup保持に成功した。snapshot復元後はpackage集合・旧package・backup hashが開始値と一致し、一時snapshot/artifact/logを削除した。Wayland実display/menuと`UNRELEASED`解除後の最終artifact再実行が残るため、下記項目は未完了のままとする。詳細は[Ubuntu lifecycle記録](validation/phase6-0.1.0-ubuntu-lifecycle-2026-09-09.md)を参照する。
 
+同日に同じlocal candidateをDebian 13のpackage未導入状態で検証した。fresh install、reinstall、remove、再fresh install、purge、`dpkg -V`、UID 1000 offscreen Qt起動、owner/modeに成功した。pflash NVRAM形式により内部snapshotが安全に拒否されたため、APT simulationでcandidate＋新規依存11件を固定し、`autoremove`を使わず全12件を明示purgeした。終了時の2236 packageと集合SHA-256は開始値に完全一致し、artifactを削除してVMをshut offへ戻した。実display/menu、旧版からのupgrade、最終artifact再実行が残るため、下記項目は未完了のままとする。詳細は[Debian lifecycle記録](validation/phase6-0.1.0-debian-lifecycle-2026-09-09.md)を参照する。
+
 - [ ] Ubuntu 26.04: local debのfresh install、Wayland通常user起動、menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。
 - [ ] Debian 13: stock Python/PySide6でfresh install、通常userの実display/menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。
 - [ ] Ubuntu 26.04 SSH先: remote helperのfresh install、readiness、reinstall、upgrade、remove、purgeと、dpkg管理外backup/key保持を最終artifactで確認する。
