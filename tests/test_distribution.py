@@ -17,9 +17,11 @@ class DebianPackagingTests(unittest.TestCase):
         python_version = tomllib.loads(
             (ROOT / "pyproject.toml").read_text(encoding="utf-8")
         )["project"]["version"]
-        match = re.fullmatch(r"(\d+\.\d+\.\d+)\.dev(\d+)", python_version)
-        self.assertIsNotNone(match, "development version must use PEP 440 .devN")
-        debian_version = f"{match.group(1)}~dev{match.group(2)}"
+        match = re.fullmatch(r"(\d+\.\d+\.\d+)(?:\.dev(\d+))?", python_version)
+        self.assertIsNotNone(match, "version must be stable X.Y.Z or PEP 440 X.Y.Z.devN")
+        debian_version = match.group(1)
+        if match.group(2) is not None:
+            debian_version += f"~dev{match.group(2)}"
 
         init_text = (ROOT / "src/llm_manager/__init__.py").read_text(encoding="utf-8")
         self.assertIn(f'__version__ = "{python_version}"', init_text)
@@ -62,7 +64,7 @@ class DebianPackagingTests(unittest.TestCase):
             encoding="utf-8"
         )
         compatible_versions = set(
-            re.findall(r'frozenset\(\{"(\d+\.\d+\.\d+~dev\d+)"\}\)', composition)
+            re.findall(r'frozenset\(\{"(\d+\.\d+\.\d+(?:~dev\d+)?)"\}\)', composition)
         )
         self.assertEqual(compatible_versions, {debian_version})
 

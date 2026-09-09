@@ -117,7 +117,7 @@ class DiagnosticTaskFactory:
             ssh_runner=ssh_runner,
             local_config_candidates=_local_opencode_candidates(),
             local_helper_probe=local_helper_compatibility_probe(
-                frozenset({"0.1.0~dev0"})
+                frozenset({"0.1.0"})
             ),
             ssh_auth_broker=(
                 ExternalTerminalSshBroker(ssh_runner, runtime_root / "llm-manager", terminal)
@@ -525,7 +525,7 @@ class SshUserApplyTaskFactory:
             SubprocessRunner(ProcessPolicy(frozenset({"ssh", "scp"}))),
             _local_state_root(),
             runtime_root / "llm-manager" / "ssh-transfer",
-            remote_helper_compatibility_probe(frozenset({"0.1.0~dev0"})),
+            remote_helper_compatibility_probe(frozenset({"0.1.0"})),
             detect_terminal(),
         )
 

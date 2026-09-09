@@ -36,7 +36,7 @@ dpkg-buildpackage -us -uc -b
 完成artifactはinstallせずに検査する。
 
 ```bash
-packaging/verify-deb.sh ../llm-manager_0.1.0~dev0_all.deb
+packaging/verify-deb.sh ../llm-manager_0.1.0_all.deb
 ```
 
 local packageには通常GUI、既存Apply helper、root restore review/status entryに加え、
@@ -52,8 +52,8 @@ PolicyKit actionに固定し、reviewやApplyの認証をexecuteへ流用しな�
 SSH先へ管理者が事前導入する`llm-manager-remote-helper`はlocal packageと別artifactにする。local packageはこれをinstall・upgradeせず、remote packageもGUI、local PolicyKit action、Secret Service、OpenSSH clientへ依存しない。
 
 ```bash
-packaging/remote/build-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
-packaging/remote/verify-deb.sh /tmp/llm-manager-remote-helper_0.1.0~dev0_all.deb
+packaging/remote/build-deb.sh /tmp/llm-manager-remote-helper_0.1.0_all.deb
+packaging/remote/verify-deb.sh /tmp/llm-manager-remote-helper_0.1.0_all.deb
 ```
 
 remote wrapperは`/usr/bin/python3 -I`で起動し、import前にbytecode生成を無効化して、package内のroot-owned private runtime `/usr/lib/llm-manager-remote-helper`を固定でimportする。privileged wrapperはdpkg管理外のroot-owned `__pycache__`を生成してはならない。artifact Gateはwrapper、canonical metadata、private runtime、copyright/notices/SBOMのroot ownershipと0755/0644 mode、依存関係、bytecode cache不在、およびlocal helper/PolicyKit/system Python packageの非同梱を検査する。buildは`debian/changelog`由来の`SOURCE_DATE_EPOCH`を使い、同一sourceからのbit-for-bit rebuildをtestする。OpenSSH read-only互換性Gateは固定pathのownership/mode、非symlink、content hash、canonical metadata、package/version/protocolをstaging前とhelper起動直前に確認する。disposable Ubuntu 26.04で同一版reinstall、remove、purge、再installを行い、package不在時のfail closed、再install後の`ready`、dpkg管理外root backup/keyの保持を確認した。

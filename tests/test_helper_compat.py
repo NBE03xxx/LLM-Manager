@@ -17,12 +17,12 @@ from llm_manager.infrastructure.helper_compat import (
 )
 
 
-METADATA = b'{"package":"llm-manager","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}\n'
+METADATA = b'{"package":"llm-manager","package_version":"0.1.0","protocol_version":1,"schema_version":"1.0"}\n'
 
 
 class HelperCompatibilityProbeTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.probe = HelperCompatibilityProbe("llm-manager", frozenset({"0.1.0~dev0"}))
+        self.probe = HelperCompatibilityProbe("llm-manager", frozenset({"0.1.0"}))
         self.host = _Host(
             FileStat(HELPER_PATH, True, mode=0o755, uid=0, gid=0),
             FileStat(METADATA_PATH, True, mode=0o644, uid=0, gid=0),
@@ -69,7 +69,7 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
 
         for content in (
             METADATA.replace(b'"llm-manager"', b'"other-helper"'),
-            METADATA.replace(b'"0.1.0~dev0"', b'"0.2.0"'),
+            METADATA.replace(b'"0.1.0"', b'"0.2.0"'),
             METADATA.replace(b'"protocol_version":1', b'"protocol_version":2'),
         ):
             with self.subTest(content=content):
@@ -88,7 +88,7 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
             self.assertEqual(caught.exception.code, "privileged_helper_unavailable")
 
     def test_remote_probe_uses_separate_paths_package_and_content_hashes(self) -> None:
-        metadata = b'{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}\n'
+        metadata = b'{"package":"llm-manager-remote-helper","package_version":"0.1.0","protocol_version":1,"schema_version":"1.0"}\n'
         host = _Host(
             FileStat(
                 REMOTE_HELPER_PATH, True, sha256="a" * 64, mode=0o755, uid=0, gid=0
@@ -103,12 +103,16 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
             ),
             metadata,
         )
-        probe = remote_helper_compatibility_probe(frozenset({"0.1.0~dev0"}))
+        probe = remote_helper_compatibility_probe(frozenset({"0.1.0"}))
         self.assertEqual(
             probe.inspect(host, CancellationToken()).status,
             HelperCompatibilityStatus.READY,
         )
-        changed = _Host(host.helper, host.metadata, metadata.replace(b"dev0", b"dev1"))
+        changed = _Host(
+            host.helper,
+            host.metadata,
+            metadata.replace(b'"0.1.0"', b'"0.2.0"'),
+        )
         self.assertEqual(
             probe.inspect(changed, CancellationToken()).status,
             HelperCompatibilityStatus.INVALID,
@@ -119,7 +123,7 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
         host = OpenSshHostAdapter(
             "development", runner, control_socket="/tmp/llm-manager-cm"
         )
-        probe = remote_helper_compatibility_probe(frozenset({"0.1.0~dev0"}))
+        probe = remote_helper_compatibility_probe(frozenset({"0.1.0"}))
         result = probe.inspect(host, CancellationToken())
         self.assertEqual(result.status, HelperCompatibilityStatus.READY)
         self.assertEqual(len(runner.requests), 5)
@@ -135,7 +139,7 @@ class HelperCompatibilityProbeTests(unittest.TestCase):
         runner = _RemoteProbeRunner(missing=True)
         host = OpenSshHostAdapter("development", runner)
         result = remote_helper_compatibility_probe(
-            frozenset({"0.1.0~dev0"})
+            frozenset({"0.1.0"})
         ).inspect(host, CancellationToken())
         self.assertEqual(result.status, HelperCompatibilityStatus.MISSING)
         self.assertEqual(result.reason, "helper_not_installed")
@@ -167,7 +171,7 @@ class _RemoteProbeRunner:
     def __init__(self, *, missing=False):
         self.requests = []
         self.missing = missing
-        self.metadata = b'{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}\n'
+        self.metadata = b'{"package":"llm-manager-remote-helper","package_version":"0.1.0","protocol_version":1,"schema_version":"1.0"}\n'
 
     def run(self, request, cancellation):
         self.requests.append(request)

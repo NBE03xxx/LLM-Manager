@@ -182,7 +182,7 @@ class SshUserApplyTaskFactoryTests(unittest.TestCase):
             SubprocessRunner(ProcessPolicy(frozenset())),
             root / "state",
             root / "runtime",
-            remote_helper_compatibility_probe(frozenset({"0.1.0~dev0"})),
+            remote_helper_compatibility_probe(frozenset({"0.1.0"})),
             TerminalSpec("/usr/bin/terminal", "ptyxis"),
             key_provider_factory=lambda: MagicMock(),
         )

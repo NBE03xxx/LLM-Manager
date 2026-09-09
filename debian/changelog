@@ -1,4 +1,4 @@
-llm-manager (0.1.0~dev0) UNRELEASED; urgency=medium
+llm-manager (0.1.0) UNRELEASED; urgency=medium
 
   * Add the MVP PySide6 desktop entry point and desktop integration metadata.
   * Keep the local privileged helper isolated behind PolicyKit.

@@ -62,14 +62,14 @@ grep -Fq '<annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manag
 grep -Fq 'from llm_manager.ui.qt_app import main' "$launcher"
 grep -Fq 'sys.dont_write_bytecode = True' "$helper"
 grep -Fq '<annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-helper</annotate>' "$policy"
-grep -Fxq '{"package":"llm-manager","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
+grep -Fxq '{"package":"llm-manager","package_version":"0.1.0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
 grep -Fxq 'Exec=/usr/bin/llm-manager' "$desktop"
 grep -Fxq 'TryExec=/usr/bin/llm-manager' "$desktop"
 grep -Fxq 'Icon=io.github.nbe03xxx.llm-manager' "$desktop"
 grep -Fxq 'Terminal=false' "$desktop"
 grep -Fq 'Copyright: 2026 NBE03xxx' "$copyright"
 python3 -m json.tool "$sbom" >/dev/null
-grep -Fq 'pkg:deb/llm-manager@0.1.0~dev0' "$sbom"
+grep -Fq 'pkg:deb/llm-manager@0.1.0' "$sbom"
 
 contents=$(dpkg-deb --contents "$package")
 printf '%s\n' "$contents" | grep -Eq '^-rwxr-xr-x root/root +[0-9]+ .* ./usr/bin/llm-manager-restore-setup$'

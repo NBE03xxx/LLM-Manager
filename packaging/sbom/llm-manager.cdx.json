@@ -7,9 +7,9 @@
     "timestamp": "2026-09-05T00:00:00Z",
     "component": {
       "type": "application",
-      "bom-ref": "pkg:deb/llm-manager@0.1.0~dev0",
+      "bom-ref": "pkg:deb/llm-manager@0.1.0",
       "name": "llm-manager",
-      "version": "0.1.0~dev0",
+      "version": "0.1.0",
       "licenses": [{"license": {"id": "MIT"}}]
     }
   },
@@ -22,5 +22,5 @@
     {"type":"application","bom-ref":"runtime:pkexec","name":"pkexec / polkit","scope":"required","properties":[{"name":"llm-manager:distribution-package","value":"pkexec, polkitd"},{"name":"llm-manager:license-source","value":"installed distribution copyright metadata"}]},
     {"type":"operating-system","bom-ref":"runtime:systemd","name":"systemd","scope":"required","properties":[{"name":"llm-manager:distribution-package","value":"systemd"},{"name":"llm-manager:license-source","value":"installed distribution copyright metadata"}]}
   ],
-  "dependencies": [{"ref":"pkg:deb/llm-manager@0.1.0~dev0","dependsOn":["runtime:python3","runtime:cryptography","runtime:secretstorage","runtime:pyside6","runtime:openssh-client","runtime:pkexec","runtime:systemd"]}]
+  "dependencies": [{"ref":"pkg:deb/llm-manager@0.1.0","dependsOn":["runtime:python3","runtime:cryptography","runtime:secretstorage","runtime:pyside6","runtime:openssh-client","runtime:pkexec","runtime:systemd"]}]
 }

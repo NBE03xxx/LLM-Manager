@@ -33,10 +33,10 @@ sbom="$extract_root/usr/share/doc/llm-manager-remote-helper/sbom.cdx.json"
 [ "$(sed -n '1p' "$helper")" = '#!/usr/bin/python3 -I' ]
 grep -Fq 'sys.dont_write_bytecode = True' "$helper"
 grep -Fq 'sys.path.insert(0, "/usr/lib/llm-manager-remote-helper")' "$helper"
-grep -Fxq '{"package":"llm-manager-remote-helper","package_version":"0.1.0~dev0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
+grep -Fxq '{"package":"llm-manager-remote-helper","package_version":"0.1.0","protocol_version":1,"schema_version":"1.0"}' "$metadata"
 grep -Fq 'Copyright: 2026 NBE03xxx' "$copyright"
 python3 -m json.tool "$sbom" >/dev/null
-grep -Fq 'pkg:deb/llm-manager-remote-helper@0.1.0~dev0' "$sbom"
+grep -Fq 'pkg:deb/llm-manager-remote-helper@0.1.0' "$sbom"
 
 [ ! -e "$extract_root/usr/bin/llm-manager-helper" ]
 [ ! -e "$extract_root/usr/share/polkit-1" ]
