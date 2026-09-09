@@ -9,6 +9,7 @@
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。SSH Applyと実displayは未完了。
   - Ubuntu 26.04のproduction local read-only診断で単一sample基準値を取得済み。`partial`、25.234 ms、最大event gap 10.383 ms、最大RSS 67,352 KiB。complete/SSH/Apply系の複数sampleとhardware基準は未完了。
 - [ ] release versionを決め、`pyproject.toml`、`debian/changelog`、remote `control`、両helper metadata、SBOMのversionを一致させる。
+  - `DebianPackagingTests.test_release_version_surfaces_are_consistent`でPython/ Debian version変換、両helper metadata、両SBOM、verifier、production helper compatibility allowlistの同期を自動検査する。
 - [ ] `debian/changelog`を`UNRELEASED`から対象distributionへ変更し、release日時と変更点を確定する。
 
 ## 2. Source、license、SBOM

@@ -1,7 +1,9 @@
 import json
+import re
 import stat
 import subprocess
 import tempfile
+import tomllib
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -11,6 +13,59 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class DebianPackagingTests(unittest.TestCase):
+    def test_release_version_surfaces_are_consistent(self) -> None:
+        python_version = tomllib.loads(
+            (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        )["project"]["version"]
+        match = re.fullmatch(r"(\d+\.\d+\.\d+)\.dev(\d+)", python_version)
+        self.assertIsNotNone(match, "development version must use PEP 440 .devN")
+        debian_version = f"{match.group(1)}~dev{match.group(2)}"
+
+        init_text = (ROOT / "src/llm_manager/__init__.py").read_text(encoding="utf-8")
+        self.assertIn(f'__version__ = "{python_version}"', init_text)
+        changelog = (ROOT / "debian/changelog").read_text(encoding="utf-8")
+        self.assertRegex(
+            changelog.splitlines()[0],
+            rf"^llm-manager \({re.escape(debian_version)}\) ",
+        )
+        remote_control = (ROOT / "packaging/remote/control").read_text(encoding="utf-8")
+        self.assertIn(f"\nVersion: {debian_version}\n", f"\n{remote_control}")
+
+        package_surfaces = (
+            (
+                "llm-manager",
+                ROOT / "packaging/helper-metadata.json",
+                ROOT / "packaging/sbom/llm-manager.cdx.json",
+                ROOT / "packaging/verify-deb.sh",
+            ),
+            (
+                "llm-manager-remote-helper",
+                ROOT / "packaging/remote/helper-metadata.json",
+                ROOT / "packaging/sbom/llm-manager-remote-helper.cdx.json",
+                ROOT / "packaging/remote/verify-deb.sh",
+            ),
+        )
+        for package, metadata_path, sbom_path, verifier_path in package_surfaces:
+            with self.subTest(package=package):
+                metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                self.assertEqual(metadata["package"], package)
+                self.assertEqual(metadata["package_version"], debian_version)
+                sbom = json.loads(sbom_path.read_text(encoding="utf-8"))
+                component = sbom["metadata"]["component"]
+                expected_ref = f"pkg:deb/{package}@{debian_version}"
+                self.assertEqual(component["version"], debian_version)
+                self.assertEqual(component["bom-ref"], expected_ref)
+                self.assertEqual(sbom["dependencies"][0]["ref"], expected_ref)
+                self.assertIn(debian_version, verifier_path.read_text(encoding="utf-8"))
+
+        composition = (ROOT / "src/llm_manager/ui/composition.py").read_text(
+            encoding="utf-8"
+        )
+        compatible_versions = set(
+            re.findall(r'frozenset\(\{"(\d+\.\d+\.\d+~dev\d+)"\}\)', composition)
+        )
+        self.assertEqual(compatible_versions, {debian_version})
+
     def test_privileged_entry_point_is_fixed_isolated_and_executable(self) -> None:
         helper = ROOT / "packaging/bin/llm-manager-helper"
         content = helper.read_text(encoding="utf-8")
