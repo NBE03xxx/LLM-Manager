@@ -1,5 +1,11 @@
 # Phase 6 `0.1.0` candidate environment SBOM / Qt review
 
+2026-09-10訂正: 本記録末尾のSSH再修復要求は撤回する。前回はサンドボックス内の
+owner表示とSSH失敗から実ホストの設定不正を断定していた。実ホスト側ではroot所有と
+通常SSH接続成功を確認した。Debianのログイン判定もguest-get-usersだけでは不十分で、
+loginctlと実画面で確認する。詳細: [再確認とDebian実display Gate](phase6-debian-display-2026-09-10.md)。
+以下のQt reviewは原文・metadataの確認であり、全license obligationの完了を意味しない。
+
 ## 結果
 
 commit `4722cfa5238af507deee0831bdf8a0cbe517fe99` 由来の同一 candidate set を使い、Ubuntu 26.04 の local/remote package と Debian 13 の local package について installed 環境の CycloneDX 1.6 evidence を採取した。local artifact SHA-256 は `25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remote は `45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1` で、candidate composition 記録と一致した。

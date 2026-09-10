@@ -1,0 +1,21 @@
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages will be REMOVED:
+  libclang1-19* libpyside6-py3-6.8* libshiboken6-py3-6.8* llm-manager*
+  python3-bcrypt* python3-cffi-backend* python3-cryptography* python3-jeepney*
+  python3-pyside6.qtcore* python3-pyside6.qtgui* python3-pyside6.qtwidgets*
+  python3-secretstorage*
+0 upgraded, 0 newly installed, 12 to remove and 75 not upgraded.
+Purg llm-manager [0.1.0]
+Purg python3-pyside6.qtwidgets [6.8.2.1-4]
+Purg python3-pyside6.qtgui [6.8.2.1-4]
+Purg libpyside6-py3-6.8 [6.8.2.1-4] [python3-pyside6.qtcore:amd64 ]
+Purg python3-pyside6.qtcore [6.8.2.1-4]
+Purg libshiboken6-py3-6.8 [6.8.2.1-4]
+Purg libclang1-19 [1:19.1.7-3+b1]
+Purg python3-secretstorage [3.3.3-3]
+Purg python3-cryptography [43.0.0-3+deb13u1]
+Purg python3-bcrypt [4.2.0-2.1+b1]
+Purg python3-cffi-backend [1.17.1-3]
+Purg python3-jeepney [0.9.0-1]

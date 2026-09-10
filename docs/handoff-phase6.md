@@ -19,6 +19,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-10 Debian実display/menu Gate（再開時は本項を優先）**: candidate `4722cfa`由来のlocal debをDebian 13通常Wayland desktopへ一時導入し、GNOMEメニュー検索から起動。UID/GID 1000、英語画面、日本語切替、keyboard focus、Alt+F4通常終了とプロセス不在を確認した。APT simulationで固定12件を導入・purgeし、ホスト保存のpackage/manual baselineと終了値が完全一致。両VMは開始・終了ともrunning、snapshot操作なし。前回のSSH再修復要求はサンドボックス内の観測だけに基づいていたため撤回。実ホストのroot所有設定と通常SSHのUbuntu接続は正常。guest-get-users空でもloginctlにdesktop sessionがあるため両方と実画面で判定する。SBOM archiveのchecksum/identity/inventory/BOM整合性verifierも追加し、既存3 archiveと6 regression testが成功。詳細: `docs/validation/phase6-debian-display-2026-09-10.md`。次は通常SSHのGUI切断照合と最終release setの残Gate。現在・次ともPhase 6。
+
 - **2026-09-09 `0.1.0` candidate environment SBOM / Qt review（再開時は本項を優先）**: commit `4722cfa`由来の同一candidate setでUbuntu local/remoteとDebian localのinstalled環境CycloneDX 1.6 evidenceを採取。Debianは2248 package・copyright欠落0、Ubuntu localは1907、remoteは1908で、開始前からある非依存Brave 2件だけが標準copyright欠落。両OSのQt binding/module/plugin 23 packageとPySide6/Shiboken runtime 2 packageに欠落なく、package/file/ELF/runtime plugin/source versionと原文を固定し、PySide6のQt GPL exceptionを含む既存notice/SBOM表記との整合を再確認した。3 archiveの内部checksumを全件検証。Ubuntuは一時snapshotを各composition間でrevert後に削除しrunningへ復帰。Debianはcandidate＋依存11件だけを明示purgeし、2236 packageと集合SHA-256 `d4b4d64a2dd5ca6436291fe1425aba368765ae8d63d26ea01251184da685d35e`へ復帰、shut off。これは`UNRELEASED` candidateのpre-final evidenceで、final artifact再採取は残件。通常system SSH configは再びowner/mode不正でfail closedしたため変更せずSSH Gate保留、Debianに通常loginはなく実display/menuも保留。詳細: `docs/validation/phase6-0.1.0-candidate-environment-sbom-qt-2026-09-09.md`。現在・次ともPhase 6。
 
 - **2026-09-09 `0.1.0` Debian lifecycle Gate（再開時は本項を優先）**: commit `4722cfa`由来のlocal candidateを、package未導入のDebian 13で検証。fresh install、reinstall、remove、再fresh install、purge、`dpkg -V`、UID 1000隔離import、Debian stock PySide6 6.8.2.1のoffscreen Qt起動、owner/modeが成功した。pflash NVRAM非QCOW2のため内部snapshotは変更前に拒否され、NVRAMを変更せずexact-cleanupへ切替。APT simulationでcandidate＋新規依存11件を固定し、`autoremove`なしで全12件を明示purge、artifactも削除した。終了時は2236 package、集合SHA-256 `d4b4d64a2dd5ca6436291fe1425aba368765ae8d63d26ea01251184da685d35e`が開始値と完全一致し、SSH serverは未導入のまま、VMは開始時どおりshut off。active desktopなしのため実display/menu、旧版なしのためupgrade、`UNRELEASED`解除後の最終artifact再実行は残件。詳細: `docs/validation/phase6-0.1.0-debian-lifecycle-2026-09-09.md`。現在・次ともPhase 6。
@@ -114,9 +116,9 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - local user Applyはhost・Ubuntu 26.04・Debian 13でcommit/rollback/recovery-requiredを各5回、計45 sample成功。各環境はexact cleanup済み
 - subprocessのstdout/stderr EOF後にもcancel/deadlineを監視する修正と、有限のcancel非協力区間に対するGUI終了待機表示・操作抑止を実装し、実Qt Gateまで完了
 - Ubuntu 26.04 VMは`running`、Debian 13 VMは`shut off`。UbuntuのPhase 6一時snapshotは削除し既存`phase4-pre-local-deb-20260831`だけを保持。Debianの内部snapshotはpflash NVRAM非QCOW2のため変更前に拒否され、作成されていない。両Gateの一時artifactと追加packageはexact cleanup済み
-- production system SSHは2026-09-09前半に管理者が正常化し、通常system SSHでpushとread-only Ubuntu接続に成功した。しかしSBOM Gate再開時にはconfig drop-in symlinkが`nobody:nogroup`・0777へ戻り、通常`ssh`が`Bad owner or permissions`でfail closedした。設定は変更していない。次のSSH Gate前に管理者管理下で再修復し、`-F /dev/null`を製品根拠にしない
+- production system SSHは2026-09-10に実ホスト側で正常と再確認した。symlinkはroot所有、参照先root:root 0644、通常system SSHでUbuntu UID 1000への接続成功。前回サンドボックス内で観測したowner不正をホストの再発と断定した記述は撤回する。設定変更は不要。
 - commit `4722cfa`由来の採用candidateはhostの`/tmp/llm-manager-release-candidate-4722cfa/`にlocal/remote各1 artifactだけを0644で保持。local SHA-256 `25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remote `45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`
-- candidate setに紐付けたUbuntu local/remote・Debian local installed-environment SBOMとQt package license reviewはpre-final Gateを完了。次はDebian desktopの通常login後の実display/menu、管理者によるSSH config再修復後の通常system SSH完成GUI disconnect/reconciliation Gate、`UNRELEASED`解除判断とfinal artifact再build/lifecycle/SBOM
+- candidate環境SBOM採取とDebian実display/menuはpre-final Gate済み。全license obligationは未完了。次は通常system SSHの完成GUI disconnect/reconciliation、`UNRELEASED`解除判断とfinal artifact再build/lifecycle/SBOM。
 
 ## 完成済みproduction routeと安全境界
 
@@ -273,7 +275,7 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 2. VMを使う場合は現在state/IP/guest-agent疎通をread-only確認する。電源断後のIPを固定値として扱わない
 3. host `/tmp/llm-manager-release-candidate-4722cfa/`のlocal/remote artifact hashを上記値と再照合し、同じcandidate setに紐付けたUbuntu local/remote・Debian local resolved-environment SBOMとQt package license reviewを進める。VMごとに開始package集合を保存し、Ubuntuは一時snapshot、Debianは追加packageの固定名によるexact cleanupを使う
 4. 通常のproduction system `ssh`でUbuntuの完成GUI SSH user Apply disconnect/reconciliation Gateを行う。`-F /dev/null`を代替根拠にせず、実設定・backup・keyを使う場合は一時snapshot内のdisposable targetに限定する
-5. Debian desktopが通常ログイン済みなら、candidate hash検証後、desktop menuからの実display起動を限定Gateとして行う。ログインがなければpasswordやsynthetic loginを使わず保留する
+5. Debian candidateの実display/menuは2026-09-10完了。最終artifactで再実行する。loginctlと実画面でsession状態を確認し、guest-get-usersの空一覧だけで保留しない
 6. resolved-environment SBOM、Qt license review、実display/SSH Gate後に`debian/changelog`の`UNRELEASED`解除を判断し、最終commitから両artifactを再buildする。final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証をrelease checklistに沿って行う。署名鍵は自動選択しない
 7. local root/SSH root Applyとlocal root/SSH user/root restoreは専用protocolと根拠が揃うまでfail closedを維持する。既存protocolから推測実装しない
 8. 合成layout/close Gateを実display accessibility完了とは扱わず、cancelを確認しないtaskを強制終了しない
@@ -281,7 +283,7 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 ## Phase 6残件分類
 
 - 完了: 利用者向けbackup/rollback/recovery文書、security/privacy review、直接依存SBOM/license notice、local user/SSH user Apply、local user restore、主要performance sample、長文layout、協力的workerと有限のcancel非協力区間のclose待機UX
-- MVP blocker: Debian実display/menu Gate、resolved-environment SBOM、Qt package license review、`UNRELEASED`解除後のfinal lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
+- MVP blocker: 最終artifactのresolved-environment SBOM、全license obligationのreview、`UNRELEASED`解除後のfinal lifecycle（Debian実display/menu再実行を含む）、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
 - acceptance/hardening: 実Agent相当の長時間負荷、実display/screen reader accessibility、通常system SSHによる完成GUI SSH切断再Gate
 - Post-MVP: 複数host、自動benchmark、追加client/runtime、telemetry履歴、外部rule配布
 
