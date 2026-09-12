@@ -19,6 +19,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-13 ff7913b Debian lifecycle/AT-SPI完了**: fresh/reinstall/remove/再fresh/purge、UID1000 isolated import、英日Wayland AT-SPIの用途/label relation/focusable/内部ID非露出、Alt+F4 exit 0成功。追加12件を明示purge後baseline完全一致、転送deb削除、両VM running。詳細: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。旧版upgrade/menu再操作/Orca音声は未実施。次はSSH/SBOM等の残Gate。現在・次ともPhase 6。
+
 - **2026-09-13 ff7913b Ubuntu local/remote lifecycle完了**: 新candidate両debでupgrade/reinstall/remove/fresh install/purge、dpkg検査、保全path不変を確認。localはUID1000 installed isolated importとQt offscreen起動/close成功。remoteは歴史的0.1.0~dev0からのupgrade、metadata/owner/mode/private runtime/local GUI非混入成功。別々のsnapshot復元後baseline完全一致、一時snapshot削除、Ubuntu running。詳細: `docs/validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md`。次は新candidate Debian/SSH/SBOM残Gate。現在・次ともPhase 6。
 
 - **2026-09-13 ff7913b candidate再現build完了**: local/remote両debを同commitのtracked sourceから独立2回build/verifyし、双方byte完全一致。各local build内806 test成功。採用先 `/tmp/llm-manager-candidate-ff7913b-20260913/`。local hashはaccessibility検証済みoverlay artifactと同じ`351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243`、remoteは`830f50b2b22984bba9622d10cca81a54571e101655f0fbd53c7a7fe76b774d2d`。詳細: `docs/validation/phase6-candidate-rebuild-2026-09-13.md`。次は新candidateのOS/remote/SSH/SBOM残Gate。以降の再現build予定は完了済み。現在・次ともPhase 6。

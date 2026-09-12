@@ -10,6 +10,8 @@
 
 ## 現在位置
 
+- 2026-09-13最新: ff7913b Debian fresh/reinstall/remove/再fresh/purgeと英日Wayland AT-SPIを完了。label relation/用途/内部ID非露出と通常終了に成功。追加12件だけをpurgeしbaseline完全一致、deb削除、両VM running。詳細: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。次はSSH/SBOM残Gate。Debian旧版upgrade、menu再操作、Orca音声聴取は未完了。
+
 - 2026-09-13最新: ff7913b由来local/remoteのUbuntu lifecycleは完了。両Gateでupgrade/reinstall/remove/fresh/purge成功、running復元後baseline完全一致、一時snapshot削除済み。localはUID1000 offscreen Qt起動/closeも成功。詳細: `docs/validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md`。次は同candidateのDebian/SSH/SBOM残Gate。
 
 - Phase 0〜5完了、現在・次ともPhase 6。release versionは0.1.0、UNRELEASEDのまま。
@@ -113,7 +115,7 @@ accessibility修正確認用local deb:
    過去の「追加11依存」などを再確認なしに固定しない。autoremoveや既存依存の削除は禁止。
    先に復元方法を確定し、導入→検証→cleanup→開始値照合まで完了させる。
 2. ff7913bからの両deb再現buildとUbuntu local/remote lifecycleは完了。
-   新candidate hashを確認してDebian lifecycle/実displayの再検証を進める。
+   Debian fresh/reinstall/remove/purgeと英日Wayland AT-SPIも完了。旧版upgradeは未実施。
 3. 別マシン間SSH切断、SBOM/license等の残Gateへ進む。60分Agent Gateは完了済み。
    Ubuntuの一時snapshotを使う場合は、その時点の開始状態を保存・復元する。
 4. `docs/release-checklist.md` の未完了項目を継続する。
