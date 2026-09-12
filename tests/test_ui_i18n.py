@@ -28,6 +28,18 @@ class UiI18nTests(unittest.TestCase):
         self.assertIn("Ollama設定ルール", Catalog("ja").text(key))
         self.assertNotIn("composition", Catalog("en").text(key))
 
+    def test_apply_status_does_not_mislabel_production_as_sandbox(self) -> None:
+        for locale in ("en", "ja"):
+            for key in ("results.running", "results.completed", "results.failed"):
+                with self.subTest(locale=locale, key=key):
+                    message = Catalog(locale).text(key, status="rolled_back", error="validation failed")
+                    self.assertNotIn("sandbox", message.lower())
+                    self.assertIn("Apply", message)
+                    if key != "results.running":
+                        self.assertIn("rolled_back", message)
+                    if key == "results.failed":
+                        self.assertIn("validation failed", message)
+
 
 if __name__ == "__main__":
     unittest.main()

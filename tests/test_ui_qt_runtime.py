@@ -836,6 +836,92 @@ class QtRuntimeTests(unittest.TestCase):
         finally:
             window.close()
 
+    def test_ssh_disconnect_reconciliation_reaches_gui_without_mutation_retry(self) -> None:
+        from PySide6.QtCore import QEventLoop, QTimer
+        from PySide6.QtWidgets import QLabel, QPushButton
+
+        from llm_manager.application.apply_availability import (
+            ApplyRoute, AssessProductionApplyAvailability,
+        )
+        from llm_manager.domain.enums import PlanStatus
+        from llm_manager.infrastructure.journal import JournalStatus
+        from llm_manager.ui.qt_window import MainWindow
+        from llm_manager.ui.workflow import GuiPresenter, GuiState, GuiStep, WorkflowStatus
+        from tests.test_ssh_user_apply_coordinator import _Case
+
+        # Real coordinator/journal and Qt worker; transport and validation are injected.
+        scenarios = (
+            ({}, PlanStatus.COMMITTED, []),
+            ({"validation_passed": False, "rollback_fails": True},
+             PlanStatus.ROLLED_BACK, ["rollback", "read"]),
+            ({"apply_read_fails": True}, PlanStatus.RECOVERY_REQUIRED, []),
+            ({"validation_passed": False, "rollback_fails": True,
+              "rollback_read_fails": True},
+             PlanStatus.RECOVERY_REQUIRED, ["rollback", "read"]),
+        )
+        for options, expected, rollback_calls in scenarios:
+            with self.subTest(options=options), _Case(apply_fails=True, **options) as case:
+                factory_calls = []
+
+                def factory(plan, report, approval):
+                    factory_calls.append((plan, report, approval))
+                    return lambda token: case.coordinator.execute(
+                        plan, report, approval, "operation-1", token
+                    )
+
+                presenter = GuiPresenter()
+                window = MainWindow(
+                    lambda _host: lambda _token: case.report,
+                    presenter=presenter,
+                    apply_task_factory=factory,
+                    apply_availability_service=AssessProductionApplyAvailability(
+                        frozenset({ApplyRoute.SSH_USER})
+                    ),
+                )
+                try:
+                    changes = case.plan.change_set
+                    presenter._state = GuiState(
+                        step=GuiStep.RESULTS, status=WorkflowStatus.SUCCESS,
+                        selected_host_id=case.report.host.host_id, report=case.report,
+                        plan_hash=changes.content_hash,
+                        approved_plan_hash=changes.content_hash,
+                        approval_id=case.approval.approval_id,
+                    )
+                    window._recommendation_plan = case.plan
+                    window._approval_record = case.approval
+                    window._render()
+                    window._navigation.setCurrentRow(list(GuiStep).index(GuiStep.RESULTS))
+                    window.show()
+                    button = window.findChild(QPushButton, "run-sandbox-apply")
+                    summary = window.findChild(QLabel, "results-summary")
+                    self.assertTrue(button.isEnabled())
+                    self.assertTrue(button.isVisible())
+                    button.click()
+                    loop = QEventLoop()
+                    poll = QTimer()
+                    poll.timeout.connect(
+                        lambda: loop.quit() if expected.value in summary.text() else None
+                    )
+                    poll.start(5)
+                    timeout = QTimer()
+                    timeout.setSingleShot(True)
+                    timeout.timeout.connect(loop.quit)
+                    timeout.start(2000)
+                    loop.exec()
+                    poll.stop()
+                    timeout.stop()
+                    self.assertIn(expected.value, summary.text())
+                    self.assertTrue(summary.isVisible())
+                    self.assertEqual(factory_calls, [(case.plan, case.report, case.approval)])
+                    self.assertEqual(case.apply.calls, ["apply", "read"])
+                    self.assertEqual(case.rollback.calls, rollback_calls)
+                    self.assertEqual(
+                        case.journal.load("operation-1").status,
+                        JournalStatus(expected.value),
+                    )
+                finally:
+                    window.close()
+
     def test_results_shows_rollback_and_recovery_required_from_local_composition(self) -> None:
         import hashlib
         import tempfile

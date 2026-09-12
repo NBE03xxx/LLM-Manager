@@ -1,0 +1,29 @@
+{
+  "scope": "production SubprocessRunner cancellation of dedicated SSH; finite remote sleep; no Qt/Apply/network-cut",
+  "samples": [
+    {
+      "elapsed_until_cancelled_ms": 323.972,
+      "cancel_to_local_reaped_ms": 1.421,
+      "parent_cpu_ms": 2.02,
+      "remote_ready_before_cancel": true,
+      "local_ssh_reaped": true,
+      "remote_child_absent_after_bounded_wait": true
+    },
+    {
+      "elapsed_until_cancelled_ms": 329.319,
+      "cancel_to_local_reaped_ms": 1.35,
+      "parent_cpu_ms": 1.181,
+      "remote_ready_before_cancel": true,
+      "local_ssh_reaped": true,
+      "remote_child_absent_after_bounded_wait": true
+    },
+    {
+      "elapsed_until_cancelled_ms": 333.486,
+      "cancel_to_local_reaped_ms": 1.429,
+      "parent_cpu_ms": 2.633,
+      "remote_ready_before_cancel": true,
+      "local_ssh_reaped": true,
+      "remote_child_absent_after_bounded_wait": true
+    }
+  ]
+}

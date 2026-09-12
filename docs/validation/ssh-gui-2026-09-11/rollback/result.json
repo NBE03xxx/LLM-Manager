@@ -1,0 +1,28 @@
+{
+  "mode": "rollback",
+  "status": "rolled_back",
+  "error": "runtime validation failed",
+  "events": [
+    "apply.invoke",
+    "apply.server_completed",
+    "result.read",
+    "rollback.invoke",
+    "rollback.server_completed",
+    "result.read"
+  ],
+  "validations": [
+    {
+      "check": "opencode.installed",
+      "status": "passed",
+      "actual": "installed"
+    },
+    {
+      "check": "opencode.config.parse",
+      "status": "failed",
+      "actual": "opencode.config.parse_failed"
+    }
+  ],
+  "gui_summary": "Sandbox Apply result: rolled_back; runtime validation failed",
+  "fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+  "target_sha256": "b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088"
+}

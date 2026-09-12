@@ -1,0 +1,13 @@
+パッケージリストを読み込んでいます...
+依存関係ツリーを作成しています...
+状態情報を読み取っています...
+Solving dependencies...
+以下のパッケージが新たにインストールされます:
+  llm-manager-remote-helper
+以下のパッケージはアップグレードされます:
+  llm-manager
+アップグレード: 1 個、新規インストール: 1 個、削除: 0 個、保留: 38 個。
+Inst llm-manager [0.1.0~dev0-1] (0.1.0 local-deb [all])
+Inst llm-manager-remote-helper (0.1.0 local-deb [all])
+Conf llm-manager (0.1.0 local-deb [all])
+Conf llm-manager-remote-helper (0.1.0 local-deb [all])

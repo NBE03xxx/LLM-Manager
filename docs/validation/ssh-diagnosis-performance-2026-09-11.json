@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "python": "3.14.4",
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "scope": "production SSH DiagnosticTaskFactory; read-only; no interactive auth",
+  "limitations": "sequential baseline; no Qt event-gap or Agent inference measurement; RSS is process lifetime peak, excluding SSH children",
+  "samples": [
+    {
+      "status": "complete",
+      "elapsed_ms": 1621.208,
+      "process_cpu_ms": 9.63,
+      "process_peak_rss_kib": 109992,
+      "system_observed": true,
+      "hardware_observed": true,
+      "ollama_connectivity": "unavailable",
+      "opencode_installed": false,
+      "runtime_prerequisites_available": false
+    },
+    {
+      "status": "complete",
+      "elapsed_ms": 1614.899,
+      "process_cpu_ms": 10.168,
+      "process_peak_rss_kib": 109992,
+      "system_observed": true,
+      "hardware_observed": true,
+      "ollama_connectivity": "unavailable",
+      "opencode_installed": false,
+      "runtime_prerequisites_available": false
+    },
+    {
+      "status": "complete",
+      "elapsed_ms": 1632.497,
+      "process_cpu_ms": 10.008,
+      "process_peak_rss_kib": 109992,
+      "system_observed": true,
+      "hardware_observed": true,
+      "ollama_connectivity": "unavailable",
+      "opencode_installed": false,
+      "runtime_prerequisites_available": false
+    },
+    {
+      "status": "complete",
+      "elapsed_ms": 1605.924,
+      "process_cpu_ms": 10.949,
+      "process_peak_rss_kib": 109992,
+      "system_observed": true,
+      "hardware_observed": true,
+      "ollama_connectivity": "unavailable",
+      "opencode_installed": false,
+      "runtime_prerequisites_available": false
+    },
+    {
+      "status": "complete",
+      "elapsed_ms": 1583.235,
+      "process_cpu_ms": 9.243,
+      "process_peak_rss_kib": 109992,
+      "system_observed": true,
+      "hardware_observed": true,
+      "ollama_connectivity": "unavailable",
+      "opencode_installed": false,
+      "runtime_prerequisites_available": false
+    }
+  ],
+  "elapsed_median_ms": 1614.899,
+  "elapsed_max_ms": 1632.497
+}
