@@ -49,5 +49,10 @@ guestの一時treeは削除し、package、設定、service、VM電源状態、s
 
 ## 残件
 
-同じ測定器を既定3600秒で完走し、結果を保存・reviewする。これは約60分を要するため、
-中断せず監視できる実行枠で行う。最終artifact確定後にも必要に応じて再実行する。
+2026-09-13に同じ測定器を既定3600秒で完走し、全15 checkに合格した。
+実行時間3600.116秒、最大event gap 66.258 ms、cancel回収53.625 ms、親RSS増加
+3,028 KiB、child peak 50,252 KiB。詳細と復元証拠は
+[60分Gate記録](phase6-long-running-agent-2026-09-13.md)を参照する。
+
+必須60分Gateは完了。任意の4時間soakと実モデル推論を含む追加試験は未実施。
+最終artifact確定後の再実行要否は、source差分とrelease checklistに基づいて判断する。

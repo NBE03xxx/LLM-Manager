@@ -7,7 +7,8 @@
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。SSH Applyと実displayは未完了。
-  - 長時間Agent Gateは[60分連続＋GUI cancel](validation/phase6-long-running-agent-plan-2026-09-12.md)と定義した。最大event gap 250 ms、cancel回収1秒、RSS/CPU/child上限等を固定し、Ubuntu実Qtの15秒preflightは成功。`release_duration_met=false`のため60分完走は未完了。
+  - 長時間Agent Gateは[60分連続＋GUI cancel](validation/phase6-long-running-agent-plan-2026-09-12.md)と定義し、2026-09-13に[3600秒Gate](validation/phase6-long-running-agent-2026-09-13.md)を完走。全15 checkに合格し、最大event gap 66.258 ms、cancel回収53.625 ms、親RSS増加3,028 KiB、child peak 50,252 KiB。合成Agent相当負荷であり、任意4時間soak・実モデル推論試験の完了は意味しない。
+  - 2026-09-12: [Ubuntu AT-SPI accessibility Gate](validation/phase6-accessibility-atspi-2026-09-12.md)で、旧b15a984 candidateのcombo box用途欠落と内部ID露出を検出して修正。修正版は英日label relation、用途description、focusable/enabled、内部ID非露出、通常終了に成功し、Ubuntu system PySide6のfocused 38 testも成功（37成功・1 expected skip）。未コミットoverlay artifactでのpre-final検証であり、commit後candidateと最終artifactで再実行する。
   - Ubuntu 26.04のproduction local read-only診断で単一sample基準値を取得済み。`partial`、25.234 ms、最大event gap 10.383 ms、最大RSS 67,352 KiB。complete/SSH/Apply系の複数sampleとhardware基準は未完了。
   - 2026-09-11: [通常SSH診断baseline](validation/phase6-ssh-diagnosis-performance-2026-09-11.md)の5 sampleで中央値1614.899 ms、最大1632.497 ms。reportはcompleteだがOllama/OpenCodeのruntime前提条件は未成立。Qt event gap・実Agent・SSH Apply性能を完了扱いにしない。
   - 2026-09-12: [実SSH cancel baseline](validation/phase6-ssh-cancel-2026-09-12.md)の3 sampleでremote ready後のcancel→local SSH回収1.350〜1.429 ms、remote有限process不在を確認。設定変更なし。短いsleep workloadの境界検証でありQt/Agent/Apply/物理回線断の代替ではない。
@@ -39,7 +40,7 @@
 
 ## 3. Reproducible build set
 
-2026-09-12の[修正後candidate再build](validation/phase6-candidate-rebuild-2026-09-12.md)で、commit `b15a984` から両debを独立2回build/verifyしbyte完全一致を確認。各local build内806 test成功。新candidateのOS Gateは旧4722cfa由来の証拠と区別して実行する。UNRELEASEDを維持しているため、以下の最終artifact項目は未完了のまま。
+2026-09-12の[修正後candidate再build](validation/phase6-candidate-rebuild-2026-09-12.md)で、commit `b15a984` から両debを独立2回build/verifyしbyte完全一致を確認。各local build内806 test成功。その後のaccessibility修正によりb15a984 artifactは現行sourceの候補ではなくなった。修正commitから両debを再buildするまで、修正確認用の未コミットoverlay artifactを採用candidateと呼ばない。UNRELEASEDを維持しているため、以下の最終artifact項目は未完了のまま。
 
 2026-09-09の`0.1.0` candidate compositionで、commit `4722cfa`からlocal/remote debを2回ずbuildして両方のbyte一致とverifier成功を確認した。local SHA-256は`25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remoteは`45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`。展開監査でELF/shared library、bytecode cache、third-party vendored moduleがないことも確認した。`UNRELEASED`解除後の最終commitから再実行するため、下記の最終artifact項目は未完了のままとする。詳細は[composition記録](validation/phase6-0.1.0-candidate-composition-2026-09-09.md)を参照する。
 

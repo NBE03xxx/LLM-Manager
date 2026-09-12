@@ -15,9 +15,13 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 - 2026-09-06までのPhase 6変更はcommit `5d3a384`として`origin/main`へpush済み
 - 2026-09-07 publication review開始時のworktreeはclean。再開時は`git status --short`とdiffを確認し、以後の変更を保持する
 - 2026-09-09にhost system SSH configのroot ownershipが管理者により復旧され、MVP route freeze commit `8854232`を通常のsystem SSHで`origin/main`へpush済み
-- 2026-09-09の最新push済み検証commitは`b6ffee1`（candidate environment SBOM / Qt review）。その前は`c204f34`（Debian lifecycle Gate）、`68ad48d`（Ubuntu lifecycle Gate）、`f32ec6b`（再現可能candidate build）。引き継ぎ文書更新commitはこの行の後に増えるため、再開時にHEADと`origin/main`の一致を確認する
+- 2026-09-12の最新push済み検証commitは`8056850`。再開時にHEADと`origin/main`の一致を確認する
 
 ## 最新再開サマリー
+
+- **2026-09-13 60分long-running Agent Gate完了（最新）**: Ubuntu system Python 3.14.4 / PySide6 6.10.2で3600.116秒を完走し、全15 checkに合格。最大event gap 66.258 ms、cancel→worker/child回収53.625 ms、親RSS増加3,028 KiB、親CPU比率0.007387、child peak 50,252 KiB。`running → cancel_requested → failed / operation_cancelled`、child reap、worker inactive、watchdog不使用を確認。初回archiveの測定script欠落は負荷開始前exit 2として別証跡化し、修正archiveで3600秒を最初から実行。guest `/tmp` cleanup後baseline完全一致、Ubuntu running。合成Agent相当負荷で、実モデル推論・network API・任意4時間soakではない。詳細: `docs/validation/phase6-long-running-agent-2026-09-13.md`。次はaccessibility修正のreview/commit、同一commit両deb再現build、SSH/SBOM等の残Gate。現在・次ともPhase 6。
+
+- **2026-09-12 Ubuntu AT-SPI accessibility Gate完了**: b15a984由来candidateでcombo boxの用途description/label relation欠落と内部page/scroll ID露出を検出し、可視英日label、buddy、accessible description、内部ID非露出へ修正。commit `8056850`のtracked source＋今回の4ファイルだけで作った修正確認用local deb（SHA-256 `351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243`）をUbuntu通常Waylandへ導入した。英日AT-SPI treeで`label_for`/`labelled_by`、用途、focusable/enabled、通常終了が成功。Ubuntu system PySide6 focused 38件は37成功・1 expected skip、隔離source全806件成功。snapshot復元後baseline完全一致、一時snapshot削除、VM running。修正版は未コミットoverlay artifactであり採用candidateではない。旧b15a984 artifactは現行sourceに対してobsolete。詳細: `docs/validation/phase6-accessibility-atspi-2026-09-12.md`。現在・次ともPhase 6。
 
 - **2026-09-12 長時間Agent Gate定義・preflight完了**: release必須を60分連続のAgent相当workload＋GUI cancelと定義。event gap 250 ms、cancel回収1秒、親RSS増加64 MiB、親CPU25%、child RSS128 MiB等を固定する測定scriptを追加。Ubuntu実Qtの15秒preflightは最大gap 55.976 ms、cancel 6.198 ms、RSS増加2,640 KiBで全preflight check成功。`release_duration_met=false`のため60分Gateは未完了。VMの/tmpだけを使用・削除し、package/設定/service/snapshot/電源状態は不変。詳細: `docs/validation/phase6-long-running-agent-plan-2026-09-12.md`。現在・次ともPhase 6。
 
@@ -293,8 +297,8 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 
 1. `git status --short`と未コミットdiffを確認し、Phase 6の既存変更をすべて保持する
 2. VMを使う場合は現在state/IP/guest-agent疎通をread-only確認する。電源断後のIPを固定値として扱わない
-3. 最新candidate `/tmp/llm-manager-candidate-b15a984-20260912/` の両hashを最新サマリーと照合してOS/実display/SSH等を検証する。旧 `/tmp/llm-manager-release-candidate-4722cfa/` の証拠と混用しない。VMごとに開始package集合を保存し、Ubuntuは一時snapshot、Debianは追加packageの固定名によるexact cleanupを使う。最終release setのSBOMは最終artifactに紐付けて再採取する
-4. 通常のproduction system `ssh`でUbuntuの完成GUI SSH user Apply disconnect/reconciliation Gateを行う。`-F /dev/null`を代替根拠にせず、実設定・backup・keyを使う場合は一時snapshot内のdisposable targetに限定する
+3. accessibility修正によりb15a984 candidateはobsolete。未コミットoverlay artifactはAT-SPI修正確認だけに使い、採用candidateと呼ばない。修正をreview/commit後、同一commitからlocal/remote両debを独立2回build/verifyして新しいhashを固定する
+4. 60分長時間Agent Gateは2026-09-13完了。次は通常のproduction system `ssh`でUbuntuの完成GUI SSH user Apply disconnect/reconciliation Gateを行う。`-F /dev/null`を代替根拠にせず、実設定・backup・keyを使う場合は一時snapshot内のdisposable targetに限定する
 5. Debian candidateの実display/menuは2026-09-10完了。最終artifactで再実行する。loginctlと実画面でsession状態を確認し、guest-get-usersの空一覧だけで保留しない
 6. resolved-environment SBOM、Qt license review、実display/SSH Gate後に`debian/changelog`の`UNRELEASED`解除を判断し、最終commitから両artifactを再buildする。final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証をrelease checklistに沿って行う。署名鍵は自動選択しない
 7. local root/SSH root Applyとlocal root/SSH user/root restoreは専用protocolと根拠が揃うまでfail closedを維持する。既存protocolから推測実装しない
@@ -304,7 +308,7 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 
 - 完了: 利用者向けbackup/rollback/recovery文書、security/privacy review、直接依存SBOM/license notice、local user/SSH user Apply、local user restore、主要performance sample、長文layout、協力的workerと有限のcancel非協力区間のclose待機UX
 - MVP blocker: 最終artifactのresolved-environment SBOM、全license obligationのreview、`UNRELEASED`解除後のfinal lifecycle（Debian実display/menu再実行を含む）、checksum/OpenPGP署名、signed tag、公開後再検証。release署名鍵は未指定
-- acceptance/hardening: 実Agent相当の長時間負荷、実display/screen reader accessibility、通常system SSHによる完成GUI SSH切断再Gate
+- acceptance/hardening: Orca音声の人手聴取、通常system SSHによる完成GUI SSH切断再Gate。自動AT-SPI英日Gateと合成Agent相当60分Gateは修正版で完了
 - Post-MVP: 複数host、自動benchmark、追加client/runtime、telemetry履歴、外部rule配布
 
 ## 安全境界

@@ -178,6 +178,15 @@ else:
             self._profile_selector.setAccessibleName("profile-selector")
             for profile in PROFILES:
                 self._profile_selector.addItem(profile.name, profile.profile_id)
+            self._host_label.setAccessibleName("selected-host")
+            self._host_label.setObjectName("selected-host")
+            self._host_label.setBuddy(self._host_selector)
+            self._language_label = QLabel()
+            self._language_label.setObjectName("language-label")
+            self._language_label.setBuddy(self._language)
+            self._profile_label = QLabel()
+            self._profile_label.setObjectName("profile-label")
+            self._profile_label.setBuddy(self._profile_selector)
             self._recommendation_summary = QLabel()
             self._recommendation_summary.setObjectName("recommendation-summary")
             self._recommendation_summary.setAccessibleName("recommendation-summary")
@@ -303,19 +312,19 @@ else:
         def _make_page(self, step: GuiStep) -> QWidget:
             page = QWidget()
             page.setObjectName(f"page-{step.value}")
-            page.setAccessibleName(f"page-{step.value}")
+            page.setAccessibleName("")
             layout = QVBoxLayout(page)
             if step is GuiStep.HOSTS:
-                self._host_label.setAccessibleName("selected-host")
-                self._host_label.setObjectName("selected-host")
                 layout.addWidget(self._host_label)
                 layout.addWidget(self._host_selector)
+                layout.addWidget(self._language_label)
                 layout.addWidget(self._language)
             elif step is GuiStep.DIAGNOSE:
                 layout.addWidget(self._status_label)
                 layout.addWidget(self._diagnose_button)
                 layout.addWidget(self._cancel_button)
             elif step is GuiStep.RECOMMENDATIONS:
+                layout.addWidget(self._profile_label)
                 layout.addWidget(self._profile_selector)
                 layout.addWidget(self._recommendation_summary)
                 layout.addWidget(self._recommendation_list)
@@ -347,7 +356,6 @@ else:
             else:
                 placeholder = QLabel()
                 placeholder.setObjectName(f"placeholder-{step.value}")
-                placeholder.setAccessibleName(f"placeholder-{step.value}")
                 layout.addWidget(placeholder)
             layout.addStretch(1)
             return page
@@ -355,7 +363,7 @@ else:
         def _scrollable_page(self, step: GuiStep) -> QScrollArea:
             scroll = QScrollArea()
             scroll.setObjectName(f"scroll-{step.value}")
-            scroll.setAccessibleName(f"scroll-{step.value}")
+            scroll.setAccessibleName("")
             scroll.setWidgetResizable(True)
             scroll.setWidget(self._make_page(step))
             return scroll
@@ -875,7 +883,9 @@ else:
         def _render(self) -> None:
             state = self._presenter.state
             self.setWindowTitle(self._catalog.text("app.title"))
-            self._host_label.setText(self._host_selector.currentText())
+            self._host_label.setText(self._catalog.text("nav.hosts"))
+            self._language_label.setText(self._catalog.text("label.language"))
+            self._profile_label.setText(self._catalog.text("label.profile"))
             self._status_label.setText(self._catalog.text(
                 "status.closing_wait" if self._close_pending else f"status.{state.status.value}"
             ))
@@ -907,7 +917,7 @@ else:
                 page = self._pages.widget(index)
                 labels = page.findChildren(QLabel)
                 for label in labels:
-                    if label.accessibleName() == f"placeholder-{step.value}":
+                    if label.objectName() == f"placeholder-{step.value}":
                         label.setText(self._catalog.text(f"nav.{step.value}"))
             self._render_recommendations()
             self._render_review()
@@ -923,9 +933,14 @@ else:
         def _refresh_accessible_names(self) -> None:
             self._navigation.setAccessibleName(self._catalog.text("app.title"))
             self._host_selector.setAccessibleName(self._catalog.text("nav.hosts"))
+            self._host_selector.setAccessibleDescription(self._catalog.text("nav.hosts"))
             self._language.setAccessibleName("English / 日本語")
+            self._language.setAccessibleDescription(self._catalog.text("label.language"))
             self._profile_selector.setAccessibleName(
-                self._catalog.text("nav.recommendations")
+                self._catalog.text("label.profile")
+            )
+            self._profile_selector.setAccessibleDescription(
+                self._catalog.text("label.profile")
             )
             self._recommendation_list.setAccessibleName(
                 self._catalog.text("nav.recommendations")
@@ -955,6 +970,8 @@ else:
                 widget.setAccessibleName(widget.text())
             for label in (
                 self._host_label,
+                self._language_label,
+                self._profile_label,
                 self._status_label,
                 self._recommendation_summary,
                 self._review_summary,

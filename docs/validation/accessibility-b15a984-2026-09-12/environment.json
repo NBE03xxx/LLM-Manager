@@ -1,0 +1,8 @@
+{
+  "candidate_sha256": "292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8",
+  "source_commit": "b15a98454ddf9e397333350d371b35cc2ed8fdd8",
+  "wayland_display": "wayland-0",
+  "toolkit_accessibility": "false",
+  "atspi": "available",
+  "orca": "installed"
+}

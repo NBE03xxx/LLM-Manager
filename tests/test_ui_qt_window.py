@@ -71,6 +71,10 @@ class QtWindowBoundaryTests(unittest.TestCase):
         self.assertIn("def _refresh_accessible_names", source)
         self.assertIn("widget.setAccessibleName(widget.text())", source)
         self.assertIn("label.setAccessibleName(label.text())", source)
+        self.assertIn("self._host_label.setBuddy(self._host_selector)", source)
+        self.assertIn("self._language_label.setBuddy(self._language)", source)
+        self.assertIn("self._profile_label.setBuddy(self._profile_selector)", source)
+        self.assertIn("setAccessibleDescription", source)
 
     def test_root_restore_entry_is_guarded_by_separate_root_availability_check(self) -> None:
         source = QT_WINDOW.read_text(encoding="utf-8")

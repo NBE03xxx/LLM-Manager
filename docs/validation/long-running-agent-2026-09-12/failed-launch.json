@@ -1,0 +1,8 @@
+{
+  "exited": true,
+  "exit_code": 2,
+  "stdout": "",
+  "stderr": "/usr/bin/python3: can't open file '/tmp/phase6-long-running-agent-source/packaging/measure-long-running-agent.py': [Errno 2] No such file or directory\n",
+  "out_truncated": false,
+  "err_truncated": false
+}

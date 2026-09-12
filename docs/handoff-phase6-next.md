@@ -1,4 +1,4 @@
-# 次チャット用引き継ぎプロンプト（2026-09-12）
+# 次チャット用引き継ぎプロンプト（2026-09-13）
 
 以下を新しいチャットで実行してください。
 
@@ -11,16 +11,16 @@
 ## 現在位置
 
 - Phase 0〜5完了、現在・次ともPhase 6。release versionは0.1.0、UNRELEASEDのまま。
-- branch `main`、再開元commitは `3078604`。直前は `cf20504`、`b15a984`。最新HEADと未コミット差分は再取得する。
-- この3 commitはローカル保存済み・未push。自動的に公開・署名しない。
-- 本引き継ぎ作成直前のworktreeはclean。本ファイル自体は未コミットで追加している。
+- branch `main`。`8056850`以降のaccessibility修正、回帰test、検証証拠、本文書更新をまとめてcommit/pushする承認を取得済み。保存後のcommit IDと同期状態は `git log -1`、`git status -sb` で再取得する。
 - 再開時に `git status --short` を確認し、利用者の変更を保持する。
 - 前チャットは5時間枠の残り10%で停止。その後再開し、新candidate Debian検証も完了・cleanup済み。
 - 本文からの再開後、新candidate remote helper lifecycleも完了・cleanup済み。詳細は下記。
 
-## 採用する新candidate（旧candidateと混用禁止）
+## candidate状態（旧candidateと混用禁止）
 
-source commit: `b15a98454ddf9e397333350d371b35cc2ed8fdd8`
+commit `b15a98454ddf9e397333350d371b35cc2ed8fdd8`由来の次のcandidateは、
+accessibility修正により現行sourceに対してobsolete。過去Gateの証拠として保持するが、
+今後の採用candidateや最終artifactとして使わない。
 
 保存先: `/tmp/llm-manager-candidate-b15a984-20260912/`
 
@@ -29,16 +29,32 @@ source commit: `b15a98454ddf9e397333350d371b35cc2ed8fdd8`
 - `llm-manager-remote-helper_0.1.0_all.deb`
   - SHA-256: `ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc`
 
-引き継ぎ保存時に両hashを再確認済み。再開時も存在/hashを確認する。
 同commitのtracked sourceから独立2回build/verifyしbyte完全一致。
 各build内806 test（767成功・39 expected skip）が成功。
 旧 `/tmp/llm-manager-release-candidate-4722cfa/` も残るが、新candidateの検証根拠にはしない。
 
+accessibility修正確認用local deb:
+
+- `/tmp/llm-manager-accessibility-fix-20260912/llm-manager_0.1.0_all.deb`
+- SHA-256: `351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243`
+- basisはcommit `8056850`のtracked source、overlayは今回変更したsource/test 4ファイルだけ。
+- 未コミットoverlay artifactなので採用candidateや再現可能buildの根拠にしない。
+- 修正をcommit後、同一commitからlocal/remote両debを独立2回build/verifyする。
+
 ## 完了済み（再実行不要）
 
-0. 長時間Agentのrelease Gateを60分連続＋GUI cancelと定義し、測定scriptを追加。
-   Ubuntu実Qtの15秒preflightは全必須check成功。ただし`release_duration_met=false`であり、
-   60分完走は未完了。詳細: `docs/validation/phase6-long-running-agent-plan-2026-09-12.md`。
+0. 長時間Agentのrelease Gateを60分連続＋GUI cancelと定義し、Ubuntu実Qtで完走。
+   3600.116秒、最大event gap 66.258 ms、cancel回収53.625 ms、親RSS増加3,028 KiB、
+   child peak 50,252 KiBで全15 check成功。guest `/tmp` cleanup後baseline完全一致。
+   合成Agent相当負荷で、実モデル推論・network API・任意4時間soakではない。詳細:
+   `docs/validation/phase6-long-running-agent-2026-09-13.md`。
+
+0a. Ubuntu通常Wayland/system AT-SPIの英日accessibility Gate。旧b15a984 candidateで
+    combo box用途とlabel relationの欠落、内部ID露出を検出して修正。修正版で
+    `label_for`/`labelled_by`、用途description、focusable/enabled、内部ID非露出、
+    Alt+F4通常終了が成功。Ubuntu system PySide6 focused 38件は37成功・1 expected skip。
+    snapshot復元後baseline完全一致、一時snapshot削除済み。詳細:
+    `docs/validation/phase6-accessibility-atspi-2026-09-12.md`。
 
 1. 新candidate remote helperをUbuntu一時snapshot内で検証。旧`0.1.0~dev0`からのupgrade、
    reinstall、remove、fresh install、purge、readiness metadata、root owner/mode、private
@@ -84,17 +100,21 @@ source commit: `b15a98454ddf9e397333350d371b35cc2ed8fdd8`
    追加packageだけの明示purgeによるexact cleanupを基本とする。
    過去の「追加11依存」などを再確認なしに固定しない。autoremoveや既存依存の削除は禁止。
    先に復元方法を確定し、導入→検証→cleanup→開始値照合まで完了させる。
-2. 新candidateのremote helper lifecycleは完了。別マシン間SSH切断、長時間Agent、
-   accessibility等の残Gateへ進む。
+2. accessibility修正をreviewし、commit後の同一sourceからlocal/remote両debを再現buildする。
+   b15a984 candidateのhashを新sourceへ流用しない。
+3. 別マシン間SSH切断、SBOM/license等の残Gateへ進む。60分Agent Gateは完了済み。
    Ubuntuの一時snapshotを使う場合は、その時点の開始状態を保存・復元する。
-3. `docs/release-checklist.md` の未完了項目を継続する。
-   長時間Agentは測定器の既定3600秒を中断せず監視できる枠で完走する。
-   新candidate/最終artifactのSBOM、accessibility、長時間Agent、署名等は未完了。
+4. `docs/release-checklist.md` の未完了項目を継続する。
+   新candidate/最終artifactのSBOM、Orca音声人手聴取、署名等は未完了。
    最終artifactでの反復はUNRELEASED解除後にも必要。
    署名鍵は未指定。秘密鍵の自動生成・推測選択・署名/公開はしない。
 
 ## 読むべき記録・再利用できる実装
 
+- `docs/validation/phase6-accessibility-atspi-2026-09-12.md`
+- `docs/validation/accessibility-fix-2026-09-12/gate.py`
+- `docs/validation/phase6-long-running-agent-2026-09-13.md`
+- `docs/validation/long-running-agent-2026-09-12/gate.py`
 - `docs/validation/phase6-candidate-rebuild-2026-09-12.md`
 - `docs/validation/phase6-ubuntu-candidate-display-2026-09-12.md`
 - `docs/validation/ubuntu-display-b15a984-2026-09-12/lifecycle.py`

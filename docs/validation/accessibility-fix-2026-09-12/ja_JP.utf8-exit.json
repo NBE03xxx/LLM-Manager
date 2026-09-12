@@ -1,0 +1,7 @@
+{
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "qt.accessibility.atspi: AtSpiAdaptor::applicationInterface does not implement \"GetApplicationBusAddress\" \"/org/a11y/atspi/accessible/root\"\n",
+  "out_truncated": false,
+  "err_truncated": false
+}

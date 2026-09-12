@@ -1,0 +1,121 @@
+{
+  "expected": {
+    "all_names": [
+      "LLM Manager",
+      "Hosts",
+      "Language",
+      "Optimization profile",
+      "Local",
+      "English",
+      "Balanced",
+      "Ready",
+      "Diagnose",
+      "Cancel"
+    ],
+    "controls": [
+      {
+        "name": "Local",
+        "role": "combo box",
+        "description": "Hosts"
+      },
+      {
+        "name": "English",
+        "role": "combo box",
+        "description": "Language"
+      },
+      {
+        "name": "Balanced",
+        "role": "combo box",
+        "description": "Optimization profile"
+      },
+      {
+        "name": "Diagnose",
+        "role": "button",
+        "description": ""
+      }
+    ],
+    "label_for": [
+      [
+        "Hosts",
+        "Local"
+      ],
+      [
+        "Language",
+        "English"
+      ],
+      [
+        "Optimization profile",
+        "Balanced"
+      ]
+    ]
+  },
+  "observed_names": [
+    "llm-manager",
+    "LLM Manager",
+    "",
+    "LLM Manager",
+    "Hosts",
+    "Diagnose",
+    "Recommendations",
+    "Review Changes",
+    "Apply / Results",
+    "Backup / Rollback",
+    "",
+    "",
+    "",
+    "",
+    "Hosts",
+    "Local",
+    "",
+    "Language",
+    "English",
+    "",
+    "",
+    "",
+    "",
+    "Ready",
+    "Diagnose",
+    "Cancel",
+    "",
+    "",
+    "",
+    "Optimization profile",
+    "Balanced",
+    "",
+    "",
+    "Recommendations",
+    "Review selected recommendations",
+    "",
+    "",
+    "",
+    "",
+    "Review Changes",
+    "",
+    "Approve reviewed changes",
+    "I understand that configuration secrets may be stored in plaintext.",
+    "",
+    "Prepare Apply",
+    "",
+    "",
+    "",
+    "",
+    "Run Apply",
+    "Cancel",
+    "",
+    "",
+    "",
+    "No backup evidence found.",
+    "Backup / Rollback",
+    "Refresh backup inventory",
+    "Select a backup to generate a metadata-only restore preview.",
+    "Approve this exact restore preview",
+    "Approve this exact restore preview",
+    "Explicit restore approval is required.",
+    "Run Restore",
+    "Cancel",
+    "System backup review is available. Each privileged step requires administrator authentication and explicit consent.",
+    "Restore system settings"
+  ],
+  "node_count": 65,
+  "result": "pass"
+}
