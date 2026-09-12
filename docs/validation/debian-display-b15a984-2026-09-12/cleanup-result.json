@@ -1,0 +1,7 @@
+{
+  "baseline_exact_match": true,
+  "dpkg_audit_empty": true,
+  "apt_check": true,
+  "vm_state": "running",
+  "transferred_deb_removed": true
+}

@@ -1,0 +1,109 @@
+# 次チャット用引き継ぎプロンプト（2026-09-12）
+
+以下を新しいチャットで実行してください。
+
+---
+
+`/home/yoshimi/WorkSpace/LLM-Manager` のPhase 6 Hardening / MVP Releaseを続けてください。
+まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と下記検証記録で補ってください。
+過去の時系列記録より本ファイルの再開位置を優先してください。
+
+## 現在位置
+
+- Phase 0〜5完了、現在・次ともPhase 6。release versionは0.1.0、UNRELEASEDのまま。
+- branch `main`、再開元commitは `3078604`。直前は `cf20504`、`b15a984`。最新HEADと未コミット差分は再取得する。
+- この3 commitはローカル保存済み・未push。自動的に公開・署名しない。
+- 本引き継ぎ作成直前のworktreeはclean。本ファイル自体は未コミットで追加している。
+- 再開時に `git status --short` を確認し、利用者の変更を保持する。
+- 前チャットは5時間枠の残り10%で停止。その後再開し、新candidate Debian検証も完了・cleanup済み。
+- 本文からの再開後、新candidate remote helper lifecycleも完了・cleanup済み。詳細は下記。
+
+## 採用する新candidate（旧candidateと混用禁止）
+
+source commit: `b15a98454ddf9e397333350d371b35cc2ed8fdd8`
+
+保存先: `/tmp/llm-manager-candidate-b15a984-20260912/`
+
+- `llm-manager_0.1.0_all.deb`
+  - SHA-256: `292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8`
+- `llm-manager-remote-helper_0.1.0_all.deb`
+  - SHA-256: `ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc`
+
+引き継ぎ保存時に両hashを再確認済み。再開時も存在/hashを確認する。
+同commitのtracked sourceから独立2回build/verifyしbyte完全一致。
+各build内806 test（767成功・39 expected skip）が成功。
+旧 `/tmp/llm-manager-release-candidate-4722cfa/` も残るが、新candidateの検証根拠にはしない。
+
+## 完了済み（再実行不要）
+
+0. 長時間Agentのrelease Gateを60分連続＋GUI cancelと定義し、測定scriptを追加。
+   Ubuntu実Qtの15秒preflightは全必須check成功。ただし`release_duration_met=false`であり、
+   60分完走は未完了。詳細: `docs/validation/phase6-long-running-agent-plan-2026-09-12.md`。
+
+1. 新candidate remote helperをUbuntu一時snapshot内で検証。旧`0.1.0~dev0`からのupgrade、
+   reinstall、remove、fresh install、purge、readiness metadata、root owner/mode、private
+   runtime、local GUI/PolicyKit非混入が成功。全境界で保全path不変、snapshot内cleanupと
+   running復元後にpackage/manual/pathがbaseline完全一致。一時snapshotとupgrade用旧debは
+   削除済み。詳細: `docs/validation/phase6-remote-helper-candidate-lifecycle-2026-09-12.md`。
+
+2. 新candidate Debian 13のfresh install/reinstall/remove/再fresh install/purgeと実menu起動、
+   UID 1000隔離argv、日英keyboard切替、通常終了を確認。固定12件だけを明示purgeし、
+   package/manual/既存設定等はbaseline完全一致。転送deb削除済み、両VM running維持。
+   詳細: `docs/validation/phase6-debian-candidate-display-2026-09-12.md`。
+
+3. 新candidateのUbuntu 26.04 local lifecycle / 通常Wayland実display。
+   upgrade/reinstall、GNOME menu起動、UID 1000隔離argv、日本語/英語keyboard切替、
+   Alt+F4通常終了、remove/fresh install/purge、dpkg検査が成功。
+   installed catalogにも旧「Sandbox」誤表記はない。
+4. Ubuntu一時snapshotをrunningへ復元し、package/manual一覧と既存設定/SSH/root backupの
+   owner/mode/hashが開始値と完全一致。一時snapshotとVMの検証debは不在。
+5. 旧candidateで実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合成功。
+   ただしloopback SSH・Gate plan注入・応答喪失例外注入であり、物理回線断ではない。
+6. 通常SSH診断5 sampleと実SSH待機cancel3 sampleを測定。
+   診断中央値1614.899 ms。cancel→local SSH回収1.350〜1.429 ms。
+   Qt/長時間Agent/Apply回線断の完了根拠ではない。
+
+## VMの最終確認状態（再開時に再取得する）
+
+- Ubuntu `ubuntu26.04`、Debian `debian13` はともにrunning。電源状態を維持する。
+- Ubuntu IPは最後の確認で `192.168.122.48`、user `yoshimi` UID1000。
+  Wayland session 3、Active=yes、State=active、LockedHint=no。
+- Ubuntu既存snapshot `phase4-pre-local-deb-20260831` は保持。今回の一時snapshotは削除済み。
+- Debianは検証後cleanup済み。user `user` UID1000、Wayland session 2で実画面確認済み。
+  IP/ログイン/画面状態は再確認する。SSH serverがない場合はguest-agentで作業する。
+- `guest-get-users` が空でもログイン不在と判定しない。loginctlと実画面で確認する。
+- 通常system SSHは正常。sandbox内だけのowner表示を根拠にhost設定の修復を要求しない。
+  必要なSSH/virsh操作は正式な権限昇格で行い、`-F /dev/null`で迂回しない。
+
+## 次の作業
+
+1. 新candidateのDebian 13 local lifecycle / 実displayは完了。旧版upgradeは未実施。
+   以下は将来Debianを再検証する際の安全条件として保持する。
+   開始package/manual集合とstateを保存し、APT simulationで追加packageを固定する。
+   Debianの内部snapshotは以前pflash NVRAM形式で拒否されたため、NVRAMを変更せず、
+   追加packageだけの明示purgeによるexact cleanupを基本とする。
+   過去の「追加11依存」などを再確認なしに固定しない。autoremoveや既存依存の削除は禁止。
+   先に復元方法を確定し、導入→検証→cleanup→開始値照合まで完了させる。
+2. 新candidateのremote helper lifecycleは完了。別マシン間SSH切断、長時間Agent、
+   accessibility等の残Gateへ進む。
+   Ubuntuの一時snapshotを使う場合は、その時点の開始状態を保存・復元する。
+3. `docs/release-checklist.md` の未完了項目を継続する。
+   長時間Agentは測定器の既定3600秒を中断せず監視できる枠で完走する。
+   新candidate/最終artifactのSBOM、accessibility、長時間Agent、署名等は未完了。
+   最終artifactでの反復はUNRELEASED解除後にも必要。
+   署名鍵は未指定。秘密鍵の自動生成・推測選択・署名/公開はしない。
+
+## 読むべき記録・再利用できる実装
+
+- `docs/validation/phase6-candidate-rebuild-2026-09-12.md`
+- `docs/validation/phase6-ubuntu-candidate-display-2026-09-12.md`
+- `docs/validation/ubuntu-display-b15a984-2026-09-12/lifecycle.py`
+- `docs/validation/phase6-debian-display-2026-09-10.md`（旧artifactの手順参考のみ）
+- `docs/validation/phase6-0.1.0-debian-lifecycle-2026-09-09.md`
+- `docs/validation/ssh-gui-2026-09-11/vm-lifecycle.py`（qga/転送/inventory関数を再利用可能）
+- `docs/validation/phase6-ssh-gui-installed-2026-09-11.md`
+
+証拠dir内のscriptは当時の固定path/hashを含む記録用であり、未変更で再実行しない。
+新しいaction用scriptは `apply_patch` で作成し、対象・hash・復元条件を明示する。
+VM操作の前後を短く報告し、秘密情報をチャットへ要求しない。
+sub-agentは明示依頼がないため起動しない。

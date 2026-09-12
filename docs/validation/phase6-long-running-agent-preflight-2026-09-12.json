@@ -1,0 +1,52 @@
+{
+  "checks": {
+    "buttons_during_run": true,
+    "cancel_bounded": true,
+    "child_reaped": true,
+    "child_rss_bounded": true,
+    "duration_met": true,
+    "event_gap_bounded": true,
+    "gui_cancel_requested_state": true,
+    "gui_running_state": true,
+    "gui_terminal_state": true,
+    "heartbeat_recent": true,
+    "parent_cpu_bounded": true,
+    "parent_rss_growth_bounded": true,
+    "release_duration_met": false,
+    "watchdog_not_used": true,
+    "worker_inactive": true
+  },
+  "elapsed_seconds": 15.058,
+  "gate": "preflight",
+  "limitations": "no model inference, network API, user configuration, or mutation",
+  "measurements": {
+    "cancel_to_reap_ms": 6.198,
+    "child_peak_rss_kib": 50316,
+    "heartbeat_age_seconds_at_cancel": 2.635,
+    "heartbeat_sequence": 60,
+    "max_event_gap_ms": 55.976,
+    "parent_cpu_fraction": 0.005453,
+    "parent_initial_rss_kib": 75500,
+    "parent_peak_rss_kib": 78140,
+    "parent_rss_growth_kib": 2640,
+    "rss_sample_count": 14,
+    "status_after_cancel_request": "cancel_requested",
+    "status_after_start": "running",
+    "terminal_error_code": "operation_cancelled",
+    "terminal_status": "failed",
+    "ticks": 301
+  },
+  "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "pyside6": "6.10.2",
+  "python": "3.14.4",
+  "requested_duration_seconds": 15.0,
+  "thresholds": {
+    "max_cancel_to_reap_ms": 1000.0,
+    "max_child_rss_kib": 131072,
+    "max_event_gap_ms": 250.0,
+    "max_parent_cpu_fraction": 0.25,
+    "max_parent_rss_growth_kib": 65536,
+    "release_gate_seconds": 3600.0
+  },
+  "workload": "synthetic Agent-like subprocess; fixed 32 MiB working set; periodic progress"
+}

@@ -7,6 +7,7 @@
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。SSH Applyと実displayは未完了。
+  - 長時間Agent Gateは[60分連続＋GUI cancel](validation/phase6-long-running-agent-plan-2026-09-12.md)と定義した。最大event gap 250 ms、cancel回収1秒、RSS/CPU/child上限等を固定し、Ubuntu実Qtの15秒preflightは成功。`release_duration_met=false`のため60分完走は未完了。
   - Ubuntu 26.04のproduction local read-only診断で単一sample基準値を取得済み。`partial`、25.234 ms、最大event gap 10.383 ms、最大RSS 67,352 KiB。complete/SSH/Apply系の複数sampleとhardware基準は未完了。
   - 2026-09-11: [通常SSH診断baseline](validation/phase6-ssh-diagnosis-performance-2026-09-11.md)の5 sampleで中央値1614.899 ms、最大1632.497 ms。reportはcompleteだがOllama/OpenCodeのruntime前提条件は未成立。Qt event gap・実Agent・SSH Apply性能を完了扱いにしない。
   - 2026-09-12: [実SSH cancel baseline](validation/phase6-ssh-cancel-2026-09-12.md)の3 sampleでremote ready後のcancel→local SSH回収1.350〜1.429 ms、remote有限process不在を確認。設定変更なし。短いsleep workloadの境界検証でありQt/Agent/Apply/物理回線断の代替ではない。
@@ -64,6 +65,10 @@ git diff --check
 ```
 
 ## 4. OS lifecycle Gate
+
+2026-09-12に同じb15a984由来remote helper candidateで[Ubuntu remote lifecycle](validation/phase6-remote-helper-candidate-lifecycle-2026-09-12.md)を確認。旧`0.1.0~dev0`からのupgrade、reinstall、remove、fresh install、purge、readiness metadata、private runtimeのowner/modeとlocal GUI/PolicyKit非混入に成功。snapshot内cleanupとrunning復元後にpackage/manual/保全pathが開始値と完全一致。最終artifactでの再検証は未完了。
+
+2026-09-12に同じb15a984由来local candidateで[Debian lifecycle/実display](validation/phase6-debian-candidate-display-2026-09-12.md)を確認。fresh install/reinstall/remove/再fresh install/purge、menu通常起動、日英keyboard切替、通常終了に成功。追加12件だけを明示purgeし、package/manual/既存設定等の開始値と完全一致。Debian旧版upgradeと最終artifactの再検証は未完了。
 
 2026-09-12にb15a984由来の修正後local candidateで[Ubuntu lifecycle/実display](validation/phase6-ubuntu-candidate-display-2026-09-12.md)を完了。upgrade/reinstall/menu通常起動/英日keyboard操作/通常終了/remove/fresh install/purgeを確認し、snapshot復元後baseline完全一致。UNRELEASED candidateのため最終artifact項目は未完了のまま。
 
