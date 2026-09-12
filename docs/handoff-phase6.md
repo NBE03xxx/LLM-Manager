@@ -19,6 +19,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+2026-09-13チャット移行時に `docs/handoff-phase6-next.md` を整理し直した。次チャットは同ファイルを最優先とし、過去slice内の「次」「未コミット」等を現状として扱わない。移行直前の検証commitは `9877e0a`、採用candidate sourceは `ff7913b`。直近はUbuntu remote／Debian local環境SBOM採取。実行中Gate・未復元snapshotはない。
+
 - **2026-09-13 ff7913b Ubuntu local SBOM採取完了**: installed 1907 package、既存Brave関連2件copyright欠落を明示。artifact hash/内外checksum/inventory/TSV/BOM整合性検証成功。license reviewは未完了。snapshot復元後baseline完全一致、一時snapshot削除、Ubuntu running。詳細: `docs/validation/phase6-ff7913b-ubuntu-local-sbom-2026-09-13.md`。次はUbuntu remoteとDebian local環境SBOM、Qt/license review、SSH残Gate。現在・次ともPhase 6。
 
 - **2026-09-13 ff7913b Debian lifecycle/AT-SPI完了**: fresh/reinstall/remove/再fresh/purge、UID1000 isolated import、英日Wayland AT-SPIの用途/label relation/focusable/内部ID非露出、Alt+F4 exit 0成功。追加12件を明示purge後baseline完全一致、転送deb削除、両VM running。詳細: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。旧版upgrade/menu再操作/Orca音声は未実施。次はSSH/SBOM等の残Gate。現在・次ともPhase 6。
