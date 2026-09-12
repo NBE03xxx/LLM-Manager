@@ -18,6 +18,16 @@
 
 ## candidate状態（旧candidateと混用禁止）
 
+2026-09-13更新: 現在の採用candidateはcommit `ff7913bb97e896f7992720b9a43c2382970a5fc8`
+から両debを独立2回build/verifyしてbyte完全一致したセット。
+保存先 `/tmp/llm-manager-candidate-ff7913b-20260913/`。
+
+- local SHA-256: `351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243`
+- remote SHA-256: `830f50b2b22984bba9622d10cca81a54571e101655f0fbd53c7a7fe76b774d2d`
+- 各build内806 test成功。localは下記overlay artifactと同一hashでAT-SPI証拠を関連付け可能。
+- 次はこのセットのOS lifecycle/remote/SSH/SBOM残Gate。以下の再build予定は完了済み。
+- 詳細: `docs/validation/phase6-candidate-rebuild-2026-09-13.md`。
+
 commit `b15a98454ddf9e397333350d371b35cc2ed8fdd8`由来の次のcandidateは、
 accessibility修正により現行sourceに対してobsolete。過去Gateの証拠として保持するが、
 今後の採用candidateや最終artifactとして使わない。
@@ -100,8 +110,8 @@ accessibility修正確認用local deb:
    追加packageだけの明示purgeによるexact cleanupを基本とする。
    過去の「追加11依存」などを再確認なしに固定しない。autoremoveや既存依存の削除は禁止。
    先に復元方法を確定し、導入→検証→cleanup→開始値照合まで完了させる。
-2. accessibility修正をreviewし、commit後の同一sourceからlocal/remote両debを再現buildする。
-   b15a984 candidateのhashを新sourceへ流用しない。
+2. ff7913bからの両deb再現buildは完了。上記の新candidate hashを確認して
+   OS lifecycle/remote helperの再検証を進める。
 3. 別マシン間SSH切断、SBOM/license等の残Gateへ進む。60分Agent Gateは完了済み。
    Ubuntuの一時snapshotを使う場合は、その時点の開始状態を保存・復元する。
 4. `docs/release-checklist.md` の未完了項目を継続する。

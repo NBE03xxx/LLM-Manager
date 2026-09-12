@@ -1,0 +1,46 @@
+{
+  "source_commit": "ff7913bb97e896f7992720b9a43c2382970a5fc8",
+  "runs": [
+    {
+      "root": "/tmp/llm-ff7913b-build1-zvryle3h",
+      "sha256": {
+        "llm-manager_0.1.0_all.deb": "351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243",
+        "llm-manager-remote-helper_0.1.0_all.deb": "830f50b2b22984bba9622d10cca81a54571e101655f0fbd53c7a7fe76b774d2d"
+      },
+      "executables": {
+        "llm-manager_0.1.0_all.deb": [
+          "usr/bin/llm-manager",
+          "usr/bin/llm-manager-helper",
+          "usr/bin/llm-manager-restore-execute",
+          "usr/bin/llm-manager-restore-review",
+          "usr/bin/llm-manager-restore-setup"
+        ],
+        "llm-manager-remote-helper_0.1.0_all.deb": [
+          "usr/bin/llm-manager-remote-helper"
+        ]
+      }
+    },
+    {
+      "root": "/tmp/llm-ff7913b-build2-qn8aug7p",
+      "sha256": {
+        "llm-manager_0.1.0_all.deb": "351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243",
+        "llm-manager-remote-helper_0.1.0_all.deb": "830f50b2b22984bba9622d10cca81a54571e101655f0fbd53c7a7fe76b774d2d"
+      },
+      "executables": {
+        "llm-manager_0.1.0_all.deb": [
+          "usr/bin/llm-manager",
+          "usr/bin/llm-manager-helper",
+          "usr/bin/llm-manager-restore-execute",
+          "usr/bin/llm-manager-restore-review",
+          "usr/bin/llm-manager-restore-setup"
+        ],
+        "llm-manager-remote-helper_0.1.0_all.deb": [
+          "usr/bin/llm-manager-remote-helper"
+        ]
+      }
+    }
+  ],
+  "toolchain": "debhelper\t13.31ubuntu1\ndh-python\t7.20260309\ndpkg\t1.23.7ubuntu1\npython3\t3.14.3-0ubuntu2\n",
+  "candidate_directory": "/tmp/llm-manager-candidate-ff7913b-20260913",
+  "byte_identical": true
+}
