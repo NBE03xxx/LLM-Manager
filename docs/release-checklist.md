@@ -38,6 +38,8 @@
 
 ## 3. Reproducible build set
 
+2026-09-12の[修正後candidate再build](validation/phase6-candidate-rebuild-2026-09-12.md)で、commit `b15a984` から両debを独立2回build/verifyしbyte完全一致を確認。各local build内806 test成功。新candidateのOS Gateは旧4722cfa由来の証拠と区別して実行する。UNRELEASEDを維持しているため、以下の最終artifact項目は未完了のまま。
+
 2026-09-09の`0.1.0` candidate compositionで、commit `4722cfa`からlocal/remote debを2回ずbuildして両方のbyte一致とverifier成功を確認した。local SHA-256は`25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remoteは`45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`。展開監査でELF/shared library、bytecode cache、third-party vendored moduleがないことも確認した。`UNRELEASED`解除後の最終commitから再実行するため、下記の最終artifact項目は未完了のままとする。詳細は[composition記録](validation/phase6-0.1.0-candidate-composition-2026-09-09.md)を参照する。
 
 - [ ] clean checkoutまたはreview済みworktreeで全testとbuildを行い、未追跡fileがartifactへ混入していないことを確認する。

@@ -19,6 +19,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-12 修正後candidate再現build（最新）**: ここまでの変更・証拠をローカルcommit `b15a98454ddf9e397333350d371b35cc2ed8fdd8` にまとめた（未push）。そのtracked sourceから両debを独立2回build/verifyしbyte完全一致。各build内806件（767成功・39 expected skip）成功。新candidateは `/tmp/llm-manager-candidate-b15a984-20260912/`。local SHA-256 `292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8`、remote `ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc`。旧4722cfaセットも保持するが証拠は混用しない。VM操作なし、UNRELEASED維持。詳細: `docs/validation/phase6-candidate-rebuild-2026-09-12.md`。次は新candidateのOS/実display等の残Gate。現在・次ともPhase 6。
+
 - **2026-09-12 実SSH cancel baseline（最新）**: `packaging/measure-ssh-cancel.py` を追加。host→Ubuntuの専用通常SSHでremote ready出力後にcancelし、3 sampleすべてlocal child回収・remote有限process不在を確認。cancel→local回収1.350〜1.429 ms。remote workloadは最大3秒のsleepだけで、設定/package/service/trust/snapshot変更なし。Qt/Agent/Apply/物理回線断の代替ではない。3 unit test追加、全806件（767成功・39 expected skip）成功。詳細: `docs/validation/phase6-ssh-cancel-2026-09-12.md`。前回の未コミット変更も保持。現在・次ともPhase 6。
 
 - **2026-09-11 SSH診断performance baseline（最新）**: `packaging/measure-ssh-diagnosis.py` を追加。host→Ubuntuの通常production SSH診断を5 sample測定し、中央値1614.899 ms・最大1632.497 ms、Python peak RSS109992 KiB。全reportはcompleteだがOllama API unavailable/OpenCode未導入であり、runtime前提条件falseを別fieldに明示。Qt/Agent/Apply性能の代替ではない。測定は非対話read-only、設定/package/snapshot変更なし。4回帰testと全803件（764成功・39 expected skip）が成功。詳細: `docs/validation/phase6-ssh-diagnosis-performance-2026-09-11.md`。以前の未コミット変更も保持。現在・次ともPhase 6。
@@ -283,7 +285,7 @@ Debian VMにはGate時点でログイン済みgraphical sessionがなく、displ
 
 1. `git status --short`と未コミットdiffを確認し、Phase 6の既存変更をすべて保持する
 2. VMを使う場合は現在state/IP/guest-agent疎通をread-only確認する。電源断後のIPを固定値として扱わない
-3. host `/tmp/llm-manager-release-candidate-4722cfa/`のlocal/remote artifact hashを上記値と再照合し、同じcandidate setに紐付けたUbuntu local/remote・Debian local resolved-environment SBOMとQt package license reviewを進める。VMごとに開始package集合を保存し、Ubuntuは一時snapshot、Debianは追加packageの固定名によるexact cleanupを使う
+3. 最新candidate `/tmp/llm-manager-candidate-b15a984-20260912/` の両hashを最新サマリーと照合してOS/実display/SSH等を検証する。旧 `/tmp/llm-manager-release-candidate-4722cfa/` の証拠と混用しない。VMごとに開始package集合を保存し、Ubuntuは一時snapshot、Debianは追加packageの固定名によるexact cleanupを使う。最終release setのSBOMは最終artifactに紐付けて再採取する
 4. 通常のproduction system `ssh`でUbuntuの完成GUI SSH user Apply disconnect/reconciliation Gateを行う。`-F /dev/null`を代替根拠にせず、実設定・backup・keyを使う場合は一時snapshot内のdisposable targetに限定する
 5. Debian candidateの実display/menuは2026-09-10完了。最終artifactで再実行する。loginctlと実画面でsession状態を確認し、guest-get-usersの空一覧だけで保留しない
 6. resolved-environment SBOM、Qt license review、実display/SSH Gate後に`debian/changelog`の`UNRELEASED`解除を判断し、最終commitから両artifactを再buildする。final lifecycle、checksum/OpenPGP署名、signed tag、公開後再検証をrelease checklistに沿って行う。署名鍵は自動選択しない

@@ -1,0 +1,29 @@
+{
+  "source_commit": "b15a98454ddf9e397333350d371b35cc2ed8fdd8",
+  "unreleased": true,
+  "byte_identical": true,
+  "builds": [
+    {
+      "llm-manager_0.1.0_all.deb": "292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8",
+      "llm-manager-remote-helper_0.1.0_all.deb": "ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc"
+    },
+    {
+      "llm-manager_0.1.0_all.deb": "292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8",
+      "llm-manager-remote-helper_0.1.0_all.deb": "ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc"
+    }
+  ],
+  "executables": {
+    "llm-manager-remote-helper_0.1.0_all.deb": [
+      "usr/bin/llm-manager-remote-helper"
+    ],
+    "llm-manager_0.1.0_all.deb": [
+      "usr/bin/llm-manager",
+      "usr/bin/llm-manager-helper",
+      "usr/bin/llm-manager-restore-execute",
+      "usr/bin/llm-manager-restore-review",
+      "usr/bin/llm-manager-restore-setup"
+    ]
+  },
+  "toolchain": "debhelper\t13.31ubuntu1\ndh-python\t7.20260309\ndpkg\t1.23.7ubuntu1\npython3-setuptools\t78.1.1-0.1build1\n",
+  "python": "Python 3.14.4"
+}
