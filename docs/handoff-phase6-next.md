@@ -10,6 +10,8 @@
 
 ## 現在位置
 
+- 2026-09-13最新: ff7913b由来local/remoteのUbuntu lifecycleは完了。両Gateでupgrade/reinstall/remove/fresh/purge成功、running復元後baseline完全一致、一時snapshot削除済み。localはUID1000 offscreen Qt起動/closeも成功。詳細: `docs/validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md`。次は同candidateのDebian/SSH/SBOM残Gate。
+
 - Phase 0〜5完了、現在・次ともPhase 6。release versionは0.1.0、UNRELEASEDのまま。
 - branch `main`。`8056850`以降のaccessibility修正、回帰test、検証証拠、本文書更新をまとめてcommit/pushする承認を取得済み。保存後のcommit IDと同期状態は `git log -1`、`git status -sb` で再取得する。
 - 再開時に `git status --short` を確認し、利用者の変更を保持する。
@@ -110,8 +112,8 @@ accessibility修正確認用local deb:
    追加packageだけの明示purgeによるexact cleanupを基本とする。
    過去の「追加11依存」などを再確認なしに固定しない。autoremoveや既存依存の削除は禁止。
    先に復元方法を確定し、導入→検証→cleanup→開始値照合まで完了させる。
-2. ff7913bからの両deb再現buildは完了。上記の新candidate hashを確認して
-   OS lifecycle/remote helperの再検証を進める。
+2. ff7913bからの両deb再現buildとUbuntu local/remote lifecycleは完了。
+   新candidate hashを確認してDebian lifecycle/実displayの再検証を進める。
 3. 別マシン間SSH切断、SBOM/license等の残Gateへ進む。60分Agent Gateは完了済み。
    Ubuntuの一時snapshotを使う場合は、その時点の開始状態を保存・復元する。
 4. `docs/release-checklist.md` の未完了項目を継続する。

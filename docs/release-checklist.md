@@ -69,6 +69,8 @@ git diff --check
 
 ## 4. OS lifecycle Gate
 
+2026-09-13: [ff7913b由来local/remote Ubuntu lifecycle](validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md)で両debのupgrade/reinstall/remove/fresh install/purge、保全path不変、running snapshot復元後baseline完全一致を確認。local UID1000 offscreen Qt起動/closeも成功。新candidateのDebianと最終release artifactでの反復は未完了。
+
 2026-09-12に同じb15a984由来remote helper candidateで[Ubuntu remote lifecycle](validation/phase6-remote-helper-candidate-lifecycle-2026-09-12.md)を確認。旧`0.1.0~dev0`からのupgrade、reinstall、remove、fresh install、purge、readiness metadata、private runtimeのowner/modeとlocal GUI/PolicyKit非混入に成功。snapshot内cleanupとrunning復元後にpackage/manual/保全pathが開始値と完全一致。最終artifactでの再検証は未完了。
 
 2026-09-12に同じb15a984由来local candidateで[Debian lifecycle/実display](validation/phase6-debian-candidate-display-2026-09-12.md)を確認。fresh install/reinstall/remove/再fresh install/purge、menu通常起動、日英keyboard切替、通常終了に成功。追加12件だけを明示purgeし、package/manual/既存設定等の開始値と完全一致。Debian旧版upgradeと最終artifactの再検証は未完了。

@@ -1,0 +1,13 @@
+{
+  "helper_mode": "0755",
+  "helper_sha256": "3db36ee5ca6f09b4a8e8d089d12d3c82c9acf98fcb609f9d51bd979fa6996811",
+  "metadata": {
+    "package": "llm-manager-remote-helper",
+    "package_version": "0.1.0~dev0",
+    "protocol_version": 1,
+    "schema_version": "1.0"
+  },
+  "metadata_mode": "0644",
+  "metadata_sha256": "37eaf28810ce326a32d3fbaf45a5520ce7aa56c3349a417fed570f7a698e339f",
+  "owner": "root:root"
+}
