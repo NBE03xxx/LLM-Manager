@@ -19,6 +19,8 @@ LLM-Managerの作業を引き継ぎ、Phase 6 Hardening と MVP Releaseから続
 
 ## 最新再開サマリー
 
+- **2026-09-12 新candidate Ubuntu lifecycle/実display完了（最新）**: b15a984由来local deb（SHA-256 `292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8`）でupgrade/reinstall、GNOME menu起動、UID 1000隔離argv、日本語/英語・keyboard focus、Alt+F4通常終了、remove/fresh install/purge成功。installed catalogにSandbox誤表記なし。各段階で他package/既存path不変、snapshot復元後baseline完全一致、一時snapshot/deb不在。既存snapshot保持、両VM running、Debian未操作。詳細: `docs/validation/phase6-ubuntu-candidate-display-2026-09-12.md`。次は同新candidateのDebian/remote等の残Gate。UNRELEASED維持、現在・次ともPhase 6。
+
 - **2026-09-12 修正後candidate再現build（最新）**: ここまでの変更・証拠をローカルcommit `b15a98454ddf9e397333350d371b35cc2ed8fdd8` にまとめた（未push）。そのtracked sourceから両debを独立2回build/verifyしbyte完全一致。各build内806件（767成功・39 expected skip）成功。新candidateは `/tmp/llm-manager-candidate-b15a984-20260912/`。local SHA-256 `292b831c5454e3a6d41b59a67145474a76b066146bebc4e7308b81a6e50ff7f8`、remote `ee4930896f02e72d7097c58878e8900bdb0c11a495b90fd3c7b6e14b0af034bc`。旧4722cfaセットも保持するが証拠は混用しない。VM操作なし、UNRELEASED維持。詳細: `docs/validation/phase6-candidate-rebuild-2026-09-12.md`。次は新candidateのOS/実display等の残Gate。現在・次ともPhase 6。
 
 - **2026-09-12 実SSH cancel baseline（最新）**: `packaging/measure-ssh-cancel.py` を追加。host→Ubuntuの専用通常SSHでremote ready出力後にcancelし、3 sampleすべてlocal child回収・remote有限process不在を確認。cancel→local回収1.350〜1.429 ms。remote workloadは最大3秒のsleepだけで、設定/package/service/trust/snapshot変更なし。Qt/Agent/Apply/物理回線断の代替ではない。3 unit test追加、全806件（767成功・39 expected skip）成功。詳細: `docs/validation/phase6-ssh-cancel-2026-09-12.md`。前回の未コミット変更も保持。現在・次ともPhase 6。

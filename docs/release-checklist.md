@@ -65,6 +65,8 @@ git diff --check
 
 ## 4. OS lifecycle Gate
 
+2026-09-12にb15a984由来の修正後local candidateで[Ubuntu lifecycle/実display](validation/phase6-ubuntu-candidate-display-2026-09-12.md)を完了。upgrade/reinstall/menu通常起動/英日keyboard操作/通常終了/remove/fresh install/purgeを確認し、snapshot復元後baseline完全一致。UNRELEASED candidateのため最終artifact項目は未完了のまま。
+
 各VMの開始stateとpackage集合を保存し、Gateが追加したartifact/packageだけを明示cleanupする。利用者data、Secret Service、SSH trust、既存systemd unitをpurge対象へ含めない。
 
 2026-09-09にcommit `4722cfa`由来の`0.1.0` local candidateをUbuntu 26.04一時snapshotで検証した。旧`0.1.0~dev0-1`からのupgrade、reinstall、remove、fresh install、purge、`dpkg -V`、隔離import、通常user offscreen Qt起動、owner/mode、dpkg管理外backup保持に成功した。snapshot復元後はpackage集合・旧package・backup hashが開始値と一致し、一時snapshot/artifact/logを削除した。Wayland実display/menuと`UNRELEASED`解除後の最終artifact再実行が残るため、下記項目は未完了のままとする。詳細は[Ubuntu lifecycle記録](validation/phase6-0.1.0-ubuntu-lifecycle-2026-09-09.md)を参照する。
