@@ -10,6 +10,8 @@
 
 ## 現在位置
 
+- 2026-09-13最新: ff7913b Ubuntu local環境SBOMを採取・検証済み。1907 package、既存Brave関連2件のcopyright欠落、license reviewは未完了。artifact/hash/checksum/BOM整合性成功、snapshot復元後baseline完全一致、一時snapshot削除。詳細: `docs/validation/phase6-ff7913b-ubuntu-local-sbom-2026-09-13.md`。次はUbuntu remote／Debian local環境SBOM、Qt/license review、SSH残Gate。
+
 - 2026-09-13最新: ff7913b Debian fresh/reinstall/remove/再fresh/purgeと英日Wayland AT-SPIを完了。label relation/用途/内部ID非露出と通常終了に成功。追加12件だけをpurgeしbaseline完全一致、deb削除、両VM running。詳細: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。次はSSH/SBOM残Gate。Debian旧版upgrade、menu再操作、Orca音声聴取は未完了。
 
 - 2026-09-13最新: ff7913b由来local/remoteのUbuntu lifecycleは完了。両Gateでupgrade/reinstall/remove/fresh/purge成功、running復元後baseline完全一致、一時snapshot削除済み。localはUID1000 offscreen Qt起動/closeも成功。詳細: `docs/validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md`。次は同candidateのDebian/SSH/SBOM残Gate。
