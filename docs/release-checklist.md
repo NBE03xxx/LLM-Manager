@@ -33,7 +33,7 @@
 - [x] runtime直接依存とupstream license sourceを`THIRD_PARTY_NOTICES.md`へ記録した。
 - [x] CycloneDX 1.6の直接依存SBOMをlocal/remote package別に作成し、各debの`/usr/share/doc/<package>/`へ収録した。
 - [ ] Ubuntu 26.04とDebian 13のclean installでAPTが解決した全推移依存のpackage/version/source/licenseを採取し、release artifactごとのresolved-environment SBOMを作成する。
-- [ ] Debianの各installed packageに対応する`/usr/share/doc/<package>/copyright`を確認し、特にPySide6/Qtの追加third-party licenseをreviewする。
+- [x] ff7913b Debian fresh-install環境の全2248 installed packageに対応するcopyrightを欠落なく採取し、Ubuntu local/remoteと合わせてPySide6/Qtの25 binary・6 source系統、主Files節、Qt GPL Exception本文、追加third-party license名をreviewした。詳細: [Qt/PySide6 review](validation/phase6-ff7913b-qt-license-review-2026-09-13.md)。これは法的適合や最終artifactのlicense Gate完了を意味しない。
 - [ ] 最終binary debを展開し、未申告の実行形式、共有library、vendored module、生成assetがないことを確認する。
 
 採取ツール`packaging/collect-installed-sbom.py`と[手順](validation/phase6-installed-sbom-2026-09-05.md)は整備済み。host smoke、両VMのlocal dev composition、Ubuntu remote helper dev compositionの採取を完了。全installed packageのsupersetを採取するため、artifact同一性・APT logとの関連付け・対象OSのmanual license reviewは別途必要。

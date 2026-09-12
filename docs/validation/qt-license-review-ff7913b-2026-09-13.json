@@ -1,0 +1,830 @@
+{
+  "source_commit": "ff7913bb97e896f7992720b9a43c2382970a5fc8",
+  "direct_dependency_sbom_pyside6_expression": "LGPL-3.0-only OR (GPL-3.0-only WITH Qt-GPL-exception-1.0)",
+  "environments": {
+    "ubuntu_local": {
+      "archive": "ubuntu-local-evidence.tar.xz",
+      "archive_sha256": "d2575435fc1c64c0478950eca2450d8f8f7a1273f8b716c91567b07dc2cb0d06",
+      "environment_package_count": 1907,
+      "qt_pyside_binary_package_count": 25,
+      "sources": {
+        "pyside6": {
+          "source_version": "6.10.2-6ubuntu1",
+          "binary_packages": [
+            {
+              "package": "libpyside6-py3-6.10",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "libshiboken6-py3-6.10",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtcore",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtgui",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtwidgets",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            }
+          ],
+          "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5",
+          "primary_files_license": "GPL-3-EXCEPT or LGPL-3",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-1.3",
+            "GPL-2",
+            "GPL-2 or GPL-3 or LGPL-3",
+            "GPL-2+",
+            "GPL-2+ or LGPL-3",
+            "GPL-3",
+            "GPL-3-EXCEPT",
+            "GPL-3-EXCEPT or LGPL-3",
+            "LGPL-3"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-base": {
+          "source_version": "6.10.2+dfsg-7",
+          "binary_packages": [
+            {
+              "package": "libqt6core6t64:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6dbus6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6gui6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6network6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6opengl6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6waylandclient6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6widgets6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6wlshellintegration6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "qt6-gtk-platformtheme:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "qt6-qpa-plugins:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            }
+          ],
+          "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "Apache-2.0 or Expat",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Bitstream",
+            "Boost-1.0",
+            "CC0-1.0",
+            "Expat",
+            "FTL",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-2+ or FTL",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "Harfbuzz",
+            "Hybrid-BSD",
+            "ICC",
+            "ISC",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "Unicode",
+            "W3C",
+            "Zlib",
+            "brg-endian",
+            "libjpeg",
+            "libjpeg and BSD-3-clause and Zlib",
+            "libpng",
+            "public-domain"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-declarative": {
+          "source_version": "6.10.2+dfsg-3",
+          "binary_packages": [
+            {
+              "package": "libqt6qml6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlmeta6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlmodels6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlworkerscript6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6quick6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            }
+          ],
+          "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "BSD-3-clause-Ecma",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2+",
+            "MPL-1.1",
+            "MPL-1.1 and GPL-2+ and LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-svg": {
+          "source_version": "6.10.2-2",
+          "binary_packages": [
+            {
+              "package": "libqt6svg6:amd64",
+              "binary_version": "6.10.2-2",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            },
+            {
+              "package": "qt6-svg-plugins:amd64",
+              "binary_version": "6.10.2-2",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            }
+          ],
+          "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "BSD-3-clause and Expat",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND-sell-variant",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2, and HPND-sell-variant"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-translations": {
+          "source_version": "6.10.2-1",
+          "binary_packages": [
+            {
+              "package": "qt6-translations-l10n",
+              "binary_version": "6.10.2-1",
+              "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f"
+            }
+          ],
+          "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f",
+          "primary_files_license": "GPL-3 with Qt-1.0 exception",
+          "license_stanza_names": [
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-wayland": {
+          "source_version": "6.10.2-4",
+          "binary_packages": [
+            {
+              "package": "libqt6waylandcompositor6:amd64",
+              "binary_version": "6.10.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            },
+            {
+              "package": "qt6-wayland:amd64",
+              "binary_version": "6.10.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            }
+          ],
+          "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND",
+            "LGPL-3",
+            "LGPL-3 or GPL-2"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        }
+      }
+    },
+    "ubuntu_remote": {
+      "archive": "ubuntu-remote-evidence.tar.xz",
+      "archive_sha256": "3d6618b880590f8eec3c0d28b8f62c3fd9c566941a3133bc8e7ff0c11152d2ff",
+      "environment_package_count": 1908,
+      "qt_pyside_binary_package_count": 25,
+      "sources": {
+        "pyside6": {
+          "source_version": "6.10.2-6ubuntu1",
+          "binary_packages": [
+            {
+              "package": "libpyside6-py3-6.10",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "libshiboken6-py3-6.10",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtcore",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtgui",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            },
+            {
+              "package": "python3-pyside6.qtwidgets",
+              "binary_version": "6.10.2-6ubuntu1",
+              "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5"
+            }
+          ],
+          "copyright_sha256": "5c08d80593d63f99f900fc18b4c2e4d7e5e3a795a79517fdd1653674bb92d4c5",
+          "primary_files_license": "GPL-3-EXCEPT or LGPL-3",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-1.3",
+            "GPL-2",
+            "GPL-2 or GPL-3 or LGPL-3",
+            "GPL-2+",
+            "GPL-2+ or LGPL-3",
+            "GPL-3",
+            "GPL-3-EXCEPT",
+            "GPL-3-EXCEPT or LGPL-3",
+            "LGPL-3"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-base": {
+          "source_version": "6.10.2+dfsg-7",
+          "binary_packages": [
+            {
+              "package": "libqt6core6t64:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6dbus6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6gui6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6network6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6opengl6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6waylandclient6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6widgets6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "libqt6wlshellintegration6:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "qt6-gtk-platformtheme:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            },
+            {
+              "package": "qt6-qpa-plugins:amd64",
+              "binary_version": "6.10.2+dfsg-7",
+              "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961"
+            }
+          ],
+          "copyright_sha256": "9bc6203f2b6fba7a47138f8370afeff96fff8d67c44ee2752ea4b4e02438d961",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "Apache-2.0 or Expat",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Bitstream",
+            "Boost-1.0",
+            "CC0-1.0",
+            "Expat",
+            "FTL",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-2+ or FTL",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "Harfbuzz",
+            "Hybrid-BSD",
+            "ICC",
+            "ISC",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "Unicode",
+            "W3C",
+            "Zlib",
+            "brg-endian",
+            "libjpeg",
+            "libjpeg and BSD-3-clause and Zlib",
+            "libpng",
+            "public-domain"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-declarative": {
+          "source_version": "6.10.2+dfsg-3",
+          "binary_packages": [
+            {
+              "package": "libqt6qml6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlmeta6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlmodels6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6qmlworkerscript6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            },
+            {
+              "package": "libqt6quick6:amd64",
+              "binary_version": "6.10.2+dfsg-3",
+              "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe"
+            }
+          ],
+          "copyright_sha256": "14da67d32ee6dd71a532a2979097ab83c7ceb7ed13045b29824a78d399842cfe",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "BSD-3-clause-Ecma",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2+",
+            "MPL-1.1",
+            "MPL-1.1 and GPL-2+ and LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-svg": {
+          "source_version": "6.10.2-2",
+          "binary_packages": [
+            {
+              "package": "libqt6svg6:amd64",
+              "binary_version": "6.10.2-2",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            },
+            {
+              "package": "qt6-svg-plugins:amd64",
+              "binary_version": "6.10.2-2",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            }
+          ],
+          "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "BSD-3-clause and Expat",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND-sell-variant",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2, and HPND-sell-variant"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-translations": {
+          "source_version": "6.10.2-1",
+          "binary_packages": [
+            {
+              "package": "qt6-translations-l10n",
+              "binary_version": "6.10.2-1",
+              "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f"
+            }
+          ],
+          "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f",
+          "primary_files_license": "GPL-3 with Qt-1.0 exception",
+          "license_stanza_names": [
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-wayland": {
+          "source_version": "6.10.2-4",
+          "binary_packages": [
+            {
+              "package": "libqt6waylandcompositor6:amd64",
+              "binary_version": "6.10.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            },
+            {
+              "package": "qt6-wayland:amd64",
+              "binary_version": "6.10.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            }
+          ],
+          "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND",
+            "LGPL-3",
+            "LGPL-3 or GPL-2"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        }
+      }
+    },
+    "debian_local": {
+      "archive": "debian-local-evidence.tar.xz",
+      "archive_sha256": "7d5ac6f909174a1591ef1d0790015a336afcd888ca33f41e2d5167cda5bdd904",
+      "environment_package_count": 2248,
+      "qt_pyside_binary_package_count": 25,
+      "sources": {
+        "pyside6": {
+          "source_version": "6.8.2.1-4",
+          "binary_packages": [
+            {
+              "package": "libpyside6-py3-6.8",
+              "binary_version": "6.8.2.1-4",
+              "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443"
+            },
+            {
+              "package": "libshiboken6-py3-6.8",
+              "binary_version": "6.8.2.1-4",
+              "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443"
+            },
+            {
+              "package": "python3-pyside6.qtcore",
+              "binary_version": "6.8.2.1-4",
+              "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443"
+            },
+            {
+              "package": "python3-pyside6.qtgui",
+              "binary_version": "6.8.2.1-4",
+              "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443"
+            },
+            {
+              "package": "python3-pyside6.qtwidgets",
+              "binary_version": "6.8.2.1-4",
+              "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443"
+            }
+          ],
+          "copyright_sha256": "c58026d1190933edbc7f72f8f24101773e654650e6a2016b479b5eb5652e0443",
+          "primary_files_license": "GPL-3-EXCEPT or LGPL-3",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-1.3",
+            "GPL-2",
+            "GPL-2 or GPL-3 or LGPL-3",
+            "GPL-2+",
+            "GPL-2+ or LGPL-3",
+            "GPL-3",
+            "GPL-3-EXCEPT",
+            "GPL-3-EXCEPT or LGPL-3",
+            "LGPL-3"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-base": {
+          "source_version": "6.8.2+dfsg-9+deb13u2",
+          "binary_packages": [
+            {
+              "package": "libqt6core6t64:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "libqt6dbus6:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "libqt6gui6:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "libqt6network6:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "libqt6opengl6:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "libqt6widgets6:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "qt6-gtk-platformtheme:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            },
+            {
+              "package": "qt6-qpa-plugins:amd64",
+              "binary_version": "6.8.2+dfsg-9+deb13u2",
+              "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d"
+            }
+          ],
+          "copyright_sha256": "f3dcba89cb3374a12866b0adb0e3d5caf950416bf3a5230341549da3b229e47d",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "Apache-2.0 or Expat",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "Bitstream",
+            "Boost-1.0",
+            "CC0-1.0",
+            "Expat",
+            "FTL",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-2+ or FTL",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "Harfbuzz",
+            "Hybrid-BSD",
+            "ICC",
+            "ISC",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "Unicode",
+            "W3C",
+            "Zlib",
+            "brg-endian",
+            "libjpeg",
+            "libjpeg and BSD-3-clause and Zlib",
+            "libpng",
+            "public-domain"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-declarative": {
+          "source_version": "6.8.2+dfsg-7",
+          "binary_packages": [
+            {
+              "package": "libqt6qml6:amd64",
+              "binary_version": "6.8.2+dfsg-7",
+              "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af"
+            },
+            {
+              "package": "libqt6qmlmeta6:amd64",
+              "binary_version": "6.8.2+dfsg-7",
+              "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af"
+            },
+            {
+              "package": "libqt6qmlmodels6:amd64",
+              "binary_version": "6.8.2+dfsg-7",
+              "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af"
+            },
+            {
+              "package": "libqt6qmlworkerscript6:amd64",
+              "binary_version": "6.8.2+dfsg-7",
+              "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af"
+            },
+            {
+              "package": "libqt6quick6:amd64",
+              "binary_version": "6.8.2+dfsg-7",
+              "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af"
+            }
+          ],
+          "copyright_sha256": "899d36b0633e24e20c2ceef0c97f213e193a87d1ba5396997c649a77897bd9af",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "Apache-2.0",
+            "BSD-2-clause",
+            "BSD-3-clause",
+            "BSD-3-clause-Ecma",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-2+",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2+",
+            "MPL-1.1",
+            "MPL-1.1 and GPL-2+ and LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-svg": {
+          "source_version": "6.8.2-3",
+          "binary_packages": [
+            {
+              "package": "libqt6svg6:amd64",
+              "binary_version": "6.8.2-3",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            },
+            {
+              "package": "qt6-svg-plugins:amd64",
+              "binary_version": "6.8.2-3",
+              "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12"
+            }
+          ],
+          "copyright_sha256": "29d0f93b6db9a91e7eeda96c456e2aa629de964f787c1cc4b637a6e43f1a6a12",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "BSD-3-clause and Expat",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND-sell-variant",
+            "LGPL-3",
+            "LGPL-3 or GPL-2",
+            "LGPL-3 or GPL-2, and HPND-sell-variant"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-translations": {
+          "source_version": "6.8.2-2",
+          "binary_packages": [
+            {
+              "package": "qt6-translations-l10n",
+              "binary_version": "6.8.2-2",
+              "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f"
+            }
+          ],
+          "copyright_sha256": "fad9f82770591df9ddfdc9c749b3979f9d6800b3518f0959ba6c3dd72d68ca7f",
+          "primary_files_license": "GPL-3 with Qt-1.0 exception",
+          "license_stanza_names": [
+            "GPL-3 with Qt-1.0 exception",
+            "LGPL-2.1"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        },
+        "qt6-wayland": {
+          "source_version": "6.8.2-4",
+          "binary_packages": [
+            {
+              "package": "libqt6waylandclient6:amd64",
+              "binary_version": "6.8.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            },
+            {
+              "package": "libqt6waylandcompositor6:amd64",
+              "binary_version": "6.8.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            },
+            {
+              "package": "libqt6wlshellintegration6:amd64",
+              "binary_version": "6.8.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            },
+            {
+              "package": "qt6-wayland:amd64",
+              "binary_version": "6.8.2-4",
+              "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231"
+            }
+          ],
+          "copyright_sha256": "465c6e85b01f4c6acc3da2f56e0cc737c35b364ccfbea6b68df7c45154da6231",
+          "primary_files_license": "LGPL-3 or GPL-2",
+          "license_stanza_names": [
+            "BSD-3-clause",
+            "Expat",
+            "GFDL-NIV-1.3",
+            "GPL-2",
+            "GPL-3",
+            "GPL-3 with Qt-1.0 exception",
+            "HPND",
+            "LGPL-3",
+            "LGPL-3 or GPL-2"
+          ],
+          "qt_company_gpl_exception_1_0_text_present": true
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "ubuntu_local_remote_qt_metadata_and_copyright_identical": true,
+    "all_environments_have_25_qt_pyside_binary_packages": true,
+    "all_selected_packages_have_copyright_evidence": true,
+    "pyside_primary_license_and_exception_match_direct_sbom_summary": true,
+    "license_review_complete": false,
+    "reason": "Captured source-level copyright includes additional file-specific terms; this comparison is evidence review, not a legal compliance verdict."
+  }
+}
