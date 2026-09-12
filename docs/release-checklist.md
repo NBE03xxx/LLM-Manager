@@ -18,7 +18,8 @@
 
 ## 2. Source、license、SBOM
 
-- [x] ff7913b Ubuntu local candidateのinstalled環境SBOMを再採取し、artifact identity/checksum/BOM整合性を確認した。1907 package、既存Brave関連2件のcopyright欠落。詳細: [採取記録](validation/phase6-ff7913b-ubuntu-local-sbom-2026-09-13.md)。同candidateのUbuntu remote/Debian localとlicense review、最終artifact採取は未完了。
+- [x] ff7913b Ubuntu local candidateのinstalled環境SBOMを再採取し、artifact identity/checksum/BOM整合性を確認した。1907 package、既存Brave関連2件のcopyright欠落。詳細: [採取記録](validation/phase6-ff7913b-ubuntu-local-sbom-2026-09-13.md)。同candidateのDebian localとlicense review、最終artifact採取は未完了。
+- [x] ff7913b Ubuntu remote helper candidateをfresh installした環境のSBOMを再採取した。APT追加はhelper 1件のみ、1908 package、既存Brave関連2件のcopyright欠落。artifact identity、内外checksum、inventory/TSV/BOM、snapshot復元後baseline完全一致を確認した。詳細: [採取記録](validation/phase6-ff7913b-ubuntu-remote-sbom-2026-09-13.md)。
 
 - [x] Ubuntu 26.04のremote helper dev compositionも通常userで環境SBOMを採取し、[証拠と復元確認を保存](validation/phase6-remote-sbom-2026-09-05.md)。最終release artifactの検証とは区別する。
 
