@@ -67,6 +67,11 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
    PySide6主Files節とQt GPL Exception本文、QtBase主Files節、追加license名を確認。
    直接依存SBOMは主選択肢の要約として整合。法的適合の自動完了とは扱わない。
    記録: `docs/validation/phase6-ff7913b-qt-license-review-2026-09-13.md`。
+9. **Debian旧版upgrade**: commit 8854232のtracked sourceからbuild・historical verifier済みの
+   `0.1.0~dev0`をfresh installし、新candidate `0.1.0`へupgrade。simulation/実行とも変更は
+   `llm-manager` 1件だけ。dpkg検証、UID1000 isolated import/offscreen Qt成功。
+   固定12件だけをpurgeしbaseline完全一致、Wayland sessionを維持。
+   記録: `docs/validation/phase6-ff7913b-debian-upgrade-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -74,8 +79,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. `docs/release-checklist.md` のSSH機能/別マシン間切断、Debian旧版upgrade、menu再検査、
-   Orca音声、最終artifactのSBOM/lifecycle等を継続する。
+1. `docs/release-checklist.md` のSSH機能/別マシン間切断、Debian menu再検査、Orca音声、
+   最終artifactのSBOM/lifecycle等を継続する。
 2. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 
@@ -100,6 +105,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 - `docs/validation/sbom-ff7913b-debian-local-2026-09-13/`：Debian archive/verifier/APT/baseline/cleaned。
 - `docs/validation/review-ff7913b-qt-licenses-2026-09-13.py`：現archiveのQt/PySide6比較。
 - `docs/validation/qt-license-review-ff7913b-2026-09-13.json`：package/source/license/hash結果。
+- `docs/validation/debian-upgrade-ff7913b-2026-09-13.py`：Debian旧版upgrade/cleanup Gate。
+- `docs/validation/debian-upgrade-ff7913b-2026-09-13/`：upgrade simulation/log/inventory/cleanup。
 - `packaging/collect-installed-sbom.py`、`packaging/verify-environment-evidence.py`：採取・archive検証。
 - `docs/validation/phase6-0.1.0-candidate-environment-sbom-qt-2026-09-09.md`：旧候補のQt原文review参考。
 - `docs/validation/lifecycle-ff7913b-2026-09-13.py`：Ubuntu local/remote lifecycle。

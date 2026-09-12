@@ -1,0 +1,41 @@
+パッケージリストを読み込んでいます...
+依存関係ツリーを作成しています...
+状態情報を読み取っています...
+以下の追加パッケージがインストールされます:
+  libclang1-19 libpyside6-py3-6.8 libshiboken6-py3-6.8 python3-bcrypt
+  python3-cffi-backend python3-cryptography python3-jeepney
+  python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtwidgets
+  python3-secretstorage
+提案パッケージ:
+  python-cryptography-doc python3-cryptography-vectors python-pyside6-doc
+  python-secretstorage-doc
+以下のパッケージが新たにインストールされます:
+  libclang1-19 libpyside6-py3-6.8 libshiboken6-py3-6.8 llm-manager
+  python3-bcrypt python3-cffi-backend python3-cryptography python3-jeepney
+  python3-pyside6.qtcore python3-pyside6.qtgui python3-pyside6.qtwidgets
+  python3-secretstorage
+アップグレード: 0 個、新規インストール: 12 個、削除: 0 個、保留: 159 個。
+Inst libclang1-19 (1:19.1.7-3+b1 Debian:13.7/stable [amd64])
+Inst libshiboken6-py3-6.8 (6.8.2.1-4 Debian:13.7/stable [amd64])
+Inst libpyside6-py3-6.8 (6.8.2.1-4 Debian:13.7/stable [amd64])
+Inst python3-bcrypt (4.2.0-2.1+b1 Debian:13.7/stable [amd64])
+Inst python3-cffi-backend (1.17.1-3 Debian:13.7/stable [amd64])
+Inst python3-cryptography (43.0.0-3+deb13u1 Debian:13.7/stable [amd64])
+Inst python3-jeepney (0.9.0-1 Debian:13.7/stable [all])
+Inst python3-secretstorage (3.3.3-3 Debian:13.7/stable [all])
+Inst python3-pyside6.qtcore (6.8.2.1-4 Debian:13.7/stable [amd64])
+Inst python3-pyside6.qtgui (6.8.2.1-4 Debian:13.7/stable [amd64])
+Inst python3-pyside6.qtwidgets (6.8.2.1-4 Debian:13.7/stable [amd64])
+Inst llm-manager (0.1.0~dev0 local-deb [all])
+Conf libclang1-19 (1:19.1.7-3+b1 Debian:13.7/stable [amd64])
+Conf libshiboken6-py3-6.8 (6.8.2.1-4 Debian:13.7/stable [amd64])
+Conf libpyside6-py3-6.8 (6.8.2.1-4 Debian:13.7/stable [amd64])
+Conf python3-bcrypt (4.2.0-2.1+b1 Debian:13.7/stable [amd64])
+Conf python3-cffi-backend (1.17.1-3 Debian:13.7/stable [amd64])
+Conf python3-cryptography (43.0.0-3+deb13u1 Debian:13.7/stable [amd64])
+Conf python3-jeepney (0.9.0-1 Debian:13.7/stable [all])
+Conf python3-secretstorage (3.3.3-3 Debian:13.7/stable [all])
+Conf python3-pyside6.qtcore (6.8.2.1-4 Debian:13.7/stable [amd64])
+Conf python3-pyside6.qtgui (6.8.2.1-4 Debian:13.7/stable [amd64])
+Conf python3-pyside6.qtwidgets (6.8.2.1-4 Debian:13.7/stable [amd64])
+Conf llm-manager (0.1.0~dev0 local-deb [all])

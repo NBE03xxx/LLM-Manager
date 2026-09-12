@@ -1,0 +1,13 @@
+{
+  "upgrade_predecessor": {
+    "source_commit": "88542323d250e8e9e18bc11e3ed0e093ade3f396",
+    "sha256": "e302d19d6d68c32cc1de777ad766361c1afcf68b7430f7418f1f3095c546737d",
+    "version": "0.1.0~dev0",
+    "historical_verifier": "pass"
+  },
+  "candidate": {
+    "source_commit": "ff7913bb97e896f7992720b9a43c2382970a5fc8",
+    "sha256": "351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243",
+    "version": "0.1.0"
+  }
+}
