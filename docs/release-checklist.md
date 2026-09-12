@@ -73,7 +73,7 @@ git diff --check
 
 ## 4. OS lifecycle Gate
 
-2026-09-13: [ff7913b Debian lifecycle/AT-SPI](validation/phase6-ff7913b-debian-2026-09-13.md)でfresh/reinstall/remove/再fresh/purge、英日Wayland通常user起動とAT-SPI、通常終了を確認。追加12件だけをpurgeしbaseline完全一致。さらに[旧`0.1.0~dev0`からのupgrade](validation/phase6-ff7913b-debian-upgrade-2026-09-13.md)で変更対象1件、UID1000 isolated import/offscreen Qt、12件の明示purge後baseline完全一致を確認した。menu再操作、最終release artifactの反復は未完了。
+2026-09-13: [ff7913b Debian lifecycle/AT-SPI](validation/phase6-ff7913b-debian-2026-09-13.md)でfresh/reinstall/remove/再fresh/purge、英日Wayland通常user起動とAT-SPI、通常終了を確認。追加12件だけをpurgeしbaseline完全一致。さらに[旧`0.1.0~dev0`からのupgrade](validation/phase6-ff7913b-debian-upgrade-2026-09-13.md)で変更対象1件、UID1000 isolated import/offscreen Qt、12件の明示purge後baseline完全一致を確認した。[GNOME menu再検査](validation/phase6-ff7913b-debian-menu-2026-09-13.md)でも検索結果のicon/名称、Enter起動、日本語画面、Alt+F4終了とbaseline復元を確認した。最終release artifactの反復は未完了。
 
 2026-09-13: [ff7913b由来local/remote Ubuntu lifecycle](validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md)で両debのupgrade/reinstall/remove/fresh install/purge、保全path不変、running snapshot復元後baseline完全一致を確認。local UID1000 offscreen Qt起動/closeも成功。新candidateのDebianと最終release artifactでの反復は未完了。
 

@@ -1,0 +1,9 @@
+{
+  "pid": 7031,
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "/usr/bin/llm-manager"
+  ],
+  "uid": "Uid:\t1000\t1000\t1000\t1000"
+}
