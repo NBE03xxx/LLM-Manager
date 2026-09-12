@@ -1,0 +1,8 @@
+{
+  "archive": "debian-local-evidence.tar.xz",
+  "artifact_sha256": "351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243",
+  "package_count": 2248,
+  "missing_copyright": [],
+  "integrity_verified": true,
+  "license_review_complete": false
+}

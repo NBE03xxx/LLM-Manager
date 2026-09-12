@@ -57,6 +57,11 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
    copyright欠落は既存Brave関連2件、collector exit 2、license review完了判定false。
    snapshot復元後baseline完全一致、一時snapshot削除済み。
    記録: `docs/validation/phase6-ff7913b-ubuntu-remote-sbom-2026-09-13.md`。
+7. **Debian local環境SBOM**: 今回のAPT simulationでcandidate＋新規依存11件を固定し、
+   fresh install環境2248 packageを採取。copyright欠落なし、collector exit 0。
+   artifact hash、内外checksum、TSV/inventory/BOM整合性成功。12件だけを明示purgeし、
+   baseline完全一致、audit/check成功。VMとWayland sessionはrunning/activeを維持。
+   記録: `docs/validation/phase6-ff7913b-debian-local-sbom-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -64,15 +69,11 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. **新candidateのDebian local環境SBOM採取**。
-   baselineを保存し、APT simulationで新規追加集合を固定する。snapshotは過去にpflash NVRAM
-   形式で拒否されたため、NVRAMを変更せず追加分だけ明示purgeする。以前の「12件」を
-   無検証で固定しない。autoremoveや既存依存削除は禁止。
-2. 両OSのQt/PySide6 copyright原文・package/source versionを比較してlicense reviewを進める。
+1. 両OSのQt/PySide6 copyright原文・package/source versionを比較してlicense reviewを進める。
    collectorは全installed packageのsupersetであり、依存graphや法的適合を自動確定しない。
-3. `docs/release-checklist.md` のSSH機能/別マシン間切断、Debian旧版upgrade、menu再検査、
+2. `docs/release-checklist.md` のSSH機能/別マシン間切断、Debian旧版upgrade、menu再検査、
    Orca音声、最終artifactのSBOM/lifecycle等を継続する。
-4. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
+3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 
 ## VMと復元条件
@@ -92,6 +93,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 - `docs/validation/sbom-ff7913b-ubuntu-local-2026-09-13/`：archive/verifier/APT/baseline/restored。
 - `docs/validation/collect-ff7913b-ubuntu-remote-sbom-2026-09-13.py`：今回のUbuntu remote SBOM採取。
 - `docs/validation/sbom-ff7913b-ubuntu-remote-2026-09-13/`：remote archive/verifier/APT/baseline/restored。
+- `docs/validation/collect-ff7913b-debian-sbom-2026-09-13.py`：今回のDebian local SBOM採取/cleanup。
+- `docs/validation/sbom-ff7913b-debian-local-2026-09-13/`：Debian archive/verifier/APT/baseline/cleaned。
 - `packaging/collect-installed-sbom.py`、`packaging/verify-environment-evidence.py`：採取・archive検証。
 - `docs/validation/phase6-0.1.0-candidate-environment-sbom-qt-2026-09-09.md`：旧候補のQt原文review参考。
 - `docs/validation/lifecycle-ff7913b-2026-09-13.py`：Ubuntu local/remote lifecycle。

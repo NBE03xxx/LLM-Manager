@@ -1,0 +1,2 @@
+2 1000 user seat0 1516 user    tty2 no -
+3 1000 user -     1530 manager -    no -
