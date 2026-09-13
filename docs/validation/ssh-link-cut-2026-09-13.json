@@ -1,0 +1,14 @@
+{
+  "scope": "source ff7913b production SubprocessRunner; host-to-Ubuntu virtual NIC cut; finite sleep; no Qt, Apply, physical cable or installed artifact claim",
+  "vm": "ubuntu26.04",
+  "target": "yoshimi@192.168.122.48",
+  "link_before": "52:54:00:f8:49:29 up",
+  "link_during_cancel": "52:54:00:f8:49:29 down",
+  "link_after": "52:54:00:f8:49:29 up",
+  "cancel_to_local_reaped_ms": 32.031,
+  "local_child_reaped": true,
+  "remote_finite_child_absent": true,
+  "new_strict_ssh_succeeded": true,
+  "vm_state_after": "running",
+  "errors": []
+}

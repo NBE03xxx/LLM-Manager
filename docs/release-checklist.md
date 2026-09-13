@@ -12,6 +12,7 @@
   - Ubuntu 26.04のproduction local read-only診断で単一sample基準値を取得済み。`partial`、25.234 ms、最大event gap 10.383 ms、最大RSS 67,352 KiB。complete/SSH/Apply系の複数sampleとhardware基準は未完了。
   - 2026-09-11: [通常SSH診断baseline](validation/phase6-ssh-diagnosis-performance-2026-09-11.md)の5 sampleで中央値1614.899 ms、最大1632.497 ms。reportはcompleteだがOllama/OpenCodeのruntime前提条件は未成立。Qt event gap・実Agent・SSH Apply性能を完了扱いにしない。
   - 2026-09-12: [実SSH cancel baseline](validation/phase6-ssh-cancel-2026-09-12.md)の3 sampleでremote ready後のcancel→local SSH回収1.350〜1.429 ms、remote有限process不在を確認。設定変更なし。短いsleep workloadの境界検証でありQt/Agent/Apply/物理回線断の代替ではない。
+  - 2026-09-13: [仮想NIC切断中の実SSH cancel](validation/phase6-ssh-link-cut-2026-09-13.md)の1 sampleでdown状態のcancel→local回収32.031 ms、link復元、新規strict SSHとremote有限process不在を確認。Qt/Apply/物理ケーブル断は対象外で、この親項目は未完了のまま。
 - [x] release versionを`0.1.0`に固定し、`pyproject.toml`、`debian/changelog`、remote `control`、両helper metadata、SBOM、verifier、production helper compatibility allowlistを一致させた。`UNRELEASED`の解除は最終Gate後の別項目とする。
   - `DebianPackagingTests.test_release_version_surfaces_are_consistent`でPython/ Debian version変換、両helper metadata、両SBOM、verifier、production helper compatibility allowlistの同期を自動検査する。
 - [ ] `debian/changelog`を`UNRELEASED`から対象distributionへ変更し、release日時と変更点を確定する。
@@ -111,6 +112,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
   - 2026-09-11: [installed candidate GUI Gate](validation/phase6-ssh-gui-installed-2026-09-11.md)で実OpenCode/dual backup/commit/自動rollbackとhelper応答喪失後の照合が成功。Wayland Results表示確認済み。loopback SSH・Gate plan注入・応答喪失例外注入の限定検証で、最終artifactや別マシン間物理切断の代替ではない。snapshot復元後のbaseline完全一致。
+  - 2026-09-13: [ff7913b別VM間GUI Gate](validation/phase6-cross-vm-ssh-2026-09-13.md)でDebian→Ubuntuの正常Apply、実OpenCode/dual backup、応答喪失例外注入後の照合が成功。rollback予定caseはsudo認証待ちでApply前に停止し未検証。再送なし、両VM復元済み。実通信断Applyと最終artifactの代替ではない。
   - 2026-09-10: [Qt切断照合回帰](validation/phase6-ssh-qt-reconciliation-2026-09-10.md)で4ケースのGUI/journal一致とmutation再送なしを確認。transportはfixtureであり、実回線・最終artifact Gateの代替ではない。
 - [x] release scope外のlocal root/SSH root ApplyとSSH user/root restoreがproduction allowlistに含まれず、経路別の固定理由でI/O前にfail closedとなることを確認した。local root手動restoreは公開Gate完了済み。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。

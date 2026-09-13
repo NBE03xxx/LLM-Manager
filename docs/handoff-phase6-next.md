@@ -7,11 +7,23 @@
 ## 現在位置とGit
 
 - Phase 0〜5完了。現在・次ともPhase 6。version 0.1.0、UNRELEASEDを維持。
-- branch `main`。本引継ぎ更新前のHEAD/remoteは `9877e0a0b6db3cc4f79099d6784558a29e9aeb08`、worktree clean。
+- branch `main`。最新commit/remote/worktree状態は再開時に取得する。
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
 - `ff7913b`以降は検証script・証拠・文書のみ変更。製品source変更なし。
-- 実行中Gate、回収待ちprocess、未復元snapshotはない。60分試験も終了・回収・cleanup済み。
+- 実行中Gate、認証待ち専用SSH/sudo、未復元snapshotはない。
+  cross-vm Gateも証拠回収・両VMのbaseline完全一致・cleanup済み。
+  60分試験も終了・回収・cleanup済み。
+
+## 進捗の表示方針
+
+ユーザーは今後の報告に進捗率の%表示を希望している。
+再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
+2026-09-13現在は18/44件、**40.9%（公開チェックリスト項目数ベース）**。
+Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
+以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
+この40.9%とは比較しない。今後は再集計可能な値を主表示とする。
+部分検証が増えてもcheckboxの完了条件を満たさない限り数値は上げない。
 
 ## 採用candidate
 
@@ -81,16 +93,28 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     12発話eventと20.672秒の非無音WAVを保存。app exit 0、toolkit accessibility false復元、
     固定12件purge後baseline/session完全一致。人によるWAV聴取確認は未完了。
     記録: `docs/validation/phase6-ff7913b-debian-orca-2026-09-13.md`。
+12. **別VM間SSH正常Apply（部分Gate）**: ff7913b Debian GUI→Ubuntu remote helperで
+    実OpenCode/dual backup/commit、応答喪失例外注入後のimmutable result照合成功。
+    Apply 1回、Results可視。rollback予定caseはsudo認証待ちでApply前に停止し未検証。
+    再送なし、設定hash維持、両VM復元済み。
+    記録: `docs/validation/phase6-cross-vm-ssh-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
 通常SSH診断5 sampleと実SSH待機cancel3 sampleも限定baselineとして保持する。
+2026-09-13にはhost→Ubuntuの仮想NICを実際にdownにした状態でキャンセルを検証。
+回収32.031 ms、link up復元、新しいstrict SSH接続とremote有限process不在を確認した。
+詳細: `docs/validation/phase6-ssh-link-cut-2026-09-13.md`。Qt/Apply完了の代替ではない。
 
 ## 次の作業（この順を基本とする）
 
 1. 保存したDebian Orca WAVを人が聴取し、発音・順序・聞き取りやすさを確認する。
 2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
    継続する。
+   利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
+   Debian GUI→Ubuntu SSHの正常Apply成功。rollback予定caseは認証待ち時間内に完了せず
+   Apply前で停止。両VMはcleanup済み。次回は入力準備を確認して新規operationを開始する。
+   保存済みoperationを再送しない。実通信断Applyは引き続き未完了。
 3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 

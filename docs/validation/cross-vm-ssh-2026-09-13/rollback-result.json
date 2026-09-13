@@ -1,0 +1,10 @@
+{
+  "mode": "rollback",
+  "status": "approved",
+  "error": "both SSH backup copies must verify",
+  "events": [],
+  "validations": [],
+  "gui_summary": "Apply result: approved; both SSH backup copies must verify",
+  "fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+  "target_sha256": "b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088"
+}
