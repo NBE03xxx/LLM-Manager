@@ -1,0 +1,27 @@
+{
+  "app": {
+    "exit_code": 0,
+    "signal": null,
+    "stdout": "",
+    "stderr": "qt.accessibility.atspi: Subscription string not handled: \"Window:Destroy:\"\n",
+    "out_truncated": false,
+    "err_truncated": false
+  },
+  "orca": {
+    "exit_code": null,
+    "signal": 15,
+    "stdout": "",
+    "stderr": "\nセッションが終了しました, シェルを停止しています... ...停止しました。\n",
+    "out_truncated": false,
+    "err_truncated": false
+  },
+  "recorder": {
+    "exit_code": null,
+    "signal": 15,
+    "stdout": "",
+    "stderr": "\nセッションが終了しました, シェルを停止しています... ...停止しました。\n",
+    "out_truncated": false,
+    "err_truncated": false
+  },
+  "toolkit_accessibility_restored": true
+}

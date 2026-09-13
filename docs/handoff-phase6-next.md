@@ -39,8 +39,9 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
    記録: `docs/validation/phase6-ff7913b-ubuntu-lifecycle-2026-09-13.md`。
 2. **Debian lifecycle/AT-SPI**: 新candidateのfresh/reinstall/remove/再fresh/purge、英日Wayland
    installed launcher起動、用途/label relation/focusable/内部ID非露出、Alt+F4 exit 0成功。
-   追加12件のみpurgeしbaseline完全一致、deb削除。旧版upgrade、今回のmenu再操作・画像目視・
-   Orca音声聴取は未実施。記録: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。
+   追加12件のみpurgeしbaseline完全一致、deb削除。このlifecycle sliceでは旧版upgrade、menu再操作、
+   Orca音声を未実施だったが、後続の上記9〜11で検証・capture済み（人のWAV聴取のみ待ち）。
+   記録: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。
 3. **Ubuntu accessibility**: combo box用途欠落・内部ID露出を修正し英日AT-SPI成功。
    system PySide6 focused 38件（37成功・1 expected skip）。
    記録: `docs/validation/phase6-accessibility-atspi-2026-09-12.md`。
@@ -76,6 +77,10 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     日本語UIを起動し、UID1000と固定argv、Alt+F4通常終了を確認。固定12件だけをpurgeし
     baseline/session完全一致、VM running。画像を含むmanifest全件一致。
     記録: `docs/validation/phase6-ff7913b-debian-menu-2026-09-13.md`。
+11. **Debian Orca音声capture**: 一時prefsでOrcaを起動し、製品名、Hosts用途/valueを含む
+    12発話eventと20.672秒の非無音WAVを保存。app exit 0、toolkit accessibility false復元、
+    固定12件purge後baseline/session完全一致。人によるWAV聴取確認は未完了。
+    記録: `docs/validation/phase6-ff7913b-debian-orca-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -83,9 +88,10 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. `docs/release-checklist.md` のSSH機能/別マシン間切断、Orca音声、最終artifactの
-   SBOM/lifecycle等を継続する。
-2. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
+1. 保存したDebian Orca WAVを人が聴取し、発音・順序・聞き取りやすさを確認する。
+2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
+   継続する。
+3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 
 ## VMと復元条件
@@ -113,6 +119,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 - `docs/validation/debian-upgrade-ff7913b-2026-09-13/`：upgrade simulation/log/inventory/cleanup。
 - `docs/validation/debian-menu-ff7913b-2026-09-13.py`：Debian menu導入/process/cleanup Gate。
 - `docs/validation/debian-menu-ff7913b-2026-09-13/`：menu画像/process/APT/inventory/cleanup。
+- `docs/validation/debian-orca-ff7913b-2026-09-13.py`：Orca/PipeWire captureとcleanup Gate。
+- `docs/validation/debian-orca-ff7913b-2026-09-13/`：WAV/debug/発話/画像/APT/inventory。
 - `packaging/collect-installed-sbom.py`、`packaging/verify-environment-evidence.py`：採取・archive検証。
 - `docs/validation/phase6-0.1.0-candidate-environment-sbom-qt-2026-09-09.md`：旧候補のQt原文review参考。
 - `docs/validation/lifecycle-ff7913b-2026-09-13.py`：Ubuntu local/remote lifecycle。

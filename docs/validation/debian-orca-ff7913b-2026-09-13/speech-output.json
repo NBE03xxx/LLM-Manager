@@ -1,0 +1,14 @@
+[
+  "10:49:07.539433 - SPEECH OUTPUT: 'Screen reader on.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:10.423366 - SPEECH OUTPUT: 'LLM Manager frame' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:10.515894 - SPEECH OUTPUT: 'LLM Manager List with 6 items' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:10.517249 - SPEECH OUTPUT: 'Hosts.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:15.383217 - SPEECH OUTPUT: 'tab' {'established': False}",
+  "10:49:15.461381 - SPEECH OUTPUT: 'layered pane 0 items' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:16.389387 - SPEECH OUTPUT: 'tab' {'established': False}",
+  "10:49:16.456044 - SPEECH OUTPUT: 'Hosts Local combo box Local.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:16.458132 - SPEECH OUTPUT: 'Hosts.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+  "10:49:17.395531 - SPEECH OUTPUT: 'left shift' {'established': False}",
+  "10:49:23.407804 - SPEECH OUTPUT: 'left alt' {'established': False}",
+  "10:49:23.434824 - SPEECH OUTPUT: 'F4' {'established': False}"
+]

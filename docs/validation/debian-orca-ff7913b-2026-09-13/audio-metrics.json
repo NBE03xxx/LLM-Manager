@@ -1,0 +1,12 @@
+{
+  "frames": 992256,
+  "rate_hz": 48000,
+  "channels": 2,
+  "sample_width_bytes": 2,
+  "duration_seconds": 20.672,
+  "peak_absolute": 32768,
+  "rms": 5032.380321858979,
+  "non_silent": true,
+  "sha256": "8ff78014226da10dad843373c87e23f7107334b38295ca59b12278153e8077de",
+  "bytes": 3969068
+}

@@ -1,0 +1,2039 @@
+INFO: Cleaning up these PIDs: []
+10:49:07.455468 - INFO: Preparing to launch.
+10:49:07.455508 - INFO: About to activate settings manager.
+10:49:07.455516 - SETTINGS MANAGER: Activating
+10:49:07.455913 - SETTINGS MANAGER: Attempt to load orca-customizations from /tmp/phase6-debian-orca-ff7913b-20260913/prefs/orca-customizations.py failed. File not found.
+10:49:07.456286 - SETTINGS MANAGER: Activated
+10:49:07.456315 - SETTINGS MANAGER: Current profile is None
+10:49:07.456324 - SETTINGS MANAGER: Current profile is now default
+10:49:07.456330 - SETTINGS MANAGER: Setting profile to: default
+10:49:07.456346 - SETTINGS MANAGER: Loading settings for default profile
+10:49:07.456491 - SETTINGS MANAGER: Settings for default profile loaded
+10:49:07.456495 - SETTINGS MANAGER: Merging settings.
+10:49:07.456502 - SETTINGS MANAGER: Settings merged.
+10:49:07.456505 - SETTINGS MANAGER: Setting runtime settings.
+10:49:07.456654 - SETTINGS MANAGER: Attempt to load orca-customizations from /tmp/phase6-debian-orca-ff7913b-20260913/prefs/orca-customizations.py succeeded.
+10:49:07.456678 - SETTINGS MANAGER: Runtime settings set.
+10:49:07.464185 - INFO: About to launch Orca.
+10:49:07.464245 - DEBUGGING TOOLS MANAGER: Orca version 48.1, AT-SPI2 version: 2.56.2, Session: wayland
+10:49:07.486517 - DEBUGGING TOOLS MANAGER: Desktop has 11 apps:
+10:49:07.490080 -   1. pid: 1711       gnome-shell               /usr/bin/gnome-shell
+10:49:07.492795 -   2. pid: 1810       gsd-media-keys            /usr/libexec/gsd-media-keys
+10:49:07.495577 -   3. pid: 1806       gsd-keyboard              /usr/libexec/gsd-keyboard
+10:49:07.498219 -   4. pid: 1801       gsd-color                 /usr/libexec/gsd-color
+10:49:07.501072 -   5. pid: 1842       gsd-wacom                 /usr/libexec/gsd-wacom
+10:49:07.504848 -   6. pid: 1913       ibus-extension-gtk3       /usr/libexec/ibus-extension-gtk3
+10:49:07.507450 -   7. pid: 1813       gsd-power                 /usr/libexec/gsd-power
+10:49:07.510313 -   8. pid: 2066       gsd-xsettings             /usr/libexec/gsd-xsettings
+10:49:07.512928 -   9. pid: 1832       spice-vdagent             /usr/bin/spice-vdagent
+10:49:07.515969 -  10. pid: 2119       evolution-alarm-notify    /usr/libexec/evolution-data-server/evolution-alarm-notify
+10:49:07.518850 -  11. pid: 2277       xdg-desktop-portal-gtk    /usr/libexec/xdg-desktop-portal-gtk
+10:49:07.518911 - ORCA: Enabling accessibility (if needed).
+10:49:07.518921 - SETTINGS MANAGER: Checking if accessibility is enabled.
+10:49:07.519877 - SETTINGS MANAGER: Accessibility enabled: False
+10:49:07.519893 - SETTINGS MANAGER: Attempting to set accessibility to True.
+10:49:07.523838 - SETTINGS MANAGER: Finished setting accessibility to True.
+10:49:07.523855 - ORCA: Loading User Settings
+10:49:07.524044 - SPEECH AND VERBOSITY MANAGER: Speech server is None
+10:49:07.524057 - BRAILLE: Attempting braille shutdown.
+10:49:07.524061 - BRAILLE: Braille was not running.
+10:49:07.524094 - EVENT MANAGER: Pause queueing: True. Clear queue: True. Loading user settings.
+10:49:07.524374 - BOOKMARKS: Refreshing handlers. script.__init__:95 > script.get_bookmarks:285 > bookmarks.__init__:45 > bookmarks.get_handlers:65
+10:49:07.528181 - BOOKMARKS: Handlers set up.
+10:49:07.528209 - STRUCTURAL NAVIGATION: Refreshing handlers. script.__init__:97 > script.get_structural_navigation:202 > structural_navigation.__init__:512 > structural_navigation.get_handlers:593
+10:49:07.528716 - DEFAULT: Getting braille bindings.
+10:49:07.528736 - DEFAULT: Finished getting braille bindings.
+10:49:07.528740 - SCRIPT: default (module=orca.scripts.default) initialized
+10:49:07.528753 - SPEECH: Initializing
+10:49:07.537411 - SPEECH: Using speech server factory: speechdispatcherfactory
+10:49:07.537437 - SPEECH: Initialized
+10:49:07.537454 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:07.537465 - BRAILLE: WINDOWPATH= None
+10:49:07.537471 - BRAILLE: XDG_VTNR= None
+10:49:07.537473 - BRAILLE: Attempting connection with BrlAPI.
+10:49:07.537786 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:07.537809 - ORCA MODIFIER MANAGER: Refreshing Orca modifiers: Loading user settings.
+10:49:07.537813 - ORCA MODIFIER MANAGER: Attempting to restore original xmodmap: Loading user settings.
+10:49:07.537816 - ORCA MODIFIER MANAGER: No stored xmodmap found
+10:49:07.538963 - ORCA MODIFIER MANAGER: Creating Orca xmodmap
+10:49:07.538986 - EVENT MANAGER: Pause queueing: False. Clear queue: False. User settings loaded.
+10:49:07.538990 - ORCA: User Settings Loaded
+10:49:07.539156 - ORCA: Connected to a11y applications gsetting: True
+10:49:07.539181 - SETTINGS MANAGER: Setting runtime settings.
+10:49:07.539187 - SETTINGS MANAGER: Runtime settings set.
+10:49:07.539207 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.539288 - SETTINGS MANAGER: Setting runtime settings.
+10:49:07.539302 - SETTINGS MANAGER: Runtime settings set.
+10:49:07.539318 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.539405 - SPEECH: Speak 'Screen reader on.' acss: {'established': False}
+10:49:07.539433 - SPEECH OUTPUT: 'Screen reader on.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:07.539438 - SPEECH DISPATCHER: Speaking 'Screen reader on.' as string
+10:49:07.539460 - SCRIPT MANAGER: Active script is: None
+10:49:07.540002 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:6"/>Screen <mark name="7:13"/>reader <mark name="14:17"/>on.</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: NONE
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:07.540187 - SETTINGS MANAGER: Setting runtime settings.
+10:49:07.540201 - SETTINGS MANAGER: Runtime settings set.
+10:49:07.540216 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.540294 - SETTINGS MANAGER: Setting runtime settings.
+10:49:07.540307 - SETTINGS MANAGER: Runtime settings set.
+10:49:07.540322 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.540423 - BRAILLE: Display message: 'Screen reader on.' (flashTime: 5000)
+10:49:07.540490 - BRAILLE: Initializing flash: Source ID: 0
+10:49:07.542171 - BRAILLE: Not contracting 'Screen reader on.' because contracted braille is not enabled.
+10:49:07.543141 - BRAILLE: Refresh. Pan: True target: 0
+10:49:07.543166 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:07.543177 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:07.543188 - BRAILLE: Line 0: 'Screen reader on.' focusOffset: 0 [[0, 17]]
+10:49:07.543191 - BRAILLE: Cursor offset in line string is: -1
+10:49:07.543194 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:07.543198 - BRAILLE LINE:  'Screen reader on.'
+10:49:07.543201 -      VISIBLE:  'Screen reader on.', cursor=0
+10:49:07.543208 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:07.543210 - BRAILLE: Need to initialize first.
+10:49:07.543218 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:07.543226 - BRAILLE: WINDOWPATH= None
+10:49:07.543231 - BRAILLE: XDG_VTNR= None
+10:49:07.543233 - BRAILLE: Attempting connection with BrlAPI.
+10:49:07.543351 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:07.543372 - EVENT MANAGER: Activating <unknown>.<module>:280 > event_manager.activate:91
+10:49:07.543654 - INPUT EVENT MANAGER: Starting key watcher.
+10:49:07.548033 - EVENT MANAGER: Activated
+10:49:07.554926 - AXObject: Clearing AT-SPI cache on [window: 'Main stage'] Recursive: False. Reason: Checking if window can be the active window
+10:49:07.555928 - AXUtilities: [window: 'Main stage'] from [application: 'gnome-shell'] lacks active state
+10:49:07.556121 - AXUtilities: Unable to find active window from [[application: 'gnome-shell']]
+10:49:07.556138 - SCRIPT MANAGER: Activating <unknown>.<module>:280 > script_manager.activate:68
+10:49:07.556379 - EVENT MANAGER: Registering listeners for: default (module=orca.scripts.default)
+10:49:07.556386 - EVENT MANAGER: registering listener for: document:attributes-changed
+10:49:07.556884 - EVENT MANAGER: registering listener for: document:reload
+10:49:07.557213 - EVENT MANAGER: registering listener for: document:load-complete
+10:49:07.557533 - EVENT MANAGER: registering listener for: document:load-stopped
+10:49:07.557841 - EVENT MANAGER: registering listener for: document:page-changed
+10:49:07.558242 - EVENT MANAGER: registering listener for: mouse:button
+10:49:07.558544 - EVENT MANAGER: registering listener for: object:announcement
+10:49:07.558906 - EVENT MANAGER: registering listener for: object:active-descendant-changed
+10:49:07.559225 - EVENT MANAGER: registering listener for: object:attributes-changed
+10:49:07.559540 - EVENT MANAGER: registering listener for: object:children-changed:add
+10:49:07.559951 - EVENT MANAGER: registering listener for: object:children-changed:remove
+10:49:07.560340 - EVENT MANAGER: registering listener for: object:column-reordered
+10:49:07.560673 - EVENT MANAGER: registering listener for: object:property-change:accessible-description
+10:49:07.561094 - EVENT MANAGER: registering listener for: object:property-change:accessible-name
+10:49:07.561484 - EVENT MANAGER: registering listener for: object:property-change:accessible-value
+10:49:07.561968 - EVENT MANAGER: registering listener for: object:row-reordered
+10:49:07.562364 - EVENT MANAGER: registering listener for: object:selection-changed
+10:49:07.562772 - EVENT MANAGER: registering listener for: object:state-changed:active
+10:49:07.563323 - EVENT MANAGER: registering listener for: object:state-changed:busy
+10:49:07.563791 - EVENT MANAGER: registering listener for: object:state-changed:checked
+10:49:07.564393 - EVENT MANAGER: registering listener for: object:state-changed:expanded
+10:49:07.564917 - EVENT MANAGER: registering listener for: object:state-changed:focused
+10:49:07.565533 - EVENT MANAGER: registering listener for: object:state-changed:indeterminate
+10:49:07.566053 - EVENT MANAGER: registering listener for: object:state-changed:pressed
+10:49:07.566640 - EVENT MANAGER: registering listener for: object:state-changed:selected
+10:49:07.567298 - EVENT MANAGER: registering listener for: object:state-changed:sensitive
+10:49:07.567720 - EVENT MANAGER: registering listener for: object:state-changed:showing
+10:49:07.568129 - EVENT MANAGER: registering listener for: object:text-attributes-changed
+10:49:07.568454 - EVENT MANAGER: registering listener for: object:text-caret-moved
+10:49:07.568765 - EVENT MANAGER: registering listener for: object:text-changed:delete
+10:49:07.569163 - EVENT MANAGER: registering listener for: object:text-changed:insert
+10:49:07.569541 - EVENT MANAGER: registering listener for: object:text-selection-changed
+10:49:07.569874 - EVENT MANAGER: registering listener for: object:value-changed
+10:49:07.570235 - EVENT MANAGER: registering listener for: window:activate
+10:49:07.570551 - EVENT MANAGER: registering listener for: window:create
+10:49:07.570878 - EVENT MANAGER: registering listener for: window:deactivate
+10:49:07.571220 - EVENT MANAGER: registering listener for: window:destroy
+10:49:07.571578 - SCRIPT MANAGER: Setting active script to default (module=orca.scripts.default) reason: activate
+10:49:07.571596 - DEFAULT: Activating script for None
+10:49:07.571614 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.571763 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.571843 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:07.571928 - DEFAULT: Setting up key bindings
+10:49:07.571950 - DEFAULT: Getting keybindings for default (module=orca.scripts.default) script_manager.set_active_script:340 > default.activate:693 > default.add_key_grabs:568 > default.get_key_bindings:400
+10:49:07.572305 - BYPASS MODE MANAGER: Refreshing bindings. Is desktop: True
+10:49:07.572333 - SLEEP MODE MANAGER: Refreshing bindings. Is desktop: True
+10:49:07.572340 - SLEEP MODE MANAGER: Bindings set up.
+10:49:07.572346 - NOTIFICATION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:07.572352 - NOTIFICATION PRESENTER: Bindings set up.
+10:49:07.572359 - CLIPBOARD PRESENTER: Refreshing bindings. Is desktop: True
+10:49:07.572368 - FLAT REVIEW FINDER: Refreshing bindings.
+10:49:07.572376 - FLAT REVIEW FINDER: Desktop bindings set up.
+10:49:07.572382 - FLAT REVIEW FINDER: Laptop bindings set up.
+10:49:07.572388 - FLAT REVIEW PRESENTER: Refreshing bindings.
+10:49:07.572418 - FLAT REVIEW PRESENTER: Desktop bindings set up.
+10:49:07.572441 - FLAT REVIEW PRESENTER: Laptop bindings set up.
+10:49:07.572464 - WHERE AM I PRESENTER: Refreshing bindings.
+10:49:07.572475 - WHERE AM I PRESENTER: Desktop bindings set up.
+10:49:07.572482 - WHERE AM I PRESENTER: Laptop bindings set up.
+10:49:07.572499 - LEARN MODE PRESENTER: Refreshing bindings. Is desktop: True
+10:49:07.572504 - LEARN MODE PRESENTER: Bindings set up.
+10:49:07.572509 - SPEECH AND VERBOSITY MANAGER: Refreshing bindings.  Is desktop: True
+10:49:07.572522 - SPEECH AND VERBOSITY MANAGER: Bindings set up.
+10:49:07.572534 - SYSTEM INFORMATION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:07.572539 - SYSTEM INFORMATION PRESENTER: Bindings set up.
+10:49:07.572552 - OBJECT NAVIGATOR: Refreshing bindings. Is desktop: True
+10:49:07.572563 - OBJECT NAVIGATOR: Bindings set up.
+10:49:07.572583 - TABLE NAVIGATOR: Refreshing bindings. Is desktop: True default.add_key_grabs:568 > default.get_key_bindings:416 > default.getExtensionBindings:369 > table_navigator.get_bindings:81
+10:49:07.572970 - TABLE NAVIGATOR: Bindings set up. Suspended: False
+10:49:07.573017 - BOOKMARKS: Refreshing bindings. default.add_key_grabs:568 > default.get_key_bindings:416 > default.getExtensionBindings:374 > bookmarks.get_bindings:53
+10:49:07.573324 - BOOKMARKS: Bindings set up.
+10:49:07.573385 - MOUSE REVIEW: Refreshing bindings. Is desktop: True
+10:49:07.573391 - MOUSE REVIEW: Bindings set up.
+10:49:07.573397 - ACTION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:07.573402 - ACTION PRESENTER: Bindings set up.
+10:49:07.573412 - DEBUGGING TOOLS MANAGER: Refreshing bindings. Is desktop: True
+10:49:07.573599 - KEYBINDINGS: Adding key grabs: script activation
+10:49:07.575037 - KEYBINDINGS: 117 key grabs out of 117 added.
+10:49:07.575066 - INPUT EVENT MANAGER: Grab id for Insert: 133
+10:49:07.575076 - INPUT EVENT MANAGER: Grab id for KP_Insert: 134
+10:49:07.575091 - DEFAULT: Script for None activated
+10:49:07.575096 - BRAILLE: Checking braille setting.
+10:49:07.575100 - BRAILLE: Setting up key ranges.
+10:49:07.575110 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:07.575121 - BRAILLE: WINDOWPATH= None
+10:49:07.575126 - BRAILLE: XDG_VTNR= None
+10:49:07.575128 - BRAILLE: Attempting connection with BrlAPI.
+10:49:07.575329 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:07.575345 - BRAILLE: Not setting up key ranges: BrlAPI not running.
+10:49:07.575351 - SPEECH AND VERBOSITY MANAGER: Speech is enabled.
+10:49:07.575356 - SPEECH: Initializing
+10:49:07.575360 - SPEECH: Already initialized
+10:49:07.575362 - SCRIPT MANAGER: Activated
+10:49:07.575366 - CLIPBOARD PRESENTER: Activating
+10:49:07.576941 - CLIPBOARD PRESENTER: Could not access klipper interface: org.freedesktop.DBus.Error.ServiceUnknown: The name org.kde.klipper was not provided by any .service files
+10:49:07.577259 - CLIPBOARD PRESENTER: Could not access GPaste interface: org.freedesktop.DBus.Error.ServiceUnknown: The name org.gnome.GPaste was not provided by any .service files
+10:49:07.577447 - CLIPBOARD PRESENTER: Using Gtk.Clipboard as fallback.
+10:49:07.577453 - CLIPBOARD PRESENTER: Activated
+10:49:07.577461 - ORCA: Starting Atspi main event loop
+
+10:49:07.591040 - EVENT MANAGER: object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca'])
+10:49:07.591132 - FOCUS MANAGER: Locus of focus is None
+10:49:07.591319 - SCRIPT MANAGER: Active script is: default (module=orca.scripts.default)
+10:49:07.591358 - EVENT MANAGER: Queueing object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca'])
+10:49:07.591368 - EVENT MANAGER: App for event source is None
+10:49:07.591379 - SCRIPT MANAGER: Getting script for None [desktop frame: 'main']
+10:49:07.591522 - SCRIPT MANAGER: Script is app script default (module=orca.scripts.default)
+10:49:07.591567 - EVENT MANAGER: object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca']) has priority level: 5
+10:49:07.591609 - EVENT MANAGER: Queued object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca']) priority: 5, counter: 0
+10:49:07.592907 - EVENT MANAGER: Dequeueing object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca'])
+10:49:07.592942 - EVENT MANAGER: Dequeued object:children-changed:add for [desktop frame: 'main'] in (11, 0, [application: 'orca']) priority: 5, counter: 0
+
+vvvvv START PRIORITY-5 OBJECT EVENT OBJECT:CHILDREN-CHANGED:ADD (queue size: 0) vvvvv
+10:49:07.594585 - EVENT SOURCE:
+                  app='' name='main' role='desktop frame' id='None'
+                  description=''
+                  help=''
+                  states=''
+                  relations=''
+                  actions=''
+                  interfaces='Component'
+                  attributes=''
+                  text=''
+                  path=[-1]
+
+                  EVENT ANY DATA:
+                  name='orca' role='application' id=''
+                  description=''
+                  help=''
+                  states=''
+                  relations=''
+                  actions=''
+                  interfaces='Collection'
+                  attributes=''
+                  text=''
+                  path=[-1]
+
+10:49:07.594611 - SCRIPT MANAGER: Active script is: default (module=orca.scripts.default)
+10:49:07.594626 - FOCUS MANAGER: Locus of focus is None
+10:49:07.594644 - EVENT MANAGER: Getting script for event for None [desktop frame: 'main']
+10:49:07.594653 - SCRIPT MANAGER: Getting script for None [desktop frame: 'main']
+10:49:07.594774 - SCRIPT MANAGER: Script is app script default (module=orca.scripts.default)
+10:49:07.594791 - EVENT MANAGER: Script for event is default (module=orca.scripts.default)
+10:49:07.594800 - EVENT MANAGER: Processing object:children-changed:add: script for event is active
+10:49:07.594809 - AXUtilitiesRelation: Clearing local cache. Reason: children-changed event.
+10:49:07.594816 - AXObject: Clearing local cache. Reason: children-changed event.
+10:49:07.594822 - AXUtilitiesRelation: Clearing local cache. Reason: children-changed event.
+10:49:07.594828 - AXUtilitiesEvent: Clearing local cache. Reason: children-changed event.
+TOTAL PROCESSING TIME: 0.0019
+^^^^^ FINISHED PRIORITY-5 OBJECT EVENT OBJECT:CHILDREN-CHANGED:ADD ^^^^^
+
+10:49:09.310511 - GENERATOR: Clearing cache.
+INFO: Timeout cleaning up: []
+10:49:10.106131 - FOCUS MANAGER: Focus and window are unknown
+
+10:49:10.363111 - EVENT MANAGER: object:property-change:accessible-name for [invalid: 'Wayland surface'] in gnome-shell (clutter 48.7) (0, 0, Wayland surface)
+10:49:10.364367 - FOCUS MANAGER: Locus of focus is None
+10:49:10.366146 - EVENT MANAGER: Queueing object:property-change:accessible-name for [invalid: 'Wayland surface'] in gnome-shell (clutter 48.7) (0, 0, Wayland surface)
+10:49:10.366392 - EVENT MANAGER: App for event source is [application: 'gnome-shell']
+10:49:10.366525 - SCRIPT MANAGER: Getting script for [application: 'gnome-shell'] [invalid: 'Wayland surface']
+10:49:10.366850 - AXObject: Exception in get_attributes_dict: object no longer exists
+10:49:10.366863 - AXObject: Adding to known dead objects ax_object.get_attribute:1205 > ax_object.get_attributes_dict:1185 > ax_object.handle_error:198 > ax_object._set_known_dead_status:175
+10:49:10.367394 - SCRIPT MANAGER: Mapped [application: 'gnome-shell'] to gnome-shell
+10:49:10.370664 - SCRIPT MANAGER: Found orca.scripts.apps.gnome-shell
+10:49:10.370859 - BOOKMARKS: Refreshing handlers. script.__init__:95 > script.get_bookmarks:285 > bookmarks.__init__:45 > bookmarks.get_handlers:65
+10:49:10.371173 - BOOKMARKS: Handlers set up.
+10:49:10.371189 - STRUCTURAL NAVIGATION: Refreshing handlers. script.__init__:97 > script.get_structural_navigation:202 > structural_navigation.__init__:512 > structural_navigation.get_handlers:593
+10:49:10.371542 - DEFAULT: Getting braille bindings.
+10:49:10.371563 - DEFAULT: Finished getting braille bindings.
+10:49:10.371567 - SCRIPT: gnome-shell (module=orca.scripts.apps.gnome-shell.script) initialized
+10:49:10.371588 - SCRIPT MANAGER: Script is app script gnome-shell (module=orca.scripts.apps.gnome-shell.script)
+10:49:10.378612 - EVENT MANAGER: object:property-change:accessible-name for [DEAD] in gnome-shell (clutter 48.7) (0, 0, Wayland surface) has priority level: 4
+10:49:10.379534 - EVENT MANAGER: Queued object:property-change:accessible-name for [DEAD] in gnome-shell (clutter 48.7) (0, 0, Wayland surface) priority: 4, counter: 1
+
+10:49:10.381655 - EVENT MANAGER: object:property-change:accessible-name for [panel: 'Wayland surface'] in gnome-shell (clutter 48.7) (0, 0, Wayland surface)
+10:49:10.381730 - FOCUS MANAGER: Locus of focus is None
+10:49:10.382123 - EVENT_MANAGER: Ignoring object:property-change:accessible-name due to multiple instances in short time
+
+10:49:10.382714 - EVENT MANAGER: object:property-change:accessible-name for [panel: 'Wayland surface container'] in gnome-shell (clutter 48.7) (0, 0, Wayland surface container)
+10:49:10.382746 - FOCUS MANAGER: Locus of focus is None
+10:49:10.382860 - EVENT_MANAGER: Ignoring object:property-change:accessible-name due to multiple instances in short time
+
+10:49:10.382934 - EVENT MANAGER: object:property-change:accessible-name for [panel: 'Wayland window'] in gnome-shell (clutter 48.7) (0, 0, Wayland window)
+10:49:10.382959 - FOCUS MANAGER: Locus of focus is None
+10:49:10.383064 - EVENT_MANAGER: Ignoring object:property-change:accessible-name due to multiple instances in short time
+
+10:49:10.383123 - EVENT MANAGER: object:children-changed:add for [panel: 'Wayland surface container'] in gnome-shell (clutter 48.7) (0, 0, [panel: 'Wayland surface'])
+10:49:10.383140 - FOCUS MANAGER: Locus of focus is None
+10:49:10.383178 - SCRIPT MANAGER: Active script is: default (module=orca.scripts.default)
+10:49:10.383184 - EVENT MANAGER: Ignoring object:children-changed:add because event is not from active app
+
+10:49:10.383211 - EVENT MANAGER: object:children-changed:add for [panel: 'Window group'] in gnome-shell (clutter 48.7) (1, 0, [panel: 'Wayland window'])
+10:49:10.383224 - FOCUS MANAGER: Locus of focus is None
+10:49:10.383234 - EVENT_MANAGER: Ignoring object:children-changed:add due to multiple instances in short time
+
+10:49:10.383268 - EVENT MANAGER: object:state-changed:sensitive for [panel: 'Wayland surface'] in gnome-shell (clutter 48.7) (1, 0, 0)
+10:49:10.383301 - FOCUS MANAGER: Locus of focus is None
+10:49:10.383323 - EVENT MANAGER: Ignoring object:state-changed:sensitive due to role of unfocused source
+
+10:49:10.383872 - EVENT MANAGER: object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager'])
+10:49:10.383902 - FOCUS MANAGER: Locus of focus is None
+10:49:10.383930 - SCRIPT MANAGER: Active script is: default (module=orca.scripts.default)
+10:49:10.383950 - EVENT MANAGER: Queueing object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager'])
+10:49:10.383958 - EVENT MANAGER: App for event source is None
+10:49:10.383966 - SCRIPT MANAGER: Getting script for None [desktop frame: 'main']
+10:49:10.384167 - SCRIPT MANAGER: Script is app script default (module=orca.scripts.default)
+10:49:10.384232 - EVENT MANAGER: object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager']) has priority level: 5
+10:49:10.384270 - EVENT MANAGER: Queued object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager']) priority: 5, counter: 2
+
+10:49:10.384329 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland window'] in gnome-shell (clutter 48.7) (1, 0, 0)
+10:49:10.384346 - FOCUS MANAGER: Locus of focus is None
+10:49:10.384365 - EVENT MANAGER: Ignoring object:state-changed:showing due to role
+
+10:49:10.384387 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland surface container'] in gnome-shell (clutter 48.7) (1, 0, 0)
+10:49:10.384400 - FOCUS MANAGER: Locus of focus is None
+10:49:10.384410 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:10.384429 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland surface'] in gnome-shell (clutter 48.7) (1, 0, 0)
+10:49:10.384441 - FOCUS MANAGER: Locus of focus is None
+10:49:10.384450 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:10.389532 - EVENT MANAGER: window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.389612 - EVENT MANAGER: Queueing window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.389630 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:10.389644 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.389996 - SCRIPT MANAGER: Mapped [application: 'llm-manager'] to llm-manager
+10:49:10.392934 - SCRIPT MANAGER: Found orca.scripts.toolkits.Qt
+10:49:10.393111 - BOOKMARKS: Refreshing handlers. script.__init__:95 > script.get_bookmarks:285 > bookmarks.__init__:45 > bookmarks.get_handlers:65
+10:49:10.393648 - BOOKMARKS: Handlers set up.
+10:49:10.393667 - STRUCTURAL NAVIGATION: Refreshing handlers. script.__init__:97 > script.get_structural_navigation:202 > structural_navigation.__init__:512 > structural_navigation.get_handlers:593
+10:49:10.394470 - DEFAULT: Getting braille bindings.
+10:49:10.394485 - DEFAULT: Finished getting braille bindings.
+10:49:10.394489 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script) initialized
+10:49:10.394511 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.394585 - EVENT MANAGER: window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) has priority level: 2
+10:49:10.394611 - EVENT MANAGER: Queued window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 3
+
+10:49:10.394666 - EVENT MANAGER: object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.394681 - EVENT_MANAGER: Not ignoring object:state-changed:active due to role
+10:49:10.394698 - EVENT MANAGER: Queueing object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.394705 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:10.394713 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.395152 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.395227 - EVENT MANAGER: object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) has priority level: 2
+10:49:10.395251 - EVENT MANAGER: Queued object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) priority: 2, counter: 4
+
+10:49:10.395318 - EVENT MANAGER: window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.395339 - EVENT MANAGER: Queueing window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.395347 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:10.395356 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.395755 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.395891 - EVENT MANAGER: window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) has priority level: 2
+10:49:10.395958 - EVENT MANAGER: Queued window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 5
+
+10:49:10.396046 - EVENT MANAGER: object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.396075 - EVENT_MANAGER: Not ignoring object:state-changed:active due to role
+10:49:10.396122 - EVENT MANAGER: Queueing object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.396143 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:10.396167 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.396564 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.396616 - EVENT MANAGER: object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) has priority level: 2
+10:49:10.396639 - EVENT MANAGER: Queued object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) priority: 2, counter: 6
+
+10:49:10.397738 - EVENT MANAGER: object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager'])
+10:49:10.397773 - FOCUS MANAGER: Locus of focus is None
+10:49:10.397997 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being focused
+10:49:10.398034 - EVENT MANAGER: Queueing object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager'])
+10:49:10.398045 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:10.398055 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:10.398274 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.398318 - EVENT MANAGER: object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager']) has priority level: 3
+10:49:10.398341 - EVENT MANAGER: Queued object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager']) priority: 3, counter: 7
+10:49:10.398822 - EVENT MANAGER: Dequeueing object:property-change:accessible-name for [DEAD] in gnome-shell (clutter 48.7) (0, 0, Wayland surface)
+10:49:10.399329 - EVENT MANAGER: Dequeued object:property-change:accessible-name for [DEAD] in gnome-shell (clutter 48.7) (0, 0, Wayland surface) priority: 4, counter: 1
+
+vvvvv START PRIORITY-4 OBJECT EVENT OBJECT:PROPERTY-CHANGE:ACCESSIBLE-NAME (queue size: 6) vvvvv
+10:49:10.399419 - EVENT MANAGER: Ignoring defunct object: [DEAD]
+TOTAL PROCESSING TIME: 0.0001
+^^^^^ FINISHED PRIORITY-4 OBJECT EVENT OBJECT:PROPERTY-CHANGE:ACCESSIBLE-NAME ^^^^^
+
+10:49:10.399534 - EVENT MANAGER: Dequeueing window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.399559 - EVENT MANAGER: Dequeued window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 3
+
+vvvvv START PRIORITY-2 OBJECT EVENT WINDOW:ACTIVATE (queue size: 5) vvvvv
+10:49:10.399619 - EVENT MANAGER: window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) obsoleted by window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) more recent duplicate
+TOTAL PROCESSING TIME: 0.0001
+^^^^^ FINISHED PRIORITY-2 OBJECT EVENT WINDOW:ACTIVATE ^^^^^
+
+10:49:10.399649 - EVENT MANAGER: Dequeueing object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.399690 - EVENT MANAGER: Dequeued object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) priority: 2, counter: 4
+
+vvvvv START PRIORITY-2 OBJECT EVENT OBJECT:STATE-CHANGED:ACTIVE (queue size: 4) vvvvv
+10:49:10.399735 - EVENT MANAGER: object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) obsoleted by object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) more recent duplicate
+TOTAL PROCESSING TIME: 0.0000
+^^^^^ FINISHED PRIORITY-2 OBJECT EVENT OBJECT:STATE-CHANGED:ACTIVE ^^^^^
+
+10:49:10.399787 - EVENT MANAGER: Dequeueing window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:10.399800 - EVENT MANAGER: Dequeued window:activate for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 5
+
+vvvvv START PRIORITY-2 OBJECT EVENT WINDOW:ACTIVATE (queue size: 3) vvvvv
+10:49:10.402081 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='LLM Manager' role='frame' id='QApplication.MainWindow'
+                  description=''
+                  help=''
+                  states='active, enabled, resizable, sensitive, showing, visible'
+                  relations=''
+                  actions=''
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0]
+
+10:49:10.402116 - SCRIPT MANAGER: Active script is: default (module=orca.scripts.default)
+10:49:10.402129 - FOCUS MANAGER: Locus of focus is None
+10:49:10.402150 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.402160 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.402350 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.402366 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.405265 - FOCUS MANAGER: Active window is None event_manager._dequeue_object_event:552 > event_manager._process_object_event:799 > event_manager._is_activatable_event:703 > focus_manager.get_active_window:258
+10:49:10.405710 - EVENT MANAGER: Change active script: True (Window activation)
+10:49:10.405724 - SCRIPT MANAGER: Deactivating default (module=orca.scripts.default) reason: Window activation
+10:49:10.405772 - INPUT EVENT MANAGER: Grab id removed for Insert: 133
+10:49:10.405778 - INPUT EVENT MANAGER: Grab id removed for KP_Insert: 134
+10:49:10.405780 - ORCA MODIFIER MANAGER: Setting pressed state to False for grab removal
+10:49:10.405786 - KEYBINDINGS: Removing key grabs: script deactivation
+10:49:10.405882 - KEYBINDINGS: 84 key grabs out of 117 removed.
+10:49:10.405895 - DEFAULT: Clearing key bindings
+10:49:10.405916 - SCRIPT MANAGER: Setting active script to llm-manager (module=orca.scripts.toolkits.Qt.script) reason: Window activation
+10:49:10.405929 - DEFAULT: Activating script for [application: 'llm-manager']
+10:49:10.405971 - SETTINGS MANAGER: Loading settings for None profile
+10:49:10.406129 - SETTINGS MANAGER: Settings for default profile loaded
+10:49:10.406134 - SETTINGS MANAGER: Merging settings.
+10:49:10.406144 - SETTINGS MANAGER: Settings merged.
+10:49:10.406147 - SETTINGS MANAGER: Setting runtime settings.
+10:49:10.406179 - SETTINGS MANAGER: Runtime settings set.
+10:49:10.406194 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:10.406326 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:10.406410 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:10.406473 - DEFAULT: Setting up key bindings
+10:49:10.406492 - DEFAULT: Getting keybindings for llm-manager (module=orca.scripts.toolkits.Qt.script) script_manager.set_active_script:340 > default.activate:693 > default.add_key_grabs:568 > default.get_key_bindings:400
+10:49:10.406786 - BYPASS MODE MANAGER: Refreshing bindings. Is desktop: True
+10:49:10.406801 - SLEEP MODE MANAGER: Refreshing bindings. Is desktop: True
+10:49:10.406806 - SLEEP MODE MANAGER: Bindings set up.
+10:49:10.406811 - NOTIFICATION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:10.406817 - NOTIFICATION PRESENTER: Bindings set up.
+10:49:10.406821 - CLIPBOARD PRESENTER: Refreshing bindings. Is desktop: True
+10:49:10.406829 - FLAT REVIEW FINDER: Refreshing bindings.
+10:49:10.406837 - FLAT REVIEW FINDER: Desktop bindings set up.
+10:49:10.406845 - FLAT REVIEW FINDER: Laptop bindings set up.
+10:49:10.406850 - FLAT REVIEW PRESENTER: Refreshing bindings.
+10:49:10.406876 - FLAT REVIEW PRESENTER: Desktop bindings set up.
+10:49:10.406898 - FLAT REVIEW PRESENTER: Laptop bindings set up.
+10:49:10.406920 - WHERE AM I PRESENTER: Refreshing bindings.
+10:49:10.406930 - WHERE AM I PRESENTER: Desktop bindings set up.
+10:49:10.406937 - WHERE AM I PRESENTER: Laptop bindings set up.
+10:49:10.406952 - LEARN MODE PRESENTER: Refreshing bindings. Is desktop: True
+10:49:10.406956 - LEARN MODE PRESENTER: Bindings set up.
+10:49:10.406961 - SPEECH AND VERBOSITY MANAGER: Refreshing bindings.  Is desktop: True
+10:49:10.406973 - SPEECH AND VERBOSITY MANAGER: Bindings set up.
+10:49:10.406984 - SYSTEM INFORMATION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:10.406989 - SYSTEM INFORMATION PRESENTER: Bindings set up.
+10:49:10.406998 - OBJECT NAVIGATOR: Refreshing bindings. Is desktop: True
+10:49:10.407005 - OBJECT NAVIGATOR: Bindings set up.
+10:49:10.407023 - TABLE NAVIGATOR: Refreshing bindings. Is desktop: True default.add_key_grabs:568 > default.get_key_bindings:416 > default.getExtensionBindings:369 > table_navigator.get_bindings:81
+10:49:10.407379 - TABLE NAVIGATOR: Bindings set up. Suspended: False
+10:49:10.407433 - BOOKMARKS: Refreshing bindings. default.add_key_grabs:568 > default.get_key_bindings:416 > default.getExtensionBindings:374 > bookmarks.get_bindings:53
+10:49:10.407756 - BOOKMARKS: Bindings set up.
+10:49:10.407810 - MOUSE REVIEW: Refreshing bindings. Is desktop: True
+10:49:10.407816 - MOUSE REVIEW: Bindings set up.
+10:49:10.407821 - ACTION PRESENTER: Refreshing bindings. Is desktop: True
+10:49:10.407826 - ACTION PRESENTER: Bindings set up.
+10:49:10.407835 - DEBUGGING TOOLS MANAGER: Refreshing bindings. Is desktop: True
+10:49:10.408016 - KEYBINDINGS: Adding key grabs: script activation
+10:49:10.408509 - KEYBINDINGS: 117 key grabs out of 117 added.
+10:49:10.408526 - INPUT EVENT MANAGER: Grab id for Insert: 267
+10:49:10.408534 - INPUT EVENT MANAGER: Grab id for KP_Insert: 268
+10:49:10.408551 - DEFAULT: Script for [application: 'llm-manager'] activated
+10:49:10.408556 - BRAILLE: Checking braille setting.
+10:49:10.408560 - BRAILLE: Setting up key ranges.
+10:49:10.408569 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:10.408580 - BRAILLE: WINDOWPATH= None
+10:49:10.408586 - BRAILLE: XDG_VTNR= None
+10:49:10.408588 - BRAILLE: Attempting connection with BrlAPI.
+10:49:10.408814 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:10.408830 - BRAILLE: Not setting up key ranges: BrlAPI not running.
+10:49:10.408835 - SPEECH AND VERBOSITY MANAGER: Speech is enabled.
+10:49:10.408839 - SPEECH: Initializing
+10:49:10.408841 - SPEECH: Already initialized
+10:49:10.408852 - EVENT MANAGER: Processing window:activate: script for event is active
+10:49:10.408884 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:10.413398 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:10.413430 - FOCUS MANAGER: Active window is None event_manager._dequeue_object_event:552 > event_manager._process_object_event:826 > default.on_window_activated:1637 > focus_manager.get_active_window:258
+10:49:10.413740 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:10.413754 - FOCUS MANAGER: Focus None is not in [frame: 'LLM Manager'] event_manager._dequeue_object_event:552 > event_manager._process_object_event:826 > default.on_window_activated:1644 > focus_manager.set_active_window:287
+10:49:10.414061 - FOCUS MANAGER: Request to set locus of focus to [frame: 'LLM Manager'] event_manager._process_object_event:826 > default.on_window_activated:1644 > focus_manager.set_active_window:292 > focus_manager.set_locus_of_focus:188
+10:49:10.414369 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Setting locus of focus.
+10:49:10.414388 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.415233 - FOCUS MANAGER: Changing locus of focus from None to [frame: 'LLM Manager']. Notify: True
+10:49:10.415309 - FOCUS MANAGER: Switching mode from None to focus-tracking
+10:49:10.415650 - FOCUS MANAGER: Region of interest: [frame: 'LLM Manager'] (0, 0)
+10:49:10.416006 - FOCUS MANAGER: Switching object of interest from None to [frame: 'LLM Manager']
+10:49:10.416545 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [frame: 'LLM Manager']
+10:49:10.416567 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:10.416571 - FOCUS MANAGER: Setting active window to existing active window
+10:49:10.416582 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.416763 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.416790 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.416852 - BRAILLE GENERATOR: BrailleGenerator._generate_frame for [frame: 'LLM Manager'] args: {'formatType': 'focused'}
+10:49:10.416864 - TABLE NAVIGATOR: Last navigation event (None) was last key event: False
+10:49:10.416891 - BRAILLE GENERATOR: _generate_ancestors: []
+10:49:10.416903 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.416924 - AXUtilitiesRelation: [frame: 'LLM Manager'] is labelled by: []
+10:49:10.416931 - GENERATOR: _generate_accessible_label: []
+10:49:10.416940 - GENERATOR: _generate_accessible_name: [LLM Manager]
+10:49:10.416947 - GENERATOR: _generate_accessible_label_and_name: [LLM Manager]
+10:49:10.418360 - BRAILLE GENERATOR: _generate_accessible_role: [frame]
+10:49:10.419212 - AXObject: [application: 'llm-manager'] claims to have no parent
+10:49:10.419236 - AXUtilities: Unfocused alerts and dialogs for [frame: 'LLM Manager']: []
+10:49:10.419243 - BRAILLE GENERATOR: _generate_alert_and_dialog_count: []
+10:49:10.419265 - BRAILLE: Not contracting 'LLM Manager frame' because contracted braille is not enabled.
+10:49:10.419469 - AXUtilitiesRelation: [frame: 'LLM Manager'] is described by: []
+10:49:10.419485 - GENERATOR: _generate_accessible_description: []
+10:49:10.419496 - BRAILLE GENERATOR: Results: [COMPONENT: 'LLM Manager frame', cursor offset:0]
+10:49:10.419529 - BRAILLE: Refresh. Pan: True target: 0
+10:49:10.419533 - BRAILLE: Kill flash message default.update_braille:724 > default.refreshBraille:2577 > braille.refresh:1273 > braille.killFlash:1510
+10:49:10.420101 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:10.420112 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:10.420122 - BRAILLE: Line 0: 'LLM Manager frame' focusOffset: 0 [[0, 17]]
+10:49:10.420125 - BRAILLE: Cursor offset in line string is: 0
+10:49:10.420128 - BRAILLE: Not adjusting offset 0. Cursor offset fits on display.
+10:49:10.420132 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:10.420135 - BRAILLE LINE:  'LLM Manager frame'
+10:49:10.420138 -      VISIBLE:  'LLM Manager frame', cursor=1
+10:49:10.420145 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:10.420147 - BRAILLE: Need to initialize first.
+10:49:10.420153 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:10.420162 - BRAILLE: WINDOWPATH= None
+10:49:10.420167 - BRAILLE: XDG_VTNR= None
+10:49:10.420170 - BRAILLE: Attempting connection with BrlAPI.
+10:49:10.420363 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:10.420437 - SPEECH GENERATOR: SpeechGenerator._generate_frame for [frame: 'LLM Manager'] args: {'formatType': 'unfocused', 'priorObj': "[frame: 'LLM Manager']"}
+10:49:10.420455 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.420465 - SPEECH GENERATOR: _generate_old_ancestors: []
+10:49:10.420475 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.420481 - SPEECH GENERATOR: _generate_new_ancestors: []
+10:49:10.420489 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.420503 - GENERATOR: _generate_accessible_label: []
+10:49:10.420508 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:10.420519 - GENERATOR: _generate_accessible_name: [LLM Manager]
+10:49:10.420531 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:10.420550 - SPEECH GENERATOR: _generate_accessible_name: [LLM Manager, {'established': 'False'}]
+10:49:10.420563 - GENERATOR: _generate_accessible_label_and_name: [LLM Manager, {'established': 'False'}]
+10:49:10.420576 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [frame: 'LLM Manager']
+10:49:10.420585 - DEFAULT: Not in SayAll
+10:49:10.422113 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:10.422149 - SPEECH GENERATOR: _generate_accessible_role: [frame, {'established': 'False'}]
+10:49:10.423020 - AXObject: [application: 'llm-manager'] claims to have no parent
+10:49:10.423044 - AXUtilities: Unfocused alerts and dialogs for [frame: 'LLM Manager']: []
+10:49:10.423051 - SPEECH GENERATOR: _generate_unfocused_dialog_count: []
+10:49:10.423061 - SPEECH GENERATOR: _generate_has_click_action: []
+10:49:10.423067 - SPEECH GENERATOR: _generate_has_details: []
+10:49:10.423072 - SPEECH GENERATOR: _generate_details_for: []
+10:49:10.423080 - SPEECH GENERATOR: _generate_accessible_description: []
+10:49:10.423093 - SPEECH GENERATOR: _generate_state_has_popup: []
+10:49:10.423271 - SPEECH GENERATOR: _generate_tutorial: []
+10:49:10.423308 - SPEECH GENERATOR: Results: [LLM Manager, {'established': 'False'}, frame, {'established': 'False'}]
+10:49:10.423317 - SCRIPT UTILITIES: Not interrupting for locusOfFocus change: event is None
+10:49:10.423340 - SPEECH: Speak [LLM Manager, {'established': 'False'}, frame, {'established': 'False'}], acss: None
+10:49:10.423366 - SPEECH OUTPUT: 'LLM Manager frame' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:10.423371 - SPEECH DISPATCHER: Speaking 'LLM Manager frame' as string
+10:49:10.423388 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.423401 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.424059 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:3"/>LLM <mark name="4:11"/>Manager <mark name="12:17"/>frame</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:10.424615 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] default.locus_of_focus_changed:678 > default._save_focused_object_info:624 > ax_utilities_event.save_object_info_for_events:163 > focus_manager.get_active_window:258
+10:49:10.425082 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [frame: 'LLM Manager']
+10:49:10.425278 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.425817 - FOCUS MANAGER: Request to set locus of focus to [frame: 'LLM Manager'] event_manager._dequeue_object_event:552 > event_manager._process_object_event:826 > default.on_window_activated:1651 > focus_manager.set_locus_of_focus:188
+10:49:10.426132 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Setting locus of focus.
+10:49:10.426152 - FOCUS MANAGER: Setting locus of focus to existing locus of focus
+TOTAL PROCESSING TIME: 0.0264
+^^^^^ FINISHED PRIORITY-2 OBJECT EVENT WINDOW:ACTIVATE ^^^^^
+
+10:49:10.428675 - EVENT MANAGER: Dequeueing object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager'])
+10:49:10.429810 - EVENT MANAGER: Dequeued object:state-changed:active for [frame: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [frame: 'LLM Manager']) priority: 2, counter: 6
+
+vvvvv START PRIORITY-2 OBJECT EVENT OBJECT:STATE-CHANGED:ACTIVE (queue size: 2) vvvvv
+10:49:10.433187 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='LLM Manager' role='frame' id='QApplication.MainWindow'
+                  description=''
+                  help=''
+                  states='active, enabled, resizable, sensitive, showing, visible'
+                  relations=''
+                  actions=''
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0]
+
+                  EVENT ANY DATA:
+                  name='LLM Manager' role='frame' id='QApplication.MainWindow'
+                  description=''
+                  help=''
+                  states='active, enabled, resizable, sensitive, showing, visible'
+                  relations=''
+                  actions=''
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0]
+
+10:49:10.433212 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.433230 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.433239 - EVENT MANAGER: Script for event from locus of focus is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.433243 - EVENT MANAGER: Processing object:state-changed:active: script for event is active
+10:49:10.433287 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:10.437288 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:10.437308 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] event_manager._dequeue_object_event:552 > event_manager._process_object_event:826 > default.on_active_changed:1052 > focus_manager.get_active_window:258
+TOTAL PROCESSING TIME: 0.0078
+^^^^^ FINISHED PRIORITY-2 OBJECT EVENT OBJECT:STATE-CHANGED:ACTIVE ^^^^^
+
+10:49:10.437660 - EVENT MANAGER: Dequeueing object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager'])
+10:49:10.437679 - EVENT MANAGER: Dequeued object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (1, 0, [list: 'LLM Manager']) priority: 3, counter: 7
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 1) vvvvv
+10:49:10.442399 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='LLM Manager' role='list' id='LLM Manager'
+                  description=''
+                  help='LLM Manager'
+                  states='enabled, focusable, focused, sensitive, showing, visible, manages-descendants'
+                  relations=''
+                  actions=''
+                  interfaces='Component, Selection, Table'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 0]
+
+                  EVENT ANY DATA:
+                  name='LLM Manager' role='list' id='LLM Manager'
+                  description=''
+                  help='LLM Manager'
+                  states='enabled, focusable, focused, sensitive, showing, visible, manages-descendants'
+                  relations=''
+                  actions=''
+                  interfaces='Component, Selection, Table'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 0]
+
+10:49:10.442421 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.442437 - FOCUS MANAGER: Locus of focus is [frame: 'LLM Manager']
+10:49:10.442452 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:10.442461 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:10.442660 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.442676 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.442683 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+10:49:10.443366 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [list: 'LLM Manager']
+10:49:10.444051 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [list: 'LLM Manager']
+10:49:10.445096 - SCRIPT UTILITIES: [list: 'LLM Manager'] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:10.445117 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:10.449101 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:10.449544 - AXSelection: [list: 'LLM Manager'] reports 1 selected children
+10:49:10.450104 - FOCUS MANAGER: Request to set locus of focus to [list item: 'Hosts'] event_manager._process_object_event:826 > script.on_focused_changed:80 > default.on_focused_changed:1376 > focus_manager.set_locus_of_focus:188
+10:49:10.451029 - AXObject: Clearing AT-SPI cache on [list item: 'Hosts'] Recursive: False. Reason: Setting locus of focus.
+10:49:10.451047 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.451414 - FOCUS MANAGER: Changing locus of focus from [frame: 'LLM Manager'] to [list item: 'Hosts']. Notify: True
+10:49:10.451481 - FOCUS MANAGER: Region of interest: [list item: 'Hosts'] (0, 0)
+10:49:10.451538 - FOCUS MANAGER: Switching object of interest from [frame: 'LLM Manager'] to [list item: 'Hosts']
+10:49:10.454417 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [list item: 'Hosts']
+10:49:10.454448 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:10.454452 - FOCUS MANAGER: Setting active window to existing active window
+10:49:10.456672 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [list item: 'Hosts']
+10:49:10.457005 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.457345 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.457853 - BRAILLE GENERATOR: BrailleGenerator._generate_list_item for [list item: 'Hosts'] args: {'formatType': 'focused'}
+10:49:10.458091 - GENERATOR: _generate_text_substring: []
+10:49:10.458112 - TABLE NAVIGATOR: Last navigation event (None) was last key event: False
+10:49:10.459045 - BRAILLE GENERATOR: _generate_ancestors: []
+10:49:10.459066 - GENERATOR: _generate_text_substring: []
+10:49:10.459466 - GENERATOR: _generate_text_line: []
+10:49:10.459795 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.460297 - AXUtilitiesRelation: [list item: 'Hosts'] is labelled by: []
+10:49:10.460315 - GENERATOR: _generate_accessible_label: []
+10:49:10.460490 - GENERATOR: _generate_accessible_name: [Hosts]
+10:49:10.460664 - GENERATOR: _generate_accessible_label_and_name: [Hosts]
+10:49:10.461437 - GENERATOR: _generate_state_expanded: []
+10:49:10.461458 - BRAILLE: Not contracting 'Hosts' because contracted braille is not enabled.
+10:49:10.465632 - AXObject: [application: 'llm-manager'] claims to have no parent
+10:49:10.465657 - GENERATOR: _get_nesting_level: 0
+10:49:10.465665 - GENERATOR: _generate_nesting_level: []
+10:49:10.466334 - AXUtilitiesRelation: [list item: 'Hosts'] is described by: []
+10:49:10.468284 - AXComponent: [list item: 'Hosts'] is off-screen: False
+10:49:10.471150 - GENERATOR: _generate_descendants: []
+10:49:10.471171 - BRAILLE GENERATOR: Results: [COMPONENT: 'Hosts', cursor offset:0]
+10:49:10.471204 - BRAILLE: Refresh. Pan: True target: 0
+10:49:10.471225 - BRAILLE: Kill flash message default.update_braille:724 > default.refreshBraille:2577 > braille.refresh:1273 > braille.killFlash:1510
+10:49:10.471677 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:10.471693 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:10.471704 - BRAILLE: Line 0: 'Hosts' focusOffset: 0 [[0, 5]]
+10:49:10.471708 - BRAILLE: Cursor offset in line string is: 0
+10:49:10.471711 - BRAILLE: Not adjusting offset 0. Cursor offset fits on display.
+10:49:10.471714 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:10.471717 - BRAILLE LINE:  'Hosts'
+10:49:10.471719 -      VISIBLE:  'Hosts', cursor=1
+10:49:10.471726 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:10.471729 - BRAILLE: Need to initialize first.
+10:49:10.471736 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:10.471747 - BRAILLE: WINDOWPATH= None
+10:49:10.471752 - BRAILLE: XDG_VTNR= None
+10:49:10.471754 - BRAILLE: Attempting connection with BrlAPI.
+10:49:10.471961 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:10.472552 - SPEECH GENERATOR: SpeechGenerator._generate_list_item for [list item: 'Hosts'] args: {'formatType': 'unfocused', 'priorObj': "[frame: 'LLM Manager']"}
+10:49:10.472895 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.475273 - SPEECH GENERATOR: _generate_old_ancestors: []
+10:49:10.475612 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.476732 - AXObject: Looking for common ancestor of [frame: 'LLM Manager'] and [list item: 'Hosts']
+10:49:10.479572 - AXObject: Common ancestor of [frame: 'LLM Manager'] and [list item: 'Hosts'] is [frame: 'LLM Manager']
+10:49:10.479596 - DEFAULT: Not in SayAll
+10:49:10.481055 - GENERATOR: _get_functional_role: frame
+10:49:10.483627 - GENERATOR: _get_functional_role: list
+10:49:10.485385 - GENERATOR: _get_functional_role: filler
+10:49:10.485413 - AXUtilities: [filler] believed to be layout only: True, has layout-only role
+10:49:10.487143 - GENERATOR: _get_functional_role: frame
+10:49:10.487729 - SPEECH GENERATOR: SpeechGenerator._generate_list for [list: 'LLM Manager'] args: {'ancestorOf': "[list item: 'Hosts']",
+                   'count': '1',
+                   'formatType': 'ancestor',
+                   'leaving': 'None',
+                   'priorObj': "[frame: 'LLM Manager']",
+                   'role': 'list'}
+10:49:10.487753 - SPEECH GENERATOR: _generate_details_for: []
+10:49:10.487763 - SPEECH GENERATOR: _generate_leaving: []
+10:49:10.488091 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.488620 - AXUtilitiesRelation: [list: 'LLM Manager'] is labelled by: []
+10:49:10.488636 - GENERATOR: _generate_accessible_label: []
+10:49:10.488643 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:10.488655 - GENERATOR: _generate_accessible_name: [LLM Manager]
+10:49:10.488668 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:10.488693 - SPEECH GENERATOR: _generate_accessible_name: [LLM Manager, {'established': 'False'}]
+10:49:10.488708 - GENERATOR: _generate_accessible_label_and_name: [LLM Manager, {'established': 'False'}]
+10:49:10.491018 - AXObject: find_descendant: found [list item: 'Hosts'] in 0.0008s
+10:49:10.492823 - AXUtilitiesRelation: [list item: 'Hosts'] is member of: []
+10:49:10.493158 - AXUtilitiesRelation: [list item: 'Hosts'] is node parent of: []
+10:49:10.498576 - AXUtilities: Members of [list item: 'Hosts'] in [list: 'LLM Manager'] based on role [[list item: 'Hosts'], [list item: 'Diagnose'], [list item: 'Recommendations'], [list item: 'Review Changes'], [list item: 'Apply / Results'], [list item: 'Backup / Rollback']]
+10:49:10.502068 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:10.502114 - SPEECH GENERATOR: _generate_number_of_children: [List with 6 items, {'established': 'False'}]
+10:49:10.503618 - GENERATOR: _get_nesting_level: 0
+10:49:10.503634 - GENERATOR: _generate_nesting_level: []
+10:49:10.503642 - SPEECH GENERATOR: _generate_nesting_level: []
+10:49:10.503672 - SPEECH GENERATOR: Results: [LLM Manager, {'established': 'False'}, List with 6 items, {'established': 'False'}]
+10:49:10.503692 - SPEECH GENERATOR: _generate_new_ancestors: [[LLM Manager, {'established': 'False'}, List with 6 items, {'established': 'False'}]]
+10:49:10.503708 - GENERATOR: _generate_text_substring: []
+10:49:10.503713 - SPEECH GENERATOR: _generate_text_substring: []
+10:49:10.504114 - SPEECH GENERATOR: _generate_text_line: []
+10:49:10.504473 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.504496 - GENERATOR: _generate_accessible_label: []
+10:49:10.504503 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:10.504829 - GENERATOR: _generate_accessible_name: [Hosts]
+10:49:10.504845 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:10.505032 - SPEECH GENERATOR: _generate_accessible_name: [Hosts, {'established': 'False'}]
+10:49:10.505216 - GENERATOR: _generate_accessible_label_and_name: [Hosts, {'established': 'False'}]
+10:49:10.505565 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [list item: 'Hosts']
+10:49:10.505731 - DEFAULT: Not in SayAll
+10:49:10.505765 - SPEECH GENERATOR: _generate_accessible_role: []
+10:49:10.506536 - GENERATOR: _generate_state_checked_if_checkable: []
+10:49:10.506553 - SPEECH GENERATOR: _generate_state_checked_if_checkable: []
+10:49:10.506942 - SPEECH GENERATOR: _generate_state_unselected: []
+10:49:10.507728 - GENERATOR: _generate_state_expanded: []
+10:49:10.507744 - SPEECH GENERATOR: _generate_state_expanded: []
+10:49:10.510066 - AXComponent: [list item: 'Hosts'] is off-screen: False
+10:49:10.512926 - GENERATOR: _generate_descendants: []
+10:49:10.512952 - SPEECH GENERATOR: _generate_position_in_list: []
+10:49:10.512964 - SPEECH GENERATOR: _generate_has_click_action: []
+10:49:10.512972 - SPEECH GENERATOR: _generate_has_details: []
+10:49:10.512979 - SPEECH GENERATOR: _generate_details_for: []
+10:49:10.513184 - GENERATOR: _generate_accessible_description: []
+10:49:10.513201 - SPEECH GENERATOR: _generate_accessible_description: []
+10:49:10.513589 - SPEECH GENERATOR: _generate_state_has_popup: []
+10:49:10.513774 - SPEECH GENERATOR: _generate_tutorial: []
+10:49:10.513830 - SPEECH GENERATOR: Results: [[LLM Manager, {'established': 'False'}, List with 6 items, {'established': 'False'}], Hosts, {'established': 'False'}, PAUSE, PAUSE, PAUSE, PAUSE]
+10:49:10.515798 - SCRIPT UTILITIES: Not interrupting for locusOfFocus change: old locusOfFocus is ancestor with name of new locusOfFocus
+10:49:10.515851 - SPEECH: Speak [[LLM Manager, {'established': 'False'}, List with 6 items, {'established': 'False'}], Hosts, {'established': 'False'}, PAUSE, PAUSE, PAUSE, PAUSE], acss: None
+10:49:10.515868 - SPEECH: Speak [LLM Manager, {'established': 'False'}, List with 6 items, {'established': 'False'}], acss: None
+10:49:10.515894 - SPEECH OUTPUT: 'LLM Manager List with 6 items' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:10.515897 - SPEECH DISPATCHER: Speaking 'LLM Manager List with 6 items' as string
+10:49:10.515920 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.516250 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.517087 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:3"/>LLM <mark name="4:11"/>Manager <mark name="12:16"/>List <mark name="17:21"/>with <mark name="22:23"/>6 <mark name="24:29"/>items</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:10.517249 - SPEECH OUTPUT: 'Hosts.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:10.517259 - SPEECH DISPATCHER: Speaking 'Hosts.' as string
+10:49:10.517285 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.517804 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.518574 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:6"/>Hosts.</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:10.522655 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] default.locus_of_focus_changed:678 > default._save_focused_object_info:624 > ax_utilities_event.save_object_info_for_events:163 > focus_manager.get_active_window:258
+TOTAL PROCESSING TIME: 0.0856
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:10.523387 - EVENT MANAGER: Dequeueing object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager'])
+10:49:10.523413 - EVENT MANAGER: Dequeued object:children-changed:add for [desktop frame: 'main'] in (12, 0, [application: 'llm-manager']) priority: 5, counter: 2
+
+vvvvv START PRIORITY-5 OBJECT EVENT OBJECT:CHILDREN-CHANGED:ADD (queue size: 0) vvvvv
+10:49:10.524959 - EVENT SOURCE:
+                  app='' name='main' role='desktop frame' id='None'
+                  description=''
+                  help=''
+                  states=''
+                  relations=''
+                  actions=''
+                  interfaces='Component'
+                  attributes=''
+                  text=''
+                  path=[-1]
+
+                  EVENT ANY DATA:
+                  name='llm-manager' role='application' id='QApplication'
+                  description='/usr/bin/python3.13'
+                  help=''
+                  states='enabled, sensitive, showing, visible'
+                  relations=''
+                  actions=''
+                  interfaces=''
+                  attributes=''
+                  text=''
+                  path=[-1]
+
+10:49:10.524980 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:10.525320 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:10.525352 - EVENT MANAGER: Getting script for event for None [desktop frame: 'main']
+10:49:10.525364 - SCRIPT MANAGER: Getting script for None [desktop frame: 'main']
+10:49:10.525487 - SCRIPT MANAGER: Script is app script default (module=orca.scripts.default)
+10:49:10.525503 - EVENT MANAGER: Script for event is default (module=orca.scripts.default)
+10:49:10.525521 - EVENT MANAGER: Change active script: False (No reason found to activate a different script.)
+10:49:10.525526 - EVENT MANAGER: Processing object:children-changed:add: script handles events when inactive
+10:49:10.525533 - AXUtilitiesRelation: Clearing local cache. Reason: children-changed event.
+10:49:10.525540 - AXObject: Clearing local cache. Reason: children-changed event.
+10:49:10.525545 - AXUtilitiesRelation: Clearing local cache. Reason: children-changed event.
+10:49:10.525550 - AXUtilitiesEvent: Clearing local cache. Reason: children-changed event.
+TOTAL PROCESSING TIME: 0.0021
+^^^^^ FINISHED PRIORITY-5 OBJECT EVENT OBJECT:CHILDREN-CHANGED:ADD ^^^^^
+
+10:49:11.310734 - GENERATOR: Clearing cache.
+10:49:13.028421 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:13.311037 - GENERATOR: Clearing cache.
+10:49:15.311351 - GENERATOR: Clearing cache.
+10:49:15.368208 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:15.368678 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:15.376981 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:15.378110 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.378334 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65289
+                 hw_code=23
+                 modifiers=16384
+                 text='	'
+                 keyval_name='Tab'
+                 timestamp=1789264155.3681214
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'Tab' (23) vvvvv
+10:49:15.378973 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.378998 - WINDOW: [frame: 'LLM Manager']
+10:49:15.379357 - LOCATION: [list item: 'Hosts']
+10:49:15.379589 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-pressed-event matches []
+10:49:15.379840 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-pressed-event fallback candidates []
+10:49:15.379864 - HANDLER: None
+10:49:15.379893 - DEFAULT: Interrupting presentation
+10:49:15.379908 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:15.381893 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:15.382766 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.383159 - KEYBOARD EVENT: Not character echoable, setting disabled.
+10:49:15.383172 - DEFAULT: Presenting keyboard event
+10:49:15.383197 - SPEECH GENERATOR: None voice requested with language='None', dialect=''
+10:49:15.383217 - SPEECH OUTPUT: 'tab' {'established': False}
+10:49:15.383226 - SPEECH DISPATCHER: Speaking 'tab' as string
+10:49:15.383229 - SPEECH DISPATCHER: Speaking 'tab' as string
+10:49:15.383250 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.383611 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.384529 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:3"/>tab</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:15.384691 - TOTAL PROCESSING TIME: 0.0062
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'Tab' (23) ^^^^^
+
+
+10:49:15.385532 - EVENT MANAGER: object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager'])
+10:49:15.385942 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.386012 - EVENT MANAGER: Queueing object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager'])
+10:49:15.386023 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:15.386033 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:15.386228 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.386277 - EVENT MANAGER: object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager']) has priority level: 3
+10:49:15.386302 - EVENT MANAGER: Queued object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager']) priority: 3, counter: 8
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65289
+                 hw_code=23
+                 modifiers=16384
+                 text='	'
+                 keyval_name='Tab'
+                 timestamp=1789264155.3848414
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'Tab' (23) vvvvv
+10:49:15.386602 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.386623 - WINDOW: [frame: 'LLM Manager']
+10:49:15.387038 - LOCATION: [list item: 'Hosts']
+10:49:15.387255 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-released-event matches []
+10:49:15.387446 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-released-event fallback candidates []
+10:49:15.387466 - HANDLER: None
+10:49:15.387647 - TOTAL PROCESSING TIME: 0.0024
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'Tab' (23) ^^^^^
+
+
+10:49:15.389191 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:15.389635 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.389930 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being focused
+10:49:15.389971 - EVENT MANAGER: Queueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:15.389996 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:15.390006 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:15.390189 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.390236 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) has priority level: 3
+10:49:15.390258 - EVENT MANAGER: Queued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) priority: 3, counter: 9
+10:49:15.390286 - EVENT MANAGER: Dequeueing object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager'])
+10:49:15.390301 - EVENT MANAGER: Dequeued object:state-changed:focused for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager']) priority: 3, counter: 8
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 1) vvvvv
+10:49:15.395531 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='LLM Manager' role='list' id='LLM Manager'
+                  description=''
+                  help='LLM Manager'
+                  states='enabled, focusable, sensitive, showing, visible, manages-descendants'
+                  relations=''
+                  actions=''
+                  interfaces='Component, Selection, Table'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 0]
+
+                  EVENT ANY DATA:
+                  name='LLM Manager' role='list' id='LLM Manager'
+                  description=''
+                  help='LLM Manager'
+                  states='enabled, focusable, sensitive, showing, visible, manages-descendants'
+                  relations=''
+                  actions=''
+                  interfaces='Component, Selection, Table'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 0]
+
+10:49:15.395580 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.395996 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.396055 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:15.396074 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [list: 'LLM Manager']
+10:49:15.396284 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.396303 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.396314 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+TOTAL PROCESSING TIME: 0.0060
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:15.396427 - EVENT MANAGER: Dequeueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:15.396448 - EVENT MANAGER: Dequeued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) priority: 3, counter: 9
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 0) vvvvv
+10:49:15.404464 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, focused, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+                  EVENT ANY DATA:
+                  name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, focused, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+10:49:15.404505 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.404876 - FOCUS MANAGER: Locus of focus is [list item: 'Hosts']
+10:49:15.404921 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [filler]
+10:49:15.404933 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:15.405125 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.405144 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.405154 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+10:49:15.406245 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:15.407312 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:15.408836 - SCRIPT UTILITIES: [filler] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:15.408863 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:15.413063 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:15.413315 - FOCUS MANAGER: Request to set locus of focus to [filler] event_manager._process_object_event:826 > script.on_focused_changed:80 > default.on_focused_changed:1376 > focus_manager.set_locus_of_focus:188
+10:49:15.413789 - AXObject: Clearing AT-SPI cache on [filler] Recursive: False. Reason: Setting locus of focus.
+10:49:15.413812 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.415554 - FOCUS MANAGER: Changing locus of focus from [list item: 'Hosts'] to [filler]. Notify: True
+10:49:15.416025 - FOCUS MANAGER: Region of interest: [filler] (0, 0)
+10:49:15.416882 - FOCUS MANAGER: Switching object of interest from [list item: 'Hosts'] to [filler]
+10:49:15.418970 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:15.418992 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:15.418996 - FOCUS MANAGER: Setting active window to existing active window
+10:49:15.420265 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:15.420510 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.420540 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.420560 - BRAILLE GENERATOR: [filler] lacks dedicated generator
+10:49:15.420600 - BRAILLE GENERATOR: BrailleGenerator._generate_default_presentation for [filler] args: {'formatType': 'focused'}
+10:49:15.420613 - TABLE NAVIGATOR: Last navigation event (None) was last key event: False
+10:49:15.420635 - BRAILLE GENERATOR: _generate_ancestors: []
+10:49:15.420647 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.420664 - AXUtilitiesRelation: [filler] is labelled by: []
+10:49:15.420686 - GENERATOR: _generate_accessible_label: []
+10:49:15.420952 - GENERATOR: _generate_accessible_name: []
+10:49:15.420972 - GENERATOR: _generate_accessible_label_and_name: []
+10:49:15.420992 - GENERATOR: _generate_text_substring: []
+10:49:15.421240 - GENERATOR: _generate_text_content: []
+10:49:15.421484 - GENERATOR: _generate_value: []
+10:49:15.421521 - BRAILLE GENERATOR: _generate_accessible_role: []
+10:49:15.421538 - GENERATOR: _generate_state_required: []
+10:49:15.421550 - GENERATOR: _generate_state_invalid: []
+10:49:15.421577 - AXUtilitiesRelation: [filler] is described by: []
+10:49:15.421584 - GENERATOR: _generate_accessible_description: []
+10:49:15.421593 - BRAILLE GENERATOR: Results: [COMPONENT: '', cursor offset:0]
+10:49:15.421615 - BRAILLE: Refresh. Pan: True target: 0
+10:49:15.421618 - BRAILLE: Kill flash message default.update_braille:724 > default.refreshBraille:2577 > braille.refresh:1273 > braille.killFlash:1510
+10:49:15.422106 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:15.422140 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:15.422149 - BRAILLE: Line 0: '' focusOffset: 0 []
+10:49:15.422153 - BRAILLE: Cursor offset in line string is: 0
+10:49:15.422155 - BRAILLE: Not adjusting offset 0. Cursor offset fits on display.
+10:49:15.422158 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:15.422161 - BRAILLE LINE:  ''
+10:49:15.422163 -      VISIBLE:  '', cursor=1
+10:49:15.422169 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:15.422171 - BRAILLE: Need to initialize first.
+10:49:15.422178 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:15.422189 - BRAILLE: WINDOWPATH= None
+10:49:15.422194 - BRAILLE: XDG_VTNR= None
+10:49:15.422197 - BRAILLE: Attempting connection with BrlAPI.
+10:49:15.422442 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:15.422484 - SPEECH GENERATOR: [filler] lacks dedicated generator
+10:49:15.422967 - SPEECH GENERATOR: SpeechGenerator._generate_default_presentation for [filler] args: {'formatType': 'unfocused', 'priorObj': "[list item: 'Hosts']"}
+10:49:15.422999 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.425975 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:15.427373 - SCRIPT UTILITIES: [filler] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:15.428641 - AXObject: Looking for common ancestor of [filler] and [list item: 'Hosts']
+10:49:15.432814 - AXObject: Common ancestor of [filler] and [list item: 'Hosts'] is [filler]
+10:49:15.432849 - DEFAULT: Not in SayAll
+10:49:15.435531 - GENERATOR: _get_functional_role: list
+10:49:15.437362 - GENERATOR: _get_functional_role: filler
+10:49:15.437776 - SPEECH GENERATOR: SpeechGenerator._generate_list for [list: 'LLM Manager'] args: {'ancestorOf': "[list item: 'Hosts']", 'count': '1', 'formatType': 'ancestor', 'leaving': 'True', 'priorObj': '[filler]', 'role': 'list'}
+10:49:15.437803 - SPEECH GENERATOR: _generate_details_for: []
+10:49:15.437817 - DEFAULT: Not in SayAll
+10:49:15.437842 - AXUtilitiesRelation: [list: 'LLM Manager'] contains details for: []
+10:49:15.438926 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:15.438966 - SPEECH GENERATOR: _generate_leaving: [, {'established': 'False'}]
+10:49:15.438983 - SPEECH GENERATOR: Results: [, {'established': 'False'}]
+10:49:15.438997 - SPEECH GENERATOR: _generate_old_ancestors: [[, {'established': 'False'}]]
+10:49:15.439012 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.439882 - AXObject: Looking for common ancestor of [list item: 'Hosts'] and [filler]
+10:49:15.443740 - AXObject: Common ancestor of [list item: 'Hosts'] and [filler] is [filler]
+10:49:15.443757 - DEFAULT: Not in SayAll
+10:49:15.445320 - GENERATOR: _get_functional_role: filler
+10:49:15.447333 - GENERATOR: _get_functional_role: layered-pane
+10:49:15.450780 - GENERATOR: _get_functional_role: filler
+10:49:15.450811 - AXUtilities: [filler] believed to be layout only: True, has layout-only role
+10:49:15.451215 - SPEECH GENERATOR: SpeechGenerator._generate_layered_pane for [layered pane] args: {'ancestorOf': '[filler]', 'count': '1', 'formatType': 'ancestor', 'leaving': 'None', 'priorObj': "[list item: 'Hosts']", 'role': 'layered-pane'}
+10:49:15.451240 - SPEECH GENERATOR: _generate_details_for: []
+10:49:15.451257 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.451630 - AXUtilitiesRelation: [layered pane] is labelled by: []
+10:49:15.451648 - GENERATOR: _generate_accessible_label: []
+10:49:15.451655 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:15.451702 - GENERATOR: _generate_accessible_name: []
+10:49:15.451716 - SPEECH GENERATOR: _generate_accessible_name: []
+10:49:15.451725 - GENERATOR: _generate_accessible_label_and_name: []
+10:49:15.451740 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [filler]
+10:49:15.451748 - DEFAULT: Not in SayAll
+10:49:15.453138 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:15.453182 - SPEECH GENERATOR: _generate_accessible_role: [layered pane, {'established': 'False'}]
+10:49:15.453206 - GENERATOR: _generate_state_sensitive: []
+10:49:15.453213 - SPEECH GENERATOR: _generate_state_sensitive: []
+10:49:15.457246 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:15.457286 - SPEECH GENERATOR: _generate_number_of_children: [0 items, {'established': 'False'}]
+10:49:15.457307 - SPEECH GENERATOR: Results: [layered pane, {'established': 'False'}, 0 items, {'established': 'False'}]
+10:49:15.457325 - SPEECH GENERATOR: _generate_new_ancestors: [[layered pane, {'established': 'False'}, 0 items, {'established': 'False'}]]
+10:49:15.457339 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.457348 - GENERATOR: _generate_accessible_label: []
+10:49:15.457353 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:15.457376 - GENERATOR: _generate_accessible_name: []
+10:49:15.457381 - SPEECH GENERATOR: _generate_accessible_name: []
+10:49:15.457387 - GENERATOR: _generate_accessible_label_and_name: []
+10:49:15.457396 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [filler]
+10:49:15.457401 - DEFAULT: Not in SayAll
+10:49:15.457414 - SPEECH GENERATOR: _generate_accessible_role: []
+10:49:15.457424 - GENERATOR: _generate_state_sensitive: []
+10:49:15.457428 - SPEECH GENERATOR: _generate_state_sensitive: []
+10:49:15.457438 - SPEECH GENERATOR: _generate_keyboard_mnemonic: []
+10:49:15.457445 - SPEECH GENERATOR: _generate_has_click_action: []
+10:49:15.457450 - SPEECH GENERATOR: _generate_has_details: []
+10:49:15.457454 - SPEECH GENERATOR: _generate_details_for: []
+10:49:15.457644 - GENERATOR: _generate_accessible_description: []
+10:49:15.457661 - SPEECH GENERATOR: _generate_accessible_description: []
+10:49:15.457696 - SPEECH GENERATOR: _generate_state_has_popup: []
+10:49:15.457914 - SPEECH GENERATOR: _generate_tutorial: []
+10:49:15.457960 - SPEECH GENERATOR: Results: [[, {'established': 'False'}], [layered pane, {'established': 'False'}, 0 items, {'established': 'False'}], PAUSE]
+10:49:15.460321 - AXUtilitiesRelation: [list item: 'Hosts'] is controlled by [filler]: False
+10:49:15.460670 - AXUtilitiesRelation: [filler] is controlled by [list item: 'Hosts']: False
+10:49:15.460696 - DEFAULT: Interrupting presentation
+10:49:15.460715 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:15.460838 - BRAILLE: Kill flash message focus_manager.set_locus_of_focus:243 > default.locus_of_focus_changed:676 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:15.461326 - SPEECH: Speak [[, {'established': 'False'}], [layered pane, {'established': 'False'}, 0 items, {'established': 'False'}], PAUSE], acss: None
+10:49:15.461341 - SPEECH: Speak [, {'established': 'False'}], acss: None
+10:49:15.461357 - SPEECH: Speak [layered pane, {'established': 'False'}, 0 items, {'established': 'False'}], acss: None
+10:49:15.461381 - SPEECH OUTPUT: 'layered pane 0 items' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:15.461385 - SPEECH DISPATCHER: Speaking 'layered pane 0 items' as string
+10:49:15.461407 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:15.461421 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:15.462351 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:7"/>layered <mark name="8:12"/>pane <mark name="13:14"/>0 <mark name="15:20"/>items</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:15.464219 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] default.locus_of_focus_changed:678 > default._save_focused_object_info:624 > ax_utilities_event.save_object_info_for_events:163 > focus_manager.get_active_window:258
+TOTAL PROCESSING TIME: 0.0684
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:16.377619 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:16.378056 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:16.388136 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:16.388419 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.388560 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65289
+                 hw_code=23
+                 modifiers=16384
+                 text='	'
+                 keyval_name='Tab'
+                 timestamp=1789264156.3775342
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'Tab' (23) vvvvv
+10:49:16.388746 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.388770 - WINDOW: [frame: 'LLM Manager']
+10:49:16.388785 - LOCATION: [filler]
+10:49:16.388814 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-pressed-event matches []
+10:49:16.388824 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-pressed-event fallback candidates []
+10:49:16.388832 - HANDLER: None
+10:49:16.388845 - DEFAULT: Interrupting presentation
+10:49:16.388857 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:16.388987 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:16.389324 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.389347 - KEYBOARD EVENT: Not character echoable, setting disabled.
+10:49:16.389350 - DEFAULT: Presenting keyboard event
+10:49:16.389370 - SPEECH GENERATOR: None voice requested with language='None', dialect=''
+10:49:16.389387 - SPEECH OUTPUT: 'tab' {'established': False}
+10:49:16.389394 - SPEECH DISPATCHER: Speaking 'tab' as string
+10:49:16.389398 - SPEECH DISPATCHER: Speaking 'tab' as string
+10:49:16.389411 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.389422 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.390411 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:3"/>tab</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:16.390551 - TOTAL PROCESSING TIME: 0.0018
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'Tab' (23) ^^^^^
+
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65289
+                 hw_code=23
+                 modifiers=16384
+                 text='	'
+                 keyval_name='Tab'
+                 timestamp=1789264156.3906791
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'Tab' (23) vvvvv
+10:49:16.391173 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.391192 - WINDOW: [frame: 'LLM Manager']
+10:49:16.391199 - LOCATION: [filler]
+10:49:16.391220 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-released-event matches []
+10:49:16.391227 - KEYBINDINGS: 'Tab' (23) mods: 16384 key-released-event fallback candidates []
+10:49:16.391234 - HANDLER: None
+10:49:16.391246 - TOTAL PROCESSING TIME: 0.0001
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'Tab' (23) ^^^^^
+
+
+10:49:16.391349 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:16.391367 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.391371 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being locus of focus
+10:49:16.391387 - EVENT MANAGER: Queueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:16.391395 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:16.391403 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:16.391611 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.391653 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler]) has priority level: 3
+10:49:16.391677 - EVENT MANAGER: Queued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler]) priority: 3, counter: 10
+
+10:49:16.392964 - EVENT MANAGER: object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local'])
+10:49:16.392996 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.393160 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being focused
+10:49:16.393200 - EVENT MANAGER: Queueing object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local'])
+10:49:16.393214 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:16.393225 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [combo box: 'Local']
+10:49:16.393370 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.393414 - EVENT MANAGER: object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local']) has priority level: 3
+10:49:16.393437 - EVENT MANAGER: Queued object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local']) priority: 3, counter: 11
+10:49:16.393476 - EVENT MANAGER: Dequeueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:16.393489 - EVENT MANAGER: Dequeued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler]) priority: 3, counter: 10
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 1) vvvvv
+10:49:16.400594 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+                  EVENT ANY DATA:
+                  name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+10:49:16.400652 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.400673 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.400685 - EVENT MANAGER: Script for event from locus of focus is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.400690 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+TOTAL PROCESSING TIME: 0.0072
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:16.400812 - EVENT MANAGER: Dequeueing object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local'])
+10:49:16.400840 - EVENT MANAGER: Dequeued object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (1, 0, [combo box: 'Local']) priority: 3, counter: 11
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 0) vvvvv
+10:49:16.419233 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='Local' role='combo box' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts.qt_scrollarea_viewport.page-hosts.host-selector'
+                  description='Hosts'
+                  help=''
+                  states='enabled, expandable, focusable, focused, sensitive, showing, visible'
+                  relations='labelled-by: [label: 'Hosts']'
+                  actions='show-menu (Down); press (Down)'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0, 0, 0, 1]
+
+                  EVENT ANY DATA:
+                  name='Local' role='combo box' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts.qt_scrollarea_viewport.page-hosts.host-selector'
+                  description='Hosts'
+                  help=''
+                  states='enabled, expandable, focusable, focused, sensitive, showing, visible'
+                  relations='labelled-by: [label: 'Hosts']'
+                  actions='show-menu (Down); press (Down)'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0, 0, 0, 1]
+
+10:49:16.419335 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.419370 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:16.419399 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [combo box: 'Local']
+10:49:16.419413 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [combo box: 'Local']
+10:49:16.419629 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.419654 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.419666 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+10:49:16.421896 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [combo box: 'Local']
+10:49:16.424131 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [combo box: 'Local']
+10:49:16.426641 - SCRIPT UTILITIES: [combo box: 'Local'] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:16.426672 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:16.431085 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:16.431295 - FOCUS MANAGER: Request to set locus of focus to [combo box: 'Local'] event_manager._process_object_event:826 > script.on_focused_changed:80 > default.on_focused_changed:1376 > focus_manager.set_locus_of_focus:188
+10:49:16.431683 - AXObject: Clearing AT-SPI cache on [combo box: 'Local'] Recursive: False. Reason: Setting locus of focus.
+10:49:16.431698 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.432511 - FOCUS MANAGER: Changing locus of focus from [filler] to [combo box: 'Local']. Notify: True
+10:49:16.432909 - FOCUS MANAGER: Region of interest: [combo box: 'Local'] (0, 0)
+10:49:16.433281 - FOCUS MANAGER: Switching object of interest from [filler] to [combo box: 'Local']
+10:49:16.435826 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [combo box: 'Local']
+10:49:16.435847 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:16.435851 - FOCUS MANAGER: Setting active window to existing active window
+10:49:16.437784 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [combo box: 'Local']
+10:49:16.437995 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.438024 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.438073 - BRAILLE GENERATOR: BrailleGenerator._generate_combo_box for [combo box: 'Local'] args: {'formatType': 'focused'}
+10:49:16.438084 - TABLE NAVIGATOR: Last navigation event (None) was last key event: False
+10:49:16.439916 - AXObject: find_descendant: found None in 0.0018s
+10:49:16.439946 - BRAILLE GENERATOR: _generate_ancestors: []
+10:49:16.439960 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.442267 - AXUtilitiesRelation: [combo box: 'Local'] is labelled by: [[label: 'Hosts']]
+10:49:16.442287 - GENERATOR: _generate_accessible_label: [Hosts]
+10:49:16.442298 - GENERATOR: _generate_accessible_name: [Local]
+10:49:16.442358 - GENERATOR: Similarity between 'Local', 'Hosts': 0.2 (threshold: 0.7)
+10:49:16.442367 - GENERATOR: _generate_accessible_label_and_name: [Hosts, Local]
+10:49:16.444507 - AXObject: find_descendant: found None in 0.0011s
+10:49:16.445548 - AXSelection: [list] reports 1 selected children
+10:49:16.446005 - GENERATOR: _generate_value: [Local]
+10:49:16.447285 - BRAILLE GENERATOR: _generate_accessible_role: [combo box]
+10:49:16.447310 - BRAILLE: Not contracting 'Hosts Local Local combo box' because contracted braille is not enabled.
+10:49:16.447554 - GENERATOR: Similarity between 'Local', 'Hosts': 0.2 (threshold: 0.7)
+10:49:16.447591 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.447601 - GENERATOR: _generate_accessible_description: [Hosts]
+10:49:16.447611 - BRAILLE: Not contracting 'Hosts' because contracted braille is not enabled.
+10:49:16.447627 - BRAILLE GENERATOR: Results: [COMPONENT: 'Hosts Local Local combo box', cursor offset:6, REGION: ' ', cursor offset:0, COMPONENT: 'Hosts', cursor offset:0]
+10:49:16.447659 - BRAILLE: Refresh. Pan: True target: 0
+10:49:16.447662 - BRAILLE: Kill flash message default.update_braille:724 > default.refreshBraille:2577 > braille.refresh:1273 > braille.killFlash:1510
+10:49:16.448165 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:16.448183 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:16.448198 - BRAILLE: Line 0: 'Hosts Local Local combo box Hosts' focusOffset: 0 [[0, 28], [28, 33]]
+10:49:16.448202 - BRAILLE: Cursor offset in line string is: 6
+10:49:16.448212 - BRAILLE: Adjusting offset to 0 (unhandled condition)
+10:49:16.448216 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:16.448219 - BRAILLE LINE:  'Hosts Local Local combo box Hosts'
+10:49:16.448221 -      VISIBLE:  'Hosts Local Local combo box Host', cursor=7
+10:49:16.448229 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:16.448231 - BRAILLE: Need to initialize first.
+10:49:16.448238 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:16.448250 - BRAILLE: WINDOWPATH= None
+10:49:16.448256 - BRAILLE: XDG_VTNR= None
+10:49:16.448257 - BRAILLE: Attempting connection with BrlAPI.
+10:49:16.448495 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:16.448580 - SPEECH GENERATOR: SpeechGenerator._generate_combo_box for [combo box: 'Local'] args: {'formatType': 'unfocused', 'priorObj': '[filler]'}
+10:49:16.448594 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.448606 - GENERATOR: _generate_accessible_label: [Hosts]
+10:49:16.448619 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:16.448638 - SPEECH GENERATOR: _generate_accessible_label: [Hosts, {'established': 'False'}]
+10:49:16.448649 - GENERATOR: _generate_accessible_name: [Local]
+10:49:16.448654 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:16.448665 - SPEECH GENERATOR: _generate_accessible_name: [Local, {'established': 'False'}]
+10:49:16.448690 - GENERATOR: Similarity between 'Local', 'Hosts': 0.2 (threshold: 0.7)
+10:49:16.448706 - GENERATOR: _generate_accessible_label_and_name: [Hosts, {'established': 'False'}, Local, {'established': 'False'}]
+10:49:16.448717 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [combo box: 'Local']
+10:49:16.448726 - DEFAULT: Not in SayAll
+10:49:16.450120 - AXObject: find_descendant: found None in 0.0013s
+10:49:16.451241 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:16.451279 - SPEECH GENERATOR: _generate_accessible_role: [combo box, {'established': 'False'}]
+10:49:16.453240 - AXObject: find_descendant: found None in 0.0011s
+10:49:16.453749 - AXSelection: [list] reports 1 selected children
+10:49:16.453985 - GENERATOR: _generate_value: [Local]
+10:49:16.454002 - SPEECH GENERATOR: default voice requested with language='None', dialect=''
+10:49:16.454027 - SPEECH GENERATOR: _generate_value: [Local, {'established': 'False'}]
+10:49:16.454042 - SPEECH GENERATOR: _generate_position_in_list: []
+10:49:16.454050 - SPEECH GENERATOR: _generate_keyboard_mnemonic: []
+10:49:16.454057 - SPEECH GENERATOR: _generate_has_click_action: []
+10:49:16.454062 - SPEECH GENERATOR: _generate_has_details: []
+10:49:16.454067 - SPEECH GENERATOR: _generate_details_for: []
+10:49:16.454080 - GENERATOR: _generate_accessible_description: [Hosts]
+10:49:16.454084 - SPEECH GENERATOR: system voice requested with language='None', dialect=''
+10:49:16.454096 - SPEECH GENERATOR: _generate_accessible_description: [Hosts, {'established': 'False'}]
+10:49:16.454109 - SPEECH GENERATOR: _generate_state_has_popup: []
+10:49:16.454302 - SPEECH GENERATOR: _generate_tutorial: []
+10:49:16.454353 - SPEECH GENERATOR: Results: [Hosts, {'established': 'False'}, Local, {'established': 'False'}, combo box, {'established': 'False'}, Local, {'established': 'False'}, PAUSE, PAUSE, Hosts, {'established': 'False'}, PAUSE]
+10:49:16.455391 - DEFAULT: Interrupting presentation
+10:49:16.455418 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:16.455534 - BRAILLE: Kill flash message focus_manager.set_locus_of_focus:243 > default.locus_of_focus_changed:676 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:16.456014 - SPEECH: Speak [Hosts, {'established': 'False'}, Local, {'established': 'False'}, combo box, {'established': 'False'}, Local, {'established': 'False'}, PAUSE, PAUSE, Hosts, {'established': 'False'}, PAUSE], acss: None
+10:49:16.456044 - SPEECH OUTPUT: 'Hosts Local combo box Local.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:16.456048 - SPEECH DISPATCHER: Speaking 'Hosts Local combo box Local.' as string
+10:49:16.456066 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.456080 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.457914 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:5"/>Hosts <mark name="6:11"/>Local <mark name="12:17"/>combo <mark name="18:21"/>box <mark name="22:28"/>Local.</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:16.458132 - SPEECH OUTPUT: 'Hosts.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}
+10:49:16.458149 - SPEECH DISPATCHER: Speaking 'Hosts.' as string
+10:49:16.458173 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:16.458195 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:16.458975 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:6"/>Hosts.</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:16.461846 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] default.locus_of_focus_changed:678 > default._save_focused_object_info:624 > ax_utilities_event.save_object_info_for_events:163 > focus_manager.get_active_window:258
+TOTAL PROCESSING TIME: 0.0638
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:17.311644 - GENERATOR: Clearing cache.
+10:49:17.388815 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:17.389151 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:17.394241 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:17.394444 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.394577 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65505
+                 hw_code=50
+                 modifiers=16384
+                 text=''
+                 keyval_name='Shift_L'
+                 timestamp=1789264157.3887403
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'Shift_L' (50) vvvvv
+10:49:17.394806 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.394823 - WINDOW: [frame: 'LLM Manager']
+10:49:17.394831 - LOCATION: [combo box: 'Local']
+10:49:17.394879 - KEYBINDINGS: 'Shift_L' (50) mods: 16384 key-pressed-event matches []
+10:49:17.394900 - KEYBINDINGS: 'Shift_L' (50) mods: 16384 key-pressed-event fallback candidates []
+10:49:17.394910 - HANDLER: None
+10:49:17.394925 - DEFAULT: Interrupting presentation
+10:49:17.394938 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:17.395112 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:17.395467 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.395487 - KEYBOARD EVENT: Not character echoable, setting disabled.
+10:49:17.395490 - DEFAULT: Presenting keyboard event
+10:49:17.395514 - SPEECH GENERATOR: None voice requested with language='None', dialect=''
+10:49:17.395531 - SPEECH OUTPUT: 'left shift' {'established': False}
+10:49:17.395540 - SPEECH DISPATCHER: Speaking 'left shift' as string
+10:49:17.395544 - SPEECH DISPATCHER: Speaking 'left shift' as string
+10:49:17.395560 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.395572 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.396551 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:4"/>left <mark name="5:10"/>shift</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:17.396698 - TOTAL PROCESSING TIME: 0.0019
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'Shift_L' (50) ^^^^^
+
+10:49:17.397816 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:17.398104 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:17.405183 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:17.405445 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.405582 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65056
+                 hw_code=23
+                 modifiers=16385
+                 text=''
+                 keyval_name='ISO_Left_Tab'
+                 timestamp=1789264157.3977816
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'ISO_Left_Tab' (23) vvvvv
+10:49:17.405761 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.405768 - WINDOW: [frame: 'LLM Manager']
+10:49:17.405776 - LOCATION: [combo box: 'Local']
+10:49:17.405802 - KEYBINDINGS: 'ISO_Left_Tab' (23) mods: 16385 key-pressed-event matches []
+10:49:17.405810 - KEYBINDINGS: 'ISO_Left_Tab' (23) mods: 16385 key-pressed-event fallback candidates []
+10:49:17.405818 - HANDLER: None
+10:49:17.405826 - DEFAULT: Interrupting presentation
+10:49:17.405852 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:17.405998 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:17.406557 - TOTAL PROCESSING TIME: 0.0008
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'ISO_Left_Tab' (23) ^^^^^
+
+
+10:49:17.406729 - EVENT MANAGER: object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local'])
+10:49:17.406751 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.406756 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being locus of focus
+10:49:17.406775 - EVENT MANAGER: Queueing object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local'])
+10:49:17.406783 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:17.406792 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [combo box: 'Local']
+10:49:17.407015 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.407060 - EVENT MANAGER: object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local']) has priority level: 3
+10:49:17.407085 - EVENT MANAGER: Queued object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local']) priority: 3, counter: 12
+
+10:49:17.407127 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:17.407154 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.407173 - EVENT_MANAGER: Not ignoring object:state-changed:focused due to source being focused
+10:49:17.407189 - EVENT MANAGER: Queueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:17.407196 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:17.407204 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:17.407393 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.407432 - EVENT MANAGER: object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) has priority level: 3
+10:49:17.407452 - EVENT MANAGER: Queued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) priority: 3, counter: 13
+10:49:17.407489 - EVENT MANAGER: Dequeueing object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local'])
+10:49:17.407503 - EVENT MANAGER: Dequeued object:state-changed:focused for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local']) priority: 3, counter: 12
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 1) vvvvv
+10:49:17.418941 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='Local' role='combo box' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts.qt_scrollarea_viewport.page-hosts.host-selector'
+                  description='Hosts'
+                  help=''
+                  states='enabled, expandable, focusable, sensitive, showing, visible'
+                  relations='labelled-by: [label: 'Hosts']'
+                  actions='show-menu (Down); press (Down)'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0, 0, 0, 1]
+
+                  EVENT ANY DATA:
+                  name='Local' role='combo box' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts.qt_scrollarea_viewport.page-hosts.host-selector'
+                  description='Hosts'
+                  help=''
+                  states='enabled, expandable, focusable, sensitive, showing, visible'
+                  relations='labelled-by: [label: 'Hosts']'
+                  actions='show-menu (Down); press (Down)'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0, 0, 0, 1]
+
+10:49:17.418987 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.419008 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.419016 - EVENT MANAGER: Script for event from locus of focus is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.419021 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+TOTAL PROCESSING TIME: 0.0115
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65056
+                 hw_code=23
+                 modifiers=16385
+                 text=''
+                 keyval_name='ISO_Left_Tab'
+                 timestamp=1789264157.4190986
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'ISO_Left_Tab' (23) vvvvv
+10:49:17.419591 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.419600 - WINDOW: [frame: 'LLM Manager']
+10:49:17.419606 - LOCATION: [combo box: 'Local']
+10:49:17.419631 - KEYBINDINGS: 'ISO_Left_Tab' (23) mods: 16385 key-released-event matches []
+10:49:17.419639 - KEYBINDINGS: 'ISO_Left_Tab' (23) mods: 16385 key-released-event fallback candidates []
+10:49:17.419646 - HANDLER: None
+10:49:17.419659 - TOTAL PROCESSING TIME: 0.0001
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'ISO_Left_Tab' (23) ^^^^^
+
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65505
+                 hw_code=50
+                 modifiers=16385
+                 text=''
+                 keyval_name='Shift_L'
+                 timestamp=1789264157.4196923
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'Shift_L' (50) vvvvv
+10:49:17.420209 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.420228 - WINDOW: [frame: 'LLM Manager']
+10:49:17.420235 - LOCATION: [combo box: 'Local']
+10:49:17.420252 - KEYBINDINGS: 'Shift_L' (50) mods: 16385 key-released-event matches []
+10:49:17.420260 - KEYBINDINGS: 'Shift_L' (50) mods: 16385 key-released-event fallback candidates []
+10:49:17.420266 - HANDLER: None
+10:49:17.420275 - TOTAL PROCESSING TIME: 0.0001
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'Shift_L' (50) ^^^^^
+
+10:49:17.420346 - EVENT MANAGER: Dequeueing object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler])
+10:49:17.420362 - EVENT MANAGER: Dequeued object:state-changed:focused for [filler] in llm-manager (Qt 6.8.2) (1, 0, [filler]) priority: 3, counter: 13
+
+vvvvv START PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED (queue size: 0) vvvvv
+10:49:17.428087 - EVENT SOURCE:
+                  app='llm-manager (Qt 6.8.2)' name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, focused, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+                  EVENT ANY DATA:
+                  name='' role='filler' id='QApplication.MainWindow.QWidget.QStackedWidget.scroll-hosts'
+                  description=''
+                  help=''
+                  states='enabled, focusable, focused, sensitive, showing, visible'
+                  relations=''
+                  actions='set-focus'
+                  interfaces='Action, Component'
+                  attributes=''
+                  text=''
+                  path=[-1, 0, 0, 1, 0]
+
+10:49:17.428112 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.428130 - FOCUS MANAGER: Locus of focus is [combo box: 'Local']
+10:49:17.428147 - EVENT MANAGER: Getting script for event for [application: 'llm-manager'] [filler]
+10:49:17.428156 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:17.428336 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.428352 - EVENT MANAGER: Script for event is llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.428360 - EVENT MANAGER: Processing object:state-changed:focused: script for event is active
+10:49:17.429425 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:17.430477 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:17.431793 - SCRIPT UTILITIES: [filler] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:17.431826 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:17.435744 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:17.435959 - FOCUS MANAGER: Request to set locus of focus to [filler] event_manager._process_object_event:826 > script.on_focused_changed:80 > default.on_focused_changed:1376 > focus_manager.set_locus_of_focus:188
+10:49:17.436763 - AXObject: Clearing AT-SPI cache on [filler] Recursive: False. Reason: Setting locus of focus.
+10:49:17.436775 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.437592 - FOCUS MANAGER: Changing locus of focus from [combo box: 'Local'] to [filler]. Notify: True
+10:49:17.438000 - FOCUS MANAGER: Region of interest: [filler] (0, 0)
+10:49:17.438366 - FOCUS MANAGER: Switching object of interest from [combo box: 'Local'] to [filler]
+10:49:17.439915 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:17.439954 - FOCUS MANAGER: Request to set active window to [frame: 'LLM Manager']
+10:49:17.439959 - FOCUS MANAGER: Setting active window to existing active window
+10:49:17.440936 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:17.441122 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:17.441149 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:17.441167 - BRAILLE GENERATOR: [filler] lacks dedicated generator
+10:49:17.441206 - BRAILLE GENERATOR: BrailleGenerator._generate_default_presentation for [filler] args: {'formatType': 'focused'}
+10:49:17.441217 - TABLE NAVIGATOR: Last navigation event (None) was last key event: False
+10:49:17.441237 - BRAILLE GENERATOR: _generate_ancestors: []
+10:49:17.441247 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:17.441255 - GENERATOR: _generate_accessible_label: []
+10:49:17.441453 - GENERATOR: _generate_accessible_name: []
+10:49:17.441470 - GENERATOR: _generate_accessible_label_and_name: []
+10:49:17.441488 - GENERATOR: _generate_text_substring: []
+10:49:17.441680 - GENERATOR: _generate_text_content: []
+10:49:17.441887 - GENERATOR: _generate_value: []
+10:49:17.441918 - BRAILLE GENERATOR: _generate_accessible_role: []
+10:49:17.441933 - GENERATOR: _generate_state_required: []
+10:49:17.441944 - GENERATOR: _generate_state_invalid: []
+10:49:17.441961 - GENERATOR: _generate_accessible_description: []
+10:49:17.441969 - BRAILLE GENERATOR: Results: [COMPONENT: '', cursor offset:0]
+10:49:17.441989 - BRAILLE: Refresh. Pan: True target: 0
+10:49:17.441992 - BRAILLE: Kill flash message default.update_braille:724 > default.refreshBraille:2577 > braille.refresh:1273 > braille.killFlash:1510
+10:49:17.442359 - BRAILLE: Last text object: None (Caret: 0, Line: 0, Cell: 0)
+10:49:17.442367 - BRAILLE: Current text object: None (Caret: 0, Line: 0). On same line: False
+10:49:17.442373 - BRAILLE: Line 0: '' focusOffset: 0 []
+10:49:17.442376 - BRAILLE: Cursor offset in line string is: 0
+10:49:17.442378 - BRAILLE: Not adjusting offset 0. Cursor offset fits on display.
+10:49:17.442381 - BRAILLE: Current range: (0, 32). Target cell: 0
+10:49:17.442384 - BRAILLE LINE:  ''
+10:49:17.442387 -      VISIBLE:  '', cursor=1
+10:49:17.442393 - BRAILLE: Enabling braille. BrlAPI running: False
+10:49:17.442395 - BRAILLE: Need to initialize first.
+10:49:17.442401 - BRAILLE: Initializing. Callback: InputEventManager.process_braille_event
+10:49:17.442411 - BRAILLE: WINDOWPATH= None
+10:49:17.442416 - BRAILLE: XDG_VTNR= None
+10:49:17.442418 - BRAILLE: Attempting connection with BrlAPI.
+10:49:17.442620 - WARNING: Braille initialization failed: couldn't connect to b':0' with key b'keyfile:/etc/brlapi.key+polkit': connect: No such file or directory
+                  (brlerrno 11, libcerrno 2, gaierrno 0)
+                  Is BRLTTY really running?
+10:49:17.442667 - SPEECH GENERATOR: [filler] lacks dedicated generator
+10:49:17.442700 - SPEECH GENERATOR: SpeechGenerator._generate_default_presentation for [filler] args: {'formatType': 'unfocused', 'priorObj': "[combo box: 'Local']"}
+10:49:17.442714 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:17.445047 - SCRIPT UTILITIES: [frame: 'LLM Manager'] is top-level object for: [filler]
+10:49:17.446475 - SCRIPT UTILITIES: [filler] is in frame [frame: 'LLM Manager'] and dialog None
+10:49:17.446709 - AXObject: Looking for common ancestor of [filler] and [combo box: 'Local']
+10:49:17.450280 - AXObject: Common ancestor of [filler] and [combo box: 'Local'] is [filler]
+10:49:17.450298 - DEFAULT: Not in SayAll
+10:49:17.452052 - GENERATOR: _get_functional_role: filler
+10:49:17.453776 - GENERATOR: _get_functional_role: filler
+10:49:17.455522 - GENERATOR: _get_functional_role: filler
+10:49:17.455545 - SPEECH GENERATOR: _generate_old_ancestors: []
+10:49:17.455562 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:17.455587 - AXObject: Looking for common ancestor of [combo box: 'Local'] and [filler]
+10:49:17.459184 - AXObject: Common ancestor of [combo box: 'Local'] and [filler] is [filler]
+10:49:17.459201 - SPEECH GENERATOR: _generate_new_ancestors: []
+10:49:17.459216 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:17.459226 - GENERATOR: _generate_accessible_label: []
+10:49:17.459231 - SPEECH GENERATOR: _generate_accessible_label: []
+10:49:17.459248 - GENERATOR: _generate_accessible_name: []
+10:49:17.459252 - SPEECH GENERATOR: _generate_accessible_name: []
+10:49:17.459258 - GENERATOR: _generate_accessible_label_and_name: []
+10:49:17.459269 - FOCUS MANAGER: Active mode: focus-tracking Object of interest: [filler]
+10:49:17.459274 - DEFAULT: Not in SayAll
+10:49:17.459288 - SPEECH GENERATOR: _generate_accessible_role: []
+10:49:17.459299 - GENERATOR: _generate_state_sensitive: []
+10:49:17.459304 - SPEECH GENERATOR: _generate_state_sensitive: []
+10:49:17.459313 - SPEECH GENERATOR: _generate_keyboard_mnemonic: []
+10:49:17.459321 - SPEECH GENERATOR: _generate_has_click_action: []
+10:49:17.459326 - SPEECH GENERATOR: _generate_has_details: []
+10:49:17.459331 - SPEECH GENERATOR: _generate_details_for: []
+10:49:17.459341 - GENERATOR: _generate_accessible_description: []
+10:49:17.459346 - SPEECH GENERATOR: _generate_accessible_description: []
+10:49:17.459355 - SPEECH GENERATOR: _generate_state_has_popup: []
+10:49:17.459545 - SPEECH GENERATOR: _generate_tutorial: []
+10:49:17.459565 - SPEECH GENERATOR: Results: [PAUSE]
+10:49:17.459580 - SPEECH GENERATOR: Results for [filler] are pauses only
+10:49:17.460954 - AXUtilitiesRelation: [combo box: 'Local'] is controlled by [filler]: False
+10:49:17.460974 - AXUtilitiesRelation: [filler] is controlled by [combo box: 'Local']: False
+10:49:17.460978 - DEFAULT: Interrupting presentation
+10:49:17.460991 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:17.461109 - BRAILLE: Kill flash message focus_manager.set_locus_of_focus:243 > default.locus_of_focus_changed:676 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:17.461556 - SPEECH: Speak [], acss: None
+10:49:17.463103 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] default.locus_of_focus_changed:678 > default._save_focused_object_info:624 > ax_utilities_event.save_object_info_for_events:163 > focus_manager.get_active_window:258
+TOTAL PROCESSING TIME: 0.0433
+^^^^^ FINISHED PRIORITY-3 OBJECT EVENT OBJECT:STATE-CHANGED:FOCUSED ^^^^^
+
+10:49:17.965759 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:18.965938 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:19.312115 - GENERATOR: Clearing cache.
+10:49:19.964983 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:21.312616 - GENERATOR: Clearing cache.
+10:49:23.312920 - GENERATOR: Clearing cache.
+10:49:23.400840 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:23.401274 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:23.406417 - AXUtilities: [frame: 'LLM Manager'] from [application: 'llm-manager'] can be active window
+10:49:23.406681 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.406819 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65513
+                 hw_code=64
+                 modifiers=16384
+                 text=''
+                 keyval_name='Alt_L'
+                 timestamp=1789264163.4007676
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'Alt_L' (64) vvvvv
+10:49:23.406991 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.406999 - WINDOW: [frame: 'LLM Manager']
+10:49:23.407004 - LOCATION: [filler]
+10:49:23.407029 - KEYBINDINGS: 'Alt_L' (64) mods: 16384 key-pressed-event matches []
+10:49:23.407038 - KEYBINDINGS: 'Alt_L' (64) mods: 16384 key-pressed-event fallback candidates []
+10:49:23.407045 - HANDLER: None
+10:49:23.407075 - DEFAULT: Interrupting presentation
+10:49:23.407087 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:23.407206 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:23.407723 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.407759 - KEYBOARD EVENT: Not character echoable, setting disabled.
+10:49:23.407763 - DEFAULT: Presenting keyboard event
+10:49:23.407785 - SPEECH GENERATOR: None voice requested with language='None', dialect=''
+10:49:23.407804 - SPEECH OUTPUT: 'left alt' {'established': False}
+10:49:23.407812 - SPEECH DISPATCHER: Speaking 'left alt' as string
+10:49:23.407814 - SPEECH DISPATCHER: Speaking 'left alt' as string
+10:49:23.407831 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.407843 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.408738 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:4"/>left <mark name="5:8"/>alt</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:23.408910 - TOTAL PROCESSING TIME: 0.0019
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'Alt_L' (64) ^^^^^
+
+10:49:23.410510 - FOCUS MANAGER: Active window is [frame: 'LLM Manager'] <unknown>.<module>:280 > input_event_manager.process_keyboard_event:247 > focus_manager.get_active_window:258
+10:49:23.411012 - AXObject: Clearing AT-SPI cache on [frame: 'LLM Manager'] Recursive: False. Reason: Checking if window can be the active window
+10:49:23.422218 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.425610 - AXUtilities: [DEAD] from [application: 'llm-manager'] lacks active state
+10:49:23.430760 - AXObject: Clearing AT-SPI cache on [window: 'Main stage'] Recursive: False. Reason: Checking if window can be the active window
+10:49:23.431475 - AXUtilities: [window: 'Main stage'] from [application: 'gnome-shell'] lacks active state
+10:49:23.431523 - AXUtilities: Unable to find active window from [[application: 'gnome-shell']]
+10:49:23.431875 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.432191 - WARNING: [DEAD] cannot be active window. No alternative found.
+10:49:23.432535 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.432728 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_PRESSED_EVENT
+                 id=65473
+                 hw_code=70
+                 modifiers=16392
+                 text=''
+                 keyval_name='F4'
+                 timestamp=1789264163.410475
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_PRESSED_EVENT: 'F4' (70) vvvvv
+10:49:23.432972 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.433276 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.433557 - WINDOW: [DEAD]
+10:49:23.433585 - LOCATION: [filler]
+10:49:23.433625 - KEYBINDINGS: 'F4' (70) mods: 16392 key-pressed-event matches []
+10:49:23.433638 - KEYBINDINGS: 'F4' (70) mods: 16392 key-pressed-event fallback candidates []
+10:49:23.433648 - HANDLER: None
+10:49:23.433663 - DEFAULT: Interrupting presentation
+10:49:23.433679 - SPEECH AND VERBOSITY MANAGER: Speech server is <orca.speechdispatcherfactory.SpeechServer object at 0x7f625a537e00>
+10:49:23.433845 - BRAILLE: Kill flash message input_event.process:710 > input_event._present:625 > default.presentationInterrupt:2289 > braille.killFlash:1510
+10:49:23.434657 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.434696 - KEYBOARD EVENT: Not character echoable, setting disabled.
+10:49:23.434701 - DEFAULT: Presenting keyboard event
+10:49:23.434778 - SPEECH GENERATOR: None voice requested with language='None', dialect=''
+10:49:23.434824 - SPEECH OUTPUT: 'F4' {'established': False}
+10:49:23.434842 - SPEECH DISPATCHER: Speaking 'F4' as string
+10:49:23.434849 - SPEECH DISPATCHER: Speaking 'F4' as string
+10:49:23.434876 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.434897 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.435864 - SPEECH DISPATCHER: Speaking '<speak><mark name="0:2"/>F4</speak>'
+                  ORCA rate 5.0, pitch 5.0, volume 5.0, language C, punctuation: MOST
+                  SD rate 2, pitch 10, volume 100, language c
+10:49:23.436070 - TOTAL PROCESSING TIME: 0.0031
+^^^^^ PROCESS ATSPI_KEY_PRESSED_EVENT: 'F4' (70) ^^^^^
+
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65473
+                 hw_code=70
+                 modifiers=16392
+                 text=''
+                 keyval_name='F4'
+                 timestamp=1789264163.4362645
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'F4' (70) vvvvv
+10:49:23.437359 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+
+10:49:23.438128 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.438968 - EVENT MANAGER: window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:23.439323 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.440058 - EVENT MANAGER: Queueing window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:23.440247 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:23.440558 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.440866 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [DEAD]
+10:49:23.441184 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.441505 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.441830 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.442647 - EVENT MANAGER: window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) has priority level: 2
+10:49:23.442960 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.443860 - EVENT MANAGER: Queued window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 14
+10:49:23.444062 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.444370 - WINDOW: [DEAD]
+10:49:23.444405 - LOCATION: [filler]
+10:49:23.444464 - KEYBINDINGS: 'F4' (70) mods: 16392 key-released-event matches []
+10:49:23.444482 - KEYBINDINGS: 'F4' (70) mods: 16392 key-released-event fallback candidates []
+10:49:23.444499 - HANDLER: None
+10:49:23.444554 - TOTAL PROCESSING TIME: 0.0072
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'F4' (70) ^^^^^
+
+
+KEYBOARD_EVENT:  type=ATSPI_KEY_RELEASED_EVENT
+                 id=65513
+                 hw_code=64
+                 modifiers=16392
+                 text=''
+                 keyval_name='Alt_L'
+                 timestamp=1789264163.4447079
+                 clickCount=1
+
+vvvvv PROCESS ATSPI_KEY_RELEASED_EVENT: 'Alt_L' (64) vvvvv
+10:49:23.445635 - SCRIPT: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.445992 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.446346 - WINDOW: [DEAD]
+10:49:23.446375 - LOCATION: [filler]
+10:49:23.446414 - KEYBINDINGS: 'Alt_L' (64) mods: 16392 key-released-event matches []
+10:49:23.446427 - KEYBINDINGS: 'Alt_L' (64) mods: 16392 key-released-event fallback candidates []
+10:49:23.446436 - HANDLER: None
+10:49:23.446457 - TOTAL PROCESSING TIME: 0.0009
+^^^^^ PROCESS ATSPI_KEY_RELEASED_EVENT: 'Alt_L' (64) ^^^^^
+
+
+10:49:23.447194 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.447725 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.448394 - EVENT MANAGER: object:state-changed:active for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.448819 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.449117 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.449406 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.449677 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.450157 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.450202 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.451495 - AXObject: Exception in get_role: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.451789 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.452372 - AXObject: Exception in get_role_name: atspi_error: No such object path '/org/a11y/atspi/accessible/2147483730' (1)
+10:49:23.453033 - EVENT MANAGER: Queueing object:state-changed:active for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.453220 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:23.454125 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.455134 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [DEAD]
+10:49:23.455489 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.455742 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.455986 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.456232 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.456472 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.456899 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.457482 - EVENT MANAGER: object:state-changed:active for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD]) has priority level: 4
+10:49:23.457740 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.458215 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.458760 - EVENT MANAGER: Queued object:state-changed:active for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD]) priority: 4, counter: 15
+
+10:49:23.458924 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.459182 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.459929 - EVENT MANAGER: object:state-changed:showing for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.460058 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.460203 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.460320 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.460439 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.460557 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.460594 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.461081 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.461117 - EVENT MANAGER: Ignoring object:state-changed:showing due to role
+
+10:49:23.462063 - EVENT MANAGER: object:state-changed:showing for [list: 'LLM Manager'] in llm-manager (Qt 6.8.2) (0, 0, [list: 'LLM Manager'])
+10:49:23.462099 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.462431 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.462796 - EVENT MANAGER: object:state-changed:showing for [label: 'Hosts'] in llm-manager (Qt 6.8.2) (0, 0, [label: 'Hosts'])
+10:49:23.462828 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.463171 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.463966 - EVENT MANAGER: object:state-changed:showing for [combo box: 'Local'] in llm-manager (Qt 6.8.2) (0, 0, [combo box: 'Local'])
+10:49:23.463997 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.464264 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.464394 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.464592 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465218 - EVENT MANAGER: object:state-changed:showing for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.465322 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465430 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465537 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465645 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465753 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.465780 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.466177 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.466304 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.466502 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467131 - EVENT MANAGER: object:state-changed:showing for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.467240 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467348 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467455 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467562 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467670 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.467696 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.468057 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.468847 - EVENT MANAGER: object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:23.468878 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.469141 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.469985 - EVENT MANAGER: object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:23.470023 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.470430 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.471232 - EVENT MANAGER: object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:23.471262 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.471267 - EVENT_MANAGER: Not ignoring object:state-changed:showing due to source being locus of focus
+10:49:23.472007 - EVENT MANAGER: Queueing object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:23.472285 - EVENT MANAGER: App for event source is [application: 'llm-manager']
+10:49:23.472310 - SCRIPT MANAGER: Getting script for [application: 'llm-manager'] [filler]
+10:49:23.472419 - SCRIPT MANAGER: Script is app script llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.473190 - EVENT MANAGER: object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler]) has priority level: 4
+10:49:23.473969 - EVENT MANAGER: Queued object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler]) priority: 4, counter: 16
+
+10:49:23.474744 - EVENT MANAGER: object:state-changed:showing for [layered pane] in llm-manager (Qt 6.8.2) (0, 0, [layered pane])
+10:49:23.474774 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.475030 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.475807 - EVENT MANAGER: object:state-changed:showing for [filler] in llm-manager (Qt 6.8.2) (0, 0, [filler])
+10:49:23.475837 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.476097 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.476315 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.476665 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.477114 - EVENT MANAGER: object:state-changed:showing for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, [DEAD])
+10:49:23.477303 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.477492 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.477710 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.477980 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.478208 - AXObject: Exception in get_role: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.478235 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.478749 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.478810 - EVENT MANAGER: object:state-changed:sensitive for [panel: 'Wayland surface'] in gnome-shell (clutter 48.7) (0, 0, 0)
+10:49:23.478828 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.478848 - EVENT MANAGER: Ignoring object:state-changed:sensitive due to role of unfocused source
+
+10:49:23.478874 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland surface'] in gnome-shell (clutter 48.7) (0, 0, 0)
+10:49:23.478887 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.478901 - EVENT MANAGER: Ignoring object:state-changed:showing due to role
+
+10:49:23.478921 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland surface container'] in gnome-shell (clutter 48.7) (0, 0, 0)
+10:49:23.478934 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.478943 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.478961 - EVENT MANAGER: object:state-changed:showing for [panel: 'Wayland window'] in gnome-shell (clutter 48.7) (0, 0, 0)
+10:49:23.478972 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.478981 - EVENT_MANAGER: Ignoring object:state-changed:showing due to multiple instances in short time
+
+10:49:23.479004 - EVENT MANAGER: object:children-changed:remove for [panel: 'Wayland surface container'] in gnome-shell (clutter 48.7) (0, 0, [panel: 'Wayland surface'])
+10:49:23.479016 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.479046 - SCRIPT MANAGER: Active script is: llm-manager (module=orca.scripts.toolkits.Qt.script)
+10:49:23.479051 - EVENT MANAGER: Ignoring object:children-changed:remove because event is not from active app
+
+10:49:23.479070 - EVENT MANAGER: object:children-changed:remove for [panel: 'Wayland window'] in gnome-shell (clutter 48.7) (0, 0, [panel: 'Wayland surface container'])
+10:49:23.479082 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.479090 - EVENT_MANAGER: Ignoring object:children-changed:remove due to multiple instances in short time
+
+10:49:23.479144 - EVENT MANAGER: object:children-changed:remove for [panel: 'Window group'] in gnome-shell (clutter 48.7) (1, 0, [panel: 'Wayland window'])
+10:49:23.479169 - FOCUS MANAGER: Locus of focus is [filler]
+10:49:23.479183 - EVENT_MANAGER: Ignoring object:children-changed:remove due to multiple instances in short time
+10:49:23.479443 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.479921 - EVENT MANAGER: Dequeueing window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager)
+10:49:23.480120 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.480630 - EVENT MANAGER: Dequeued window:deactivate for [DEAD] in llm-manager (Qt 6.8.2) (0, 0, LLM Manager) priority: 2, counter: 14
+
+vvvvv START PRIORITY-2 OBJECT EVENT WINDOW:DEACTIVATE (queue size: 2) vvvvv
+10:49:23.481212 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.481399 - EVENT MANAGER: Ignoring defunct object: [DEAD]
+10:49:23.481582 - AXObject: Exception in get_role_name: atspi_error: The name :1.31 was not provided by any .service files (1)
+10:49:23.481765 - FOCUS MANAGER: Active window is [DEAD] <unknown>.<module>:280 > event_manager._dequeue_object_event:552 > event_manager._process_object_event:774 > focus_manager.get_active_window:258
+10:49:23.482103 - FOCUS MANAGER: Clearing all state: Active window is dead or defunct
+10:49:23.482140 - SCRIPT MANAGER: Deactivating llm-manager (module=orca.scripts.toolkits.Qt.script) reason: Active window is dead or defunct
+10:49:23.482197 - INPUT EVENT MANAGER: Grab id removed for Insert: 267
+10:49:23.482203 - INPUT EVENT MANAGER: Grab id removed for KP_Insert: 268
+10:49:23.482206 - ORCA MODIFIER MANAGER: Setting pressed state to False for grab removal
+10:49:23.482210 - KEYBINDINGS: Removing key grabs: script deactivation
+10:49:23.482294 - KEYBINDINGS: 84 key grabs out of 117 removed.
+10:49:23.482301 - DEFAULT: Clearing key bindings
+TOTAL PROCESSING TIME: 0.0017
+^^^^^ FINISHED PRIORITY-2 OBJECT EVENT WINDOW:DEACTIVATE ^^^^^
+
+
+10:49:23.482630 - AXObject: Exception in get_role_name: app no longer exists
+10:49:23.482651 - AXObject: Exception in get_name: app no longer exists
+10:49:23.482671 - EVENT MANAGER: object:children-changed:remove for [desktop frame: 'main'] in (12, 0, [DEAD])
+10:49:23.482689 - FOCUS MANAGER: Locus of focus is None
+10:49:23.482715 - AXObject: Exception in get_role_name: app no longer exists
+10:49:23.482720 - AXObject: Exception in get_name: app no longer exists
+10:49:23.482732 - EVENT MANAGER: Queueing object:children-changed:remove for [desktop frame: 'main'] in (12, 0, [DEAD])
+10:49:23.482738 - EVENT MANAGER: App for event source is None
+10:49:23.482746 - SCRIPT MANAGER: Getting script for None [desktop frame: 'main']
+10:49:23.482915 - SCRIPT MANAGER: Script is app script default (module=orca.scripts.default)
+10:49:23.482949 - AXObject: Exception in get_role_name: app no longer exists
+10:49:23.482957 - AXObject: Exception in get_name: app no longer exists
+10:49:23.482972 - EVENT MANAGER: object:children-changed:remove for [desktop frame: 'main'] in (12, 0, [DEAD]) has priority level: 5
+10:49:23.482985 - AXObject: Exception in get_role_name: app no longer exists
+10:49:23.482989 - AXObject: Exception in get_name: app no longer exists
+10:49:23.483001 - EVENT MANAGER: Queued object:children-changed:remove for [desktop frame: 'main'] in (12, 0, [DEAD]) priority: 5, counter: 17
