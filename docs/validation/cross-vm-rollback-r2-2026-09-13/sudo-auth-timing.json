@@ -1,0 +1,6 @@
+[
+  {
+    "time_utc": "2026-09-13T03:32:12.337792+00:00",
+    "message": "yoshimi : TTY=/dev/pts/0 ; PWD=/home/yoshimi ; USER=root ; COMMAND=/usr/bin/llm-manager-remote-helper invoke-recovery ssh-user-68bfd26243344bf78a481dd86db69324 462e0370be445768afffb30e01c744de337538a0a249ff1574f3f9ec4d8bd729"
+  }
+]

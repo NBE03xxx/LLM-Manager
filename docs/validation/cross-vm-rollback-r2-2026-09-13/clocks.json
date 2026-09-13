@@ -1,0 +1,19 @@
+{
+  "debian": {
+    "now": "2026-09-13T03:40:44.644001+00:00",
+    "sync": "NTP=no\nNTPSynchronized=no\n",
+    "requests": []
+  },
+  "ubuntu": {
+    "now": "2026-09-13T03:36:38.449520+00:00",
+    "sync": "NTP=yes\nNTPSynchronized=no\n",
+    "requests": [
+      {
+        "backup_created_at": "2026-09-13T03:35:31.960567+00:00",
+        "expires_at": "2026-09-13T03:40:31.976030+00:00",
+        "request_id": "ssh-user-68bfd26243344bf78a481dd86db69324",
+        "requested_at": "2026-09-13T03:35:31.976030+00:00"
+      }
+    ]
+  }
+}

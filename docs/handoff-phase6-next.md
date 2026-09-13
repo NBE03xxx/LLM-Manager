@@ -11,9 +11,10 @@
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
 - `ff7913b`以降は検証script・証拠・文書のみ変更。製品source変更なし。
-- 実行中Gate、認証待ち専用SSH/sudo、未復元snapshotはない。
-  cross-vm Gateも証拠回収・両VMのbaseline完全一致・cleanup済み。
-  60分試験も終了・回収・cleanup済み。
+- 実行中Gate、認証待ち、未復元snapshotはない。r2/r3とも両VM cleanup完了。
+  r2は時計ずれの拒否を再現、時計補正後の新規r3でrollback成功。
+  snapshot復元後も両VMの時計を明示承認に基づき補正済み。NTP設定は未変更。
+  以前のcross-vm Gateと60分試験もcleanup済み。
 
 ## 進捗の表示方針
 
@@ -98,6 +99,11 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     Apply 1回、Results可視。rollback予定caseはsudo認証待ちでApply前に停止し未検証。
     再送なし、設定hash維持、両VM復元済み。
     記録: `docs/validation/phase6-cross-vm-ssh-2026-09-13.md`。
+13. **別VM間SSH rollback（部分Gate）**: r2でsudo認証後の時刻ずれ拒否を特定。
+    両VM時計を補正した新規r3で、不正JSON→自動rollback成功。
+    Apply/rollback各1回、例外注入後のimmutable result照合、元hashとResults表示を確認。
+    両VMのpackage/manual/保全path/session復元済み。
+    記録: `docs/validation/phase6-cross-vm-rollback-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -112,9 +118,10 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
-   Debian GUI→Ubuntu SSHの正常Apply成功。rollback予定caseは認証待ち時間内に完了せず
-   Apply前で停止。両VMはcleanup済み。次回は入力準備を確認して新規operationを開始する。
-   保存済みoperationを再送しない。実通信断Applyは引き続き未完了。
+   Debian GUI→Ubuntu SSHの正常Applyとrollbackは別caseで成功済み。
+   次は実通信断Apply。例外注入成功とNIC切断中のsleepキャンセルを合成して完了にしない。
+   snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
+   手動Run Applyで入力タイミングを合わせる。保存済みoperationは再送しない。
 3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 
