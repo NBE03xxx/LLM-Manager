@@ -11,7 +11,10 @@
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
 - `ff7913b`以降は検証script・証拠・文書のみ変更。製品source変更なし。
-- 実行中Gate、認証待ち、未復元snapshotはない。r2/r3とも両VM cleanup完了。
+- 実行中Gate、認証待ち、未復元snapshotはない。net2の実NIC断commit照合に成功。
+  net/net2とr2/r3はすべて両VM cleanup完了。最後にsystem clockを補正済み。
+  初回netは監視前にApplyが完了し、stale markerチェックによりNIC切断を中止。
+  非採用証拠を保存して両VM cleanup済み。net2は新しいoperationであり再送ではない。
   r2は時計ずれの拒否を再現、時計補正後の新規r3でrollback成功。
   snapshot復元後も両VMの時計を明示承認に基づき補正済み。NTP設定は未変更。
   以前のcross-vm Gateと60分試験もcleanup済み。
@@ -104,6 +107,10 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     Apply/rollback各1回、例外注入後のimmutable result照合、元hashとResults表示を確認。
     両VMのpackage/manual/保全path/session復元済み。
     記録: `docs/validation/phase6-cross-vm-rollback-2026-09-13.md`。
+14. **実NIC断後のSSH commit照合（部分Gate）**: net2でhelper成功後のstdoutを
+    試験relayで保留し、Ubuntu live NICを4.020秒切断。SSH自身がexit 255、
+    復旧後のimmutable result読み取り1回でcommitted。Apply 1回、例外注入なし。
+    両VM復元済み。記録: `docs/validation/phase6-cross-vm-network-2026-09-13.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -119,7 +126,10 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
    Debian GUI→Ubuntu SSHの正常Applyとrollbackは別caseで成功済み。
-   次は実通信断Apply。例外注入成功とNIC切断中のsleepキャンセルを合成して完了にしない。
+   実NIC断後の正常Apply照合もnet2で成功済み。次はrollback応答中の実通信断、
+   通常GUI操作全経路などの残条件を絞り込む。最終artifact項目は未完了のまま。
+   net2は成功応答を10秒保留するrelayと短いSSH keepaliveの限定caseである。
+   次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
    snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
    手動Run Applyで入力タイミングを合わせる。保存済みoperationは再送しない。
 3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。

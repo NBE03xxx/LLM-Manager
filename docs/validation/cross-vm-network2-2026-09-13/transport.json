@@ -1,0 +1,6 @@
+{
+  "exit_code": 255,
+  "timed_out": false,
+  "duration_ms": 2941,
+  "stderr": "Timeout, server 192.168.122.48 not responding.\r\n"
+}

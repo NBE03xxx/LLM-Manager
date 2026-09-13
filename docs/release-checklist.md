@@ -114,6 +114,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
   - 2026-09-11: [installed candidate GUI Gate](validation/phase6-ssh-gui-installed-2026-09-11.md)で実OpenCode/dual backup/commit/自動rollbackとhelper応答喪失後の照合が成功。Wayland Results表示確認済み。loopback SSH・Gate plan注入・応答喪失例外注入の限定検証で、最終artifactや別マシン間物理切断の代替ではない。snapshot復元後のbaseline完全一致。
   - 2026-09-13: [ff7913b別VM間GUI Gate](validation/phase6-cross-vm-ssh-2026-09-13.md)でDebian→Ubuntuの正常Apply、実OpenCode/dual backup、応答喪失例外注入後の照合が成功。rollback予定caseはsudo認証待ちでApply前に停止し未検証。再送なし、両VM復元済み。実通信断Applyと最終artifactの代替ではない。
   - 2026-09-13追記: [時計補正後の新規rollback Gate](validation/phase6-cross-vm-rollback-2026-09-13.md)で別VM間の不正JSON→自動rollback、Apply/rollback各1回、応答喪失例外注入後のresult照合、元hashとGUI表示を確認。先行r2はsudo成功時の時計ずれによる有効期間外拒否を純粋decoderで再現。両VM復元・時計補正済み。実通信断Applyと最終artifact Gateは未完了。
+  - 2026-09-13再追記: [実NIC断後のcommit照合](validation/phase6-cross-vm-network-2026-09-13.md)でhelper成功後の応答保留中にlive NICを4.020秒切断し、実SSH exit 255後、復旧後のresult照合でcommitted。Apply 1回、例外注入なし。relay/短いkeepaliveの限定caseであり、rollback応答断や最終artifact Gateは未完了。両VM復元・時計補正済み。
   - 2026-09-10: [Qt切断照合回帰](validation/phase6-ssh-qt-reconciliation-2026-09-10.md)で4ケースのGUI/journal一致とmutation再送なしを確認。transportはfixtureであり、実回線・最終artifact Gateの代替ではない。
 - [x] release scope外のlocal root/SSH root ApplyとSSH user/root restoreがproduction allowlistに含まれず、経路別の固定理由でI/O前にfail closedとなることを確認した。local root手動restoreは公開Gate完了済み。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。

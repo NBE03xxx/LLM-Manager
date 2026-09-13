@@ -1,0 +1,15 @@
+{
+  "helper_marker": {
+    "verb": "user-apply",
+    "request_id": "ssh-user-1f15dd4a490f46a7ae540855d3f5214a",
+    "request_hash": "00a205f445dc9ff9e8d68fc5eb24a042f8d37f1db118a4037378720092016b4b",
+    "helper_exit_code": 0
+  },
+  "link_before": "up",
+  "down_at_monotonic": 79197.683330803,
+  "link_during": "52:54:00:f8:49:29 down",
+  "up_at_monotonic": 79201.703606555,
+  "watchdog_exit": 0,
+  "watchdog_stderr": "",
+  "link_after": "52:54:00:f8:49:29 up"
+}

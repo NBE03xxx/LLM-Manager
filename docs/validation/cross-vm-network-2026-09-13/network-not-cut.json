@@ -1,0 +1,13 @@
+{
+  "reason": "stale marker; response may already be delivered",
+  "observation": {
+    "marker": {
+      "verb": "user-apply",
+      "request_id": "ssh-user-934d5bee0a9848a292f83511d6676597",
+      "request_hash": "2b7817f6061ae05f5f3b10d8845660d822a8df61c3ca09da6a93e1e9a02e0cd9",
+      "helper_exit_code": 0
+    },
+    "age": 59.482300758361816
+  },
+  "link": "52:54:00:f8:49:29 up"
+}
