@@ -1,0 +1,12 @@
+{
+  "reason": "rollback helper exited 1 before the success marker; NIC cut was not attempted",
+  "rollback_status": "recovery_required",
+  "rollback_transport": {
+    "exit_code": 1,
+    "timed_out": false,
+    "duration_ms": 222,
+    "stderr": ""
+  },
+  "link": "52:54:00:f8:49:29 up",
+  "mutation_retried": false
+}

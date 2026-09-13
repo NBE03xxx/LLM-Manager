@@ -1,0 +1,27 @@
+{
+  "mode": "rollback",
+  "status": "recovery_required",
+  "error": "runtime validation failed; rollback: OpenSSH staging operation failed",
+  "events": [
+    "apply.invoke",
+    "result.read",
+    "rollback.invoke",
+    "rollback.transport_failed",
+    "result.read"
+  ],
+  "validations": [
+    {
+      "check": "opencode.installed",
+      "status": "passed",
+      "actual": "installed"
+    },
+    {
+      "check": "opencode.config.parse",
+      "status": "failed",
+      "actual": "opencode.config.parse_failed"
+    }
+  ],
+  "gui_summary": "Apply result: recovery_required; runtime validation failed; rollback: OpenSSH staging operation failed",
+  "fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+  "target_sha256": "14b3f36a005f062412df3c2f1b90b55180ace98f87b118b52badc3d2be70a466"
+}

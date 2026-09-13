@@ -1,0 +1,199 @@
+{
+  "metadata_only": [
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84-rollback",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84-rollback/80402310f9e96e1d73b24dabbbfedb15a0256397a7686afc27252029c54644c4",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/86d10c7d72243270d004f61f9262f80b0b0d5b09c135e98da746f0113184ed9a",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/86d10c7d72243270d004f61f9262f80b0b0d5b09c135e98da746f0113184ed9a/request.json",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 883
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/86d10c7d72243270d004f61f9262f80b0b0d5b09c135e98da746f0113184ed9a/items",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/86d10c7d72243270d004f61f9262f80b0b0d5b09c135e98da746f0113184ed9a/result.json",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 465
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e/request.json",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 1115
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e/items",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e/result.json",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 856
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e/items/0000-b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088.bin",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 22
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84/86d10c7d72243270d004f61f9262f80b0b0d5b09c135e98da746f0113184ed9a/items/0000-14b3f36a005f062412df3c2f1b90b55180ace98f87b118b52badc3d2be70a466.bin",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 15
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84-rollback/80402310f9e96e1d73b24dabbbfedb15a0256397a7686afc27252029c54644c4/request.json",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 1037
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84-rollback/80402310f9e96e1d73b24dabbbfedb15a0256397a7686afc27252029c54644c4/items",
+      "uid": 1000,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/home/yoshimi/.local/state/llm-manager/remote-helper/ssh-user-571a0fa82a1844eda1b18fac52254f84-rollback/80402310f9e96e1d73b24dabbbfedb15a0256397a7686afc27252029c54644c4/items/0000-b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088.bin",
+      "uid": 1000,
+      "mode": "0o600",
+      "bytes": 22
+    },
+    {
+      "path": "/var/lib/llm-manager",
+      "uid": 0,
+      "mode": "0o755",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/keys",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/0ed7ee8fc7dda664477c39bf",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/keys/remote-master-v1.key",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 32
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/0ed7ee8fc7dda664477c39bf/ssh-user-283c9ad2481e48fe8670c9cba2b3b1f1",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288/ssh-user-571a0fa82a1844eda1b18fac52254f84",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288/ssh-user-571a0fa82a1844eda1b18fac52254f84/receipt.json",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 856
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288/ssh-user-571a0fa82a1844eda1b18fac52254f84/retention.json",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 416
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288/ssh-user-571a0fa82a1844eda1b18fac52254f84/items",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/1ac80e8c10d3a068eb33f288/ssh-user-571a0fa82a1844eda1b18fac52254f84/items/0000-b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088.enc",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 224
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/0ed7ee8fc7dda664477c39bf/ssh-user-283c9ad2481e48fe8670c9cba2b3b1f1/receipt.json",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 774
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/0ed7ee8fc7dda664477c39bf/ssh-user-283c9ad2481e48fe8670c9cba2b3b1f1/retention.json",
+      "uid": 0,
+      "mode": "0o600",
+      "bytes": 398
+    },
+    {
+      "path": "/var/lib/llm-manager/backups/0ed7ee8fc7dda664477c39bf/ssh-user-283c9ad2481e48fe8670c9cba2b3b1f1/items",
+      "uid": 0,
+      "mode": "0o700",
+      "bytes": 4096
+    }
+  ],
+  "sudo_helper_lines": [
+    "yoshimi : TTY=/dev/pts/0 ; PWD=/home/yoshimi ; USER=root ; COMMAND=/usr/bin/llm-manager-remote-helper invoke-recovery ssh-user-571a0fa82a1844eda1b18fac52254f84 3e9c4e1b750fcb7dd4ee8334f9c8e80e0e47763a68e800c5fc8382b80714093e"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "exit_code": 0,
+  "stdout": "{\"apply_request_hash\":\"715ecfe17905b308e2ecfa8992f2e0e047c6656db89602d77e84751229358e2d\",\"host_fingerprint\":\"SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA\",\"host_id\":\"ssh:phase6-cross-vm-network-rollback2\",\"request_hash\":\"d1ff9147d0217d8e99cc582466d13b041f47128813a50d43078860d8ec3bd098\",\"request_id\":\"ssh-user-1b3b600008f142f69e3f49b2e03d444f-rollback\",\"restored_hash\":\"b30b14759c0fd796fc8e6a744ccd19caf081d874d51ff1dfebb1c1938ae29088\",\"target\":\".config/opencode/opencode.jsonc\"}",
+  "stderr": ""
+}

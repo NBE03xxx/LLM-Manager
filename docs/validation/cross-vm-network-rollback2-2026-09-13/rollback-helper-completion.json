@@ -1,0 +1,6 @@
+{
+  "verb": "user-rollback",
+  "request_id": "ssh-user-1b3b600008f142f69e3f49b2e03d444f-rollback",
+  "request_hash": "d1ff9147d0217d8e99cc582466d13b041f47128813a50d43078860d8ec3bd098",
+  "helper_exit_code": 0
+}

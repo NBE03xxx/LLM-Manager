@@ -1,0 +1,7 @@
+{
+  "content": "{\"autoupdate\": false}\n",
+  "owner_uid": 1000,
+  "mode": "0600",
+  "apply_not_started": true,
+  "start_policy": "User clicks Run Apply; normal product authorization timeout unchanged"
+}

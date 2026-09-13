@@ -4,6 +4,39 @@
 まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と検証記録で補ってください。
 本ファイルを過去の時系列記録より優先してください。
 
+## 今回の継続結果（最優先）
+
+- network-rollback2でrollback応答中の実NIC切断・結果照合が成功。NIC down 4.055358秒、
+  実SSH exit 255、Apply/rollback各1回、復旧後result読み取り1回でrolled_back。
+  正常Apply後にもresultを1回読む。fixture hashとGUI表示を確認済み。
+- 先行network-rollbackはhelper exit 1、recovery_required、NIC未切断の非採用試行。
+  時計ずれが有力だが失敗時のhelperエラーコード未採取のため原因未確定。
+  次試行でprepare後のUbuntu約1.72秒遅れを測定し、同期後に成功した。
+- 両試行のcleanup完了、両VM baseline完全一致、一時snapshot削除、時計補正済み。
+  実行中watcher・GUI・relayは残していない。製品source ff7913bを維持。
+- 詳細: `docs/validation/phase6-cross-vm-network-rollback-2026-09-13.md`。
+  回帰806件（767成功・39 expected skip）、証拠checksum67件・構文・空白検査成功。
+  次はOrca WAVの人による聴取と通常GUI全操作などの残条件整理。
+  以下の中断点・次候補は継続前の履歴として参照する。
+
+## 前回の中断点（履歴）
+
+- ユーザーが5時間枠の残量7%と報告し、ここで中断・新しいチャットへの引継ぎ保存を依頼。
+  使用量リセット、監視、自動再開、新規チャット作成は依頼されていない。実施しない。
+- 最終検証commitは `e098d11`（`main`、originへpush済み）。本引継ぎ編集開始時はworktree clean。
+  本引継ぎの保存はその後の文書更新として扱う。
+- 最後の成果はnet2の実NIC断commit照合。Apply 1回、NIC down 4.020秒、実SSH exit 255、
+  復旧後result読み取り1回でcommitted。両VMのcleanupと時計補正まで完了した。
+- 次の実装・検証候補は **rollback応答中の実NIC切断と結果照合**。
+  net2はuser-apply専用のrelay/observerであり、そのままrollbackへ流用すると誤検証になる。
+  新しいnamespace、snapshot、operation、証拠directoryで設計・検証する。
+- 監視のreadyを確認してからGUIをlaunchする。利用者がRun Applyを押し、Debian画面の
+  外部端末でUbuntuユーザーのsudo認証をする。開始時点で入力可能か確認する。
+- 実行中の監視・Gate・回収待ちprocess・一時snapshotは残していない。
+  再開時はread-onlyで状態を確認し、過去のprepare/launch/watchを無条件に再実行しない。
+- 最終回帰806件（767成功・39 expected skip）、証拠checksum、Git空白検査成功。
+  version 0.1.0 / UNRELEASED、製品source ff7913bを維持。公開承認や署名鍵は未確定。
+
 ## 現在位置とGit
 
 - Phase 0〜5完了。現在・次ともPhase 6。version 0.1.0、UNRELEASEDを維持。
@@ -126,7 +159,7 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
    Debian GUI→Ubuntu SSHの正常Applyとrollbackは別caseで成功済み。
-   実NIC断後の正常Apply照合もnet2で成功済み。次はrollback応答中の実通信断、
+   実NIC断後の正常Apply照合はnet2、rollback照合はnetwork-rollback2で成功済み。次は
    通常GUI操作全経路などの残条件を絞り込む。最終artifact項目は未完了のまま。
    net2は成功応答を10秒保留するrelayと短いSSH keepaliveの限定caseである。
    次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
@@ -148,6 +181,16 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 再利用できる入口
 
+- `docs/validation/phase6-cross-vm-network-2026-09-13.md`：最新の実NIC断commit照合と試験の境界。
+- `docs/validation/cross-vm-network-2026-09-13.py`：基礎操作script。初回netは古い通知で切断中止。
+- `docs/validation/cross-vm-network2-2026-09-13.py`、同名directory：採用net2の入口と全証拠。
+- `docs/validation/phase6-cross-vm-rollback-2026-09-13.md`：r3の別VM間rollback成功（例外注入）。
+- `docs/validation/cross-vm-rollback-r2-2026-09-13.py`、`cross-vm-rollback-r3-2026-09-13.py`：旧Gate構成。
+- `docs/validation/phase6-cross-vm-clock-rejection-2026-09-13.md`：時計ずれの拒否再現。
+- `docs/validation/sync-gate-vm-clocks-2026-09-13.py`、同名JSON：承認済み時計補正の方法・記録。
+  両VMのhwclock不在を検査しsystem clockのみ補正。NTP設定は変更しない。
+- `/tmp/phase6-cross-vm-opencode-1.18.30.tar.gz`：保持した公式OpenCode archive。
+  再使用前にSHA-256 `60c92147d0d86ca606dda8a77260d3c87e0ef959eb2d8dbffb34df6d8a64e063` を照合する。
 - `docs/validation/collect-ff7913b-ubuntu-sbom-2026-09-13.py`：今回のUbuntu local SBOM採取。
 - `docs/validation/sbom-ff7913b-ubuntu-local-2026-09-13/`：archive/verifier/APT/baseline/restored。
 - `docs/validation/collect-ff7913b-ubuntu-remote-sbom-2026-09-13.py`：今回のUbuntu remote SBOM採取。

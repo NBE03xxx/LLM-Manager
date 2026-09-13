@@ -111,6 +111,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
+  - 2026-09-13追加: [rollback応答中の実NIC断](validation/phase6-cross-vm-network-rollback-2026-09-13.md)でlive NICを4.055358秒切断、実SSH exit 255後にimmutable result照合でrolled_back。Apply/rollback各1回、元hash・GUI表示・両VM復元を確認。先行失敗はNIC未切断の非採用証拠として保存。relay/短いkeepalive・plan注入の限定caseで、通常GUI全操作と最終artifact Gateは未完了。
   - 2026-09-11: [installed candidate GUI Gate](validation/phase6-ssh-gui-installed-2026-09-11.md)で実OpenCode/dual backup/commit/自動rollbackとhelper応答喪失後の照合が成功。Wayland Results表示確認済み。loopback SSH・Gate plan注入・応答喪失例外注入の限定検証で、最終artifactや別マシン間物理切断の代替ではない。snapshot復元後のbaseline完全一致。
   - 2026-09-13: [ff7913b別VM間GUI Gate](validation/phase6-cross-vm-ssh-2026-09-13.md)でDebian→Ubuntuの正常Apply、実OpenCode/dual backup、応答喪失例外注入後の照合が成功。rollback予定caseはsudo認証待ちでApply前に停止し未検証。再送なし、両VM復元済み。実通信断Applyと最終artifactの代替ではない。
   - 2026-09-13追記: [時計補正後の新規rollback Gate](validation/phase6-cross-vm-rollback-2026-09-13.md)で別VM間の不正JSON→自動rollback、Apply/rollback各1回、応答喪失例外注入後のresult照合、元hashとGUI表示を確認。先行r2はsudo成功時の時計ずれによる有効期間外拒否を純粋decoderで再現。両VM復元・時計補正済み。実通信断Applyと最終artifact Gateは未完了。
