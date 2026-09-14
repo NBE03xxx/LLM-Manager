@@ -6,6 +6,17 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、通常GUI全経路＋実NIC断のSSH Apply照合が成功。
+  診断→Agent推奨2件→review→承認→Applyは注入なし。Apply 1回、NIC down 4.023秒、
+  実SSH exit 255、復旧後result照合でcommitted。config/journal/dual backup/GUI一致。
+  詳細: `docs/validation/phase6-full-gui-network-2026-09-14.md`。
+- `/tmp`消失後にff7913b tracked sourceからcandidateを再buildし、両debが採用hashと一致。
+  build内806 test、両verifier成功。OpenCode 1.18.25も公式hash一致で再取得した。
+- 両VM baseline完全一致、試験専用state/key/alias/package削除、一時snapshot削除、
+  時計補正済み。実行中watcher/GUI/relayなし。進捗18/44、40.9%を維持。
+- 次は性能の残条件を明確化して複数sampleを補うか、通常GUI rollback全経路、
+  local user/root restore全GUI操作へ進む。公開用final artifact・署名はまだ行わない。
+
 - 通常GUI経路のSSH Applyが成功。full-gui-sshでOpenCode 1.18.25、Agent推奨2件を
   利用者が選択・レビュー・承認し、compaction.auto/prune=trueへcommitted。
   plan/approval/transport注入なし、通常qt_app.main＋観測subclass、20画面履歴保存。
@@ -68,7 +79,7 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-13現在は18/44件、**40.9%（公開チェックリスト項目数ベース）**。
+2026-09-14現在は18/44件、**40.9%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
 この40.9%とは比較しない。今後は再集計可能な値を主表示とする。
