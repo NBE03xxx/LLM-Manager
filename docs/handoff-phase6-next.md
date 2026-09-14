@@ -6,6 +6,9 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、[認証コンテキストUI改善](validation/phase6-authentication-context-ui-2026-09-14.md)を実装。remote SSH loginは`REMOTE SSH login — <user@host/alias>`、remote sudoは`REMOTE sudo — <alias>`を外部ターミナルタイトルへ表示し、local Apply/root restoreのPolicyKit description/messageには`LOCAL`を明記した。認証の固定argv、helper protocol、秘密情報非保持は不変。
+- 対象38件と全806件（767成功・39 expected skip）、compile/XML/shell/desktop/SBOM/diff検査が成功。従来の`ff7913b` candidateは本改善を含まないため、新sourceからのcandidate再buildとDebian通常desktop目視Gateを残す。final artifactと進捗18/44、40.9%は未変更。
+
 - 2026-09-14、[通常GUI SSH Apply 5 sample performance Gate](validation/phase6-ssh-apply-performance-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`で、各sampleを診断→Agent推奨2件→review→承認→Applyまで操作。5/5 committed、Apply各1回、validation 2件passed、開始hashと終了config一致。plan/approval/transport/validation注入なし。
 - Applyクリック→完了（対話sudo込み）は13,222.943〜32,539.075 ms、中央値15,416.516 ms。`ssh.user_apply.invoke`は214.865〜252.493 ms、中央値231.750 ms。sample間のfixture resetは終了回収後・次の測定前に限定。observerのsample-01重複画面保存は測定・製品state非影響として記録し、sample-02以降修正。
 - 証拠checksum成功。専用key/alias/state/packageを削除し両VM baseline完全一致、一時snapshot削除済み。snapshot復元後のUbuntu約1,158秒遅れはNTP設定を変えずsystem clockのみ補正し、VM間差0.023秒。性能の複数sampleは補完したが、自然障害rollback・最終artifact Gateが残るため進捗18/44、40.9%を維持。

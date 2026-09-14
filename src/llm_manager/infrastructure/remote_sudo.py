@@ -88,7 +88,9 @@ class OpenSshRemoteSudoInvoker:
         )
         try:
             subprocess.Popen(
-                self.terminal.launch_argv("LLM-Manager remote authorization", interactive_command),
+                self.terminal.launch_argv(
+                    f"LLM-Manager — REMOTE sudo — {alias}", interactive_command
+                ),
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,

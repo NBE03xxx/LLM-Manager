@@ -103,7 +103,7 @@ class ExternalTerminalSshBroker:
         return self._authenticate(
             request.target,
             request.port,
-            request.host,
+            request.target,
             request.timeout_seconds,
             cancellation,
         )
@@ -123,7 +123,7 @@ class ExternalTerminalSshBroker:
         self,
         target: str,
         port: int | None,
-        title_host: str,
+        title_target: str,
         timeout_seconds: int,
         cancellation: CancellationToken,
     ) -> SshControlSession:
@@ -161,7 +161,7 @@ class ExternalTerminalSshBroker:
             "--",
             target,
         )
-        title = f"LLM-Manager SSH authentication — {title_host}"
+        title = f"LLM-Manager — REMOTE SSH login — {title_target}"
         try:
             subprocess.Popen(
                 self.terminal.launch_argv(title, ssh_command),

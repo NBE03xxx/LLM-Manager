@@ -137,6 +137,8 @@ class RootRestoreExecuteCliTests(unittest.TestCase):
             root / 'packaging/polkit/io.github.nbe03xxx.llm-manager.policy'
         ).getroot().findall('action')}
         execute = actions['io.github.nbe03xxx.llm-manager.execute-system-restore']
+        self.assertIn('LOCAL', execute.findtext('description'))
+        self.assertIn('LOCAL', execute.findtext('message'))
         self.assertEqual(execute.findtext('defaults/allow_active'), 'auth_admin')
         self.assertEqual(execute.findtext('defaults/allow_any'), 'no')
         self.assertEqual(execute.findtext('defaults/allow_inactive'), 'no')

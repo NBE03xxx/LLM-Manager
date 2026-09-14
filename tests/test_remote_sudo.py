@@ -49,6 +49,9 @@ class OpenSshRemoteSudoInvokerTests(unittest.TestCase):
             invoker.invoke("development", None, "backup-1", "b" * 64, CancellationToken())
         argv = popen.call_args.args[0]
         self.assertEqual(argv[0], "/usr/bin/ptyxis")
+        self.assertEqual(
+            argv[1], "--title=LLM-Manager — REMOTE sudo — development"
+        )
         self.assertIn("-t", argv)
         self.assertTrue(any("sudo -- /usr/bin/llm-manager-remote-helper" in item for item in argv))
         self.assertFalse(any("password" in item.lower() for item in argv))

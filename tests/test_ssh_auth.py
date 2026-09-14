@@ -63,6 +63,10 @@ class BrokerTests(unittest.TestCase):
                         SshAuthRequest("yoshimi", "192.168.1.253"), CancellationToken()
                     )
             argv = popen.call_args.args[0]
+            self.assertEqual(
+                argv[1],
+                "--title=LLM-Manager — REMOTE SSH login — yoshimi@192.168.1.253",
+            )
             self.assertIn("ControlMaster=yes", argv)
             self.assertIn("BatchMode=no", argv)
             self.assertNotIn("secret-value", argv)
@@ -91,6 +95,9 @@ class BrokerTests(unittest.TestCase):
                     SshAliasAuthRequest("development"), CancellationToken()
                 )
             argv = popen.call_args.args[0]
+            self.assertEqual(
+                argv[1], "--title=LLM-Manager — REMOTE SSH login — development"
+            )
             self.assertEqual(session.target, "development")
             self.assertIsNone(session.port)
             self.assertNotIn("-p", argv)

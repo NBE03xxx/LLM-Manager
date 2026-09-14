@@ -122,6 +122,8 @@ class HelperCliTests(unittest.TestCase):
         root = ET.parse(policy).getroot()
         action = root.find("action")
         self.assertEqual(action.attrib["id"], "io.github.nbe03xxx.llm-manager.apply-system-settings")
+        self.assertIn("LOCAL", action.findtext("description"))
+        self.assertIn("LOCAL", action.findtext("message"))
         self.assertEqual(action.findtext("defaults/allow_any"), "no")
         self.assertEqual(action.findtext("defaults/allow_inactive"), "no")
         self.assertEqual(action.findtext("defaults/allow_active"), "auth_admin")

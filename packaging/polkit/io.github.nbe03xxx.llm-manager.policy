@@ -6,8 +6,8 @@
   <vendor>LLM-Manager contributors</vendor>
   <vendor_url>https://github.com/NBE03xxx/LLM-Manager</vendor_url>
   <action id="io.github.nbe03xxx.llm-manager.apply-system-settings">
-    <description>Apply approved LLM-Manager system settings</description>
-    <message>Authentication is required to apply approved Ollama system settings</message>
+    <description>Apply approved LLM-Manager settings on this LOCAL computer</description>
+    <message>LOCAL authentication is required to apply approved Ollama system settings on this computer</message>
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>
@@ -16,8 +16,8 @@
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-helper</annotate>
   </action>
   <action id="io.github.nbe03xxx.llm-manager.review-system-restore">
-    <description>Review an LLM-Manager system backup for restoration</description>
-    <message>Authentication is required to inspect and save an Ollama restore review; this does not restore settings</message>
+    <description>Review an LLM-Manager system backup on this LOCAL computer</description>
+    <message>LOCAL authentication is required to inspect and save an Ollama restore review; this does not restore settings</message>
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>
@@ -26,8 +26,8 @@
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/llm-manager-restore-review</annotate>
   </action>
   <action id="io.github.nbe03xxx.llm-manager.execute-system-restore">
-    <description>Execute an approved LLM-Manager system restore</description>
-    <message>Authentication is required to restore the approved Ollama system settings</message>
+    <description>Execute an approved LLM-Manager restore on this LOCAL computer</description>
+    <message>LOCAL authentication is required to restore the approved Ollama system settings on this computer</message>
     <defaults>
       <allow_any>no</allow_any>
       <allow_inactive>no</allow_inactive>

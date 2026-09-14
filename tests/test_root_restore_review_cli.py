@@ -106,6 +106,8 @@ class RootRestoreReviewCliTests(unittest.TestCase):
         policy = ET.parse(root / 'packaging/polkit/io.github.nbe03xxx.llm-manager.policy')
         actions = {a.attrib['id']: a for a in policy.findall('action')}
         review = actions['io.github.nbe03xxx.llm-manager.review-system-restore']
+        self.assertIn('LOCAL', review.findtext('description'))
+        self.assertIn('LOCAL', review.findtext('message'))
         self.assertEqual(review.findtext('defaults/allow_active'), 'auth_admin')
         self.assertEqual(review.findtext('defaults/allow_any'), 'no')
         self.assertEqual(review.findtext('defaults/allow_inactive'), 'no')
