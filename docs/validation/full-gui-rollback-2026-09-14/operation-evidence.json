@@ -1,0 +1,82 @@
+{
+  "journal/ssh-user-3975f85cf5b1476fbd26c1de613ff83f.json": {
+    "approval_id": "approval-a0411fa88fd441628cb532ea0065395d",
+    "backup_id": "ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+    "change_set_hash": "9abae5a092d4ef92d5b5e79ade8093268f651c4722df8407b319006f31949516",
+    "created_at": "2026-09-14T10:55:38.340102+00:00",
+    "host_id": "ssh:phase6-full-gui-rollback",
+    "journal_hash": "e48c68c2b95273ef04d885832d0bbbaf766a5baa6551d3d425df252ad103e55d",
+    "manifest_hash": "e0e879e5a2a50b0c5511d05a0a14e8231f39ca45dfeb61a793f5e22c82754900",
+    "operation_id": "ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+    "plan_id": "plan-94002e78bd134cfe8f69885701370c31",
+    "request_hash": "ea7c8358e799e3960c47bee82077138e4b72ea7f3f4a19c841240bf7027a7e62",
+    "rollback_request_hash": "e8a53af890c4923dde6179f3d217b9ed6f46698244c26d4906969f54471e6aa2",
+    "schema_version": "1.1",
+    "status": "rolled_back",
+    "targets": [
+      {
+        "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+        "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc"
+      }
+    ],
+    "updated_at": "2026-09-14T10:55:43.302605+00:00"
+  },
+  "remote-recovery/receipts/e0e879e5a2a50b0c5511d05a0a14e8231f39ca45dfeb61a793f5e22c82754900.json": {
+    "backup_id": "ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+    "change_set_hash": "9abae5a092d4ef92d5b5e79ade8093268f651c4722df8407b319006f31949516",
+    "envelope_version": 1,
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-full-gui-rollback",
+    "item_hashes": [
+      [
+        "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+      ]
+    ],
+    "key_reference": "remote-master-v1",
+    "key_scope": "remote_root",
+    "local_manifest_hash": "e0e879e5a2a50b0c5511d05a0a14e8231f39ca45dfeb61a793f5e22c82754900",
+    "plan_id": "plan-94002e78bd134cfe8f69885701370c31",
+    "receipt_hash": "306bad549810350fa78d9864586d607a3d177889a68e526f3c822c0af780f2c6",
+    "schema_version": "1.0",
+    "scheme": "AES-256-GCM",
+    "storage_location": "/var/lib/llm-manager/backups/a06b57e527c58c237c73a15e/ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+    "verified": true
+  },
+  "backups/a06b57e527c58c237c73a15e/ssh-user-3975f85cf5b1476fbd26c1de613ff83f/manifest.json": {
+    "backup_id": "ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+    "change_set_hash": "9abae5a092d4ef92d5b5e79ade8093268f651c4722df8407b319006f31949516",
+    "complete": true,
+    "created_at": "2026-09-14T10:55:28.635868+00:00",
+    "encryption": {
+      "enabled": true,
+      "envelope_version": 1,
+      "key_reference": "local-master-v1",
+      "key_scope": "local_secret_service",
+      "scheme": "AES-256-GCM"
+    },
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-full-gui-rollback",
+    "items": [
+      {
+        "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+        "existed": true,
+        "gid": 1000,
+        "mode": 384,
+        "selinux_context": null,
+        "service_state": null,
+        "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "storage_location": "/tmp/phase6-full-gui-rollback-20260913/state/llm-manager/backups/a06b57e527c58c237c73a15e/ssh-user-3975f85cf5b1476fbd26c1de613ff83f",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "uid": 1000
+      }
+    ],
+    "manifest_hash": "e0e879e5a2a50b0c5511d05a0a14e8231f39ca45dfeb61a793f5e22c82754900",
+    "plan_id": "plan-94002e78bd134cfe8f69885701370c31",
+    "protected": false,
+    "retention_expires_at": "2026-10-14T10:55:28.635868+00:00",
+    "schema_version": "1.0",
+    "storage_location": "/tmp/phase6-full-gui-rollback-20260913/state/llm-manager/backups/a06b57e527c58c237c73a15e/ssh-user-3975f85cf5b1476fbd26c1de613ff83f"
+  }
+}

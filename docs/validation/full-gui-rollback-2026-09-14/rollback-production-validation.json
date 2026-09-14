@@ -1,0 +1,12 @@
+[
+  {
+    "check": "opencode.installed",
+    "status": "passed",
+    "actual": "installed"
+  },
+  {
+    "check": "opencode.config.parse",
+    "status": "passed",
+    "actual": "valid"
+  }
+]

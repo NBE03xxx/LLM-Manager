@@ -1,10 +1,21 @@
-# 次チャット用引継ぎ（2026-09-13）
+# 次チャット用引継ぎ（2026-09-14）
 
 `/home/yoshimi/WorkSpace/LLM-Manager` のPhase 6 Hardening / MVP Releaseを続けてください。
 まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と検証記録で補ってください。
 本ファイルを過去の時系列記録より優先してください。
 
 ## 今回の継続結果（最優先）
+
+- 2026-09-14、通常GUI全経路のSSH自動rollbackが成功。診断→Agent推奨2件→
+  review→承認→Applyは注入なし。production validation 2件passed保存後、対象fileを
+  変えないGate failure 1件で分岐し、Apply/rollback各1回、rolled_back、開始hash復元。
+  GUI表示はobserver JSONと画像で確認。詳細:
+  `docs/validation/phase6-full-gui-rollback-2026-09-14.md`。
+- journal/rollback request/local AES-GCM manifest/remote verified receiptを照合。
+  両VM baseline完全一致、専用state/package/snapshot削除、復元後時計補正済み。
+  validation faultを含む現candidate 1 sampleなので進捗18/44、40.9%を維持。
+- 次はlocal user/root manual restoreの全GUI操作、性能複数sample、または公開前の
+  final artifact Gateへ進む。version 0.1.0 / UNRELEASEDと署名未実施を維持する。
 
 - 2026-09-14、通常GUI全経路＋実NIC断のSSH Apply照合が成功。
   診断→Agent推奨2件→review→承認→Applyは注入なし。Apply 1回、NIC down 4.023秒、
@@ -14,8 +25,8 @@
   build内806 test、両verifier成功。OpenCode 1.18.25も公式hash一致で再取得した。
 - 両VM baseline完全一致、試験専用state/key/alias/package削除、一時snapshot削除、
   時計補正済み。実行中watcher/GUI/relayなし。進捗18/44、40.9%を維持。
-- 次は性能の残条件を明確化して複数sampleを補うか、通常GUI rollback全経路、
-  local user/root restore全GUI操作へ進む。公開用final artifact・署名はまだ行わない。
+- 後続で通常GUI rollback全経路も完了。残りは性能の複数sample、
+  local user/root restore全GUI操作、final artifact Gate。公開用署名はまだ行わない。
 
 - 通常GUI経路のSSH Applyが成功。full-gui-sshでOpenCode 1.18.25、Agent推奨2件を
   利用者が選択・レビュー・承認し、compaction.auto/prune=trueへcommitted。
@@ -112,7 +123,7 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
 2. **Debian lifecycle/AT-SPI**: 新candidateのfresh/reinstall/remove/再fresh/purge、英日Wayland
    installed launcher起動、用途/label relation/focusable/内部ID非露出、Alt+F4 exit 0成功。
    追加12件のみpurgeしbaseline完全一致、deb削除。このlifecycle sliceでは旧版upgrade、menu再操作、
-   Orca音声を未実施だったが、後続の上記9〜11で検証・capture済み（人のWAV聴取のみ待ち）。
+   Orca音声を未実施だったが、後続の上記9〜11で検証・captureし、人のWAV聴取も完了。
    記録: `docs/validation/phase6-ff7913b-debian-2026-09-13.md`。
 3. **Ubuntu accessibility**: combo box用途欠落・内部ID露出を修正し英日AT-SPI成功。
    system PySide6 focused 38件（37成功・1 expected skip）。
@@ -151,7 +162,7 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     記録: `docs/validation/phase6-ff7913b-debian-menu-2026-09-13.md`。
 11. **Debian Orca音声capture**: 一時prefsでOrcaを起動し、製品名、Hosts用途/valueを含む
     12発話eventと20.672秒の非無音WAVを保存。app exit 0、toolkit accessibility false復元、
-    固定12件purge後baseline/session完全一致。人によるWAV聴取確認は未完了。
+    固定12件purge後baseline/session完全一致。人によるWAV聴取確認も完了。
     記録: `docs/validation/phase6-ff7913b-debian-orca-2026-09-13.md`。
 12. **別VM間SSH正常Apply（部分Gate）**: ff7913b Debian GUI→Ubuntu remote helperで
     実OpenCode/dual backup/commit、応答喪失例外注入後のimmutable result照合成功。
@@ -177,13 +188,13 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. 保存したDebian Orca WAVを人が聴取し、発音・順序・聞き取りやすさを確認する。
+1. local user/root manual restoreの全GUI操作と、性能の残条件・複数sampleを進める。
 2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
    Debian GUI→Ubuntu SSHの正常Applyとrollbackは別caseで成功済み。
    実NIC断後の正常Apply照合はnet2、rollback照合はnetwork-rollback2で成功済み。次は
-   通常GUI操作全経路などの残条件を絞り込む。最終artifact項目は未完了のまま。
+   通常GUIのcommit/rollback全経路も現candidateで成功済み。最終artifact項目は未完了のまま。
    net2は成功応答を10秒保留するrelayと短いSSH keepaliveの限定caseである。
    次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
    snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
@@ -204,6 +215,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 再利用できる入口
 
+- `docs/validation/phase6-full-gui-rollback-2026-09-14.md`：通常GUI全経路のSSH自動rollback。
+- `docs/validation/full-gui-rollback-2026-09-14.py`、同名directory：入口と全証拠。
 - `docs/validation/phase6-cross-vm-network-2026-09-13.md`：最新の実NIC断commit照合と試験の境界。
 - `docs/validation/cross-vm-network-2026-09-13.py`：基礎操作script。初回netは古い通知で切断中止。
 - `docs/validation/cross-vm-network2-2026-09-13.py`、同名directory：採用net2の入口と全証拠。

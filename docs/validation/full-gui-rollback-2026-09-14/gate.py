@@ -1,0 +1,80 @@
+import json,sys
+from pathlib import Path
+sys.dont_write_bytecode=True
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication,QLabel,QPushButton,QComboBox,QCheckBox
+from llm_manager.ui import qt_app
+OUT=Path(__file__).parent/'evidence'/'rollback'
+OUT.mkdir(parents=True,exist_ok=False)
+history=[]
+
+from dataclasses import replace
+from llm_manager.application.ports import ValidationResult
+from llm_manager.domain.enums import Severity,ValidationStatus
+from llm_manager.domain.models import LocalizedMessage
+from llm_manager.infrastructure.process import SubprocessRunner
+from llm_manager.ui.composition import SshUserApplyTaskFactory
+
+original_run=SubprocessRunner.run
+transport_events=[]
+def measured_run(self,request,cancellation):
+ result=original_run(self,request,cancellation)
+ if request.correlation_id in {'ssh.user_apply.invoke','ssh.user_rollback.invoke','ssh.staging.download'}:
+  transport_events.append({'correlation_id':request.correlation_id,'exit_code':result.exit_code,
+   'timed_out':result.timed_out,'duration_ms':result.duration_ms,'stderr':result.stderr_redacted})
+  (OUT/'transport-events.json').write_text(json.dumps(transport_events,indent=2)+'\n')
+ return result
+SubprocessRunner.run=measured_run
+
+class GateValidationFailure:
+ def __init__(self,inner): self.inner=inner
+ def validate(self,change_set,cancellation):
+  results=self.inner.validate(change_set,cancellation)
+  assert results and all(item.status is ValidationStatus.PASSED for item in results)
+  observed=[{'check':item.check,'status':item.status.value,'actual':item.actual} for item in results]
+  (OUT/'production-validation.json').write_text(json.dumps(observed,indent=2)+'\n')
+  return (*results,ValidationResult(validation_id='gate.runtime.failure',scope='gate',
+   check='gate.runtime.failure',status=ValidationStatus.FAILED,expected='passed',actual='injected_failed',
+   severity=Severity.HIGH,message=LocalizedMessage('gate.runtime.failure')))
+
+original_coordinator=SshUserApplyTaskFactory._coordinator
+def gate_coordinator(self,*args,**kwargs):
+ coordinator=original_coordinator(self,*args,**kwargs)
+ coordinator.validator=GateValidationFailure(coordinator.validator)
+ return coordinator
+SshUserApplyTaskFactory._coordinator=gate_coordinator
+
+class ObservedWindow(qt_app.MainWindow):
+ def __init__(self,*a,**k):
+  super().__init__(*a,**k)
+  self.previous=None
+  self.observation_timer=QTimer(self)
+  self.observation_timer.timeout.connect(self.observe)
+  self.observation_timer.start(100)
+ def observe(self):
+  state=self._presenter.state
+  outcome=self._apply_outcome
+  record={'step':state.step.value,'busy':state.busy,'error':state.error_code,
+   'host_id':state.selected_host_id,'approved':state.approved,
+   'labels':{x.objectName():x.text() for x in self.findChildren(QLabel) if x.isVisible()},
+   'buttons':{x.objectName():{'enabled':x.isEnabled(),'text':x.text()} for x in self.findChildren(QPushButton) if x.isVisible()},
+   'combos':{x.objectName():x.currentText() for x in self.findChildren(QComboBox) if x.isVisible()},
+   'checks':{x.objectName():x.isChecked() for x in self.findChildren(QCheckBox) if x.isVisible()}}
+  if record!=self.previous:
+   self.previous=record
+   history.append(record)
+   (OUT/'history.json').write_text(json.dumps(history,indent=2)+'\n')
+   self.grab().save(str(OUT/('step-%03d.png'%len(history))))
+  if outcome is not None and not state.busy and self._active_host_id is None:
+   self.observation_timer.stop()
+   result={'status':outcome.status.value,'error':outcome.error,
+     'validations':[{'check':v.check,'status':v.status.value,'actual':v.actual} for v in outcome.validations],
+     'gui_summary':self._results_summary.text(),'history_count':len(history),
+     'plan_injected':False,'approval_injected':False,'transport_injected':False,'validation_fault_injected':True,'transport_events':transport_events}
+   (OUT/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+   self.grab().save(str(OUT/'results.png'))
+   print(json.dumps(result),flush=True)
+   self.close()
+   QApplication.instance().exit(0 if outcome.status.value=='rolled_back' else 1)
+qt_app.MainWindow=ObservedWindow
+sys.exit(qt_app.main(['llm-manager']))
