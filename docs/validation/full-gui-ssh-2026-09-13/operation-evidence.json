@@ -1,0 +1,82 @@
+{
+  "journal/ssh-user-fbd8a3e468554a9f9ee4b512dedfed21.json": {
+    "approval_id": "approval-a92252af68a042099c2b0f4d8d151deb",
+    "backup_id": "ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+    "change_set_hash": "6015b44fa5c037dc90e92f4b654dcddce12bcabb67cb90151fd06c1c2d699c39",
+    "created_at": "2026-09-13T14:14:18.382920+00:00",
+    "host_id": "ssh:phase6-full-gui",
+    "journal_hash": "c1af97ff4df02ed86dbb5bc4ad07f679edc210c6001f78f3223eeb828e082d52",
+    "manifest_hash": "2e2780fdf0a156894f74c9db0092f8d9c5336cea9617a33028de68bd757b2683",
+    "operation_id": "ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+    "plan_id": "plan-76514b3885544e8db63fd0736c072b67",
+    "request_hash": "0c882bb841d9e76e6ed391fdc5c0475e91024f3de7d1b60a0139b9bc72d0199c",
+    "rollback_request_hash": null,
+    "schema_version": "1.1",
+    "status": "committed",
+    "targets": [
+      {
+        "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+        "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc"
+      }
+    ],
+    "updated_at": "2026-09-13T14:14:21.291462+00:00"
+  },
+  "remote-recovery/receipts/2e2780fdf0a156894f74c9db0092f8d9c5336cea9617a33028de68bd757b2683.json": {
+    "backup_id": "ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+    "change_set_hash": "6015b44fa5c037dc90e92f4b654dcddce12bcabb67cb90151fd06c1c2d699c39",
+    "envelope_version": 1,
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-full-gui",
+    "item_hashes": [
+      [
+        "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+      ]
+    ],
+    "key_reference": "remote-master-v1",
+    "key_scope": "remote_root",
+    "local_manifest_hash": "2e2780fdf0a156894f74c9db0092f8d9c5336cea9617a33028de68bd757b2683",
+    "plan_id": "plan-76514b3885544e8db63fd0736c072b67",
+    "receipt_hash": "03ff120a9956b60eeb3d09018895039a17b0499a5419c1cde6c3260d14309b03",
+    "schema_version": "1.0",
+    "scheme": "AES-256-GCM",
+    "storage_location": "/var/lib/llm-manager/backups/2f208853477cff263da87574/ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+    "verified": true
+  },
+  "backups/2f208853477cff263da87574/ssh-user-fbd8a3e468554a9f9ee4b512dedfed21/manifest.json": {
+    "backup_id": "ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+    "change_set_hash": "6015b44fa5c037dc90e92f4b654dcddce12bcabb67cb90151fd06c1c2d699c39",
+    "complete": true,
+    "created_at": "2026-09-13T14:14:09.349331+00:00",
+    "encryption": {
+      "enabled": true,
+      "envelope_version": 1,
+      "key_reference": "local-master-v1",
+      "key_scope": "local_secret_service",
+      "scheme": "AES-256-GCM"
+    },
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-full-gui",
+    "items": [
+      {
+        "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+        "existed": true,
+        "gid": 1000,
+        "mode": 384,
+        "selinux_context": null,
+        "service_state": null,
+        "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "storage_location": "/tmp/phase6-full-gui-20260913/state/llm-manager/backups/2f208853477cff263da87574/ssh-user-fbd8a3e468554a9f9ee4b512dedfed21",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "uid": 1000
+      }
+    ],
+    "manifest_hash": "2e2780fdf0a156894f74c9db0092f8d9c5336cea9617a33028de68bd757b2683",
+    "plan_id": "plan-76514b3885544e8db63fd0736c072b67",
+    "protected": false,
+    "retention_expires_at": "2026-10-13T14:14:09.349331+00:00",
+    "schema_version": "1.0",
+    "storage_location": "/tmp/phase6-full-gui-20260913/state/llm-manager/backups/2f208853477cff263da87574/ssh-user-fbd8a3e468554a9f9ee4b512dedfed21"
+  }
+}

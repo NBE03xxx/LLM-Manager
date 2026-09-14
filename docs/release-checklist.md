@@ -4,6 +4,13 @@
 
 ## 1. Scopeとversion freeze
 
+2026-09-13最新: 保存Orca WAVの発音・順序・聞き取りやすさについて利用者が
+「問題なく聞き取れた」と回答し、このcaptureの聴取確認は完了。
+[通常GUIの別VM間SSH Apply](validation/phase6-full-gui-ssh-2026-09-13.md)も
+診断→Agent推奨2件→review→承認→committedまで成功（plan/approval/transport注入なし）。
+下記の古い「人の聴取未完了」「SSH Apply未完了」の記述はこの範囲で更新された。
+通常GUIでのrollback/通信断の組合せや最終artifact等は引き続き未完了。
+
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。[ff7913b Debian Orca capture](validation/phase6-ff7913b-debian-orca-2026-09-13.md)では製品名・Hosts用途/valueの発話eventと20.672秒の非無音WAVを保存したが、人の聴取確認は未完了。SSH Applyと実displayは未完了。

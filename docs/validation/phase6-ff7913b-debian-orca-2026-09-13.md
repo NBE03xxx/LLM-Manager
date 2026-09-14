@@ -38,4 +38,9 @@ Wayland/active/unlocked、`dpkg --audit`は空、`apt-get check`成功、VMはru
 
 機械検査としては、Orcaが製品名・control用途・値をSpeech Dispatcherへ渡し、実音声波形が出力
 されたことまで確認した。人が音声を聴いて発音・順序・聞き取りやすさを判断する試験は代替せず、
-保存WAVの利用者確認待ちとする。最終artifactでの反復も別Gateとして残す。
+保存WAVの利用者確認として扱う。最終artifactでの反復も別Gateとして残す。
+
+2026-09-13追記: 上記hashの保存WAVを会話内に提示し、製品名とHostsについて
+発音・順序・聞き取りやすさを質問した。利用者は「問題なく聞き取れた」と回答した。
+このcaptureに対する人の聴取確認は完了。全control・日本語音声・最終artifactでの
+検証まで完了したとは扱わない。

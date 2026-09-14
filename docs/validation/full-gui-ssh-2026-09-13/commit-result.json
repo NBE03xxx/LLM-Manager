@@ -1,0 +1,21 @@
+{
+  "status": "committed",
+  "error": null,
+  "validations": [
+    {
+      "check": "opencode.installed",
+      "status": "passed",
+      "actual": "installed"
+    },
+    {
+      "check": "opencode.config.parse",
+      "status": "passed",
+      "actual": "valid"
+    }
+  ],
+  "gui_summary": "Apply result: committed.",
+  "history_count": 20,
+  "plan_injected": false,
+  "approval_injected": false,
+  "transport_injected": false
+}

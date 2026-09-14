@@ -6,6 +6,18 @@
 
 ## 今回の継続結果（最優先）
 
+- 通常GUI経路のSSH Applyが成功。full-gui-sshでOpenCode 1.18.25、Agent推奨2件を
+  利用者が選択・レビュー・承認し、compaction.auto/prune=trueへcommitted。
+  plan/approval/transport注入なし、通常qt_app.main＋観測subclass、20画面履歴保存。
+  詳細: `docs/validation/phase6-full-gui-ssh-2026-09-13.md`。
+  両VM baseline完全一致、試験データと一時snapshot削除、時計補正済み。
+  GUI/認証待ち/監視processは残していない。回帰806件（767成功・39 skip）と
+  証拠checksum・journal/manifest/receipt対応検査も成功。2026-09-14に記録保存を再開。
+- Orca保存WAVの製品名・Hostsの発音/順序/聞き取りやすさについて、利用者が
+  「問題なく聞き取れた」と回答。今回captureの人による聴取確認は完了。
+- 次は通常GUIとrollback/通信断の組合せ、local restore全操作などの残条件。
+  未診断Recommendationsが説明なく空欄になるUI改善候補も観測された。
+
 - network-rollback2でrollback応答中の実NIC切断・結果照合が成功。NIC down 4.055358秒、
   実SSH exit 255、Apply/rollback各1回、復旧後result読み取り1回でrolled_back。
   正常Apply後にもresultを1回読む。fixture hashとGUI表示を確認済み。
