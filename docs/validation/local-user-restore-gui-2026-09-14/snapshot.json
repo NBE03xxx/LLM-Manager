@@ -1,0 +1,6 @@
+{
+  "name": "phase6-local-user-restore-gui-20260914",
+  "kind": "external-disk-only",
+  "before": " Type   Device   Target   Source\n------------------------------------------------------------------\n file   disk     vda      /var/lib/libvirt/images/debian13.qcow2\n file   cdrom    sda      -\n\n",
+  "after": " Type   Device   Target   Source\n---------------------------------------------------------------------------------------------------\n file   disk     vda      /var/lib/libvirt/images/debian13.phase6-local-user-restore-gui-20260914\n file   cdrom    sda      -\n\n"
+}

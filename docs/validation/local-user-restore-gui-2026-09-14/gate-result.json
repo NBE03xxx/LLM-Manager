@@ -1,0 +1,11 @@
+{
+  "initial_hash_restored": true,
+  "apply_operations": 1,
+  "restore_attempts": 1,
+  "restore_results": 1,
+  "execution_evidence": "committed",
+  "explicit_refresh_inventory_observed": true,
+  "observer_injected_plan": false,
+  "observer_injected_approval": false,
+  "observer_injected_gui_state": false
+}

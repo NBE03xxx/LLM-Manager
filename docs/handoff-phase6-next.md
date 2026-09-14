@@ -6,6 +6,10 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、[local user manual restore通常GUI Gate](validation/phase6-local-user-restore-gui-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`で、Local診断→Agent推奨2件→review→承認→Apply→実AES-256-GCM backupを作成。同じGUIで明示Refresh→backup選択→preview→正確な同意→Run Restore→再Refreshを操作した。Apply/restore各1回、restore evidenceは`committed`、初期config hashへ復元、inventory表示も一致。
+- observerは画面/state保存だけでplan/approval/GUI stateを注入していない。Secret Service、manifest、journal、restore attempt/result、audit 5-event hash chainの結合を機械照合。専用key/state/pathと追加12 packageを削除し、Debian baseline/session完全一致、external snapshot削除済み。回帰806件（767成功・39 expected skip）と証拠checksum、`git diff --check`成功。
+- 現`UNRELEASED` candidate 1 sampleのため進捗18/44、40.9%を維持。次はlocal root manual restoreを通常GUI＋PolicyKitの別Gateとして行い、その後に性能複数sample/final artifact条件を進める。保存済みoperationを再実行しない。version 0.1.0 / UNRELEASED、署名・tag・公開未実施を維持する。
+
 - 2026-09-14、通常GUI全経路のSSH自動rollbackが成功。診断→Agent推奨2件→
   review→承認→Applyは注入なし。production validation 2件passed保存後、対象fileを
   変えないGate failure 1件で分岐し、Apply/rollback各1回、rolled_back、開始hash復元。

@@ -1,0 +1,217 @@
+{
+  "target_sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+  "target": {
+    "autoupdate": false,
+    "compaction": {
+      "auto": false,
+      "prune": false
+    }
+  },
+  "journals": {
+    "journal/local-6c09e63bbd574af8a7ea306420bead7f.json": {
+      "approval_id": null,
+      "backup_id": null,
+      "change_set_hash": "d14add48dd572c5f851ad2d722caa2091da188a5acbc0391e86a8312ed1e1110",
+      "created_at": "2026-09-14T12:19:42.294926+00:00",
+      "host_id": "local:debian",
+      "journal_hash": "72efb37008ecedb06ef85b2931815e047f0ea49711f07795c3a0469d41eba3b2",
+      "manifest_hash": null,
+      "operation_id": "local-6c09e63bbd574af8a7ea306420bead7f",
+      "plan_id": "plan-25e6bd172e684a7baf15c114e7950b85",
+      "request_hash": null,
+      "rollback_request_hash": null,
+      "schema_version": "1.1",
+      "status": "committed",
+      "targets": [
+        {
+          "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+          "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+          "target": "/tmp/phase6-local-user-restore-gui-20260914/config/opencode/opencode.jsonc"
+        }
+      ],
+      "updated_at": "2026-09-14T12:19:42.670050+00:00"
+    }
+  },
+  "manifests": {
+    "backups/ce54d4c719b70e081696d188/local-6c09e63bbd574af8a7ea306420bead7f/manifest.json": {
+      "backup_id": "local-6c09e63bbd574af8a7ea306420bead7f",
+      "change_set_hash": "d14add48dd572c5f851ad2d722caa2091da188a5acbc0391e86a8312ed1e1110",
+      "complete": true,
+      "created_at": "2026-09-14T12:19:42.285535+00:00",
+      "encryption": {
+        "enabled": true,
+        "envelope_version": 1,
+        "key_reference": "local-master-v1",
+        "key_scope": "local_secret_service",
+        "scheme": "AES-256-GCM"
+      },
+      "host_fingerprint": null,
+      "host_id": "local:debian",
+      "items": [
+        {
+          "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+          "existed": true,
+          "gid": 1000,
+          "mode": 384,
+          "selinux_context": null,
+          "service_state": null,
+          "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+          "storage_location": "/tmp/phase6-local-user-restore-gui-20260914/state/llm-manager/backups/ce54d4c719b70e081696d188/local-6c09e63bbd574af8a7ea306420bead7f",
+          "target": "/tmp/phase6-local-user-restore-gui-20260914/config/opencode/opencode.jsonc",
+          "uid": 1000
+        }
+      ],
+      "manifest_hash": "b8e78f15a5416a278f7aa0cb2ca3a613eae6b661b63a2c8db79e88aabf2e9047",
+      "plan_id": "plan-25e6bd172e684a7baf15c114e7950b85",
+      "protected": false,
+      "retention_expires_at": "2026-10-14T12:19:42.285535+00:00",
+      "schema_version": "1.0",
+      "storage_location": "/tmp/phase6-local-user-restore-gui-20260914/state/llm-manager/backups/ce54d4c719b70e081696d188/local-6c09e63bbd574af8a7ea306420bead7f"
+    }
+  },
+  "restore_executions": {
+    "restore-executions/11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0.result.json": {
+      "attempt_hash": "4f6e0f976e1e5526ab5f28ca20034716f7470fa00de439b58905df7c4a5251f2",
+      "authorization_hash": "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0",
+      "backup_id": "local-6c09e63bbd574af8a7ea306420bead7f",
+      "completed_at": "2026-09-14T12:26:01.782387+00:00",
+      "error_code": null,
+      "evidence_hash": "92ab0223353746b476500c55e9f08aac8fabc09343f46693fe0b6dc9e973695e",
+      "host_id": "local:debian",
+      "manifest_hash": "b8e78f15a5416a278f7aa0cb2ca3a613eae6b661b63a2c8db79e88aabf2e9047",
+      "schema_version": "1.0",
+      "state": "committed",
+      "target": "/tmp/phase6-local-user-restore-gui-20260914/config/opencode/opencode.jsonc"
+    },
+    "restore-executions/11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0.attempt.json": {
+      "actor": "user",
+      "approval_id": "restore-6d334dcf167a46a1b288b414d2b16dda",
+      "attempt_hash": "4f6e0f976e1e5526ab5f28ca20034716f7470fa00de439b58905df7c4a5251f2",
+      "authorization_hash": "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0",
+      "backup_id": "local-6c09e63bbd574af8a7ea306420bead7f",
+      "host_id": "local:debian",
+      "manifest_hash": "b8e78f15a5416a278f7aa0cb2ca3a613eae6b661b63a2c8db79e88aabf2e9047",
+      "preview_hash": "c627528e6f8d6088c27ce263d7ddc70d0be7f024df3e6aa17a6af50b290ce1d7",
+      "schema_version": "1.0",
+      "started_at": "2026-09-14T12:26:01.762736+00:00",
+      "target": "/tmp/phase6-local-user-restore-gui-20260914/config/opencode/opencode.jsonc"
+    }
+  },
+  "audit": {
+    "audit/00000000000000000005.json": {
+      "correlation_id": "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0",
+      "created_at": "2026-09-14T12:26:01.782783+00:00",
+      "event_hash": "435c78a534a30eb534bbaa0d8668bbd17c38d8a1dbc6b3ae8af0e9b4669ac454",
+      "event_type": "restore.committed",
+      "fields": [
+        [
+          "host_id",
+          "local:debian"
+        ],
+        [
+          "backup_id",
+          "local-6c09e63bbd574af8a7ea306420bead7f"
+        ],
+        [
+          "binding_hash",
+          "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0"
+        ]
+      ],
+      "previous_hash": "a9cb2fb464ab24f20bdb0d28bd0c40bf7d783c6b2ed55c57325937152063e46c",
+      "schema_version": "1.0",
+      "sequence": 5
+    },
+    "audit/00000000000000000004.json": {
+      "correlation_id": "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0",
+      "created_at": "2026-09-14T12:26:01.763657+00:00",
+      "event_hash": "a9cb2fb464ab24f20bdb0d28bd0c40bf7d783c6b2ed55c57325937152063e46c",
+      "event_type": "restore.started",
+      "fields": [
+        [
+          "host_id",
+          "local:debian"
+        ],
+        [
+          "backup_id",
+          "local-6c09e63bbd574af8a7ea306420bead7f"
+        ],
+        [
+          "binding_hash",
+          "11f6f96eaee41773582cc697c758b5e95793e5d9cc5bb5821e02e7e6694a7be0"
+        ]
+      ],
+      "previous_hash": "129525dd9935848173b5e3a8da98c7400c8cccad6e5791ecafd08c105b7079c9",
+      "schema_version": "1.0",
+      "sequence": 4
+    },
+    "audit/00000000000000000003.json": {
+      "correlation_id": "plan-25e6bd172e684a7baf15c114e7950b85",
+      "created_at": "2026-09-14T12:19:42.669667+00:00",
+      "event_hash": "129525dd9935848173b5e3a8da98c7400c8cccad6e5791ecafd08c105b7079c9",
+      "event_type": "apply.committed",
+      "fields": [
+        [
+          "plan_id",
+          "plan-25e6bd172e684a7baf15c114e7950b85"
+        ],
+        [
+          "host_id",
+          "local:debian"
+        ],
+        [
+          "backup_id",
+          "local-6c09e63bbd574af8a7ea306420bead7f"
+        ]
+      ],
+      "previous_hash": "8c0f387a4dd7cb5fcbc5e9af16c22ce38a861a4e20c36424d6e60e355013dcba",
+      "schema_version": "1.0",
+      "sequence": 3
+    },
+    "audit/00000000000000000002.json": {
+      "correlation_id": "plan-25e6bd172e684a7baf15c114e7950b85",
+      "created_at": "2026-09-14T12:19:42.294536+00:00",
+      "event_hash": "8c0f387a4dd7cb5fcbc5e9af16c22ce38a861a4e20c36424d6e60e355013dcba",
+      "event_type": "backup.verified",
+      "fields": [
+        [
+          "plan_id",
+          "plan-25e6bd172e684a7baf15c114e7950b85"
+        ],
+        [
+          "host_id",
+          "local:debian"
+        ],
+        [
+          "backup_id",
+          "local-6c09e63bbd574af8a7ea306420bead7f"
+        ]
+      ],
+      "previous_hash": "97d6ec7711caa6b93b78eae06e542f2fe9dded02352ab872c3b9aeeac04cfa74",
+      "schema_version": "1.0",
+      "sequence": 2
+    },
+    "audit/00000000000000000001.json": {
+      "correlation_id": "plan-25e6bd172e684a7baf15c114e7950b85",
+      "created_at": "2026-09-14T12:19:42.261710+00:00",
+      "event_hash": "97d6ec7711caa6b93b78eae06e542f2fe9dded02352ab872c3b9aeeac04cfa74",
+      "event_type": "apply.approved",
+      "fields": [
+        [
+          "plan_id",
+          "plan-25e6bd172e684a7baf15c114e7950b85"
+        ],
+        [
+          "host_id",
+          "local:debian"
+        ],
+        [
+          "approval_id",
+          "approval-478a8558801c4a84a265d81091e572ac"
+        ]
+      ],
+      "previous_hash": null,
+      "schema_version": "1.0",
+      "sequence": 1
+    }
+  }
+}

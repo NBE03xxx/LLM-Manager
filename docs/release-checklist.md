@@ -117,6 +117,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [x] security/privacy code reviewでsecret redaction、audit非露出、bounded subprocess output、GUI error上限、root helper出力破棄を確認した。
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
+  - 2026-09-14: [local user manual restore通常GUI Gate](validation/phase6-local-user-restore-gui-2026-09-14.md)で、Debian通常user・installed candidate・通常`qt_app.main`から診断→Agent推奨2件→review→承認→Apply→暗号化backupを実行。同じGUIで明示Refresh→backup選択→preview→正確な同意→Run Restore→再Refreshを操作し、Apply/restore各1回、committed evidence、開始hash復元、inventory、Secret Service/manifest/journal/restore execution/audit結合、baseline完全復元を確認した。現UNRELEASED candidate 1 sampleであり最終artifact項目は未完了。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
   - 2026-09-14: [通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)で、診断→Agent推奨2件→review→承認→Applyを注入なしで操作。production validationの全passed結果を保存後、対象fileを変えないfailed check 1件で分岐させ、Apply/rollback各1回、開始hash復元、journal/dual backup/GUI表示、両VM復元を確認。validation faultを含む現candidate 1 sampleであり、自然障害・最終artifact項目は未完了。
   - 2026-09-14: [通常GUI全経路＋実NIC断](validation/phase6-full-gui-network-2026-09-14.md)で、診断→Agent推奨2件→review→承認→Applyを注入なしで操作。helper成功応答中にlive NICを4.023秒切断し、実SSH exit 255後のresult照合でcommitted。Apply 1回、config/journal/dual backup/GUI表示、両VM復元を確認。現UNRELEASED candidate 1 sampleであり最終artifact項目は未完了。

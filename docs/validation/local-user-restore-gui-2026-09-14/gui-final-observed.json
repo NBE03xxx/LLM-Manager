@@ -1,0 +1,59 @@
+{
+  "step": "results",
+  "busy": false,
+  "error": null,
+  "host_id": "local:debian",
+  "approved": true,
+  "apply_status": "committed",
+  "restore_state": null,
+  "inventory": [
+    {
+      "backup_id": "local-6c09e63bbd574af8a7ea306420bead7f",
+      "state": "committed",
+      "restore_state": "committed",
+      "restore_attention": false
+    }
+  ],
+  "labels": {
+    "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+    "restore-preview-summary": "Select a backup to generate a metadata-only restore preview.",
+    "restore-approval-status": "Explicit restore approval is required.",
+    "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+  },
+  "buttons": {
+    "refresh-backup-inventory": {
+      "enabled": true,
+      "text": "Refresh backup inventory"
+    },
+    "run-restore": {
+      "enabled": false,
+      "text": "Run Restore"
+    },
+    "cancel-restore": {
+      "enabled": false,
+      "text": "Cancel"
+    },
+    "open-root-restore": {
+      "enabled": true,
+      "text": "Restore system settings"
+    }
+  },
+  "combos": {},
+  "checks": {
+    "approve-restore-preview": false
+  },
+  "lists": {
+    "workflow-navigation": [
+      "Hosts",
+      "Diagnose",
+      "Recommendations",
+      "Review Changes",
+      "Apply / Results",
+      "Backup / Rollback"
+    ],
+    "backup-inventory-list": [
+      "local-6c09e63bbd574af8a7ea306420bead7f · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: committed · restore attention: false\nactions: refresh_inventory"
+    ],
+    "restore-preview-list": []
+  }
+}
