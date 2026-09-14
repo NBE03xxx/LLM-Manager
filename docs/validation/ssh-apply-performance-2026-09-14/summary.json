@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "scope": "normal GUI production SSH user Apply; five sequential samples",
+  "limitations": "single VM pair; interactive authorization is included only in end-to-end Apply elapsed time; between-sample fixture resets are excluded",
+  "samples": [
+    {
+      "sample": "sample-01",
+      "status": "committed",
+      "apply_elapsed_including_authorization_ms": 13222.943,
+      "ssh_apply_invoke_ms": 249.107,
+      "ssh_event_count": 85
+    },
+    {
+      "sample": "sample-02",
+      "status": "committed",
+      "apply_elapsed_including_authorization_ms": 32539.075,
+      "ssh_apply_invoke_ms": 214.865,
+      "ssh_event_count": 137
+    },
+    {
+      "sample": "sample-03",
+      "status": "committed",
+      "apply_elapsed_including_authorization_ms": 19655.209,
+      "ssh_apply_invoke_ms": 220.387,
+      "ssh_event_count": 103
+    },
+    {
+      "sample": "sample-04",
+      "status": "committed",
+      "apply_elapsed_including_authorization_ms": 13550.948,
+      "ssh_apply_invoke_ms": 252.493,
+      "ssh_event_count": 87
+    },
+    {
+      "sample": "sample-05",
+      "status": "committed",
+      "apply_elapsed_including_authorization_ms": 15416.516,
+      "ssh_apply_invoke_ms": 231.75,
+      "ssh_event_count": 92
+    }
+  ]
+}

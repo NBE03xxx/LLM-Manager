@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "sample": "sample-05",
+  "gui_started_monotonic_ns": 15524428732443,
+  "apply_clicked_monotonic_ns": 15573488117556,
+  "apply_finished_signal_monotonic_ns": 15588904633874,
+  "apply_elapsed_including_authorization_ms": 15416.516
+}

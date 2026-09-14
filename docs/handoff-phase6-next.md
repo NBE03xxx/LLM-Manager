@@ -6,6 +6,10 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、[通常GUI SSH Apply 5 sample performance Gate](validation/phase6-ssh-apply-performance-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`で、各sampleを診断→Agent推奨2件→review→承認→Applyまで操作。5/5 committed、Apply各1回、validation 2件passed、開始hashと終了config一致。plan/approval/transport/validation注入なし。
+- Applyクリック→完了（対話sudo込み）は13,222.943〜32,539.075 ms、中央値15,416.516 ms。`ssh.user_apply.invoke`は214.865〜252.493 ms、中央値231.750 ms。sample間のfixture resetは終了回収後・次の測定前に限定。observerのsample-01重複画面保存は測定・製品state非影響として記録し、sample-02以降修正。
+- 証拠checksum成功。専用key/alias/state/packageを削除し両VM baseline完全一致、一時snapshot削除済み。snapshot復元後のUbuntu約1,158秒遅れはNTP設定を変えずsystem clockのみ補正し、VM間差0.023秒。性能の複数sampleは補完したが、自然障害rollback・最終artifact Gateが残るため進捗18/44、40.9%を維持。
+
 - 2026-09-14、[pre-final security regression](validation/phase6-pre-final-security-regression-2026-09-14.md)が成功。現`main`でproduct source/test/packaging/version surfaceは採用source `ff7913b`から不変。focused 159件（158成功・1 expected skip）、全806件（767成功・39 expected skip）、両candidate deb verifier、compileall・shell・desktop・SBOM JSON・`git diff --check`が成功した。保存済みVM operationは再実行していない。
 - `UNRELEASED` candidateであり最終artifact反復ではないため、security最終commit項目は未完了、進捗18/44、40.9%を維持。次は実SSH Apply性能の複数sample、自然障害rollback、または最終artifact開始に必要なdistribution/signing key判断を進める。署名・tag・公開は未実施。
 

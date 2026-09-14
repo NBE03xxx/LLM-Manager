@@ -1,0 +1,990 @@
+{
+  "status": "committed",
+  "error": null,
+  "validations": [
+    {
+      "check": "opencode.installed",
+      "status": "passed",
+      "actual": "installed"
+    },
+    {
+      "check": "opencode.config.parse",
+      "status": "passed",
+      "actual": "valid"
+    }
+  ],
+  "gui_summary": "Apply result: committed.",
+  "history_count": 13,
+  "plan_injected": false,
+  "approval_injected": false,
+  "transport_injected": false,
+  "timing": {
+    "schema_version": 1,
+    "sample": "sample-02",
+    "gui_started_monotonic_ns": 15025448461902,
+    "apply_clicked_monotonic_ns": 15116974338321,
+    "apply_finished_signal_monotonic_ns": 15149513413123,
+    "apply_elapsed_including_authorization_ms": 32539.075
+  },
+  "transport": [
+    {
+      "correlation_id": "ssh.identity.config",
+      "elapsed_ms": 6.587,
+      "reported_duration_ms": 7,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identity.probe",
+      "elapsed_ms": 125.378,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.uid",
+      "elapsed_ms": 125.792,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.passwd",
+      "elapsed_ms": 123.488,
+      "reported_duration_ms": 123,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identify",
+      "elapsed_ms": 119.644,
+      "reported_duration_ms": 120,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 119.689,
+      "reported_duration_ms": 120,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 129.824,
+      "reported_duration_ms": 130,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "linux.lscpu",
+      "elapsed_ms": 130.227,
+      "reported_duration_ms": 130,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "linux.uname",
+      "elapsed_ms": 129.509,
+      "reported_duration_ms": 129,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "linux.disk.root",
+      "elapsed_ms": 131.41,
+      "reported_duration_ms": 131,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "linux.gpu.pci",
+      "elapsed_ms": 138.887,
+      "reported_duration_ms": 139,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ollama.api.version",
+      "elapsed_ms": 135.096,
+      "reported_duration_ms": 135,
+      "exit_code": 7,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ollama.version",
+      "elapsed_ms": 118.038,
+      "reported_duration_ms": 118,
+      "exit_code": 127,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "opencode.version",
+      "elapsed_ms": 482.743,
+      "reported_duration_ms": 483,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 134.981,
+      "reported_duration_ms": 135,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 126.747,
+      "reported_duration_ms": 127,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 128.176,
+      "reported_duration_ms": 128,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identity.config",
+      "elapsed_ms": 8.504,
+      "reported_duration_ms": 8,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identity.probe",
+      "elapsed_ms": 125.833,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.uid",
+      "elapsed_ms": 125.293,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.passwd",
+      "elapsed_ms": 124.821,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identify",
+      "elapsed_ms": 121.335,
+      "reported_duration_ms": 121,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 125.274,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identity.config",
+      "elapsed_ms": 8.341,
+      "reported_duration_ms": 8,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identity.probe",
+      "elapsed_ms": 120.117,
+      "reported_duration_ms": 120,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.uid",
+      "elapsed_ms": 129.66,
+      "reported_duration_ms": 130,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user.passwd",
+      "elapsed_ms": 125.405,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.identify",
+      "elapsed_ms": 125.772,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 127.782,
+      "reported_duration_ms": 128,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 115.456,
+      "reported_duration_ms": 115,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 118.992,
+      "reported_duration_ms": 119,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 127.51,
+      "reported_duration_ms": 127,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 124.838,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 122.267,
+      "reported_duration_ms": 122,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 122.884,
+      "reported_duration_ms": 123,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 123.048,
+      "reported_duration_ms": 123,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 124.253,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 133.439,
+      "reported_duration_ms": 133,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.prepare",
+      "elapsed_ms": 209.643,
+      "reported_duration_ms": 210,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.upload",
+      "elapsed_ms": 125.706,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.upload",
+      "elapsed_ms": 121.252,
+      "reported_duration_ms": 121,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 133.872,
+      "reported_duration_ms": 134,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 128.773,
+      "reported_duration_ms": 129,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 124.326,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 124.352,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 123.243,
+      "reported_duration_ms": 123,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.remote-helper.sudo-probe",
+      "elapsed_ms": 120.739,
+      "reported_duration_ms": 121,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.178,
+      "reported_duration_ms": 130,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.31,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.398,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 127.508,
+      "reported_duration_ms": 127,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.056,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.036,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 129.054,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 127.943,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 126.903,
+      "reported_duration_ms": 127,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.72,
+      "reported_duration_ms": 134,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 125.965,
+      "reported_duration_ms": 126,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.879,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 134.71,
+      "reported_duration_ms": 135,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 134.135,
+      "reported_duration_ms": 134,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 123.0,
+      "reported_duration_ms": 123,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 129.02,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.715,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.696,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 127.244,
+      "reported_duration_ms": 127,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.352,
+      "reported_duration_ms": 132,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 135.363,
+      "reported_duration_ms": 135,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 127.2,
+      "reported_duration_ms": 127,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.654,
+      "reported_duration_ms": 132,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 129.241,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.592,
+      "reported_duration_ms": 134,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 125.155,
+      "reported_duration_ms": 125,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.451,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.572,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.357,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.146,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 124.288,
+      "reported_duration_ms": 124,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 135.196,
+      "reported_duration_ms": 135,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.469,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.485,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.42,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.16,
+      "reported_duration_ms": 132,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.599,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.639,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 133.988,
+      "reported_duration_ms": 134,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 129.826,
+      "reported_duration_ms": 130,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.468,
+      "reported_duration_ms": 130,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.054,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 140.881,
+      "reported_duration_ms": 141,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.972,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.722,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 134.254,
+      "reported_duration_ms": 134,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.25,
+      "reported_duration_ms": 128,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 123.678,
+      "reported_duration_ms": 124,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 123.35,
+      "reported_duration_ms": 123,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 125.745,
+      "reported_duration_ms": 126,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.92,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.573,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.705,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.724,
+      "reported_duration_ms": 132,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 135.656,
+      "reported_duration_ms": 136,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 129.858,
+      "reported_duration_ms": 130,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 124.619,
+      "reported_duration_ms": 125,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 125.79,
+      "reported_duration_ms": 126,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 122.249,
+      "reported_duration_ms": 122,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 124.707,
+      "reported_duration_ms": 125,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 124.732,
+      "reported_duration_ms": 125,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 128.615,
+      "reported_duration_ms": 129,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 125.538,
+      "reported_duration_ms": 126,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 120.925,
+      "reported_duration_ms": 121,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 139.163,
+      "reported_duration_ms": 139,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 134.626,
+      "reported_duration_ms": 135,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.954,
+      "reported_duration_ms": 133,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 131.253,
+      "reported_duration_ms": 131,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 136.61,
+      "reported_duration_ms": 137,
+      "exit_code": 1,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 130.402,
+      "reported_duration_ms": 130,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 122.864,
+      "reported_duration_ms": 123,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 124.507,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 117.546,
+      "reported_duration_ms": 118,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 121.642,
+      "reported_duration_ms": 122,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 125.325,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 125.3,
+      "reported_duration_ms": 125,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.prepare",
+      "elapsed_ms": 207.776,
+      "reported_duration_ms": 208,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.upload",
+      "elapsed_ms": 138.523,
+      "reported_duration_ms": 138,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.upload",
+      "elapsed_ms": 123.741,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 128.53,
+      "reported_duration_ms": 129,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 126.051,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 126.989,
+      "reported_duration_ms": 127,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 130.446,
+      "reported_duration_ms": 130,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 123.956,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.user_apply.invoke",
+      "elapsed_ms": 214.865,
+      "reported_duration_ms": 215,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "elapsed_ms": 132.523,
+      "reported_duration_ms": 132,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "opencode.version",
+      "elapsed_ms": 482.678,
+      "reported_duration_ms": 483,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.stat",
+      "elapsed_ms": 126.421,
+      "reported_duration_ms": 126,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 121.879,
+      "reported_duration_ms": 122,
+      "exit_code": 0,
+      "timed_out": false
+    },
+    {
+      "correlation_id": "ssh.read_file",
+      "elapsed_ms": 124.241,
+      "reported_duration_ms": 124,
+      "exit_code": 0,
+      "timed_out": false
+    }
+  ]
+}
