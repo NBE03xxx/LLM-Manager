@@ -1,0 +1,22 @@
+{
+  "target_sha256": "a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89",
+  "fixture": {
+    "backup_id": "root-gui-backup-20260914",
+    "changed_sha256": "a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89",
+    "original_sha256": "391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1",
+    "record_hash": "3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827",
+    "source_apply_request_hash": "1dd5ceaf0b852bafc07223c7f29ec988086259e4a87c5829c5fd82f41728aeb3",
+    "source_manifest_hash": "17ab5c962e60de48b691ab8565daf335a3f29b478192697623369958630a050c",
+    "target": "/etc/systemd/system/ollama.service.d/90-llm-manager.conf"
+  },
+  "root_state": [
+    "audit",
+    "backups",
+    "backups/root-gui-backup-20260914.bin",
+    "backups/root-gui-backup-20260914.json",
+    "executions",
+    "keys",
+    "keys/local-root-v1.key",
+    "keys/local-root-v1.ready"
+  ]
+}

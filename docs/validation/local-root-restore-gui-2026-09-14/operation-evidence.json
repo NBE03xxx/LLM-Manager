@@ -1,0 +1,150 @@
+{
+  "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+  "target": {
+    "sha256": "391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1",
+    "content_b64": "W1NlcnZpY2VdCkVudmlyb25tZW50PSJPTExBTUFfSE9TVD0xMjcuMC4wLjE6MTE0MzQiCkVudmlyb25tZW50PSJPTExBTUFfRkxBU0hfQVRURU5USU9OPTAiCg==",
+    "mode": 420,
+    "uid": 0,
+    "gid": 0
+  },
+  "backup": {
+    "schema": "llm-manager.root-backup-origin/1",
+    "backup_id": "root-gui-backup-20260914",
+    "host_id": "local:debian",
+    "source_apply_request_hash": "1dd5ceaf0b852bafc07223c7f29ec988086259e4a87c5829c5fd82f41728aeb3",
+    "target": "/etc/systemd/system/ollama.service.d/90-llm-manager.conf",
+    "original": {
+      "exists": true,
+      "sha256": "391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1",
+      "mode": 420,
+      "uid": 0,
+      "gid": 0
+    },
+    "ciphertext_hash": "3f3b7206f0012b78eb5047a4037ee97fd2d498f331236aa39dc68d3b2400d085",
+    "key_id": "local-root-v1",
+    "captured_at": "2026-09-14T12:51:01.737938+00:00",
+    "record_hash": "3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827",
+    "source_manifest_hash": "17ab5c962e60de48b691ab8565daf335a3f29b478192697623369958630a050c"
+  },
+  "plaintext_sha256": "391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1",
+  "execution": {
+    "attempt": {
+      "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+      "request_hash": "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154",
+      "review_hash": "8f58e93a74b972dfc654c75d9eadc2f26a0704222d120641b36baab94008baf9",
+      "started_at": "2026-09-14T13:36:33.603909+00:00"
+    },
+    "result": {
+      "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+      "request_hash": "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154",
+      "attempt_hash": "7faf58071989d708f9488c25d0d04859137c8ed6f5c329a9d8dfb649d7e02a31",
+      "state": "committed",
+      "completed_at": "2026-09-14T13:36:33.940482+00:00",
+      "error_code": null
+    }
+  },
+  "audit": [
+    {
+      "sequence": 1,
+      "schema_version": "1.0",
+      "event_type": "root_restore.started",
+      "correlation_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+      "fields": [
+        [
+          "request_hash",
+          "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+        ]
+      ],
+      "created_at": "2026-09-14T13:36:33.608690+00:00",
+      "previous_hash": null,
+      "event_hash": "6e54cd408d843d1fb88a9280cbaab405f1e8082779784ee1532149ebbe251c6d"
+    },
+    {
+      "sequence": 2,
+      "schema_version": "1.0",
+      "event_type": "root_restore.finished",
+      "correlation_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+      "fields": [
+        [
+          "error_code",
+          null
+        ],
+        [
+          "request_hash",
+          "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+        ],
+        [
+          "state",
+          "committed"
+        ]
+      ],
+      "created_at": "2026-09-14T13:36:33.933839+00:00",
+      "previous_hash": "6e54cd408d843d1fb88a9280cbaab405f1e8082779784ee1532149ebbe251c6d",
+      "event_hash": "fd417ecb4049a425050437a9b2725b68b75c7cc39f755719321d4d59f0cad4d0"
+    }
+  ],
+  "records": {
+    "review-24b5d8f3e5f242ad93a6df791df09950.attempt.json": {
+      "hash": "7faf58071989d708f9488c25d0d04859137c8ed6f5c329a9d8dfb649d7e02a31",
+      "kind": "attempt",
+      "payload": {
+        "request_hash": "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154",
+        "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+        "review_hash": "8f58e93a74b972dfc654c75d9eadc2f26a0704222d120641b36baab94008baf9",
+        "started_at": "2026-09-14T13:36:33.603909+00:00"
+      }
+    },
+    "review-24b5d8f3e5f242ad93a6df791df09950.result.json": {
+      "hash": "08c2d462551abc79666447b61a0b03c11fefa4e84b15286bdd39e583bd18205e",
+      "kind": "result",
+      "payload": {
+        "attempt_hash": "7faf58071989d708f9488c25d0d04859137c8ed6f5c329a9d8dfb649d7e02a31",
+        "completed_at": "2026-09-14T13:36:33.940482+00:00",
+        "error_code": null,
+        "request_hash": "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154",
+        "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+        "state": "committed"
+      }
+    },
+    "review-24b5d8f3e5f242ad93a6df791df09950.review.json": {
+      "hash": "8f58e93a74b972dfc654c75d9eadc2f26a0704222d120641b36baab94008baf9",
+      "kind": "review",
+      "payload": {
+        "approved_at": "2026-09-14T13:35:17.931501+00:00",
+        "approved_request": {
+          "approval_id": "consent-e79be6886d78416f8a2ed389422a450e",
+          "backup": {
+            "exists": true,
+            "gid": 0,
+            "mode": 420,
+            "sha256": "391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1",
+            "uid": 0
+          },
+          "backup_id": "root-gui-backup-20260914",
+          "caller_uid": 1000,
+          "current": {
+            "exists": true,
+            "gid": 0,
+            "mode": 420,
+            "sha256": "a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89",
+            "uid": 0
+          },
+          "expires_at": "2026-09-14T13:39:20.919969+00:00",
+          "host_id": "local:debian",
+          "inventory_hash": "a51fcbce330b127e37f22795b44867a5fe7780a73f805746b4ddab3cf7735730",
+          "manifest_hash": "17ab5c962e60de48b691ab8565daf335a3f29b478192697623369958630a050c",
+          "preview_hash": "912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a",
+          "protocol": "llm-manager.local-root-manual-restore",
+          "protocol_version": 1,
+          "request_hash": "4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154",
+          "request_id": "review-24b5d8f3e5f242ad93a6df791df09950",
+          "requested_at": "2026-09-14T13:34:20.919969+00:00",
+          "target": "/etc/systemd/system/ollama.service.d/90-llm-manager.conf"
+        },
+        "expires_at": "2026-09-14T13:39:20.919969+00:00",
+        "origin_record_hash": "3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827",
+        "source_apply_request_hash": "1dd5ceaf0b852bafc07223c7f29ec988086259e4a87c5829c5fd82f41728aeb3"
+      }
+    }
+  }
+}

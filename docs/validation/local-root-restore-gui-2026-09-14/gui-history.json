@@ -1,0 +1,3485 @@
+[
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ]
+        ],
+        "buttons": [],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Load the bounded system backup inventory."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            true
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Load the bounded system backup inventory."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            true
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Loading system backup metadata…"
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Loading system backup metadata…"
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            true
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            true
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Load a review to inspect the selected backup."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Load a review to inspect the selected backup."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Loading the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Loading the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            true,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            true,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Saving the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Saving the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:13:11.167935+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: b1a8f21c9aed7dd8695037fabd4a2071fa4bec0a8f5be354d55ba414a1241a2d"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "The review could not be confirmed. If saving had started, it may have been saved. This dialog will not resend it."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "The review could not be confirmed. If saving had started, it may have been saved. This dialog will not resend it."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Checking saved history…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Checking saved history…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "History could not be confirmed. Do not infer that no restore occurred. No retry was sent."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "History could not be confirmed. Do not infer that no restore occurred. No retry was sent."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ]
+        ],
+        "buttons": [],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Load the bounded system backup inventory."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            true
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Load the bounded system backup inventory."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            true
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Loading system backup metadata…"
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Loading system backup metadata…"
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            -1
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            false
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            -1
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreInventoryDialog",
+        "title": "System backup inventory",
+        "labels": [
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            true
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Load root-owned backup metadata using administrator authentication. Selecting a backup does not restore settings."
+          ],
+          [
+            "root-inventory-status",
+            "Select one backup to review."
+          ]
+        ],
+        "buttons": [
+          [
+            "",
+            "Load system backups (administrator authentication)",
+            false
+          ],
+          [
+            "",
+            "Review selected backup",
+            true
+          ],
+          [
+            "",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ],
+          [
+            "root-inventory-list",
+            [
+              "root-gui-backup-20260914\nCaptured: 2026-09-14T12:51:01.737938+00:00\nOriginal SHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1 · mode: 0644\nEvidence SHA-256: 3c020ba559ff02db11d357e670d973c94677be42ff1c94042e15eb6811e36827"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Load a review to inspect the selected backup."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Load a review to inspect the selected backup."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Loading the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Loading the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            true,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Check the current and backup states below before consenting."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            true,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Saving the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Saving the review…"
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            false
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nExists: True\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nBackup state:\nExists: True\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nPreview SHA-256: 912141ee1823707d30b96e2d3fd1d53420c31698ba68ba52dbdd9e95ba97fb8a"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "RootRestoreReviewDialog",
+        "title": "System restore review",
+        "labels": [
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Review saved. No settings were restored."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            true
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      },
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "Review and save the selected system backup metadata. Restoring settings is not available here."
+          ],
+          [
+            "root-review-status",
+            "Review saved. No settings were restored."
+          ],
+          [
+            "",
+            "I have checked this exact target, current state and backup state, and agree to save this review."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-review-load",
+            "Load review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-save",
+            "Save review (administrator authentication)",
+            false
+          ],
+          [
+            "root-review-check",
+            "Check saved history (administrator authentication)",
+            true
+          ],
+          [
+            "root-review-continue",
+            "Continue to final restore consent",
+            true
+          ],
+          [
+            "root-review-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-review-consent",
+            "I agree to save this review",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-review-details",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Explicit consent is required before the restore can start."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      },
+      {
+        "class": "RootRestoreExecutionDialog",
+        "title": "Restore system settings",
+        "labels": [
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Explicit consent is required before the restore can start."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Explicit consent is required before the restore can start."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            true
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            true,
+            true
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      },
+      {
+        "class": "RootRestoreExecutionDialog",
+        "title": "Restore system settings",
+        "labels": [
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Explicit consent is required before the restore can start."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            true
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            true,
+            true
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Restoring settings and validating Ollama… Do not start another restore."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      },
+      {
+        "class": "RootRestoreExecutionDialog",
+        "title": "Restore system settings",
+        "labels": [
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "Restoring settings and validating Ollama… Do not start another restore."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ],
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "The saved result reports that restore and validation completed."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            false
+          ]
+        ],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      },
+      {
+        "class": "RootRestoreExecutionDialog",
+        "title": "Restore system settings",
+        "labels": [
+          [
+            "",
+            "This action changes the fixed system Ollama settings and restarts Ollama. Review every value before continuing. It runs once and is never retried automatically."
+          ],
+          [
+            "root-execute-status",
+            "The saved result reports that restore and validation completed."
+          ],
+          [
+            "",
+            "I checked the exact target, current state, backup state, expiry and request SHA-256. I understand this will change system settings and restart Ollama."
+          ]
+        ],
+        "buttons": [
+          [
+            "root-execute-run",
+            "Restore settings (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-check",
+            "Check saved result (administrator authentication)",
+            false
+          ],
+          [
+            "root-execute-close",
+            "Close",
+            true
+          ]
+        ],
+        "checks": [
+          [
+            "root-execute-consent",
+            "I agree to execute this exact restore",
+            false,
+            false
+          ]
+        ],
+        "lists": [],
+        "text": [
+          [
+            "root-execute-details",
+            "Host: local:debian\nCaller UID: 1000\nBackup: root-gui-backup-20260914\nTarget: /etc/systemd/system/ollama.service.d/90-llm-manager.conf\nExpires: 2026-09-14T13:39:20.919969+00:00\n\nCurrent state:\nSHA-256: a75e365026814256f2df824962f3f82599677c2af36a267dbb7913b657f1cc89\nMode: 0644\nUID: 0\nGID: 0\n\nRestore state:\nSHA-256: 391a06e89a7a33b0402ca88d85541d8d12dad8a22c24ed238a4246a5b183bde1\nMode: 0644\nUID: 0\nGID: 0\n\nRequest SHA-256: 4c9b66d647a269f8728725585ee01c33303d2cc66471869d99d02c42465ef154"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "windows": [
+      {
+        "class": "Window",
+        "title": "LLM Manager",
+        "labels": [
+          [
+            "selected-host",
+            "Hosts"
+          ],
+          [
+            "language-label",
+            "Language"
+          ]
+        ],
+        "buttons": [],
+        "checks": [],
+        "lists": [
+          [
+            "workflow-navigation",
+            [
+              "Hosts",
+              "Diagnose",
+              "Recommendations",
+              "Review Changes",
+              "Apply / Results",
+              "Backup / Rollback"
+            ],
+            0
+          ]
+        ],
+        "text": []
+      }
+    ]
+  }
+]

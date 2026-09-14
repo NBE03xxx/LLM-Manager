@@ -237,3 +237,14 @@ root-owned immutable evidence、strict audit chain、snapshotによるexact clea
 production entrypointの公開集合は`LOCAL_USER`と`LOCAL_ROOT`、availability省略時は空集合、
 SSH routeは非公開のままである。詳細は
 `docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md`。
+
+## Local-root restore通常GUI＋PolicyKit Gate（2026-09-14）
+
+Debian 13の通常user・installed ff7913b candidate・通常`qt_app.main`で、root-owned encrypted
+backupのinventory、選択、review、review保存、final consent、restoreをactive desktopの実PolicyKit
+prompt経由で操作した。review/attempt/result各1件、strict audit 2件、`committed`、固定targetの
+開始hash/root ownership/mode復元、systemd restartとAPIを確認。unconfirmedになった先行review saveは
+再送せず、root state空をread-only確認して新規reviewへ進んだ。専用root key/state/unit/target、
+追加12 package、snapshotを削除しbaseline/session完全一致。全806 test（39 expected skip）成功。
+詳細: `docs/validation/phase6-local-root-restore-gui-2026-09-14.md`。現UNRELEASED candidate 1 sampleで、
+最終artifact項目と進捗18/44は変更しない。

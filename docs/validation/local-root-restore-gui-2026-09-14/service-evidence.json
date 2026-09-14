@@ -1,0 +1,10 @@
+{
+  "is_active": "active",
+  "show": "MainPID=6312\nEnvironment=OLLAMA_HOST=127.0.0.1:11434 OLLAMA_FLASH_ATTENTION=0\nActiveState=active\nSubState=running\n",
+  "version": {
+    "version": "0.33.2"
+  },
+  "tags": {
+    "models": []
+  }
+}

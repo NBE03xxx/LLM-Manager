@@ -6,9 +6,11 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、[local root manual restore通常GUI＋PolicyKit Gate](validation/phase6-local-root-restore-gui-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`でroot backup inventory→選択→review→保存→final consent→restoreを操作し、active desktopの実PolicyKit promptで認証した。review/attempt/result各1件、strict audit 2件、`committed`、開始hash・root/root 0644復元、systemd restart/API validationを確認。
+- 期限切れでunconfirmedになった先行review saveは同一要求を再送せず、root stateにreview/attempt/result/auditがないことをread-only確認して新規reviewを作成した。restore要求は1回だけ。専用root key/state/unit/target/pathと追加12 packageを削除し、Debian baseline/session完全一致、snapshot削除済み。回帰806件（767成功・39 expected skip）、証拠checksum、`git diff --check`成功。
 - 2026-09-14、[local user manual restore通常GUI Gate](validation/phase6-local-user-restore-gui-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`で、Local診断→Agent推奨2件→review→承認→Apply→実AES-256-GCM backupを作成。同じGUIで明示Refresh→backup選択→preview→正確な同意→Run Restore→再Refreshを操作した。Apply/restore各1回、restore evidenceは`committed`、初期config hashへ復元、inventory表示も一致。
 - observerは画面/state保存だけでplan/approval/GUI stateを注入していない。Secret Service、manifest、journal、restore attempt/result、audit 5-event hash chainの結合を機械照合。専用key/state/pathと追加12 packageを削除し、Debian baseline/session完全一致、external snapshot削除済み。回帰806件（767成功・39 expected skip）と証拠checksum、`git diff --check`成功。
-- 現`UNRELEASED` candidate 1 sampleのため進捗18/44、40.9%を維持。次はlocal root manual restoreを通常GUI＋PolicyKitの別Gateとして行い、その後に性能複数sample/final artifact条件を進める。保存済みoperationを再実行しない。version 0.1.0 / UNRELEASED、署名・tag・公開未実施を維持する。
+- 現`UNRELEASED` candidate各1 sampleのため進捗18/44、40.9%を維持。local user/root manual restoreの通常GUI Gateは分離して完了。次は性能の残条件・複数sample、自然障害rollback、またはfinal artifact条件を進める。保存済みoperationを再実行しない。version 0.1.0 / UNRELEASED、署名・tag・公開未実施を維持する。
 
 - 2026-09-14、通常GUI全経路のSSH自動rollbackが成功。診断→Agent推奨2件→
   review→承認→Applyは注入なし。production validation 2件passed保存後、対象fileを
@@ -82,7 +84,7 @@
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
 - `ff7913b`以降は検証script・証拠・文書のみ変更。製品source変更なし。
-- 実行中Gate、認証待ち、未復元snapshotはない。net2の実NIC断commit照合に成功。
+- 実行中Gate、認証待ち、未復元snapshotはない。local user/root manual restoreの通常GUI Gateとnet2の実NIC断commit照合に成功。
   net/net2とr2/r3はすべて両VM cleanup完了。最後にsystem clockを補正済み。
   初回netは監視前にApplyが完了し、stale markerチェックによりNIC切断を中止。
   非採用証拠を保存して両VM cleanup済み。net2は新しいoperationであり再送ではない。
@@ -182,6 +184,16 @@ localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-
     試験relayで保留し、Ubuntu live NICを4.020秒切断。SSH自身がexit 255、
     復旧後のimmutable result読み取り1回でcommitted。Apply 1回、例外注入なし。
     両VM復元済み。記録: `docs/validation/phase6-cross-vm-network-2026-09-13.md`。
+15. **local user manual restore通常GUI Gate**: Debian通常user・installed ff7913b candidate・
+    通常`qt_app.main`でLocal診断からApply/暗号化backupを作成し、同じGUIで明示Refresh、preview、
+    exact consent、restore、再Refreshを操作。Apply/restore各1回、committed、開始hash復元、
+    Secret Service/manifest/journal/execution/audit結合、baseline cleanupを確認。
+    記録: `docs/validation/phase6-local-user-restore-gui-2026-09-14.md`。
+16. **local root manual restore通常GUI＋PolicyKit Gate**: Debian通常user・installed candidate・
+    通常`qt_app.main`でroot backup inventoryからfinal restoreまで操作。active desktopの実PolicyKit、
+    review/attempt/result各1件、strict audit、committed、固定target開始hash、systemd/API、完全cleanupを確認。
+    unconfirmedの先行review要求は再送せず、新しいreviewだけを実行へ使用した。
+    記録: `docs/validation/phase6-local-root-restore-gui-2026-09-14.md`。
 
 旧candidateの実OpenCode/dual backup/SSH GUI Apply・rollback・応答喪失後照合も成功済みだが、
 loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断ではない。
@@ -192,7 +204,7 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. local user/root manual restoreの全GUI操作と、性能の残条件・複数sampleを進める。
+1. local user/root manual restoreの全GUI操作は現candidate各1 sampleを完了。次は性能の残条件・複数sample、自然障害rollback、またはfinal artifact Gateを進める。
 2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
@@ -219,6 +231,10 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 再利用できる入口
 
+- `docs/validation/phase6-local-root-restore-gui-2026-09-14.md`：通常GUI＋実PolicyKitのlocal root restore結果。
+- `docs/validation/local-root-restore-gui-2026-09-14.py`、同名directory：one-shot入口と全証拠。完了済みoperationを再実行しない。
+- `docs/validation/phase6-local-user-restore-gui-2026-09-14.md`：通常GUI全経路のlocal user Apply/manual restore。
+- `docs/validation/local-user-restore-gui-2026-09-14.py`、同名directory：完了済みGate入口と全証拠。再実行しない。
 - `docs/validation/phase6-full-gui-rollback-2026-09-14.md`：通常GUI全経路のSSH自動rollback。
 - `docs/validation/full-gui-rollback-2026-09-14.py`、同名directory：入口と全証拠。
 - `docs/validation/phase6-cross-vm-network-2026-09-13.md`：最新の実NIC断commit照合と試験の境界。

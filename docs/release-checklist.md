@@ -114,6 +114,8 @@ git diff --check
 
 local root手動restoreの公開条件を[コードと照合](validation/phase6-root-restore-route-review-2026-09-06.md)した。専用backup証拠、preflight adapter、executor、immutable result、製品Applyからのorigin採取、明示provisioning、mutation単位の排他、通常GUIでの選択から最終同意までの接続、installed OS Gate、active desktop PolicyKit prompt/cancel/auth、正規要求とstatus照合まで完了した。
 
+2026-09-14: [local root manual restore通常GUI＋PolicyKit Gate](validation/phase6-local-root-restore-gui-2026-09-14.md)で、Debian通常user・installed candidate・通常`qt_app.main`からroot backup inventory→選択→review→保存→final consent→restoreを操作した。各特権工程はactive desktopの実PolicyKit promptを通り、review/attempt/result各1件、strict audit 2件、`committed`、開始hash/root ownership/mode復元、systemd restart/API validation、専用root key/state/unit/target/package/snapshot cleanupとbaseline/session完全一致を確認した。期限切れでunconfirmedになった先行review saveは同じ要求を再送せず、root state空を確認して新規reviewへ進んだ。現UNRELEASED candidate 1 sampleのためトップレベル項目は18/44のまま。
+
 - [x] security/privacy code reviewでsecret redaction、audit非露出、bounded subprocess output、GUI error上限、root helper出力破棄を確認した。
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
 - [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。

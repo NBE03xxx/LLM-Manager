@@ -1,0 +1,11 @@
+{
+  "root_restore_attempts": 1,
+  "root_restore_results": 1,
+  "root_restore_state": "committed",
+  "root_audit_events": 2,
+  "initial_hash_restored": true,
+  "service_validated": true,
+  "observer_injected_plan": false,
+  "observer_injected_approval": false,
+  "observer_injected_gui_state": false
+}

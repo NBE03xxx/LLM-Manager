@@ -1,0 +1,52 @@
+[
+  {
+    "path": "audit/00000000000000000001.json",
+    "size": 376,
+    "sha256": "a47a749f52d43ed116c63f0127e6ecb2569f7659bd3eab077e971914dc897540"
+  },
+  {
+    "path": "audit/00000000000000000002.json",
+    "size": 481,
+    "sha256": "02994278492383a80a717fdb2b2dac3e62d8ab84c2a28260a4e3573aa0ff1bb6"
+  },
+  {
+    "path": "audit/HEAD",
+    "size": 67,
+    "sha256": "df0239c6ef1830aa56c0cb5972591be70bd36617b90380ec0e532c6477a6dcea"
+  },
+  {
+    "path": "backups/root-gui-backup-20260914.bin",
+    "size": 312,
+    "sha256": "3f3b7206f0012b78eb5047a4037ee97fd2d498f331236aa39dc68d3b2400d085"
+  },
+  {
+    "path": "backups/root-gui-backup-20260914.json",
+    "size": 732,
+    "sha256": "2e010b12076aac9dc56c2adbd740ed584bf12130daed96ee37f80119a88ad22a"
+  },
+  {
+    "path": "executions/review-24b5d8f3e5f242ad93a6df791df09950.attempt.json",
+    "size": 370,
+    "sha256": "b36a3566f027634256939545964f53499ce025b16d7b63e79921dffa4e24a8f0"
+  },
+  {
+    "path": "executions/review-24b5d8f3e5f242ad93a6df791df09950.result.json",
+    "size": 410,
+    "sha256": "ba598f247892cd4bb02f5bae1d53427da683ff1a32032e2e571333b18ac5c359"
+  },
+  {
+    "path": "executions/review-24b5d8f3e5f242ad93a6df791df09950.review.json",
+    "size": 1424,
+    "sha256": "e3e6ccf2672b06f402cc6debffd4daa489826c57993f6018d8077368ece15ca4"
+  },
+  {
+    "path": "keys/local-root-v1.key",
+    "size": 32,
+    "sha256": "d566104941d98134f6fae15526b00ffaf1d6662cbc4e64d86f7057a9e01671ab"
+  },
+  {
+    "path": "keys/local-root-v1.ready",
+    "size": 64,
+    "sha256": "80aad9126d47d5ec86c64395b9a176e3f742f3f744f90e4d854af53bd0c72906"
+  }
+]
