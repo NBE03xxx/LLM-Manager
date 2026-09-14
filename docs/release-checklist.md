@@ -131,6 +131,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
   - 2026-09-10: [Qt切断照合回帰](validation/phase6-ssh-qt-reconciliation-2026-09-10.md)で4ケースのGUI/journal一致とmutation再送なしを確認。transportはfixtureであり、実回線・最終artifact Gateの代替ではない。
 - [x] release scope外のlocal root/SSH root ApplyとSSH user/root restoreがproduction allowlistに含まれず、経路別の固定理由でI/O前にfail closedとなることを確認した。local root手動restoreは公開Gate完了済み。
 - [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。
+  - 2026-09-14: [pre-final security regression](validation/phase6-pre-final-security-regression-2026-09-14.md)で、product sourceが採用candidate `ff7913b`から不変であることを確認し、focused 159件（158成功・1 expected skip）と全806件（767成功・39 expected skip）、両deb verifier、必須静的検査に成功した。現candidateは`UNRELEASED`のため、本項目は最終artifact反復まで未完了とする。
 - [x] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順を[acceptance review](validation/phase6-recovery-procedure-acceptance-2026-09-07.md)する。
 
 ## 6. Checksum、署名、公開

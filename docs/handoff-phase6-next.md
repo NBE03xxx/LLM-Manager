@@ -6,6 +6,9 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-14、[pre-final security regression](validation/phase6-pre-final-security-regression-2026-09-14.md)が成功。現`main`でproduct source/test/packaging/version surfaceは採用source `ff7913b`から不変。focused 159件（158成功・1 expected skip）、全806件（767成功・39 expected skip）、両candidate deb verifier、compileall・shell・desktop・SBOM JSON・`git diff --check`が成功した。保存済みVM operationは再実行していない。
+- `UNRELEASED` candidateであり最終artifact反復ではないため、security最終commit項目は未完了、進捗18/44、40.9%を維持。次は実SSH Apply性能の複数sample、自然障害rollback、または最終artifact開始に必要なdistribution/signing key判断を進める。署名・tag・公開は未実施。
+
 - 2026-09-14、[local root manual restore通常GUI＋PolicyKit Gate](validation/phase6-local-root-restore-gui-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`でroot backup inventory→選択→review→保存→final consent→restoreを操作し、active desktopの実PolicyKit promptで認証した。review/attempt/result各1件、strict audit 2件、`committed`、開始hash・root/root 0644復元、systemd restart/API validationを確認。
 - 期限切れでunconfirmedになった先行review saveは同一要求を再送せず、root stateにreview/attempt/result/auditがないことをread-only確認して新規reviewを作成した。restore要求は1回だけ。専用root key/state/unit/target/pathと追加12 packageを削除し、Debian baseline/session完全一致、snapshot削除済み。回帰806件（767成功・39 expected skip）、証拠checksum、`git diff --check`成功。
 - 2026-09-14、[local user manual restore通常GUI Gate](validation/phase6-local-user-restore-gui-2026-09-14.md)が成功。Debian通常user・installed candidate・通常`qt_app.main`で、Local診断→Agent推奨2件→review→承認→Apply→実AES-256-GCM backupを作成。同じGUIで明示Refresh→backup選択→preview→正確な同意→Run Restore→再Refreshを操作した。Apply/restore各1回、restore evidenceは`committed`、初期config hashへ復元、inventory表示も一致。
