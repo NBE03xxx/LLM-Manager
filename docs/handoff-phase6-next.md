@@ -6,6 +6,7 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-15、[release transition readiness audit](validation/phase6-release-transition-readiness-2026-09-15.md)を実施。`HEAD`/`origin/main`は`c86f04d`、採用pre-final candidate hashも再一致。GitHub repositoryはpublic、既存tag/Releaseは0件。[0.1.0 release notes draft](release-notes-0.1.0-draft.md)へ必須sectionと検証手順を準備した。target distribution、changelog署名者表記、release専用OpenPGP fingerprint／保管責任者、公開先・公開承認が未確定のため`UNRELEASED`を維持する。判断後の順序をmetadata確定→final commit→再現build→SBOM/binary監査→OS/GUI/security Gate→checksum/署名→tag/公開後再検証と固定。進捗18/44、40.9%は変更なし。
 - 2026-09-15、commit `7f846f5`から[認証UI改善candidate](validation/phase6-auth-context-candidate-build-2026-09-15.md)をlocal/remote各2回buildしbyte一致。local SHA-256 `ecc099a6ae285d99fe1990cc1335dbff10f17019a766d8527566819f850eba9a`、remote `4ca5e152c2738c1fa2ca92eaf5ab4802ecfd88438f15f54780117f463b9edbb2`。各build内806 testと両verifier、package展開監査成功。
 - [installed UI Gate](validation/phase6-auth-context-ui-installed-2026-09-15.md)でDebian通常desktopに`REMOTE sudo — phase6-auth-context-ui`とPolicyKitの`LOCAL authentication` messageを表示し、AT-SPI/画面保存。通常GUI SSH Applyは1回、committed、validation 2件passed、注入なし。localはread-only review actionを利用者がキャンセルしprocess不在。
 - 前日performance Gateが作成した`local-master-v1` 1件をcleanup harnessのreference置換ずれで見逃していたことを作成時刻から特定。対応backup/state不在と非秘密propertyを照合して正確な1件だけ削除し、旧記録を訂正した。本Gate専用key/path/packageも削除、両VM baseline完全一致、snapshot削除、時計補正、checksum成功。進捗18/44、40.9%、0.1.0 / UNRELEASEDを維持。

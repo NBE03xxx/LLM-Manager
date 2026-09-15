@@ -22,6 +22,13 @@ local/remote各2回のbyte一致とverifierに成功し、[installed UI Gate](va
 通常GUI SSH Applyもcommitted。前日性能GateのSecret Service cleanup漏れ1件を特定・削除し旧記録を訂正。
 final artifactではないため全体進捗18/44（40.9%）は変更しない。
 
+2026-09-15: [release transition readiness audit](validation/phase6-release-transition-readiness-2026-09-15.md)で
+final source commit前の依存関係を整理した。GitHub repositoryはpublic、既存tag/Releaseは0件。
+target distribution、changelog署名者表記、release専用OpenPGP fingerprint／保管責任者、
+公開先と公開承認が未確定のため`UNRELEASED`を維持する。判断後はmetadata確定→final commit→
+再現build→SBOM/binary監査→OS/GUI/security Gate→checksum/署名→tag/公開後再検証の順で行う。
+完了条件を満たす項目は増えていないため進捗18/44（40.9%）は変更しない。
+
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。[ff7913b Debian Orca capture](validation/phase6-ff7913b-debian-orca-2026-09-13.md)では製品名・Hosts用途/valueの発話eventと20.672秒の非無音WAVを保存し、人の聴取確認も完了。[通常GUI全経路＋実NIC断](validation/phase6-full-gui-network-2026-09-14.md)ではSSH Applyのcommit case 1 sample、[通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)ではvalidation fault付きrollback case 1 sampleを完了した。性能の複数sample、自然障害rollback、最終artifact Gateは未完了。
@@ -152,7 +159,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [ ] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。
 - [ ] `SHA256SUMS`へASCII armored detached signatureを作成し、別環境でfingerprint指定の検証を行う。
 - [ ] Git tagを同じkeyで署名し、tagがbuild source commitを指すことを確認する。
-- [ ] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載する。
+- [ ] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載する。[0.1.0 draft](release-notes-0.1.0-draft.md)にfingerprint、release date、final source/artifact identity以外の骨子を作成済み。
 - [ ] 公開先から全artifactを再取得してchecksum、署名、package verifierを再実行する。
 
 署名鍵は現時点で未指定のため、署名と公開はblockerである。鍵を自動生成したり既存の個人鍵を推測選択したりしない。
