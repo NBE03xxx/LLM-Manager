@@ -4,8 +4,8 @@
 artifactとして公開しないでください。
 
 - release date: `TBD`
-- Debian changelog distribution: `TBD`
-- release OpenPGP fingerprint: `TBD`
+- Debian changelog distribution: planned `unstable`（changelogは最終日時確定まで`UNRELEASED`）
+- release OpenPGP primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
 - final source commit/tag: `TBD`
 - final artifact SHA-256: `TBD`
 
@@ -50,6 +50,7 @@ SSH先のhelperを自動installまたはupgradeすることはありません。
 - Ubuntu 26.04／Debian 13 resolved-environment SBOM (`TBD`)
 - `SHA256SUMS`
 - `SHA256SUMS.asc`
+- `RELEASE_KEY.asc`
 
 ## Install and upgrade
 
@@ -82,8 +83,10 @@ sha256sum --check SHA256SUMS
 gpg --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS
 ```
 
-出力の`VALIDSIG`に含まれる完全fingerprintが、公開済みrelease fingerprint
-`TBD`と完全一致することを別経路で確認してください。key IDの短縮表示だけでは判定しません。
+出力の`VALIDSIG`に含まれるprimary fingerprintが、公開済みrelease fingerprint
+`353F4D4F55175F537FBCD07C3E2532969B404FFD`と完全一致することを別経路で確認してください。
+署名副鍵fingerprintは`034DA1601E14BE534254BA4DD8F253C086BE34C2`です。key IDの短縮表示だけでは
+判定しません。
 
 ## Remove or purge
 
@@ -134,6 +137,6 @@ project-owned sourceとassetはMIT Licenseです。third-party notices、直接�
 - `TBD`をすべて解消する
 - supported versionをfinal Gateの実測値と照合する
 - artifact名と`SHA256SUMS`の対象を完全一致させる
-- OpenPGP fingerprintを完全長で記載する
+- 公開鍵とOpenPGP primary/signing-subkey fingerprintをfinal署名から再照合する
 - final tag/source commitへのlinkを追加する
 - 公開前にsecret、内部test path、test host、未採用candidate hashがないことをreviewする

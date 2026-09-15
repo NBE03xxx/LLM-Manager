@@ -25,40 +25,40 @@ tag、公開は開始しない。
 - GitHub repository: `NBE03xxx/LLM-Manager`、public、default branch `main`
 - remote tag: 0件
 - GitHub Release: 0件
-- [release notes draft](../release-notes-0.1.0-draft.md): 必須sectionを作成済みだが、
-  release date、distribution、fingerprint、final source/artifact identityは未確定
+- [release notes draft](../release-notes-0.1.0-draft.md): 必須sectionを作成済み。release dateと
+  final source/artifact identityは未確定
 - release用`SHA256SUMS`: 未作成
-- release専用OpenPGP key: fingerprint・保管責任者とも未指定
+- planned distribution: `unstable`（changelogはrelease日時確定まで`UNRELEASED`）
+- changelog signer/maintainer: `NBE03xxx <NBE03247@nifty.com>`
+- release専用OpenPGP primary fingerprint:
+  `353F4D4F55175F537FBCD07C3E2532969B404FFD`
+- signing subkey fingerprint: `034DA1601E14BE534254BA4DD8F253C086BE34C2`
+- key custodian: `Project owner (NBE03xxx)`
+- publication destination: GitHub Releases
 
 candidate 2 artifactのSHA-256は本監査時にも再計算し、上記採用値と一致した。
 worktreeは監査開始時にcleanで、`HEAD`と`origin/main`も一致した。
 
-## Decisions required before the final source commit
+## Decisions completed before the final source commit
 
 ### Target distribution
 
-`debian/changelog`の`UNRELEASED`を置き換える値を指定する必要がある。Debian packageの
-通常の開発・一般配布用metadataとしては`unstable`が第一候補だが、これは自動決定しない。
-選択と同時にrelease日時、最終変更点、changelog署名者表記を確定する。
+`debian/changelog`のtarget distributionは`unstable`と決定した。実際の置換はrelease日時と
+最終変更点を確定するfinal source transitionで行う。
 
-現在のMaintainerとchangelog署名者は
-`LLM-Manager contributors <noreply@example.invalid>`である。package metadataとしてこの
-placeholderを維持するか、公開連絡先へ変更するかも同じrelease metadata判断に含める。
+Maintainerとchangelog署名者は`NBE03xxx <NBE03247@nifty.com>`と決定し、placeholderを
+package metadataから除去する。
 
 ### Signing identity and custody
 
-次の2点を利用者が明示する必要がある。
-
-1. release専用OpenPGP keyの完全fingerprint
-2. 秘密鍵の保管責任者
-
-既存の個人鍵を列挙・推測選択せず、新しい鍵を自動生成しない。秘密鍵をrepository、VM、
-artifact、build log、validation evidenceへ複製しない。
+利用者が[release専用鍵を作成・検証](phase6-release-signing-key-2026-09-15.md)した。保管責任者は
+`Project owner (NBE03xxx)`。主鍵は5年、署名副鍵は1年の期限とし、後継者は指定しない。
+秘密鍵をrepository、VM、artifact、build log、validation evidenceへ複製しない。
 
 ### Publication authorization
 
-公開候補先は既存のpublic GitHub repositoryのGitHub Releasesだが、通常のcommit/push承認は
-release作成、tag作成、artifact uploadの承認を兼ねない。公開先と公開実行の承認を別途得る。
+公開先は既存のpublic GitHub repositoryのGitHub Releasesと決定した。通常のcommit/push承認は
+release作成、tag作成、artifact uploadの承認を兼ねないため、公開実行の直前確認は別途行う。
 
 ## Ordered final sequence
 

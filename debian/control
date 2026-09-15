@@ -1,7 +1,7 @@
 Source: llm-manager
 Section: admin
 Priority: optional
-Maintainer: LLM-Manager contributors <noreply@example.invalid>
+Maintainer: NBE03xxx <NBE03247@nifty.com>
 Build-Depends:
  debhelper-compat (= 13),
  dh-python,

@@ -22,6 +22,9 @@ dist/
 .env
 .env.*
 !.env.example
+/llm-manager-release-revocation.asc
+/llm-manager-release-secret-key.asc
+/test-SHA256SUMS*
 
 # Editors and operating systems
 .idea/

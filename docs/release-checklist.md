@@ -27,7 +27,16 @@ final source commit前の依存関係を整理した。GitHub repositoryはpubli
 target distribution、changelog署名者表記、release専用OpenPGP fingerprint／保管責任者、
 公開先と公開承認が未確定のため`UNRELEASED`を維持する。判断後はmetadata確定→final commit→
 再現build→SBOM/binary監査→OS/GUI/security Gate→checksum/署名→tag/公開後再検証の順で行う。
-完了条件を満たす項目は増えていないため進捗18/44（40.9%）は変更しない。
+この監査時点では完了条件を満たす項目は増えていないため進捗18/44（40.9%）は変更しない。
+
+2026-09-15: 利用者が[release専用OpenPGP鍵](validation/phase6-release-signing-key-2026-09-15.md)を
+作成して試験署名を検証した。Ed25519主鍵fingerprintは
+`353F4D4F55175F537FBCD07C3E2532969B404FFD`、署名副鍵は
+`034DA1601E14BE534254BA4DD8F253C086BE34C2`。保管責任者は`Project owner (NBE03xxx)`、
+後継者は指定せず署名副鍵を活動中だけ1年単位で更新する。公開鍵だけを`RELEASE_KEY.asc`へ収録し、
+秘密file名を`.gitignore`で保護した。target distributionは`unstable`、公開先はGitHub Releases、
+Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・責任者の項目が完了し、
+進捗は19/44（43.2%）。実署名、signed tag、公開は未実施。
 
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
@@ -156,7 +165,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 ## 6. Checksum、署名、公開
 
 - [ ] release setの両deb、source archive、直接依存SBOM、resolved-environment SBOMに対して`SHA256SUMS`を作る。
-- [ ] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。
+- [x] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`、保管責任者`Project owner (NBE03xxx)`。詳細は[鍵検証記録](validation/phase6-release-signing-key-2026-09-15.md)。
 - [ ] `SHA256SUMS`へASCII armored detached signatureを作成し、別環境でfingerprint指定の検証を行う。
 - [ ] Git tagを同じkeyで署名し、tagがbuild source commitを指すことを確認する。
 - [ ] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載する。[0.1.0 draft](release-notes-0.1.0-draft.md)にfingerprint、release date、final source/artifact identity以外の骨子を作成済み。
