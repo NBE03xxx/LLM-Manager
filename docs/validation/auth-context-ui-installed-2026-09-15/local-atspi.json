@@ -1,0 +1,17 @@
+[
+  {
+    "application": "gnome-shell",
+    "name": "LOCAL authentication is required to inspect and save an Ollama restore review; this does not restore settings",
+    "role": "label"
+  },
+  {
+    "application": "org.gnome.Terminal",
+    "name": "LLM-Manager — LOCAL PolicyKit check",
+    "role": "frame"
+  },
+  {
+    "application": "org.gnome.Terminal",
+    "name": "LLM-Manager — LOCAL PolicyKit check",
+    "role": "label"
+  }
+]

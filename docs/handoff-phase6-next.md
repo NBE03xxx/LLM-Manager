@@ -6,6 +6,10 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-15、commit `7f846f5`から[認証UI改善candidate](validation/phase6-auth-context-candidate-build-2026-09-15.md)をlocal/remote各2回buildしbyte一致。local SHA-256 `ecc099a6ae285d99fe1990cc1335dbff10f17019a766d8527566819f850eba9a`、remote `4ca5e152c2738c1fa2ca92eaf5ab4802ecfd88438f15f54780117f463b9edbb2`。各build内806 testと両verifier、package展開監査成功。
+- [installed UI Gate](validation/phase6-auth-context-ui-installed-2026-09-15.md)でDebian通常desktopに`REMOTE sudo — phase6-auth-context-ui`とPolicyKitの`LOCAL authentication` messageを表示し、AT-SPI/画面保存。通常GUI SSH Applyは1回、committed、validation 2件passed、注入なし。localはread-only review actionを利用者がキャンセルしprocess不在。
+- 前日performance Gateが作成した`local-master-v1` 1件をcleanup harnessのreference置換ずれで見逃していたことを作成時刻から特定。対応backup/state不在と非秘密propertyを照合して正確な1件だけ削除し、旧記録を訂正した。本Gate専用key/path/packageも削除、両VM baseline完全一致、snapshot削除、時計補正、checksum成功。進捗18/44、40.9%、0.1.0 / UNRELEASEDを維持。
+
 - 2026-09-14、[認証コンテキストUI改善](validation/phase6-authentication-context-ui-2026-09-14.md)を実装。remote SSH loginは`REMOTE SSH login — <user@host/alias>`、remote sudoは`REMOTE sudo — <alias>`を外部ターミナルタイトルへ表示し、local Apply/root restoreのPolicyKit description/messageには`LOCAL`を明記した。認証の固定argv、helper protocol、秘密情報非保持は不変。
 - 対象38件と全806件（767成功・39 expected skip）、compile/XML/shell/desktop/SBOM/diff検査が成功。従来の`ff7913b` candidateは本改善を含まないため、新sourceからのcandidate再buildとDebian通常desktop目視Gateを残す。final artifactと進捗18/44、40.9%は未変更。
 
@@ -114,21 +118,21 @@ Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 
 ## 採用candidate
 
-source commit: `ff7913bb97e896f7992720b9a43c2382970a5fc8`
+source commit: `7f846f5fb1134be7df06490f30a5216ab414ae0d`
 
-保存先: `/tmp/llm-manager-candidate-ff7913b-20260913/`
+保存先: `/tmp/llm-manager-candidate-7f846f5-20260915/`
 
 | artifact | SHA-256 |
 | --- | --- |
-| `llm-manager_0.1.0_all.deb` | `351edec886ff06f7e72979e7e6022abac45354871dbd412cab724d01f9518243` |
-| `llm-manager-remote-helper_0.1.0_all.deb` | `830f50b2b22984bba9622d10cca81a54571e101655f0fbd53c7a7fe76b774d2d` |
+| `llm-manager_0.1.0_all.deb` | `ecc099a6ae285d99fe1990cc1335dbff10f17019a766d8527566819f850eba9a` |
+| `llm-manager-remote-helper_0.1.0_all.deb` | `4ca5e152c2738c1fa2ca92eaf5ab4802ecfd88438f15f54780117f463b9edbb2` |
 
 引継ぎ更新時に両hashを再確認済み。再開時も存在/hashを確認する。
 tracked sourceから両debを独立2回build/verifyしbyte完全一致。
 各local build内806 test（767成功・39 expected skip）、ELF/shared library/bytecode混入なし。
-localはaccessibility修正確認用overlay artifactと同じhashで、そのAT-SPI証拠を関連付け可能。
-旧b15a984/4722cfaセットは過去証拠用。現candidateの検証済み根拠として混用しない。
-詳細: `docs/validation/phase6-candidate-rebuild-2026-09-13.md`。
+認証表示のinstalled UI Gateは完了。旧ff7913b/b15a984/4722cfaセットは過去証拠用。
+新candidateの他Gateへ旧artifactのbyte identityを混用しない。
+詳細: `docs/validation/phase6-auth-context-candidate-build-2026-09-15.md`。
 
 ## 完了済み
 

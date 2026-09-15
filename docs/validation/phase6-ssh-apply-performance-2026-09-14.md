@@ -66,3 +66,15 @@ clock GateでNTP設定を変更せずsystem clockだけを補正した。補正�
 対応hardware全体、長時間・恒久切断、自然障害rollback、最終release artifactを保証しない。
 現candidateは`0.1.0 / UNRELEASED`で、公開checklistの親項目は自然障害rollbackと最終artifact
 反復が残るため未完了のままとする。
+
+### 2026-09-15 cleanup訂正
+
+後続の[authentication context installed UI Gate](phase6-auth-context-ui-installed-2026-09-15.md)の
+開始時検査で、`local-master-v1`のSecret Service項目1件が残存していることを検出した。
+非秘密propertyの作成/更新時刻は2026-09-14 23:08:20 JSTで、本Gate sample-01開始直前と一致する。
+製品が作成した`local-master-v1`とcleanupが検索した専用referenceのharness置換ずれにより、
+上記「専用Secret Service keyを削除」の主張はこの1件について誤っていた。
+
+対応backup/state/configは本Gate終了時から不在。本日、属性・label・作成/更新時刻を再照合した
+正確な1件だけを削除し、同referenceが不在であることを確認した。秘密値は取得していない。
+package/manual/session baseline、性能測定、Apply結果への影響はない。cleanup完全性は本訂正を含めて判定する。

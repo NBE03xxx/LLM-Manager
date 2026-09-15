@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "application": "llm-manager",
+    "key-reference": "local-master-v1",
+    "purpose": "backup-encryption",
+    "xdg:schema": "org.freedesktop.Secret.Generic"
+  },
+  "label": "LLM-Manager backup encryption key",
+  "locked": false,
+  "object_path": "/org/freedesktop/secrets/collection/login/4",
+  "nonsecret_properties_match_before": true,
+  "dedicated_key_absent": true,
+  "observation_stage": "after current Gate cleanup, before removal of the prior performance-Gate residual"
+}

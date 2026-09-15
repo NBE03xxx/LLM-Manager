@@ -1,0 +1,12 @@
+[
+  {
+    "attributes": {
+      "application": "llm-manager",
+      "key-reference": "local-master-v1",
+      "purpose": "backup-encryption",
+      "xdg:schema": "org.freedesktop.Secret.Generic"
+    },
+    "label": "LLM-Manager backup encryption key",
+    "locked": false
+  }
+]

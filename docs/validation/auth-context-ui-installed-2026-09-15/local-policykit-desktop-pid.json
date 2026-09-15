@@ -1,0 +1,5 @@
+{
+  "pid": 9839,
+  "operation": "read-only root backup inventory from active desktop terminal",
+  "prior_direct_request": "rejected before authorization with exit 127"
+}

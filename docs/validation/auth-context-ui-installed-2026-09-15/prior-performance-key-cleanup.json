@@ -1,0 +1,10 @@
+{
+  "object_path": "/org/freedesktop/secrets/collection/login/4",
+  "nonsecret_properties": "({'Locked': <false>, 'Attributes': <{'application': 'llm-manager', 'key-reference': 'local-master-v1', 'purpose': 'backup-encryption', 'xdg:schema': 'org.freedesktop.Secret.Generic'}>, 'Label': <'LLM-Manager backup encryption key'>, 'Type': <'org.freedesktop.Secret.Generic'>, 'Created': <uint64 1789394900>, 'Modified': <uint64 1789394900>},)",
+  "created_epoch": 1789394900,
+  "delete_result": "(objectpath '/',)",
+  "search_after": "(@ao [], @ao [])",
+  "provenance": "created immediately before performance sample-01; cleanup searched a mismatched dedicated reference",
+  "secret_read": false,
+  "recoverable": false
+}

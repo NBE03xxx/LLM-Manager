@@ -1,0 +1,12 @@
+[
+  {
+    "application": "org.gnome.Terminal",
+    "name": "LLM-Manager — REMOTE sudo — phase6-auth-context-ui",
+    "role": "frame"
+  },
+  {
+    "application": "org.gnome.Terminal",
+    "name": "LLM-Manager — REMOTE sudo — phase6-auth-context-ui",
+    "role": "label"
+  }
+]

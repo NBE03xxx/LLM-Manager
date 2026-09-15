@@ -36,3 +36,7 @@ passwordをアプリ、タイトル、argvへ渡す経路も追加していな�
 本UI改善を収録していない。本変更を含む同一commitからlocal/remote candidateを再buildし、
 Debian通常desktopで外部ターミナルタイトルとPolicyKit文言を目視するGateは未実施。
 したがってfinal artifact項目は完了にせず、release checklistは18/44（40.9%）を維持する。
+
+2026-09-15追記: commit `7f846f5`からcandidateを独立2回buildしてbyte一致を確認し、
+[installed UI Gate](phase6-auth-context-ui-installed-2026-09-15.md)でremote sudoタイトルとlocal PolicyKit
+messageを通常Debian desktop上に表示・保存した。final artifact項目と進捗は引き続き変更しない。

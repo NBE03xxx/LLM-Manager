@@ -1,0 +1,6 @@
+{
+  "search": "([objectpath '/org/freedesktop/secrets/collection/login/4'], @ao [])",
+  "dedicated_search": "(@ao [], @ao [])",
+  "object_path": "/org/freedesktop/secrets/collection/login/4",
+  "properties": "({'Locked': <false>, 'Attributes': <{'application': 'llm-manager', 'key-reference': 'local-master-v1', 'purpose': 'backup-encryption', 'xdg:schema': 'org.freedesktop.Secret.Generic'}>, 'Label': <'LLM-Manager backup encryption key'>, 'Type': <'org.freedesktop.Secret.Generic'>, 'Created': <uint64 1789394900>, 'Modified': <uint64 1789394900>},)"
+}
