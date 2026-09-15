@@ -1,0 +1,6 @@
+{
+  "source_commit": "7f846f5fb1134be7df06490f30a5216ab414ae0d",
+  "local_sha256": "ecc099a6ae285d99fe1990cc1335dbff10f17019a766d8527566819f850eba9a",
+  "remote_sha256": "4ca5e152c2738c1fa2ca92eaf5ab4802ecfd88438f15f54780117f463b9edbb2",
+  "scope": "pre-final functional candidate; later release metadata commits are not embedded"
+}

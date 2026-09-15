@@ -1,0 +1,82 @@
+{
+  "journal/ssh-user-14fed5e69f3344ae9879005843a2ff4b.json": {
+    "approval_id": "approval-18f4c694d860496bbf2daeb7a817e81d",
+    "backup_id": "ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+    "change_set_hash": "925320c3ef7c858dedc272f1783f77e742bd9e8bda8f082e879e488373919f51",
+    "created_at": "2026-09-15T14:19:09.870949+00:00",
+    "host_id": "ssh:phase6-natural-rollback",
+    "journal_hash": "53cad46ca3fe61c127a195239d61e8ddbe84d06190d1c2b9fac520ff2fde424c",
+    "manifest_hash": "266995dacb420e69591482e5f08fee24747c7bc0872ecd4ad1994649f7e82c94",
+    "operation_id": "ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+    "plan_id": "plan-cafc056081974271b8fc3a467a896ad3",
+    "request_hash": "6cbf0f1f7a072190b5e0518d4f530b192a05ae4e5a748b2ecde35b7020a45668",
+    "rollback_request_hash": "261029bc3a14ad9f36c7fe5293b4b08155c7440d1d908dd99e2d7697edc8c3ea",
+    "schema_version": "1.1",
+    "status": "rolled_back",
+    "targets": [
+      {
+        "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+        "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc"
+      }
+    ],
+    "updated_at": "2026-09-15T14:19:14.271096+00:00"
+  },
+  "remote-recovery/receipts/266995dacb420e69591482e5f08fee24747c7bc0872ecd4ad1994649f7e82c94.json": {
+    "backup_id": "ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+    "change_set_hash": "925320c3ef7c858dedc272f1783f77e742bd9e8bda8f082e879e488373919f51",
+    "envelope_version": 1,
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-natural-rollback",
+    "item_hashes": [
+      [
+        "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+      ]
+    ],
+    "key_reference": "remote-master-v1",
+    "key_scope": "remote_root",
+    "local_manifest_hash": "266995dacb420e69591482e5f08fee24747c7bc0872ecd4ad1994649f7e82c94",
+    "plan_id": "plan-cafc056081974271b8fc3a467a896ad3",
+    "receipt_hash": "8ddc7a074c1f708ebcf52237838fff02535a042ded3299ce2a2fc66d37dd1015",
+    "schema_version": "1.0",
+    "scheme": "AES-256-GCM",
+    "storage_location": "/var/lib/llm-manager/backups/b7c71284076201615cea40de/ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+    "verified": true
+  },
+  "backups/b7c71284076201615cea40de/ssh-user-14fed5e69f3344ae9879005843a2ff4b/manifest.json": {
+    "backup_id": "ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+    "change_set_hash": "925320c3ef7c858dedc272f1783f77e742bd9e8bda8f082e879e488373919f51",
+    "complete": true,
+    "created_at": "2026-09-15T14:19:00.495011+00:00",
+    "encryption": {
+      "enabled": true,
+      "envelope_version": 1,
+      "key_reference": "local-master-v1",
+      "key_scope": "local_secret_service",
+      "scheme": "AES-256-GCM"
+    },
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-natural-rollback",
+    "items": [
+      {
+        "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+        "existed": true,
+        "gid": 1000,
+        "mode": 384,
+        "selinux_context": null,
+        "service_state": null,
+        "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "storage_location": "/tmp/phase6-natural-rollback-20260915/state/llm-manager/backups/b7c71284076201615cea40de/ssh-user-14fed5e69f3344ae9879005843a2ff4b",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "uid": 1000
+      }
+    ],
+    "manifest_hash": "266995dacb420e69591482e5f08fee24747c7bc0872ecd4ad1994649f7e82c94",
+    "plan_id": "plan-cafc056081974271b8fc3a467a896ad3",
+    "protected": false,
+    "retention_expires_at": "2026-10-15T14:19:00.495011+00:00",
+    "schema_version": "1.0",
+    "storage_location": "/tmp/phase6-natural-rollback-20260915/state/llm-manager/backups/b7c71284076201615cea40de/ssh-user-14fed5e69f3344ae9879005843a2ff4b"
+  }
+}

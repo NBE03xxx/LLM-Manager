@@ -1,0 +1,17 @@
+{
+  "source": "Captured non-secret org.freedesktop.Secret.Item GetAll output before deletion",
+  "path": "/org/freedesktop/secrets/collection/login/5",
+  "locked": false,
+  "attributes": {
+    "application": "llm-manager",
+    "purpose": "backup-encryption",
+    "key-reference": "local-master-v1",
+    "xdg:schema": "org.freedesktop.Secret.Generic"
+  },
+  "label": "LLM-Manager backup encryption key",
+  "type": "application/octet-stream",
+  "created": 1789481940,
+  "modified": 1789481940,
+  "secret_value_read": false,
+  "note": "Structured after the exact captured GetAll output because the first audit filename was subsequently overwritten by the empty post-delete search."
+}

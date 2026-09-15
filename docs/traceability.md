@@ -248,3 +248,9 @@ prompt経由で操作した。review/attempt/result各1件、strict audit 2件�
 追加12 package、snapshotを削除しbaseline/session完全一致。全806 test（39 expected skip）成功。
 詳細: `docs/validation/phase6-local-root-restore-gui-2026-09-14.md`。現UNRELEASED candidate 1 sampleで、
 最終artifact項目と進捗18/44は変更しない。
+
+2026-09-15には[通常GUI SSH自然runtime障害rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)を追加した。
+承認済みApply直後だけ実OpenCode binaryを同一filesystem内へ退避し、結果を注入せずproduction
+validator自身が`not_installed`を検出して、Apply/rollback各1回で`rolled_back`となった。
+configとruntime、journal/dual backup/GUI、両VM baselineを照合・復元した。pre-final candidateのため
+最終artifact項目は未完了で、release専用鍵の確定による進捗19/44（43.2%）を維持する。

@@ -729,5 +729,48 @@
         "qga_error": "hwclock unavailable; skip guest-set-time RTC update"
       }
     ]
+  },
+  {
+    "scope": "guest clocks only; host clock and NTP settings unchanged",
+    "measurements": [
+      {
+        "vm": "ubuntu26.04",
+        "before": {
+          "host_start": 1789482042.8729885,
+          "guest": 1789481751.7567213,
+          "host_end": 1789482042.8914323,
+          "offset_lower_seconds": -291.1347110271454,
+          "offset_upper_seconds": -291.11626720428467
+        },
+        "after": {
+          "host_start": 1789482043.189002,
+          "guest": 1789482043.1974545,
+          "host_end": 1789482043.4686866,
+          "offset_lower_seconds": -0.27123212814331055,
+          "offset_upper_seconds": 0.008452415466308594
+        },
+        "method": "guest-exec date --set (system clock only)",
+        "qga_error": "hwclock unavailable; skip guest-set-time RTC update"
+      },
+      {
+        "vm": "debian13",
+        "before": {
+          "host_start": 1789482043.4761248,
+          "guest": 1789482043.5688145,
+          "host_end": 1789482043.7524083,
+          "offset_lower_seconds": -0.18359375,
+          "offset_upper_seconds": 0.09268975257873535
+        },
+        "after": {
+          "host_start": 1789482044.0441225,
+          "guest": 1789482044.0547085,
+          "host_end": 1789482044.3223467,
+          "offset_lower_seconds": -0.2676382064819336,
+          "offset_upper_seconds": 0.010586023330688477
+        },
+        "method": "guest-exec date --set (system clock only)",
+        "qga_error": "hwclock unavailable; skip guest-set-time RTC update"
+      }
+    ]
   }
 ]

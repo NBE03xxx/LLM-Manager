@@ -6,6 +6,7 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-15、[通常GUI SSH自然runtime障害rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)が成功。通常GUIで診断→Agent推奨2件→review→承認→Apply、利用者がREMOTE sudo認証。Apply直後だけ実OpenCode 1.18.25 binaryを一時退避し、production validator自身が`not_installed`を検出。validation結果注入なし、Apply/rollback各1回、`rolled_back`、configとbinary hash/mode/version復元、journal/dual backup/GUI一致。継承harnessが専用referenceをcleanupする一方productionは`local-master-v1`を作る不整合を検出し、開始時不在・今回時刻/属性一致の1件だけ秘密値を読まず削除、scriptを修正。両VM baseline/session完全一致、snapshot削除、時計補正、checksum成功。最終artifact反復が残るため進捗19/44、43.2%は維持。
 - 2026-09-15、利用者が[release専用OpenPGP鍵](validation/phase6-release-signing-key-2026-09-15.md)を作成し試験署名を検証。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`（Ed25519 certification、2031-09-14まで）、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`（Ed25519 signing、2027-09-15まで）。保管責任者は`Project owner (NBE03xxx)`、後継者なし、活動中だけ1年更新。公開鍵のみ`RELEASE_KEY.asc`へ収録し、秘密file名を`.gitignore`へ追加。target distributionは`unstable`、公開先GitHub Releases、Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。実署名/tag/公開は未実施。進捗19/44、43.2%。
 - 2026-09-15、[release transition readiness audit](validation/phase6-release-transition-readiness-2026-09-15.md)を実施。`HEAD`/`origin/main`は`c86f04d`、採用pre-final candidate hashも再一致。GitHub repositoryはpublic、既存tag/Releaseは0件。[0.1.0 release notes draft](release-notes-0.1.0-draft.md)へ必須sectionと検証手順を準備した。target distribution、changelog署名者表記、release専用OpenPGP fingerprint／保管責任者、公開先・公開承認が未確定のため`UNRELEASED`を維持する。判断後の順序をmetadata確定→final commit→再現build→SBOM/binary監査→OS/GUI/security Gate→checksum/署名→tag/公開後再検証と固定。進捗18/44、40.9%は変更なし。
 - 2026-09-15、commit `7f846f5`から[認証UI改善candidate](validation/phase6-auth-context-candidate-build-2026-09-15.md)をlocal/remote各2回buildしbyte一致。local SHA-256 `ecc099a6ae285d99fe1990cc1335dbff10f17019a766d8527566819f850eba9a`、remote `4ca5e152c2738c1fa2ca92eaf5ab4802ecfd88438f15f54780117f463b9edbb2`。各build内806 testと両verifier、package展開監査成功。
@@ -112,10 +113,10 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-14現在は18/44件、**40.9%（公開チェックリスト項目数ベース）**。
+2026-09-15現在は19/44件、**43.2%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
-この40.9%とは比較しない。今後は再集計可能な値を主表示とする。
+この43.2%とは比較しない。今後は再集計可能な値を主表示とする。
 部分検証が増えてもcheckboxの完了条件を満たさない限り数値は上げない。
 
 ## 採用candidate
@@ -220,7 +221,7 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. local user/root manual restoreの全GUI操作は現candidate各1 sampleを完了。次は性能の残条件・複数sample、自然障害rollback、またはfinal artifact Gateを進める。
+1. local user/root manual restoreの全GUI操作、性能の複数sample、自然runtime障害rollbackは現candidateで完了。次はfinal artifact Gateを進める。
 2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
    継続する。
    利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
@@ -231,7 +232,9 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
    次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
    snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
    手動Run Applyで入力タイミングを合わせる。保存済みoperationは再送しない。
-3. 最終Gate後にUNRELEASED解除を判断。署名鍵は未指定。秘密鍵を自動生成・推測選択しない。
+3. release専用署名鍵、target distribution、署名者、公開先は確定済み。最終Gate開始時に
+   `UNRELEASED`を`unstable`へ変更してrelease日時・変更点を確定する。
+   秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 
 ## VMと復元条件
