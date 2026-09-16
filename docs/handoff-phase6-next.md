@@ -6,6 +6,11 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-16、確定済みrelease判断に基づきfinal source metadata transitionを開始。
+  `debian/changelog`を`unstable`へ変更し、release日時を2026-09-16、署名者を
+  `NBE03xxx <NBE03247@nifty.com>`へ固定。release notesから`TBD`を除去し、signed tagを
+  `v0.1.0`、source archiveを`llm-manager-0.1.0.tar.gz`、artifact identityの正本を
+  `SHA256SUMS`とした。最終artifact、署名、tag、公開は未実施。進捗21/44、47.7%。
 - 2026-09-15、[通常GUI SSH自然runtime障害rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)が成功。通常GUIで診断→Agent推奨2件→review→承認→Apply、利用者がREMOTE sudo認証。Apply直後だけ実OpenCode 1.18.25 binaryを一時退避し、production validator自身が`not_installed`を検出。validation結果注入なし、Apply/rollback各1回、`rolled_back`、configとbinary hash/mode/version復元、journal/dual backup/GUI一致。継承harnessが専用referenceをcleanupする一方productionは`local-master-v1`を作る不整合を検出し、開始時不在・今回時刻/属性一致の1件だけ秘密値を読まず削除、scriptを修正。両VM baseline/session完全一致、snapshot削除、時計補正、checksum成功。最終artifact反復が残るため進捗19/44、43.2%は維持。
 - 2026-09-15、利用者が[release専用OpenPGP鍵](validation/phase6-release-signing-key-2026-09-15.md)を作成し試験署名を検証。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`（Ed25519 certification、2031-09-14まで）、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`（Ed25519 signing、2027-09-15まで）。保管責任者は`Project owner (NBE03xxx)`、後継者なし、活動中だけ1年更新。公開鍵のみ`RELEASE_KEY.asc`へ収録し、秘密file名を`.gitignore`へ追加。target distributionは`unstable`、公開先GitHub Releases、Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。実署名/tag/公開は未実施。進捗19/44、43.2%。
 - 2026-09-15、[release transition readiness audit](validation/phase6-release-transition-readiness-2026-09-15.md)を実施。`HEAD`/`origin/main`は`c86f04d`、採用pre-final candidate hashも再一致。GitHub repositoryはpublic、既存tag/Releaseは0件。[0.1.0 release notes draft](release-notes-0.1.0-draft.md)へ必須sectionと検証手順を準備した。target distribution、changelog署名者表記、release専用OpenPGP fingerprint／保管責任者、公開先・公開承認が未確定のため`UNRELEASED`を維持する。判断後の順序をmetadata確定→final commit→再現build→SBOM/binary監査→OS/GUI/security Gate→checksum/署名→tag/公開後再検証と固定。進捗18/44、40.9%は変更なし。
@@ -96,7 +101,8 @@
 
 ## 現在位置とGit
 
-- Phase 0〜5完了。現在・次ともPhase 6。version 0.1.0、UNRELEASEDを維持。
+- Phase 0〜5完了。現在・次ともPhase 6。version 0.1.0、distribution `unstable`。
+  最終Gate、署名、signed tag、公開後再検証が完了するまで一般配布しない。
 - branch `main`。最新commit/remote/worktree状態は再開時に取得する。
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
@@ -232,8 +238,8 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
    次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
    snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
    手動Run Applyで入力タイミングを合わせる。保存済みoperationは再送しない。
-3. release専用署名鍵、target distribution、署名者、公開先は確定済み。最終Gate開始時に
-   `UNRELEASED`を`unstable`へ変更してrelease日時・変更点を確定する。
+3. release専用署名鍵、target distribution、署名者、公開先は確定済み。final source metadataで
+   `UNRELEASED`を`unstable`へ変更し、release日時・変更点も確定済み。
    秘密鍵を自動生成・推測選択しない。
    release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
 

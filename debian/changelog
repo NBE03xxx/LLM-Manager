@@ -1,7 +1,7 @@
-llm-manager (0.1.0) UNRELEASED; urgency=medium
+llm-manager (0.1.0) unstable; urgency=medium
 
   * Add the MVP PySide6 desktop entry point and desktop integration metadata.
   * Keep the local privileged helper isolated behind PolicyKit.
   * Distinguish LOCAL PolicyKit prompts from REMOTE SSH and sudo terminals.
 
- -- NBE03xxx <NBE03247@nifty.com>  Sat, 29 Aug 2026 22:00:00 +0900
+ -- NBE03xxx <NBE03247@nifty.com>  Wed, 16 Sep 2026 18:49:47 +0900

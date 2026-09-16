@@ -1,13 +1,14 @@
-# LLM-Manager 0.1.0 release notes (DRAFT — DO NOT PUBLISH)
+# LLM-Manager 0.1.0 release notes
 
-この文書はPhase 6最終Gate前のdraftです。次の値が未確定であるため、release本文や
-artifactとして公開しないでください。
+Release date: 2026-09-16
 
-- release date: `TBD`
-- Debian changelog distribution: planned `unstable`（changelogは最終日時確定まで`UNRELEASED`）
+この文書は公開内容を固定するためのrelease notesです。Phase 6の最終artifact、署名、
+signed tag、公開後再検証が完了するまでは公開しないでください。
+
+- Debian changelog distribution: `unstable`
 - release OpenPGP primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
-- final source commit/tag: `TBD`
-- final artifact SHA-256: `TBD`
+- source identity: signed tag `v0.1.0`（tag targetの完全commit IDを検証する）
+- artifact identity: release setの`SHA256SUMS`を正本とする
 
 ## Overview
 
@@ -45,9 +46,9 @@ SSH先のhelperを自動installまたはupgradeすることはありません。
 
 - `llm-manager_0.1.0_all.deb`
 - `llm-manager-remote-helper_0.1.0_all.deb`
-- source archive (`TBD`)
+- `llm-manager-0.1.0.tar.gz` source archive
 - local/remote直接依存CycloneDX 1.6 SBOM
-- Ubuntu 26.04／Debian 13 resolved-environment SBOM (`TBD`)
+- Ubuntu 26.04 local、Debian 13 local、Ubuntu 26.04 remote helperのresolved-environment SBOM archive
 - `SHA256SUMS`
 - `SHA256SUMS.asc`
 - `RELEASE_KEY.asc`
@@ -132,11 +133,10 @@ project-owned sourceとassetはMIT Licenseです。third-party notices、直接�
 解決した依存のSBOMをrelease setへ含めます。source repository:
 `https://github.com/NBE03xxx/LLM-Manager`
 
-## Finalization checklist for this draft
+## Publication verification
 
-- `TBD`をすべて解消する
 - supported versionをfinal Gateの実測値と照合する
 - artifact名と`SHA256SUMS`の対象を完全一致させる
 - 公開鍵とOpenPGP primary/signing-subkey fingerprintをfinal署名から再照合する
-- final tag/source commitへのlinkを追加する
+- signed tag `v0.1.0`がbuild source commitを指すことを確認する
 - 公開前にsecret、内部test path、test host、未採用candidate hashがないことをreviewする

@@ -1,6 +1,6 @@
 # MVP Release Checklist
 
-このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`へ固定済みだが、`UNRELEASED`のまま一般配布しない。
+このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`、distributionは`unstable`へ固定済みだが、最終Gate、署名、公開後再検証が完了するまで一般配布しない。
 
 ## 1. Scopeとversion freeze
 
@@ -38,6 +38,12 @@ target distribution、changelog署名者表記、release専用OpenPGP fingerprin
 Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・責任者の項目が完了し、
 進捗は19/44（43.2%）。実署名、signed tag、公開は未実施。
 
+2026-09-16: 確定済み判断に従い`debian/changelog`を`unstable`へ変更し、release日時と変更点、
+署名者表記を固定した。release notesはrelease date、固定tag名、source archive名、artifact identityを
+`SHA256SUMS`へ結び付ける方式へ確定した。metadataとrelease notesの2項目が完了し、
+進捗は21/44（47.7%）。
+最終source commitからのartifact build、署名、tag、公開は未実施。
+
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。[ff7913b Debian Orca capture](validation/phase6-ff7913b-debian-orca-2026-09-13.md)では製品名・Hosts用途/valueの発話eventと20.672秒の非無音WAVを保存し、人の聴取確認も完了。[通常GUI全経路＋実NIC断](validation/phase6-full-gui-network-2026-09-14.md)ではSSH Applyのcommit case 1 sample、[通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)ではvalidation fault付きrollback case 1 sample、[実runtime不在rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)ではproduction validatorによる自然障害caseを完了した。性能の複数sampleと自然障害rollbackは補完済みで、最終artifact Gateだけが未完了。
@@ -49,9 +55,9 @@ Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・�
   - 2026-09-11: [通常SSH診断baseline](validation/phase6-ssh-diagnosis-performance-2026-09-11.md)の5 sampleで中央値1614.899 ms、最大1632.497 ms。reportはcompleteだがOllama/OpenCodeのruntime前提条件は未成立。Qt event gap・実Agent・SSH Apply性能を完了扱いにしない。
   - 2026-09-12: [実SSH cancel baseline](validation/phase6-ssh-cancel-2026-09-12.md)の3 sampleでremote ready後のcancel→local SSH回収1.350〜1.429 ms、remote有限process不在を確認。設定変更なし。短いsleep workloadの境界検証でありQt/Agent/Apply/物理回線断の代替ではない。
   - 2026-09-13: [仮想NIC切断中の実SSH cancel](validation/phase6-ssh-link-cut-2026-09-13.md)の1 sampleでdown状態のcancel→local回収32.031 ms、link復元、新規strict SSHとremote有限process不在を確認。Qt/Apply/物理ケーブル断は対象外で、この親項目は未完了のまま。
-- [x] release versionを`0.1.0`に固定し、`pyproject.toml`、`debian/changelog`、remote `control`、両helper metadata、SBOM、verifier、production helper compatibility allowlistを一致させた。`UNRELEASED`の解除は最終Gate後の別項目とする。
+- [x] release versionを`0.1.0`に固定し、`pyproject.toml`、`debian/changelog`、remote `control`、両helper metadata、SBOM、verifier、production helper compatibility allowlistを一致させた。distributionの確定は下の別項目で追跡する。
   - `DebianPackagingTests.test_release_version_surfaces_are_consistent`でPython/ Debian version変換、両helper metadata、両SBOM、verifier、production helper compatibility allowlistの同期を自動検査する。
-- [ ] `debian/changelog`を`UNRELEASED`から対象distributionへ変更し、release日時と変更点を確定する。
+- [x] `debian/changelog`を`UNRELEASED`から`unstable`へ変更し、release日時、変更点、署名者表記を確定した。詳細: [final source metadata transition](validation/phase6-final-source-metadata-2026-09-16.md)。
 
 ## 2. Source、license、SBOM
 
@@ -170,10 +176,11 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [x] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`、保管責任者`Project owner (NBE03xxx)`。詳細は[鍵検証記録](validation/phase6-release-signing-key-2026-09-15.md)。
 - [ ] `SHA256SUMS`へASCII armored detached signatureを作成し、別環境でfingerprint指定の検証を行う。
 - [ ] Git tagを同じkeyで署名し、tagがbuild source commitを指すことを確認する。
-- [ ] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載する。[0.1.0 draft](release-notes-0.1.0-draft.md)にfingerprint、release date、final source/artifact identity以外の骨子を作成済み。
+- [x] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載した。[0.1.0 release notes](release-notes-0.1.0-draft.md)はrelease dateと固定tag `v0.1.0`を記載し、artifact identityの正本を後続で作る`SHA256SUMS`へ固定した。
 - [ ] 公開先から全artifactを再取得してchecksum、署名、package verifierを再実行する。
 
-署名鍵は現時点で未指定のため、署名と公開はblockerである。鍵を自動生成したり既存の個人鍵を推測選択したりしない。
+署名鍵は指定済みだが、実署名、signed tag、公開は未実施であり、公開実行には別の明示承認が
+必要である。鍵を自動生成したり別の個人鍵を推測選択したりしない。
 
 ## 7. Release判定
 
