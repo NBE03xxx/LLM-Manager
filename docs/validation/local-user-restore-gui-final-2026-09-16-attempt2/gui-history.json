@@ -1,0 +1,780 @@
+[
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "selected-host": "Hosts",
+      "language-label": "Language"
+    },
+    "buttons": {},
+    "combos": {
+      "host-selector": "Local",
+      "language-selector": "English"
+    },
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "workflow-status": "Ready"
+    },
+    "buttons": {
+      "start-diagnosis": {
+        "enabled": true,
+        "text": "Diagnose"
+      },
+      "cancel-operation": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": ""
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Balanced"
+    },
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "recommendation-list": []
+    }
+  },
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": ""
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Agent"
+    },
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "recommendation-list": []
+    }
+  },
+  {
+    "step": "diagnose",
+    "busy": true,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "workflow-status": "Running"
+    },
+    "buttons": {
+      "start-diagnosis": {
+        "enabled": false,
+        "text": "Diagnose"
+      },
+      "cancel-operation": {
+        "enabled": true,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "recommendations",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": "2 recommendations (2 actionable)"
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Agent"
+    },
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "recommendation-list": [
+        "compaction.auto: false → true\nMedium · Actionable\nEnable compaction.auto for bounded long-running agent context.\nReduces unbounded context growth.",
+        "compaction.prune: false → true\nMedium · Actionable\nEnable compaction.prune for bounded long-running agent context.\nReduces unbounded context growth."
+      ]
+    }
+  },
+  {
+    "step": "recommendations",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": "2 recommendations (2 actionable)"
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": true,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Agent"
+    },
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "recommendation-list": [
+        "compaction.auto: false → true\nMedium · Actionable\nEnable compaction.auto for bounded long-running agent context.\nReduces unbounded context growth.",
+        "compaction.prune: false → true\nMedium · Actionable\nEnable compaction.prune for bounded long-running agent context.\nReduces unbounded context growth."
+      ]
+    }
+  },
+  {
+    "step": "review",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "review-summary": "2 recommendations selected",
+      "backup-policy-summary": "Backup: encrypted (AES-256-GCM); retention: 30 days / 10 generations.",
+      "approval-status": "Approval is required before Apply can be prepared."
+    },
+    "buttons": {
+      "prepare-apply": {
+        "enabled": false,
+        "text": "Prepare Apply"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-change-set": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "review-list": [
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\ncompaction.auto: false -> true\nRoot required: no; restart required: no",
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\ncompaction.prune: false -> true\nRoot required: no; restart required: no"
+      ]
+    }
+  },
+  {
+    "step": "review",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "review-summary": "2 recommendations selected",
+      "backup-policy-summary": "Backup: encrypted (AES-256-GCM); retention: 30 days / 10 generations.",
+      "approval-status": "Approved for this exact change set."
+    },
+    "buttons": {
+      "prepare-apply": {
+        "enabled": true,
+        "text": "Prepare Apply"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-change-set": true
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "review-list": [
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\ncompaction.auto: false -> true\nRoot required: no; restart required: no",
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\ncompaction.prune: false -> true\nRoot required: no; restart required: no"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "results-summary": "Approval approval-791f77e90aaf4b60a77363e07860535c is ready. Apply has not started."
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": true,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": true,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": null,
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "results-summary": "Apply is running…"
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": false,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": true,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "results-summary": "Apply result: committed."
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": false,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {},
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [],
+    "labels": {
+      "backup-inventory-summary": "No backup evidence found.",
+      "restore-preview-summary": "Select a backup to generate a metadata-only restore preview.",
+      "restore-approval-status": "Explicit restore approval is required.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": false,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [],
+      "restore-preview-list": []
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [
+      {
+        "backup_id": "local-25bc46883e9842718a7924f19ce24d41",
+        "state": "committed",
+        "restore_state": null,
+        "restore_attention": false
+      }
+    ],
+    "labels": {
+      "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+      "restore-preview-summary": "Select a backup to generate a metadata-only restore preview.",
+      "restore-approval-status": "Explicit restore approval is required.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": false,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [
+        "local-25bc46883e9842718a7924f19ce24d41 · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: none · restore attention: false\nactions: refresh_inventory"
+      ],
+      "restore-preview-list": []
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [
+      {
+        "backup_id": "local-25bc46883e9842718a7924f19ce24d41",
+        "state": "committed",
+        "restore_state": null,
+        "restore_attention": false
+      }
+    ],
+    "labels": {
+      "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+      "restore-preview-summary": "Restore preview for local-25bc46883e9842718a7924f19ce24d41: 1 targets; protected: false.",
+      "restore-approval-status": "Explicit restore approval is required.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": false,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [
+        "local-25bc46883e9842718a7924f19ce24d41 · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: none · restore attention: false\nactions: refresh_inventory"
+      ],
+      "restore-preview-list": [
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\nexisted: true · SHA-256: fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7 · mode: 0o600"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [
+      {
+        "backup_id": "local-25bc46883e9842718a7924f19ce24d41",
+        "state": "committed",
+        "restore_state": null,
+        "restore_attention": false
+      }
+    ],
+    "labels": {
+      "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+      "restore-preview-summary": "Restore preview for local-25bc46883e9842718a7924f19ce24d41: 1 targets; protected: false.",
+      "restore-approval-status": "Approved for this exact preview.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": true,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": true
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [
+        "local-25bc46883e9842718a7924f19ce24d41 · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: none · restore attention: false\nactions: refresh_inventory"
+      ],
+      "restore-preview-list": [
+        "/tmp/phase6-local-user-restore-gui-final-20260916-attempt2/config/opencode/opencode.jsonc\nexisted: true · SHA-256: fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7 · mode: 0o600"
+      ]
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": "committed",
+    "inventory": [
+      {
+        "backup_id": "local-25bc46883e9842718a7924f19ce24d41",
+        "state": "committed",
+        "restore_state": null,
+        "restore_attention": false
+      }
+    ],
+    "labels": {
+      "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+      "restore-preview-summary": "Select a backup to generate a metadata-only restore preview.",
+      "restore-approval-status": "Restore evidence: committed; error: none; persisted: true. Refresh inventory before another request.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": false,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [
+        "local-25bc46883e9842718a7924f19ce24d41 · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: none · restore attention: false\nactions: refresh_inventory"
+      ],
+      "restore-preview-list": []
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": true,
+    "apply_status": "committed",
+    "restore_state": null,
+    "inventory": [
+      {
+        "backup_id": "local-25bc46883e9842718a7924f19ce24d41",
+        "state": "committed",
+        "restore_state": "committed",
+        "restore_attention": false
+      }
+    ],
+    "labels": {
+      "backup-inventory-summary": "Loaded 1 backup records (read-only).",
+      "restore-preview-summary": "Select a backup to generate a metadata-only restore preview.",
+      "restore-approval-status": "Explicit restore approval is required.",
+      "root-restore-summary": "System backup review is available. Each privileged step requires administrator authentication and explicit consent."
+    },
+    "buttons": {
+      "refresh-backup-inventory": {
+        "enabled": true,
+        "text": "Refresh backup inventory"
+      },
+      "run-restore": {
+        "enabled": false,
+        "text": "Run Restore"
+      },
+      "cancel-restore": {
+        "enabled": false,
+        "text": "Cancel"
+      },
+      "open-root-restore": {
+        "enabled": true,
+        "text": "Restore system settings"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-restore-preview": false
+    },
+    "lists": {
+      "workflow-navigation": [
+        "Hosts",
+        "Diagnose",
+        "Recommendations",
+        "Review Changes",
+        "Apply / Results",
+        "Backup / Rollback"
+      ],
+      "backup-inventory-list": [
+        "local-25bc46883e9842718a7924f19ce24d41 · committed\nlocal: present · remote: absent · protected: false · attention: false\nrestore: committed · restore attention: false\nactions: refresh_inventory"
+      ],
+      "restore-preview-list": []
+    }
+  }
+]

@@ -1,4 +1,4 @@
-# 次チャット用引継ぎ（2026-09-14）
+# 次チャット用引継ぎ（2026-09-16）
 
 `/home/yoshimi/WorkSpace/LLM-Manager` のPhase 6 Hardening / MVP Releaseを続けてください。
 まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と検証記録で補ってください。
@@ -6,6 +6,27 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-16、[final artifact local user Apply/manual restore通常GUI Gate](validation/phase6-final-local-user-restore-gui-2026-09-16.md)が成功。
+  Debian通常user・installed final deb・通常`qt_app.main`でLocal診断→Agent推奨2件→review→明示承認→
+  Apply→AES-256-GCM backup→同じGUIのRefresh／backup選択／metadata-only preview／正確な同意→
+  Run Restore→再Refreshを操作。採用attemptはApply/restore各1回、両方`committed`、初期config hash復元、
+  inventory `restore: committed`、journal／manifest／restore evidence／audit chain／Secret Service結合を確認。
+  専用key/state/pathと追加12 packageを削除しDebian baseline/session完全一致、snapshot削除、VM running、
+  証拠checksum成功。先行非採用試行はpreview期限切れでrestore未開始のまま分離記録・完全清掃した。
+  local user最終GUI項目が完了し、進捗38/44、86.4%。
+- 2026-09-16、final artifactのUbuntu local、Ubuntu remote helper、Debian local lifecycleを完了。
+  localは両OSでfresh/reinstall/upgrade/remove/purge、Ubuntu／Debian GNOME menuのicon/name、Enter起動、
+  UID1000・固定argv、日本語画面、Alt+F4通常終了を確認。Debianは英日Wayland AT-SPIも成功。
+  remote helperはreadiness、private runtime owner/mode、local GUI/PolicyKit非混入、dpkg管理外保全pathを確認。
+  Ubuntu各Gateは専用snapshotからbaseline完全復元・削除。Debianは追加12 packageだけを明示purgeし、
+  package/manual/保全path、session完全一致。両VM running、一時snapshot/process/pathなし。
+  OS lifecycle 6項目が完了し、進捗37/44、84.1%。
+- 2026-09-16、final source／artifactのsecurity regressionを実施。secret corpus、redaction、
+  symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を
+  含むfocused 159件（158成功・1 expected skip）、全806件（767成功・39 expected skip）、
+  両final deb verifier、compileall／shell／desktop／SBOM JSON／whitespace検査に成功。
+  product source/test/packaging実装は`7f846f5`から不変で、差分はrelease metadata 3fileだけ。
+  進捗31/44、70.5%。
 - 2026-09-16、final artifactをUbuntu local、Ubuntu remote helper、Debian localへ一時導入し、
   resolved-environment SBOMを採取。package数は1,907／1,908／2,248、Ubuntuのcopyright欠落は
   開始前からある非依存Brave 2件だけ、Debianは0件。artifact hash、内部/外部checksum、BOM、
@@ -132,10 +153,10 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-16現在は30/44件、**68.2%（公開チェックリスト項目数ベース）**。
+2026-09-16現在は38/44件、**86.4%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
-この68.2%とは比較しない。今後は再集計可能な値を主表示とする。
+この86.4%とは比較しない。今後は再集計可能な値を主表示とする。
 部分検証が増えてもcheckboxの完了条件を満たさない限り数値は上げない。
 
 ## 採用candidate

@@ -1,0 +1,6 @@
+{
+  "reason": "restore preview expired during operator accessibility troubleshooting",
+  "apply_committed": true,
+  "restore_started": false,
+  "release_gate_passed": false
+}

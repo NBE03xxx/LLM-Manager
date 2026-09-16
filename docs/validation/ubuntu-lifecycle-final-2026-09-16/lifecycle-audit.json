@@ -1,0 +1,45 @@
+{
+  "upgrade": {
+    "package_rows": [
+      [
+        "llm-manager",
+        "0.1.0",
+        "installed"
+      ]
+    ],
+    "other_packages_unchanged": true,
+    "existing_paths_unchanged": true
+  },
+  "reinstall": {
+    "package_rows": [
+      [
+        "llm-manager",
+        "0.1.0",
+        "installed"
+      ]
+    ],
+    "other_packages_unchanged": true,
+    "existing_paths_unchanged": true
+  },
+  "remove": {
+    "package_rows": [],
+    "other_packages_unchanged": true,
+    "existing_paths_unchanged": true
+  },
+  "fresh-install": {
+    "package_rows": [
+      [
+        "llm-manager",
+        "0.1.0",
+        "installed"
+      ]
+    ],
+    "other_packages_unchanged": true,
+    "existing_paths_unchanged": true
+  },
+  "purge": {
+    "package_rows": [],
+    "other_packages_unchanged": true,
+    "existing_paths_unchanged": true
+  }
+}

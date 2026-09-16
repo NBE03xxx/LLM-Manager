@@ -1,0 +1,12 @@
+{
+  "candidate": {
+    "sha256": "ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4",
+    "source_commit": "5b7d4de03e495fe630deab952de043f945a22bd7",
+    "version": "0.1.0"
+  },
+  "upgrade_predecessor": {
+    "sha256": "84213a1c9b897919c7d5625c7361be2ec7c74f4734db4fa9e50f29125141c5fa",
+    "source_commit": "88542323d250e8e9e18bc11e3ed0e093ade3f396",
+    "version": "0.1.0~dev0"
+  }
+}

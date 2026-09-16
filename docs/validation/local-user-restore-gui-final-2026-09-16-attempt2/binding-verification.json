@@ -1,0 +1,27 @@
+{
+  "canonical_hashes_verified": [
+    "journal",
+    "manifest",
+    "restore_attempt",
+    "restore_result",
+    "apply.approved",
+    "backup.verified",
+    "apply.committed",
+    "restore.started",
+    "restore.committed"
+  ],
+  "apply_manifest_binding_verified": true,
+  "restore_manifest_binding_verified": true,
+  "audit_chain_and_correlations_verified": true,
+  "encrypted_content_reference_verified": true,
+  "secret_service_key_reference": "local-master-v1",
+  "secret_service_lifecycle_assertions": {
+    "absent_before_setup": true,
+    "exactly_one_before_cleanup": true,
+    "absent_after_cleanup": true
+  },
+  "initial_target_hash_restored": true,
+  "apply_operations": 1,
+  "restore_attempts": 1,
+  "restore_results": 1
+}

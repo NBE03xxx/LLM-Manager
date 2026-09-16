@@ -1,0 +1,1127 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "ホスト",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": true,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "診断",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "推奨",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "変更内容の確認",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "適用・結果",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [],
+                  "description": "",
+                  "name": "バックアップ・復元",
+                  "relations": [],
+                  "role": "list item",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                }
+              ],
+              "description": "",
+              "name": "LLM Manager",
+              "relations": [],
+              "role": "list",
+              "states": {
+                "enabled": true,
+                "focusable": true,
+                "focused": true,
+                "sensitive": true,
+                "showing": true,
+                "visible": true
+              }
+            },
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "ホスト",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "Local"
+                                  ],
+                                  "type": "label_for"
+                                }
+                              ],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": true,
+                                "visible": true
+                              }
+                            },
+                            {
+                              "children": [
+                                {
+                                  "children": [],
+                                  "description": "",
+                                  "name": "",
+                                  "relations": [],
+                                  "role": "list",
+                                  "states": {
+                                    "enabled": true,
+                                    "focusable": true,
+                                    "focused": false,
+                                    "sensitive": true,
+                                    "showing": false,
+                                    "visible": false
+                                  }
+                                }
+                              ],
+                              "description": "ホスト",
+                              "name": "Local",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "ホスト"
+                                  ],
+                                  "type": "labelled_by"
+                                }
+                              ],
+                              "role": "combo box",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": true,
+                                "visible": true
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "言語",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "日本語"
+                                  ],
+                                  "type": "label_for"
+                                }
+                              ],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": true,
+                                "visible": true
+                              }
+                            },
+                            {
+                              "children": [
+                                {
+                                  "children": [],
+                                  "description": "",
+                                  "name": "",
+                                  "relations": [],
+                                  "role": "list",
+                                  "states": {
+                                    "enabled": true,
+                                    "focusable": true,
+                                    "focused": false,
+                                    "sensitive": true,
+                                    "showing": false,
+                                    "visible": false
+                                  }
+                                }
+                              ],
+                              "description": "言語",
+                              "name": "日本語",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "言語"
+                                  ],
+                                  "type": "labelled_by"
+                                }
+                              ],
+                              "role": "combo box",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": true,
+                                "visible": true
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": true,
+                            "visible": true
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": true,
+                        "visible": true
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": true,
+                    "visible": true
+                  }
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "準備完了",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "診断する",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "キャンセル",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": false,
+                            "visible": false
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": false,
+                        "visible": false
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": false,
+                    "visible": false
+                  }
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "最適化プロファイル",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "バランス"
+                                  ],
+                                  "type": "label_for"
+                                }
+                              ],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [
+                                {
+                                  "children": [],
+                                  "description": "",
+                                  "name": "",
+                                  "relations": [],
+                                  "role": "list",
+                                  "states": {
+                                    "enabled": true,
+                                    "focusable": true,
+                                    "focused": false,
+                                    "sensitive": true,
+                                    "showing": false,
+                                    "visible": false
+                                  }
+                                }
+                              ],
+                              "description": "最適化プロファイル",
+                              "name": "バランス",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "最適化プロファイル"
+                                  ],
+                                  "type": "labelled_by"
+                                }
+                              ],
+                              "role": "combo box",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "推奨",
+                              "relations": [],
+                              "role": "list",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "選択した推奨を確認",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": false,
+                            "visible": false
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": false,
+                        "visible": false
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": false,
+                    "visible": false
+                  }
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "変更内容の確認",
+                              "relations": [],
+                              "role": "list",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "確認した変更を承認",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "check box",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "設定内の秘密情報が平文保存され得るriskを理解しました。",
+                              "relations": [],
+                              "role": "check box",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "Applyを準備",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": false,
+                            "visible": false
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": false,
+                        "visible": false
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": false,
+                    "visible": false
+                  }
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "Applyを実行",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "キャンセル",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": false,
+                            "visible": false
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": false,
+                        "visible": false
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": false,
+                    "visible": false
+                  }
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "バックアップevidenceはありません。",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "バックアップ・復元",
+                              "relations": [],
+                              "role": "list",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "バックアップ一覧を再読込",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "バックアップを選択するとmetadata-only復元プレビューを生成します。",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "この復元プレビューを明示承認",
+                              "relations": [],
+                              "role": "list",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "この復元プレビューを明示承認",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "check box",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "復元には明示承認が必要です。",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "復元を実行",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "キャンセル",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": false,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": false,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "システムバックアップのレビューを開始できます。各特権工程で管理者認証と明示同意が必要です。",
+                              "relations": [],
+                              "role": "label",
+                              "states": {
+                                "enabled": true,
+                                "focusable": false,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            },
+                            {
+                              "children": [],
+                              "description": "",
+                              "name": "システム設定を復元",
+                              "relations": [
+                                {
+                                  "targets": [
+                                    "LLM Manager"
+                                  ],
+                                  "type": "controller_for"
+                                }
+                              ],
+                              "role": "button",
+                              "states": {
+                                "enabled": true,
+                                "focusable": true,
+                                "focused": false,
+                                "sensitive": true,
+                                "showing": false,
+                                "visible": false
+                              }
+                            }
+                          ],
+                          "description": "",
+                          "name": "",
+                          "relations": [],
+                          "role": "filler",
+                          "states": {
+                            "enabled": true,
+                            "focusable": false,
+                            "focused": false,
+                            "sensitive": true,
+                            "showing": false,
+                            "visible": false
+                          }
+                        }
+                      ],
+                      "description": "",
+                      "name": "",
+                      "relations": [],
+                      "role": "filler",
+                      "states": {
+                        "enabled": true,
+                        "focusable": false,
+                        "focused": false,
+                        "sensitive": true,
+                        "showing": false,
+                        "visible": false
+                      }
+                    }
+                  ],
+                  "description": "",
+                  "name": "",
+                  "relations": [],
+                  "role": "filler",
+                  "states": {
+                    "enabled": true,
+                    "focusable": true,
+                    "focused": false,
+                    "sensitive": true,
+                    "showing": false,
+                    "visible": false
+                  }
+                }
+              ],
+              "description": "",
+              "name": "",
+              "relations": [],
+              "role": "layered pane",
+              "states": {
+                "enabled": true,
+                "focusable": false,
+                "focused": false,
+                "sensitive": true,
+                "showing": true,
+                "visible": true
+              }
+            }
+          ],
+          "description": "",
+          "name": "",
+          "relations": [],
+          "role": "filler",
+          "states": {
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "sensitive": true,
+            "showing": true,
+            "visible": true
+          }
+        }
+      ],
+      "description": "",
+      "name": "LLM Manager",
+      "relations": [],
+      "role": "frame",
+      "states": {
+        "enabled": true,
+        "focusable": false,
+        "focused": false,
+        "sensitive": true,
+        "showing": true,
+        "visible": true
+      }
+    }
+  ],
+  "description": "/usr/bin/python3.13",
+  "name": "llm-manager",
+  "relations": [],
+  "role": "application",
+  "states": {
+    "enabled": true,
+    "focusable": false,
+    "focused": false,
+    "sensitive": true,
+    "showing": true,
+    "visible": true
+  }
+}

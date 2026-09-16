@@ -44,6 +44,12 @@ Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・�
 進捗は21/44（47.7%）。
 最終source commitからのartifact build、署名、tag、公開は未実施。
 
+2026-09-16: final source/artifactの再現build、resolved-environment SBOM、security regression、
+Ubuntu local／remote helperとDebian local lifecycle 6項目に続き、
+[final artifact local user Apply/manual restore通常GUI Gate](validation/phase6-final-local-user-restore-gui-2026-09-16.md)を完了した。
+現在の進捗は38/44（86.4%）。残件はperformance親項目、final SSH user GUI Gate、
+release set checksum、artifact署名、signed tag、公開後再取得検証の6項目。署名・tag・公開は未実施。
+
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [ ] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。[ff7913b Debian Orca capture](validation/phase6-ff7913b-debian-orca-2026-09-13.md)では製品名・Hosts用途/valueの発話eventと20.672秒の非無音WAVを保存し、人の聴取確認も完了。[通常GUI全経路＋実NIC断](validation/phase6-full-gui-network-2026-09-14.md)ではSSH Applyのcommit case 1 sample、[通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)ではvalidation fault付きrollback case 1 sample、[実runtime不在rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)ではproduction validatorによる自然障害caseを完了した。性能の複数sampleと自然障害rollbackは補完済みで、最終artifact Gateだけが未完了。
@@ -137,12 +143,12 @@ git diff --check
 
 同日に同じlocal candidateをDebian 13のpackage未導入状態で検証した。fresh install、reinstall、remove、再fresh install、purge、`dpkg -V`、UID 1000 offscreen Qt起動、owner/modeに成功した。pflash NVRAM形式により内部snapshotが安全に拒否されたため、APT simulationでcandidate＋新規依存11件を固定し、`autoremove`を使わず全12件を明示purgeした。終了時の2236 packageと集合SHA-256は開始値に完全一致し、artifactを削除してVMをshut offへ戻した。実display/menu、旧版からのupgrade、最終artifact再実行が残るため、下記項目は未完了のままとする。詳細は[Debian lifecycle記録](validation/phase6-0.1.0-debian-lifecycle-2026-09-09.md)を参照する。
 
-- [ ] Ubuntu 26.04: local debのfresh install、Wayland通常user起動、menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。
-- [ ] Debian 13: stock Python/PySide6でfresh install、通常userの実display/menu起動、reinstall、upgrade、remove、purgeを最終artifactで確認する。
-- [ ] Ubuntu 26.04 SSH先: remote helperのfresh install、readiness、reinstall、upgrade、remove、purgeと、dpkg管理外backup/key保持を最終artifactで確認する。
-- [ ] 両OSでlocal launcher/helper/desktop/icon/copyright/notices/SBOMのowner/modeを確認する。
-- [ ] remote helperでprivate runtime/copyright/notices/SBOMのowner/modeと、local GUI/PolicyKitが混入しないことを確認する。
-- [ ] Gate終了後のpackage集合、VM state、一時artifact、HTTP server、test key/configが開始前へ戻ったことを記録する。
+- [x] Ubuntu 26.04: local debのfresh install、Wayland通常user起動、menu起動、reinstall、`0.1.0~dev0-1`からのupgrade、remove、purgeを最終artifactで確認した。
+- [x] Debian 13: stock Python/PySide6でfresh install、通常userの英日Wayland AT-SPIとGNOME menu起動、reinstall、履歴`0.1.0~dev0`からのupgrade、remove、purgeを最終artifactで確認した。
+- [x] Ubuntu 26.04 SSH先: remote helperのfresh install、readiness、reinstall、履歴`0.1.0~dev0`からのupgrade、remove、purgeと、dpkg管理外backup/key保持を最終artifactで確認した。
+- [x] 両OSでlocal launcher/helper/desktop/icon/copyright/notices/SBOMのowner/modeをartifact verifier、installed `dpkg -V`、isolated launcher起動で確認した。
+- [x] remote helperでprivate runtime/copyright/notices/SBOMのowner/modeと、local GUI/PolicyKitが混入しないことを確認した。
+- [x] Gate終了後のpackage集合、VM state、一時artifact、snapshot、process、test pathが開始前へ戻ったことを記録した。詳細: [final OS lifecycle and menu Gate](validation/phase6-final-os-lifecycle-menu-2026-09-16.md)。
 
 ## 5. Functionalとsecurity Gate
 
@@ -158,8 +164,9 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 
 - [x] security/privacy code reviewでsecret redaction、audit非露出、bounded subprocess output、GUI error上限、root helper出力破棄を確認した。
 - [x] 利用者向け`Backup・Rollback・Recoveryガイド`を公開routeとfail-closed routeに合わせて作成した。
-- [ ] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
+- [x] 最終artifactでlocal user Apply/rollback/manual restoreのGUI Gateを再実行する。
   - 2026-09-14: [local user manual restore通常GUI Gate](validation/phase6-local-user-restore-gui-2026-09-14.md)で、Debian通常user・installed candidate・通常`qt_app.main`から診断→Agent推奨2件→review→承認→Apply→暗号化backupを実行。同じGUIで明示Refresh→backup選択→preview→正確な同意→Run Restore→再Refreshを操作し、Apply/restore各1回、committed evidence、開始hash復元、inventory、Secret Service/manifest/journal/restore execution/audit結合、baseline完全復元を確認した。現UNRELEASED candidate 1 sampleであり最終artifact項目は未完了。
+  - 2026-09-16: [final artifact local user Apply/manual restore通常GUI Gate](validation/phase6-final-local-user-restore-gui-2026-09-16.md)で同経路をfinal local debから再実行。採用attemptはApply/restore各1回、両方`committed`、初期hash復元、restore後明示Refresh、hash chain／Secret Service結合、追加12 packageと専用stateの削除、Debian baseline/session完全一致、snapshot削除、証拠checksumに成功した。
 - [ ] 最終artifactでSSH user Apply/rollbackと切断後immutable result照合をGUIから再実行する。
   - 2026-09-14: [通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)で、診断→Agent推奨2件→review→承認→Applyを注入なしで操作。production validationの全passed結果を保存後、対象fileを変えないfailed check 1件で分岐させ、Apply/rollback各1回、開始hash復元、journal/dual backup/GUI表示、両VM復元を確認。validation faultを含む現candidate 1 sampleであり、自然障害・最終artifact項目は未完了。
   - 2026-09-15: [実runtime不在による通常GUI rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)で、production validationの`opencode.installed`が実際にfailedとなり、Apply/rollback各1回で`rolled_back`。plan/approval/transport/validation result注入なし、config/OpenCode runtime/両VM baselineを復元した。pre-final candidateのため最終artifact項目は未完了。
@@ -171,7 +178,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
   - 2026-09-13再追記: [実NIC断後のcommit照合](validation/phase6-cross-vm-network-2026-09-13.md)でhelper成功後の応答保留中にlive NICを4.020秒切断し、実SSH exit 255後、復旧後のresult照合でcommitted。Apply 1回、例外注入なし。relay/短いkeepaliveの限定caseであり、rollback応答断や最終artifact Gateは未完了。両VM復元・時計補正済み。
   - 2026-09-10: [Qt切断照合回帰](validation/phase6-ssh-qt-reconciliation-2026-09-10.md)で4ケースのGUI/journal一致とmutation再送なしを確認。transportはfixtureであり、実回線・最終artifact Gateの代替ではない。
 - [x] release scope外のlocal root/SSH root ApplyとSSH user/root restoreがproduction allowlistに含まれず、経路別の固定理由でI/O前にfail closedとなることを確認した。local root手動restoreは公開Gate完了済み。
-- [ ] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更を最終commitで再実行する。
+- [x] secret corpus、symlink/path traversal、owner/mode、stale approval/hash、PolicyKit deny/cancel、SSH fingerprint変更をfinal sourceとfinal artifactで再実行した。focused 159件（158成功・1 expected skip）、全806件（767成功・39 expected skip）、両deb verifierと必須静的検査に成功。詳細: [final security regression](validation/phase6-final-security-regression-2026-09-16.md)。
   - 2026-09-14: [pre-final security regression](validation/phase6-pre-final-security-regression-2026-09-14.md)で、product sourceが採用candidate `ff7913b`から不変であることを確認し、focused 159件（158成功・1 expected skip）と全806件（767成功・39 expected skip）、両deb verifier、必須静的検査に成功した。現candidateは`UNRELEASED`のため、本項目は最終artifact反復まで未完了とする。
 - [x] backup key loss、片側copy loss、`RECOVERY_REQUIRED`、restore `failed`/`unknown`の利用者手順を[acceptance review](validation/phase6-recovery-procedure-acceptance-2026-09-07.md)する。
 
