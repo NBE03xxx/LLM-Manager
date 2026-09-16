@@ -77,7 +77,7 @@ Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・�
 - [x] CycloneDX 1.6の直接依存SBOMをlocal/remote package別に作成し、各debの`/usr/share/doc/<package>/`へ収録した。
 - [ ] Ubuntu 26.04とDebian 13のclean installでAPTが解決した全推移依存のpackage/version/source/licenseを採取し、release artifactごとのresolved-environment SBOMを作成する。
 - [x] ff7913b Debian fresh-install環境の全2248 installed packageに対応するcopyrightを欠落なく採取し、Ubuntu local/remoteと合わせてPySide6/Qtの25 binary・6 source系統、主Files節、Qt GPL Exception本文、追加third-party license名をreviewした。詳細: [Qt/PySide6 review](validation/phase6-ff7913b-qt-license-review-2026-09-13.md)。これは法的適合や最終artifactのlicense Gate完了を意味しない。
-- [ ] 最終binary debを展開し、未申告の実行形式、共有library、vendored module、生成assetがないことを確認する。
+- [x] 最終binary debを展開し、未申告の実行形式、共有library、vendored module、生成assetがないことを確認した。実行fileはlocal固定launcher/helper 5本とremote helper 1本だけで、ELF、shared object、bytecode cacheはなかった。詳細: [final artifact build](validation/phase6-final-artifact-build-2026-09-16.md)。
 
 採取ツール`packaging/collect-installed-sbom.py`と[手順](validation/phase6-installed-sbom-2026-09-05.md)は整備済み。host smoke、両VMのlocal dev composition、Ubuntu remote helper dev compositionの採取を完了。全installed packageのsupersetを採取するため、artifact同一性・APT logとの関連付け・対象OSのmanual license reviewは別途必要。
 
@@ -91,15 +91,20 @@ Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・�
 
 2026-09-12の[修正後candidate再build](validation/phase6-candidate-rebuild-2026-09-12.md)で、commit `b15a984` から両debを独立2回build/verifyしbyte完全一致を確認。各local build内806 test成功。その後のaccessibility修正によりb15a984 artifactは現行sourceの候補ではなくなった。修正commitから両debを再buildするまで、修正確認用の未コミットoverlay artifactを採用candidateと呼ばない。UNRELEASEDを維持しているため、以下の最終artifact項目は未完了のまま。
 
-2026-09-09の`0.1.0` candidate compositionで、commit `4722cfa`からlocal/remote debを2回ずbuildして両方のbyte一致とverifier成功を確認した。local SHA-256は`25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remoteは`45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`。展開監査でELF/shared library、bytecode cache、third-party vendored moduleがないことも確認した。`UNRELEASED`解除後の最終commitから再実行するため、下記の最終artifact項目は未完了のままとする。詳細は[composition記録](validation/phase6-0.1.0-candidate-composition-2026-09-09.md)を参照する。
+2026-09-09の`0.1.0` candidate compositionで、commit `4722cfa`からlocal/remote debを2回ずbuildして両方のbyte一致とverifier成功を確認した。local SHA-256は`25e227fbab536be66a3f40fda81f40cc9ecae2a091a5f8fe41015358b2e6b181`、remoteは`45dcd8eb852317aed1da212a7bb0c1f3d008aee5d1aae38b09f980df8e56a1d1`。展開監査でELF/shared library、bytecode cache、third-party vendored moduleがないことも確認した。詳細は[composition記録](validation/phase6-0.1.0-candidate-composition-2026-09-09.md)を参照する。
 
-- [ ] clean checkoutまたはreview済みworktreeで全testとbuildを行い、未追跡fileがartifactへ混入していないことを確認する。
-- [ ] local debを`dpkg-buildpackage -us -uc -b`で作成する。
-- [ ] remote helper debを`packaging/remote/build-deb.sh`で作成する。
-- [ ] `packaging/verify-deb.sh`と`packaging/remote/verify-deb.sh`を両artifactへ実行する。
-- [ ] package name/version/architecture/dependency、root owner/mode、isolated launcher、PolicyKit fixed helper、desktop/icon、copyright/notices/SBOMを展開後に確認する。
-- [ ] 同じsource commitから2回buildし、差異を比較する。差異がある場合は原因を記録し、少なくともpayload内容が一致することを確認する。
-- [ ] source commit ID、build host、toolchain、両debのSHA-256をrelease記録へ保存する。
+2026-09-16: [final source build](validation/phase6-final-artifact-build-2026-09-16.md)でcommit
+`5b7d4de03e495fe630deab952de043f945a22bd7`のtracked sourceを独立2回展開し、local／remote両debを
+各2回buildした。両artifact、buildinfo、changesがbyte一致し、各local build内806 test、4回の
+専用verifier、展開後binary／owner／mode／同梱境界監査に成功した。
+
+- [x] clean checkoutまたはreview済みworktreeで全testとbuildを行い、未追跡fileがartifactへ混入していないことを確認した。
+- [x] local debを`dpkg-buildpackage -us -uc -b`で作成した。
+- [x] remote helper debを`packaging/remote/build-deb.sh`で作成した。
+- [x] `packaging/verify-deb.sh`と`packaging/remote/verify-deb.sh`を両runのartifactへ実行した。
+- [x] package name/version/architecture/dependency、root owner/mode、isolated launcher、PolicyKit fixed helper、desktop/icon、copyright/notices/SBOMを展開後に確認した。
+- [x] 同じsource commitから2回buildし、local／remote artifact、buildinfo、changesのbyte完全一致を確認した。
+- [x] source commit ID、build host、toolchain、両debのSHA-256を[release build記録](validation/phase6-final-artifact-build-2026-09-16.md)へ保存した。
 
 必須検査:
 

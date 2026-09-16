@@ -6,6 +6,13 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-16、final source commit `5b7d4de03e495fe630deab952de043f945a22bd7`から
+  tracked sourceを独立2回展開し、local／remote両debを各2回build。各artifact、buildinfo、
+  changesがbyte一致。local SHA-256 `63f4b1b43d0b72f4578f30282d99313b675c29166e37637f9d79040bdbafece1`、
+  remote SHA-256 `ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4`。
+  各build内806 test、4 verifier、tracked source一致、package展開binary／owner／mode／同梱境界監査が成功。
+  artifactは`/tmp/llm-manager-final-5b7d4de-20260916/artifacts/`へ保持。未署名・未公開。
+  Reproducible build 7項目とfinal binary監査が完了し、進捗29/44、65.9%。
 - 2026-09-16、確定済みrelease判断に基づきfinal source metadata transitionを開始。
   `debian/changelog`を`unstable`へ変更し、release日時を2026-09-16、署名者を
   `NBE03xxx <NBE03247@nifty.com>`へ固定。release notesから`TBD`を除去し、signed tagを
@@ -119,13 +126,30 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-15現在は19/44件、**43.2%（公開チェックリスト項目数ベース）**。
+2026-09-16現在は29/44件、**65.9%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
-この43.2%とは比較しない。今後は再集計可能な値を主表示とする。
+この65.9%とは比較しない。今後は再集計可能な値を主表示とする。
 部分検証が増えてもcheckboxの完了条件を満たさない限り数値は上げない。
 
 ## 採用candidate
+
+### Final artifact（2026-09-16）
+
+source commit: `5b7d4de03e495fe630deab952de043f945a22bd7`
+
+保存先: `/tmp/llm-manager-final-5b7d4de-20260916/artifacts/`
+
+| artifact | SHA-256 |
+| --- | --- |
+| `llm-manager_0.1.0_all.deb` | `63f4b1b43d0b72f4578f30282d99313b675c29166e37637f9d79040bdbafece1` |
+| `llm-manager-remote-helper_0.1.0_all.deb` | `ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4` |
+| `llm-manager-0.1.0.tar.gz` | `6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18` |
+
+独立2回build、各build内806 test、両runのverifier、展開監査に成功。最終OS／GUI／security Gate、
+resolved-environment SBOM、`SHA256SUMS`、署名、tag、公開は未実施。下記pre-final candidateを混用しない。
+
+### Pre-final candidate（履歴）
 
 source commit: `7f846f5fb1134be7df06490f30a5216ab414ae0d`
 
