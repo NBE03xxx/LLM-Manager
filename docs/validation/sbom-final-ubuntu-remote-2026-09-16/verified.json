@@ -1,0 +1,11 @@
+{
+  "archive": "ubuntu-remote-evidence.tar.xz",
+  "artifact_sha256": "ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4",
+  "package_count": 1908,
+  "missing_copyright": [
+    "brave-browser",
+    "brave-keyring"
+  ],
+  "integrity_verified": true,
+  "license_review_complete": false
+}

@@ -1,0 +1,21 @@
+{
+  "purged_packages": [
+    "libclang1-19",
+    "libpyside6-py3-6.8",
+    "libshiboken6-py3-6.8",
+    "llm-manager",
+    "python3-bcrypt",
+    "python3-cffi-backend",
+    "python3-cryptography",
+    "python3-jeepney",
+    "python3-pyside6.qtcore",
+    "python3-pyside6.qtgui",
+    "python3-pyside6.qtwidgets",
+    "python3-secretstorage"
+  ],
+  "baseline_exact_match": true,
+  "dpkg_audit_empty": true,
+  "apt_check": true,
+  "temporary_files_removed": true,
+  "vm_state": "running"
+}

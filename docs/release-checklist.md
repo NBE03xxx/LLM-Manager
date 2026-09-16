@@ -75,7 +75,7 @@ Maintainer/changelog signerは`NBE03xxx <NBE03247@nifty.com>`と決定。鍵・�
 - [x] vendored third-party codeがないことをtracked file一覧とpackage構成で確認した。
 - [x] runtime直接依存とupstream license sourceを`THIRD_PARTY_NOTICES.md`へ記録した。
 - [x] CycloneDX 1.6の直接依存SBOMをlocal/remote package別に作成し、各debの`/usr/share/doc/<package>/`へ収録した。
-- [ ] Ubuntu 26.04とDebian 13のclean installでAPTが解決した全推移依存のpackage/version/source/licenseを採取し、release artifactごとのresolved-environment SBOMを作成する。
+- [x] final artifactをUbuntu 26.04 local／remote helperとDebian 13 localへ導入し、APTが解決した全推移依存のpackage/version/source/licenseを採取してartifact別resolved-environment SBOM archiveを作成した。Ubuntuは1,907／1,908 packageと既存非依存Brave 2件のcopyright欠落、Debianは2,248 packageで欠落なし。artifact identity、BOM、inventory、copyright checksum、環境cleanupを確認した。詳細: [final environment SBOM and Qt review](validation/phase6-final-environment-sbom-qt-2026-09-16.md)。
 - [x] ff7913b Debian fresh-install環境の全2248 installed packageに対応するcopyrightを欠落なく採取し、Ubuntu local/remoteと合わせてPySide6/Qtの25 binary・6 source系統、主Files節、Qt GPL Exception本文、追加third-party license名をreviewした。詳細: [Qt/PySide6 review](validation/phase6-ff7913b-qt-license-review-2026-09-13.md)。これは法的適合や最終artifactのlicense Gate完了を意味しない。
 - [x] 最終binary debを展開し、未申告の実行形式、共有library、vendored module、生成assetがないことを確認した。実行fileはlocal固定launcher/helper 5本とremote helper 1本だけで、ELF、shared object、bytecode cacheはなかった。詳細: [final artifact build](validation/phase6-final-artifact-build-2026-09-16.md)。
 

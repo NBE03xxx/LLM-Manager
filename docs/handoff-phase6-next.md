@@ -6,6 +6,12 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-16、final artifactをUbuntu local、Ubuntu remote helper、Debian localへ一時導入し、
+  resolved-environment SBOMを採取。package数は1,907／1,908／2,248、Ubuntuのcopyright欠落は
+  開始前からある非依存Brave 2件だけ、Debianは0件。artifact hash、内部/外部checksum、BOM、
+  inventoryが一致。Qt/PySide6 25 binary・6 source系統の原文reviewも成功。Ubuntuは各snapshotを
+  baselineへ復元・削除、Debianは追加12 packageだけをpurgeしてbaseline完全一致。両VM running、
+  一時snapshotなし。release用archiveをfinal artifact directoryへ収録。進捗30/44、68.2%。
 - 2026-09-16、final source commit `5b7d4de03e495fe630deab952de043f945a22bd7`から
   tracked sourceを独立2回展開し、local／remote両debを各2回build。各artifact、buildinfo、
   changesがbyte一致。local SHA-256 `63f4b1b43d0b72f4578f30282d99313b675c29166e37637f9d79040bdbafece1`、
@@ -126,10 +132,10 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-16現在は29/44件、**65.9%（公開チェックリスト項目数ベース）**。
+2026-09-16現在は30/44件、**68.2%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
-この65.9%とは比較しない。今後は再集計可能な値を主表示とする。
+この68.2%とは比較しない。今後は再集計可能な値を主表示とする。
 部分検証が増えてもcheckboxの完了条件を満たさない限り数値は上げない。
 
 ## 採用candidate
