@@ -1,0 +1,5 @@
+Name=user
+Type=wayland
+Active=yes
+State=active
+LockedHint=no

@@ -1,0 +1,82 @@
+{
+  "journal/ssh-user-7c9e9856bca04fcb94103602ed099f40.json": {
+    "approval_id": "approval-bbd883bf605e4629801a51edbe29b427",
+    "backup_id": "ssh-user-7c9e9856bca04fcb94103602ed099f40",
+    "change_set_hash": "35f845af54c5cd984f7f88892fb5971ee1263f47f56e78e80cdfdb92810c03f5",
+    "created_at": "2026-09-17T12:24:11.776393+00:00",
+    "host_id": "ssh:phase6-final-ssh-rollback-net2",
+    "journal_hash": "c9b955ab6c7a466b114699645da9d672a14e00559c8e49a0b98fc920d165bad8",
+    "manifest_hash": "d0cc2af11bc2c464391f6acc33d0a407821be8fca6a18fca080d5982bc021933",
+    "operation_id": "ssh-user-7c9e9856bca04fcb94103602ed099f40",
+    "plan_id": "plan-87ae0ca4a8564d2e8680694211e7b874",
+    "request_hash": "61bd2628a18e3dfd464a63d47d296165f7aa463dd9e2068392d62adea55a030f",
+    "rollback_request_hash": "5a4acd83d4e1d056aa817fc99ffa9e2b8009150d31c5352dbd47121866481328",
+    "schema_version": "1.1",
+    "status": "rolled_back",
+    "targets": [
+      {
+        "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+        "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc"
+      }
+    ],
+    "updated_at": "2026-09-17T12:24:21.333839+00:00"
+  },
+  "remote-recovery/receipts/d0cc2af11bc2c464391f6acc33d0a407821be8fca6a18fca080d5982bc021933.json": {
+    "backup_id": "ssh-user-7c9e9856bca04fcb94103602ed099f40",
+    "change_set_hash": "35f845af54c5cd984f7f88892fb5971ee1263f47f56e78e80cdfdb92810c03f5",
+    "envelope_version": 1,
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-final-ssh-rollback-net2",
+    "item_hashes": [
+      [
+        "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+      ]
+    ],
+    "key_reference": "remote-master-v1",
+    "key_scope": "remote_root",
+    "local_manifest_hash": "d0cc2af11bc2c464391f6acc33d0a407821be8fca6a18fca080d5982bc021933",
+    "plan_id": "plan-87ae0ca4a8564d2e8680694211e7b874",
+    "receipt_hash": "734c07b582d108010d508bf3a6d2ebc2af00a751cf3ad3b7417f3daa0f76dd0c",
+    "schema_version": "1.0",
+    "scheme": "AES-256-GCM",
+    "storage_location": "/var/lib/llm-manager/backups/56c9d41d22f1263bf9a53dfd/ssh-user-7c9e9856bca04fcb94103602ed099f40",
+    "verified": true
+  },
+  "backups/56c9d41d22f1263bf9a53dfd/ssh-user-7c9e9856bca04fcb94103602ed099f40/manifest.json": {
+    "backup_id": "ssh-user-7c9e9856bca04fcb94103602ed099f40",
+    "change_set_hash": "35f845af54c5cd984f7f88892fb5971ee1263f47f56e78e80cdfdb92810c03f5",
+    "complete": true,
+    "created_at": "2026-09-17T12:23:18.420267+00:00",
+    "encryption": {
+      "enabled": true,
+      "envelope_version": 1,
+      "key_reference": "local-master-v1",
+      "key_scope": "local_secret_service",
+      "scheme": "AES-256-GCM"
+    },
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-final-ssh-rollback-net2",
+    "items": [
+      {
+        "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+        "existed": true,
+        "gid": 1000,
+        "mode": 384,
+        "selinux_context": null,
+        "service_state": null,
+        "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "storage_location": "/tmp/phase6-final-ssh-rollback-net2-20260917/state/llm-manager/backups/56c9d41d22f1263bf9a53dfd/ssh-user-7c9e9856bca04fcb94103602ed099f40",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "uid": 1000
+      }
+    ],
+    "manifest_hash": "d0cc2af11bc2c464391f6acc33d0a407821be8fca6a18fca080d5982bc021933",
+    "plan_id": "plan-87ae0ca4a8564d2e8680694211e7b874",
+    "protected": false,
+    "retention_expires_at": "2026-10-17T12:23:18.420267+00:00",
+    "schema_version": "1.0",
+    "storage_location": "/tmp/phase6-final-ssh-rollback-net2-20260917/state/llm-manager/backups/56c9d41d22f1263bf9a53dfd/ssh-user-7c9e9856bca04fcb94103602ed099f40"
+  }
+}

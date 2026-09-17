@@ -1,0 +1,11 @@
+{
+  "reason": "interactive backup preflight did not produce two verified SSH backup copies",
+  "status": "approved",
+  "error": "both SSH backup copies must verify",
+  "staging_download_count": 318,
+  "apply_invoke_count": 0,
+  "target_initial_hash_unchanged": true,
+  "mutation_retried": false,
+  "qualifying_disconnect_gate": false,
+  "link": "52:54:00:f8:49:29 up"
+}

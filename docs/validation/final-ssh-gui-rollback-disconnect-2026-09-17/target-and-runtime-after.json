@@ -1,0 +1,14 @@
+{
+  "config_sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+  "config": {
+    "autoupdate": false,
+    "compaction": {
+      "auto": false,
+      "prune": false
+    }
+  },
+  "binary_sha256": "d91e0d33676d0839f7cde87924cd4127ea88c9d6784eea9f009a7d08bdc60eeb",
+  "binary_mode": "0o755",
+  "held_exists": false,
+  "version": "1.18.25"
+}

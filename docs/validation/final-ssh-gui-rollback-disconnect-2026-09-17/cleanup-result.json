@@ -1,0 +1,9 @@
+{
+  "ubuntu_baseline_exact_match": true,
+  "debian_baseline_exact_match": true,
+  "dedicated_debian_secret_service_item_removed": false,
+  "ubuntu_state": "running",
+  "debian_state": "running",
+  "gate_created_local_master_v1_removed_after_reference_audit": true,
+  "cleanup_claim_corrected": true
+}

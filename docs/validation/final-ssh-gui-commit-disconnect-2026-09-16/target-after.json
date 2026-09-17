@@ -1,0 +1,10 @@
+{
+  "sha256": "28a1a2974c3ac47da4636f2c4e1c4a685e17c306620b92959fc9bf507c4f8861",
+  "config": {
+    "autoupdate": false,
+    "compaction": {
+      "auto": true,
+      "prune": false
+    }
+  }
+}

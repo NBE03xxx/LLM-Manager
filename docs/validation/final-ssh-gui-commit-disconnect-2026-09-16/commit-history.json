@@ -1,0 +1,275 @@
+[
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "local:debian",
+    "approved": false,
+    "labels": {
+      "selected-host": "Hosts",
+      "language-label": "Language"
+    },
+    "buttons": {},
+    "combos": {
+      "host-selector": "Local",
+      "language-selector": "English"
+    },
+    "checks": {}
+  },
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "selected-host": "Hosts",
+      "language-label": "Language"
+    },
+    "buttons": {},
+    "combos": {
+      "host-selector": "phase6-final-ssh-commit-net",
+      "language-selector": "English"
+    },
+    "checks": {}
+  },
+  {
+    "step": "hosts",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "workflow-status": "Ready"
+    },
+    "buttons": {
+      "start-diagnosis": {
+        "enabled": true,
+        "text": "Diagnose"
+      },
+      "cancel-operation": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {}
+  },
+  {
+    "step": "diagnose",
+    "busy": true,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "workflow-status": "Running"
+    },
+    "buttons": {
+      "start-diagnosis": {
+        "enabled": false,
+        "text": "Diagnose"
+      },
+      "cancel-operation": {
+        "enabled": true,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {}
+  },
+  {
+    "step": "recommendations",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": "0 recommendations (0 actionable)"
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Balanced"
+    },
+    "checks": {}
+  },
+  {
+    "step": "recommendations",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": "0 recommendations (0 actionable)"
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Coding"
+    },
+    "checks": {}
+  },
+  {
+    "step": "recommendations",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "profile-label": "Optimization profile",
+      "recommendation-summary": "2 recommendations (2 actionable)"
+    },
+    "buttons": {
+      "review-selected": {
+        "enabled": false,
+        "text": "Review selected recommendations"
+      }
+    },
+    "combos": {
+      "profile-selector": "Agent"
+    },
+    "checks": {}
+  },
+  {
+    "step": "review",
+    "busy": true,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "review-summary": "1 recommendations selected\nGenerating an executable change set from the current file\u2026",
+      "backup-policy-summary": "",
+      "approval-status": ""
+    },
+    "buttons": {
+      "prepare-apply": {
+        "enabled": false,
+        "text": "Prepare Apply"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-change-set": false
+    }
+  },
+  {
+    "step": "review",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": false,
+    "labels": {
+      "review-summary": "1 recommendations selected",
+      "backup-policy-summary": "Backup: encrypted (AES-256-GCM); retention: 30 days / 10 generations.",
+      "approval-status": "Approval is required before Apply can be prepared."
+    },
+    "buttons": {
+      "prepare-apply": {
+        "enabled": false,
+        "text": "Prepare Apply"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-change-set": false
+    }
+  },
+  {
+    "step": "review",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": true,
+    "labels": {
+      "review-summary": "1 recommendations selected",
+      "backup-policy-summary": "Backup: encrypted (AES-256-GCM); retention: 30 days / 10 generations.",
+      "approval-status": "Approved for this exact change set."
+    },
+    "buttons": {
+      "prepare-apply": {
+        "enabled": true,
+        "text": "Prepare Apply"
+      }
+    },
+    "combos": {},
+    "checks": {
+      "approve-change-set": true
+    }
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": true,
+    "labels": {
+      "results-summary": "Approval approval-52f85f78896145f080e464777a6f8385 is ready. Apply has not started."
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": true,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {}
+  },
+  {
+    "step": "results",
+    "busy": true,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": true,
+    "labels": {
+      "results-summary": "Apply is running\u2026"
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": false,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": true,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {}
+  },
+  {
+    "step": "results",
+    "busy": false,
+    "error": null,
+    "host_id": "ssh:phase6-final-ssh-commit-net",
+    "approved": true,
+    "labels": {
+      "results-summary": "Apply result: committed."
+    },
+    "buttons": {
+      "run-sandbox-apply": {
+        "enabled": false,
+        "text": "Run Apply"
+      },
+      "cancel-sandbox-apply": {
+        "enabled": false,
+        "text": "Cancel"
+      }
+    },
+    "combos": {},
+    "checks": {}
+  }
+]

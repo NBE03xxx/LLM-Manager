@@ -1,0 +1,82 @@
+{
+  "journal/ssh-user-5f45eb38f545460dba902d0d605e6ba5.json": {
+    "approval_id": "approval-401c789d795e469f8b97f4f66a3b281a",
+    "backup_id": "ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+    "change_set_hash": "3e2fedb7dab1d2ed8becde3bd47a21658254d09a583b7f7a72b41db589dfb16e",
+    "created_at": "2026-09-17T12:17:35.448889+00:00",
+    "host_id": "ssh:phase6-final-ssh-commit-net4",
+    "journal_hash": "69c08de7b0be883cf4069811f5b30443383ab45948dc1b32020a0bae6ba96a6c",
+    "manifest_hash": "2e5c9ae5e93938bc936638bdd0cb98da4584947cbb88e8ba2c65b57108c029f3",
+    "operation_id": "ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+    "plan_id": "plan-419e9508a3264dc2a2d0c6765aff9e4f",
+    "request_hash": "fe336acc31a2037091a784e58f8aaeb21d5601719e96262ab1ff2e44c146ced9",
+    "rollback_request_hash": null,
+    "schema_version": "1.1",
+    "status": "committed",
+    "targets": [
+      {
+        "after_hash": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea",
+        "before_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc"
+      }
+    ],
+    "updated_at": "2026-09-17T12:17:43.207677+00:00"
+  },
+  "remote-recovery/receipts/2e5c9ae5e93938bc936638bdd0cb98da4584947cbb88e8ba2c65b57108c029f3.json": {
+    "backup_id": "ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+    "change_set_hash": "3e2fedb7dab1d2ed8becde3bd47a21658254d09a583b7f7a72b41db589dfb16e",
+    "envelope_version": 1,
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-final-ssh-commit-net4",
+    "item_hashes": [
+      [
+        "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+      ]
+    ],
+    "key_reference": "remote-master-v1",
+    "key_scope": "remote_root",
+    "local_manifest_hash": "2e5c9ae5e93938bc936638bdd0cb98da4584947cbb88e8ba2c65b57108c029f3",
+    "plan_id": "plan-419e9508a3264dc2a2d0c6765aff9e4f",
+    "receipt_hash": "c795b65c7d384a75151a7e296edfa893539e7325902bcd865ba667a54475609c",
+    "schema_version": "1.0",
+    "scheme": "AES-256-GCM",
+    "storage_location": "/var/lib/llm-manager/backups/e51f4dad2c215eb8558179fa/ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+    "verified": true
+  },
+  "backups/e51f4dad2c215eb8558179fa/ssh-user-5f45eb38f545460dba902d0d605e6ba5/manifest.json": {
+    "backup_id": "ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+    "change_set_hash": "3e2fedb7dab1d2ed8becde3bd47a21658254d09a583b7f7a72b41db589dfb16e",
+    "complete": true,
+    "created_at": "2026-09-17T12:16:15.226176+00:00",
+    "encryption": {
+      "enabled": true,
+      "envelope_version": 1,
+      "key_reference": "local-master-v1",
+      "key_scope": "local_secret_service",
+      "scheme": "AES-256-GCM"
+    },
+    "host_fingerprint": "SHA256:icwHdGrzhWtopJvu38FgzWxnenrYn3249M1dr7dRLnA",
+    "host_id": "ssh:phase6-final-ssh-commit-net4",
+    "items": [
+      {
+        "content_ref": "items/0000-fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7.enc",
+        "existed": true,
+        "gid": 1000,
+        "mode": 384,
+        "selinux_context": null,
+        "service_state": null,
+        "sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+        "storage_location": "/tmp/phase6-final-ssh-commit-net4-20260917/state/llm-manager/backups/e51f4dad2c215eb8558179fa/ssh-user-5f45eb38f545460dba902d0d605e6ba5",
+        "target": "/home/yoshimi/.config/opencode/opencode.jsonc",
+        "uid": 1000
+      }
+    ],
+    "manifest_hash": "2e5c9ae5e93938bc936638bdd0cb98da4584947cbb88e8ba2c65b57108c029f3",
+    "plan_id": "plan-419e9508a3264dc2a2d0c6765aff9e4f",
+    "protected": false,
+    "retention_expires_at": "2026-10-17T12:16:15.226176+00:00",
+    "schema_version": "1.0",
+    "storage_location": "/tmp/phase6-final-ssh-commit-net4-20260917/state/llm-manager/backups/e51f4dad2c215eb8558179fa/ssh-user-5f45eb38f545460dba902d0d605e6ba5"
+  }
+}

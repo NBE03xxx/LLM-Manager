@@ -1,0 +1,15 @@
+{
+  "status": "restored",
+  "started_wall_time_ns": 1789647659612068371,
+  "before_sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7",
+  "binary_sha256": "d91e0d33676d0839f7cde87924cd4127ea88c9d6784eea9f009a7d08bdc60eeb",
+  "binary_mode": "0o755",
+  "mutation_detected": {
+    "wall_time_ns": 1789647853989911595,
+    "after_sha256": "682128216e9141bd32169fd999804f3992827cbc902aaf6d4057fd4eecdac0ea"
+  },
+  "runtime_restored": {
+    "wall_time_ns": 1789647856329767883,
+    "config_sha256": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+  }
+}

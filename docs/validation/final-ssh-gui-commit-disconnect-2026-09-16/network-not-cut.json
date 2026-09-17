@@ -1,0 +1,13 @@
+{
+  "reason": "interactive authentication crossed a task turn and the foreground watcher session did not persist",
+  "helper_marker": {
+    "verb": "user-apply",
+    "request_id": "ssh-user-5c835879ff11469dbeb6437027132460",
+    "request_hash": "2628e277f4a6ec2f3c89c3b08653c7d3e4b3620210ad108fed597b6eede58816",
+    "helper_exit_code": 0
+  },
+  "apply_exit_code": 0,
+  "mutation_retried": false,
+  "qualifying_disconnect_gate": false,
+  "link": "52:54:00:f8:49:29 up"
+}

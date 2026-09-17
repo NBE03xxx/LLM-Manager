@@ -1,0 +1,16 @@
+{
+  "helper_marker": {
+    "verb": "user-rollback",
+    "request_id": "ssh-user-7c9e9856bca04fcb94103602ed099f40-rollback",
+    "request_hash": "5a4acd83d4e1d056aa817fc99ffa9e2b8009150d31c5352dbd47121866481328",
+    "helper_exit_code": 0,
+    "restored_hash": "fcbdf78f1ce1c2bb87446df5f5fc64d9b6da5fd23824881109581152bfee98a7"
+  },
+  "link_before": "up",
+  "down_at_monotonic": 44826.712361251,
+  "link_during": "52:54:00:f8:49:29 down",
+  "up_at_monotonic": 44830.732707962,
+  "watchdog_exit": 0,
+  "watchdog_stderr": "",
+  "link_after": "52:54:00:f8:49:29 up"
+}

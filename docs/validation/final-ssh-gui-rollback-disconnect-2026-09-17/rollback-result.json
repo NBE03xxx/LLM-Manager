@@ -1,0 +1,1015 @@
+{
+  "status": "rolled_back",
+  "error": "runtime validation failed",
+  "validations": [
+    {
+      "check": "opencode.installed",
+      "status": "failed",
+      "actual": "not_installed"
+    },
+    {
+      "check": "opencode.config.parse",
+      "status": "failed",
+      "actual": "not_found"
+    }
+  ],
+  "gui_summary": "Apply result: rolled_back; runtime validation failed",
+  "history_count": 14,
+  "plan_injected": false,
+  "approval_injected": false,
+  "transport_injected": true,
+  "transport_condition": "rollback stdout relay and short keepalive; actual NIC cut",
+  "remote_sudo_timeout_seconds": 600,
+  "remote_sudo_timeout_injected": true,
+  "validation_injected": false,
+  "external_runtime_outage": true,
+  "transport_events": [
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 120,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 134,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 142,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 121,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 134,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 139,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 134,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 139,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 132,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 134,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 134,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 124,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 133,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 128,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 126,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 125,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 127,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 129,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 130,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 1,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": "scp: .local/state/llm-manager/remote-helper/ssh-user-7c9e9856bca04fcb94103602ed099f40/4511fc8afef41e33c09762199d40edf14d5b5d6b469354ef536277dbdd36d481/result.json: No such file or directory\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 131,
+      "stderr": ""
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 122,
+      "stderr": ""
+    },
+    {
+      "correlation_id": "ssh.user_apply.invoke",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 220,
+      "stderr": ""
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 123,
+      "stderr": ""
+    },
+    {
+      "correlation_id": "ssh.user_rollback.invoke",
+      "exit_code": 255,
+      "timed_out": false,
+      "duration_ms": 2473,
+      "stderr": "Timeout, server 192.168.122.48 not responding.\r\n"
+    },
+    {
+      "correlation_id": "ssh.staging.download",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_ms": 3190,
+      "stderr": ""
+    }
+  ]
+}

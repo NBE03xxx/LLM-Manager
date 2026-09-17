@@ -1,0 +1,9 @@
+Watcher ready; waiting for successful helper completion.
+Traceback (most recent call last):
+  File "/home/yoshimi/.codex/worktrees/886c/LLM-Manager/docs/validation/final-ssh-gui-commit-disconnect-2026-09-16-attempt2.py", line 47, in <module>
+    gate["network"].watch()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/yoshimi/.codex/worktrees/886c/LLM-Manager/docs/validation/cross-vm-network-2026-09-13.py", line 108, in watch
+    assert marker and marker['helper_exit_code']==0,'no successful helper marker; no network cut'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: no successful helper marker; no network cut

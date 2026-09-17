@@ -1,0 +1,6 @@
+{
+  "exitcode": 1,
+  "out-data": "eyJzdGF0dXMiOiAiYXBwcm92ZWQiLCAiZXJyb3IiOiAiYm90aCBTU0ggYmFja3VwIGNvcGllcyBtdXN0IHZlcmlmeSIsICJ2YWxpZGF0aW9ucyI6IFtdLCAiZ3VpX3N1bW1hcnkiOiAiQXBwbHkgcmVzdWx0OiBhcHByb3ZlZDsgYm90aCBTU0ggYmFja3VwIGNvcGllcyBtdXN0IHZlcmlmeSIsICJoaXN0b3J5X2NvdW50IjogMTQsICJwbGFuX2luamVjdGVkIjogZmFsc2UsICJhcHByb3ZhbF9pbmplY3RlZCI6IGZhbHNlLCAidHJhbnNwb3J0X2luamVjdGVkIjogdHJ1ZSwgInRyYW5zcG9ydF9jb25kaXRpb24iOiAic3Rkb3V0IHJlbGF5IGFuZCBzaG9ydCBrZWVwYWxpdmU7IGFjdHVhbCBOSUMgY3V0In0K",
+  "out-truncated": false,
+  "exited": true
+}

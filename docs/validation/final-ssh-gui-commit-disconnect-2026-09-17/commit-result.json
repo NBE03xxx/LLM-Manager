@@ -1,0 +1,11 @@
+{
+  "status": "approved",
+  "error": "both SSH backup copies must verify",
+  "validations": [],
+  "gui_summary": "Apply result: approved; both SSH backup copies must verify",
+  "history_count": 14,
+  "plan_injected": false,
+  "approval_injected": false,
+  "transport_injected": true,
+  "transport_condition": "stdout relay and short keepalive; actual NIC cut"
+}

@@ -1,0 +1,7 @@
+{
+  "reason": "derived outer GUI GUEST retained the historical date",
+  "stopped_before_gui_launch": true,
+  "stopped_before_mutation": true,
+  "completed_setup_replayed": false,
+  "correct_guest": "/tmp/phase6-final-ssh-commit-net-20260916"
+}

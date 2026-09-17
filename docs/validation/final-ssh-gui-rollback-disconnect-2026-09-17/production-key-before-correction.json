@@ -1,0 +1,6 @@
+[
+  {
+    "path": "/org/freedesktop/secrets/collection/login/12",
+    "properties_gvariant": "({'Locked': <false>, 'Attributes': <{'application': 'llm-manager', 'key-reference': 'local-master-v1', 'purpose': 'backup-encryption', 'xdg:schema': 'org.freedesktop.Secret.Generic'}>, 'Label': <'LLM-Manager backup encryption key'>, 'Type': <'org.freedesktop.Secret.Generic'>, 'Created': <uint64 1789647798>, 'Modified': <uint64 1789647798>},)\n"
+  }
+]

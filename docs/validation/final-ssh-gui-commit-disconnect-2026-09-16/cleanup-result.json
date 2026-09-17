@@ -1,0 +1,7 @@
+{
+  "ubuntu_baseline_exact_match": true,
+  "debian_baseline_exact_match": true,
+  "dedicated_debian_secret_service_item_removed": true,
+  "ubuntu_state": "running",
+  "debian_state": "running"
+}

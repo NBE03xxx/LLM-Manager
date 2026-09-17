@@ -1,4 +1,4 @@
-# 次チャット用引継ぎ（2026-09-16）
+# 次チャット用引継ぎ（2026-09-17）
 
 `/home/yoshimi/WorkSpace/LLM-Manager` のPhase 6 Hardening / MVP Releaseを続けてください。
 まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と検証記録で補ってください。
@@ -6,6 +6,16 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-17、[final artifact SSH user Apply/rollback＋実NIC断Gate](validation/phase6-final-ssh-gui-disconnect-2026-09-17.md)が成功。
+  Debian通常user・installed final deb・通常`qt_app.main`からUbuntu SSH userへのcommitと自然rollbackを
+  別namespace／snapshot／operationで実行。plan/approval/validation結果注入なし。commitはApply 1回、
+  validation 2件passed、helper exit 0後にlive NICを4.021秒down、実SSH exit 255、復旧後immutable resultは
+  `committed`。rollbackは実OpenCode binaryをApply後だけ一時退避しproduction validatorが`not_installed`を検出、
+  Apply/rollback各1回、rollback helper exit 0後にlive NICを4.020秒down、実SSH exit 255、復旧後resultは
+  `rolled_back`。config/runtime hash・mode復元、両VM baseline完全一致、snapshot／専用Secret Service item削除、
+  時計補正、証拠checksum成功。採用caseでは人の認証turn用にremote sudo待機だけを600秒と明示し、
+  product outcomeは置換していない。最終SSH項目とperformance親項目が完了し、進捗40/44、90.9%。
+  残件はrelease set checksum、artifact署名、signed tag、公開後再取得検証。署名・tag・公開は未実施。
 - 2026-09-16、[final artifact local user Apply/manual restore通常GUI Gate](validation/phase6-final-local-user-restore-gui-2026-09-16.md)が成功。
   Debian通常user・installed final deb・通常`qt_app.main`でLocal診断→Agent推奨2件→review→明示承認→
   Apply→AES-256-GCM backup→同じGUIのRefresh／backup選択／metadata-only preview／正確な同意→
@@ -141,7 +151,7 @@
 - 本文書更新は別commitになるため、再開時は `git status -sb` と `git log -5 --oneline` を取得する。
 - ユーザーは「検査後にまとめてコミット・プッシュ」を承認済み。各検証sliceをその方針で保存してきた。
 - `ff7913b`以降は検証script・証拠・文書のみ変更。製品source変更なし。
-- 実行中Gate、認証待ち、未復元snapshotはない。local user/root manual restoreの通常GUI Gateとnet2の実NIC断commit照合に成功。
+- 実行中Gate、認証待ち、未復元snapshotはない。final artifactのlocal user/root manual restoreとSSH user commit／自然rollback＋実NIC断GUI Gateに成功。
   net/net2とr2/r3はすべて両VM cleanup完了。最後にsystem clockを補正済み。
   初回netは監視前にApplyが完了し、stale markerチェックによりNIC切断を中止。
   非採用証拠を保存して両VM cleanup済み。net2は新しいoperationであり再送ではない。
@@ -153,7 +163,7 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-16現在は38/44件、**86.4%（公開チェックリスト項目数ベース）**。
+2026-09-17現在は40/44件、**90.9%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
 この86.4%とは比較しない。今後は再集計可能な値を主表示とする。
@@ -174,7 +184,8 @@ source commit: `5b7d4de03e495fe630deab952de043f945a22bd7`
 | `llm-manager-0.1.0.tar.gz` | `6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18` |
 
 独立2回build、各build内806 test、両runのverifier、展開監査に成功。最終OS／GUI／security Gate、
-resolved-environment SBOM、`SHA256SUMS`、署名、tag、公開は未実施。下記pre-final candidateを混用しない。
+resolved-environment SBOM、OS／GUI／security Gateは完了。release set `SHA256SUMS`、署名、tag、公開は未実施。
+下記pre-final candidateを混用しない。
 
 ### Pre-final candidate（履歴）
 
@@ -278,17 +289,11 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. local user/root manual restoreの全GUI操作、性能の複数sample、自然runtime障害rollbackは現candidateで完了。次はfinal artifact Gateを進める。
-2. `docs/release-checklist.md` のSSH機能/別マシン間切断、最終artifactのSBOM/lifecycle等を
-   継続する。
-   利用者はDebian画面でUbuntuのsudo認証が可能と回答済み。
-   Debian GUI→Ubuntu SSHの正常Applyとrollbackは別caseで成功済み。
-   実NIC断後の正常Apply照合はnet2、rollback照合はnetwork-rollback2で成功済み。次は
-   通常GUIのcommit/rollback全経路も現candidateで成功済み。最終artifact項目は未完了のまま。
-   net2は成功応答を10秒保留するrelayと短いSSH keepaliveの限定caseである。
-   次回ネットワークGateは必ずGUI launchより先にwatch readyを確認する。
-   snapshot操作後は両VM時計を確認すること。r2で約200秒先のrequestを拒否した。
-   手動Run Applyで入力タイミングを合わせる。保存済みoperationは再送しない。
+1. final artifactのSBOM、lifecycle、security、local user/root GUI、SSH user commit／自然rollback＋実NIC断Gateは完了。
+   次は保存済みfinal release artifact setを再hashし、両deb、source archive、直接依存SBOM、
+   resolved-environment SBOMを対象にrelease set `SHA256SUMS`を作成・検証する。
+2. `SHA256SUMS`作成時もsource commit `5b7d4de03e495fe630deab952de043f945a22bd7`と上記artifact hashを正本とし、
+   pre-final artifactを混用しない。既存Gate operationは完了済みなので再実行・再送しない。
 3. release専用署名鍵、target distribution、署名者、公開先は確定済み。final source metadataで
    `UNRELEASED`を`unstable`へ変更し、release日時・変更点も確定済み。
    秘密鍵を自動生成・推測選択しない。
