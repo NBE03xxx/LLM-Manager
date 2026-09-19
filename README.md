@@ -106,7 +106,6 @@ upgrade、remove、purge、既知制限、復旧時の注意は[v0.1.0 Release N
 - [Phase 5 Qt restore result evidence](docs/validation/phase5-qt-restore-results-2026-09-04.md)
 - [Phase 5 local restore explicit refresh](docs/validation/phase5-local-restore-refresh-2026-09-04.md)
 - [Phase 5 closure audit](docs/validation/phase5-closure-audit-2026-09-04.md)
-- [Phase 6 handoff](docs/handoff-phase6.md)
 - [SSH transfer disconnect validation](docs/validation/ssh-transfer-disconnect-2026-08-30.md)
 - [SSH remote journal reconciliation validation](docs/validation/ssh-remote-journal-reconciliation-2026-08-30.md)
 - [SSH development read-only validation](docs/validation/ssh-development-readonly-2026-08-29.md)
