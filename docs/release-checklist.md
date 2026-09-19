@@ -1,6 +1,6 @@
 # MVP Release Checklist
 
-このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`、distributionは`unstable`へ固定済みだが、公開後再検証が完了するまで一般配布しない。
+このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。version `0.1.0`の全44項目と公開後再検証は完了した。
 
 ## 1. Scopeとversion freeze
 
@@ -72,6 +72,11 @@ primary／subkey fingerprint一致、`GOODSIG`、`VALIDSIG`を確認。manifest 
 release専用署名副鍵を完全指定し、公開鍵だけの隔離GPG環境で`GOODSIG`、`VALIDSIG`を確認。
 tag targetをfinal artifact source commit `5b7d4de03e495fe630deab952de043f945a22bd7`へ固定し、
 remote tag object／peeled targetも一致した。進捗は43/44（97.7%）。GitHub Releaseは未公開。
+
+2026-09-19: [GitHub Release公開後再取得検証](validation/phase6-public-release-verification-2026-09-19.md)を完了した。
+`v0.1.0`へ11 assetを公開し、認証なしの公開URLから全件を新規directoryへ再取得。asset集合／API digest、
+checksum 9/9、隔離GPG署名、署名タグtarget、両deb verifier、3環境証拠verifierに成功した。
+進捗は44/44（100.0%）。Phase 6 MVP release checklistの全項目が完了。
 
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
@@ -213,14 +218,14 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 - [x] `SHA256SUMS`へASCII armored detached signatureを作成し、公開鍵だけの隔離GPG環境でprimary／署名副鍵fingerprint、`GOODSIG`、`VALIDSIG`を検証した。詳細: [release set detached signature](validation/phase6-release-set-signature-2026-09-19.md)。
 - [x] Git tag `v0.1.0`を同じrelease keyで署名し、隔離GPG環境で検証した。local／remote tag objectは`e766d2041e83fedffb5fd3180aabadbc8696345e`、peeled targetはbuild source commit `5b7d4de03e495fe630deab952de043f945a22bd7`に一致。詳細: [signed tag検証](validation/phase6-signed-tag-2026-09-19.md)。
 - [x] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載した。[0.1.0 release notes](release-notes-0.1.0-draft.md)はrelease dateと固定tag `v0.1.0`を記載し、artifact identityの正本を後続で作る`SHA256SUMS`へ固定した。
-- [ ] 公開先から全artifactを再取得してchecksum、署名、package verifierを再実行する。
+- [x] [GitHub Release `v0.1.0`](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)から認証なしで全11 assetを再取得し、正確なasset集合、API digest、checksum 9/9、隔離GPG署名、両package verifier、3環境証拠verifier、署名タグtargetを再検証した。詳細: [公開後再取得検証](validation/phase6-public-release-verification-2026-09-19.md)。
 
-release setとGit tagの実署名は完了したが、GitHub Release公開は未実施であり、実行には別の明示承認が
-必要である。鍵を自動生成したり別の個人鍵を推測選択したりしない。
+release setとGit tagの実署名、GitHub Release公開、公開後再取得検証は完了した。今後も鍵を
+自動生成したり別の個人鍵を推測選択したりしない。公開済み`v0.1.0` assetの置換は行わない。
 
 ## 7. Release判定
 
-未完了項目を「既知制限」だけで代替しない。release scopeから外す場合は、実装上もその経路をI/O前にfail closedとし、要件と受け入れ条件を更新してreviewする。全必須項目、artifact hash、署名検証、OS cleanup evidenceが揃った時点でMVP release候補とする。
+未完了項目を「既知制限」だけで代替しない。release scopeから外す場合は、実装上もその経路をI/O前にfail closedとし、要件と受け入れ条件を更新してreviewする。全必須項目、artifact hash、署名検証、OS cleanup evidence、公開後再取得検証が揃い、MVP release `v0.1.0`の判定は完了した。
 
 
 ## Root restore review producer（2026-09-06）

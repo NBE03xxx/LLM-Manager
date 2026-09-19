@@ -1,0 +1,55 @@
+{
+  "release": {
+    "tag": "v0.1.0",
+    "name": "LLM Manager 0.1.0",
+    "url": "https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0",
+    "published_at": "2026-09-19T13:07:34Z",
+    "draft": false,
+    "prerelease": false,
+    "github_target_commitish_metadata": "main",
+    "asset_count": 11,
+    "all_asset_states": "uploaded"
+  },
+  "signed_tag": {
+    "tag_object_sha1": "e766d2041e83fedffb5fd3180aabadbc8696345e",
+    "peeled_target_commit": "5b7d4de03e495fe630deab952de043f945a22bd7",
+    "target_matches_release_build_source": true,
+    "isolated_signature_verification": "passed",
+    "primary_fingerprint": "353F4D4F55175F537FBCD07C3E2532969B404FFD",
+    "signing_subkey_fingerprint": "034DA1601E14BE534254BA4DD8F253C086BE34C2"
+  },
+  "assets": {
+    "RELEASE_KEY.asc": {"size": 807, "sha256": "ca9aa1f6cc747008d1133aa688e887fe31a10ce2de87ced5cb044e7f0736d9f8"},
+    "SHA256SUMS": {"size": 933, "sha256": "147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d"},
+    "SHA256SUMS.asc": {"size": 228, "sha256": "3581654c520ab5dac6890d1579a1fb875c766964dc3bcd753e3bdc566a906c90"},
+    "llm-manager-0.1.0.tar.gz": {"size": 37075955, "sha256": "6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18"},
+    "llm-manager-remote-helper.cdx.json": {"size": 1413, "sha256": "1878023f02c347018deb663b5b657d1a70b0b744f7997276598391bc35b2d09b"},
+    "llm-manager-remote-helper_0.1.0_all.deb": {"size": 137958, "sha256": "ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4"},
+    "llm-manager-remote-helper_0.1.0_ubuntu-26.04_environment-sbom.tar.xz": {"size": 1835720, "sha256": "0849f2a21c4eaca844e2abd1977606c6646fb1b54dc8b6aabeaf8ec8e6c651c1"},
+    "llm-manager.cdx.json": {"size": 2708, "sha256": "ed224935304652d6ac9bb613376f8f85c28462d15786059e3729ff9f332cf89a"},
+    "llm-manager_0.1.0_all.deb": {"size": 151784, "sha256": "63f4b1b43d0b72f4578f30282d99313b675c29166e37637f9d79040bdbafece1"},
+    "llm-manager_0.1.0_debian-13_environment-sbom.tar.xz": {"size": 1974996, "sha256": "c51602b536cc618acc2847666e13ef214e500578341291b0779c8ea8e9eea8b0"},
+    "llm-manager_0.1.0_ubuntu-26.04_environment-sbom.tar.xz": {"size": 1835384, "sha256": "e1ef61769f2c4db749353d1ebe34adc324858488b8e0c7e91df214572ec30eae"}
+  },
+  "public_retrieval": {
+    "unauthenticated_direct_download": "passed_11_of_11",
+    "download_directory": "/tmp/llm-manager-v0.1.0-public-unauth-20260919",
+    "exact_regular_non_symlink_asset_set": true,
+    "github_api_digests_match": "passed_11_of_11",
+    "sha256sum_check": "passed_9_of_9",
+    "isolated_manifest_signature_verification": "passed",
+    "local_deb_verifier": "passed",
+    "remote_deb_verifier": "passed",
+    "environment_evidence_verifiers": {
+      "ubuntu_26_04_local": "passed_package_count_1907",
+      "debian_13_local": "passed_package_count_2248",
+      "ubuntu_26_04_remote_helper": "passed_package_count_1908"
+    },
+    "release_body_matches_tracked_notes": true
+  },
+  "release_checklist": {
+    "completed": 44,
+    "total": 44,
+    "percent": 100.0
+  }
+}

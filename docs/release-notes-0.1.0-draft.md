@@ -2,8 +2,8 @@
 
 Release date: 2026-09-16
 
-この文書は公開内容を固定するためのrelease notesです。Phase 6の最終artifact、署名、
-signed tag、公開後再検証が完了するまでは公開しないでください。
+このreleaseはPhase 6の最終artifact Gate、release set checksum／署名、signed tagの検証を
+完了しています。download後は下記手順でchecksumと署名を確認してください。
 
 - Debian changelog distribution: `unstable`
 - release OpenPGP primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
@@ -42,13 +42,16 @@ SSH先のhelperを自動installまたはupgradeすることはありません。
 
 ## Artifacts
 
-最終release setには少なくとも次を含めます。名前と集合は最終build時に固定します。
+最終release setは次の11 fileです。
 
 - `llm-manager_0.1.0_all.deb`
 - `llm-manager-remote-helper_0.1.0_all.deb`
-- `llm-manager-0.1.0.tar.gz` source archive
-- local/remote直接依存CycloneDX 1.6 SBOM
-- Ubuntu 26.04 local、Debian 13 local、Ubuntu 26.04 remote helperのresolved-environment SBOM archive
+- `llm-manager-0.1.0.tar.gz`
+- `llm-manager.cdx.json`
+- `llm-manager-remote-helper.cdx.json`
+- `llm-manager_0.1.0_ubuntu-26.04_environment-sbom.tar.xz`
+- `llm-manager_0.1.0_debian-13_environment-sbom.tar.xz`
+- `llm-manager-remote-helper_0.1.0_ubuntu-26.04_environment-sbom.tar.xz`
 - `SHA256SUMS`
 - `SHA256SUMS.asc`
 - `RELEASE_KEY.asc`
@@ -112,7 +115,7 @@ SSH先のroot-owned recovery copyや鍵を復旧目的で自動削除しませ�
 Apply結果が`recovery_required`、restore結果が`failed`または`unknown`の場合、同じmutationを
 再送しないでください。host identity、fingerprint、Plan/backup ID、target、error codeを記録し、
 設定本文やsecretは共有しないでください。詳しい手順は
-[Backup・Rollback・Recoveryガイド](recovery-guide.md)を参照してください。
+[Backup・Rollback・Recoveryガイド](https://github.com/NBE03xxx/LLM-Manager/blob/v0.1.0/docs/recovery-guide.md)を参照してください。
 
 ## Known limitations
 
@@ -133,10 +136,9 @@ project-owned sourceとassetはMIT Licenseです。third-party notices、直接�
 解決した依存のSBOMをrelease setへ含めます。source repository:
 `https://github.com/NBE03xxx/LLM-Manager`
 
-## Publication verification
+## Release identity
 
-- supported versionをfinal Gateの実測値と照合する
-- artifact名と`SHA256SUMS`の対象を完全一致させる
-- 公開鍵とOpenPGP primary/signing-subkey fingerprintをfinal署名から再照合する
-- signed tag `v0.1.0`がbuild source commitを指すことを確認する
-- 公開前にsecret、内部test path、test host、未採用candidate hashがないことをreviewする
+- signed tag `v0.1.0` target: `5b7d4de03e495fe630deab952de043f945a22bd7`
+- `SHA256SUMS` SHA-256: `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`
+- OpenPGP primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
+- OpenPGP signing-subkey fingerprint: `034DA1601E14BE534254BA4DD8F253C086BE34C2`
