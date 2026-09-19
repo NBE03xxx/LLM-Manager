@@ -2,16 +2,52 @@
 
 LLM-Manager は、ローカル Linux PC または既存の OpenSSH 接続先について、ハードウェア、OS、Ollama、OpenCode を診断し、用途別の最適化案を安全にレビュー・適用するデスクトップ GUI アプリケーションです。
 
-Phase 0〜5を完了し、現在は **Phase 6（Hardening と MVP Release）**です。Phase 5ではQt非依存presenter/view-model、optional QThreadPool worker、6工程widget、Local/OpenSSH診断、Reviewとexact approval、local user Apply/restoreのproduction vertical sliceを完成させました。Phase 6ではlocal user/SSH user Apply、local user手動restore、local root手動restoreを公開しました。local root手動restoreは専用protocol・実装・disposable OS Gateに加え、Ubuntu 26.04 active desktopでPolicyKitのcancel/auth/正規要求/status Gateを完了しています。local root Applyは根拠あるactionable Ollama rule待ち、SSH root ApplyとSSH user/root手動restoreは専用protocol未完成のため、各経路を固定理由でI/O前にfail closedとしています。詳細は[Phase 5 closure audit](docs/validation/phase5-closure-audit-2026-09-04.md)と[Phase 6 interactive PolicyKit Gate](docs/validation/phase6-root-restore-interactive-policykit-2026-09-08.md)を参照してください。
+Phase 0〜6を完了し、MVP [v0.1.0](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)を公開しました。release setの再現build、SBOM、Ubuntu 26.04／Debian 13 lifecycle、通常GUI、security、checksum、OpenPGP署名、signed tag、公開後の認証なし再取得検証まで44/44項目を完了しています。詳細は[MVP Release Checklist](docs/release-checklist.md)と[公開後再取得検証](docs/validation/phase6-public-release-verification-2026-09-19.md)を参照してください。
 
 MVP releaseのmutation scopeはこの4経路で固定しています。非公開経路の内部実装は将来検証用であり、現行MVPの実行権限ではありません。
 
 - Apply: local user OpenCode、SSH user OpenCode
 - Manual restore: local user OpenCode、local root Ollama
 
-MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証する。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けリリースでは deb パッケージを提供する。
+MVP の正式対象は Ubuntu 26.04 と Debian 13 で、Python 3.14.4、Ollama 0.33.2、OpenCode 1.18.25 を初期検証基準とする。Debian 13のsystem Pythonを含めるためapplication/runtimeのsupported minimumはPython 3.13、cryptography 43.0.0、SecretStorage 3.3.3とし、Debian 13 stock desktop Gateで全単体テストと暗号・Secret Service・helper境界を検証した。製品の周辺バージョンは互換性確認後に対応範囲へ追加する。開発中はソース起動を許容し、一般ユーザー向けにはdebパッケージを提供する。
 
 UIはユーザーlocaleを初期値として日本語・英語を提供し、未対応localeは英語へフォールバックする。
+
+## Download、検証、install
+
+[GitHub Release v0.1.0](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)から、使用するdebだけでなく、`RELEASE_KEY.asc`、`SHA256SUMS`、`SHA256SUMS.asc`を含むrelease assetを同じdirectoryへdownloadしてください。完全なrelease setはlocal／remote helperのdeb、source archive、直接依存SBOM、3環境のresolved-environment SBOM、公開鍵、checksum、署名の11 fileです。
+
+公開鍵を一時keyring等へimportし、表示されるfingerprintを別経路で照合してからmanifest署名とartifact checksumを検証します。短いkey IDだけで判定しないでください。
+
+```bash
+(
+  set -eu
+  verify_home="$(mktemp -d)"
+  trap 'rm -rf -- "$verify_home"' EXIT
+  chmod 700 "$verify_home"
+  gpg --homedir "$verify_home" --import RELEASE_KEY.asc
+  gpg --homedir "$verify_home" --fingerprint --fingerprint
+  gpg --homedir "$verify_home" --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS
+  sha256sum --check SHA256SUMS
+)
+```
+
+- primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
+- signing subkey fingerprint: `034DA1601E14BE534254BA4DD8F253C086BE34C2`
+
+local GUI packageは対象PCでAPTへ渡します。
+
+```bash
+sudo apt install ./llm-manager_0.1.0_all.deb
+```
+
+SSH user経路を利用する場合は、接続先hostでremote helper packageを管理者が事前導入します。local packageがSSH先へhelperを自動install／upgradeすることはありません。
+
+```bash
+sudo apt install ./llm-manager-remote-helper_0.1.0_all.deb
+```
+
+upgrade、remove、purge、既知制限、復旧時の注意は[v0.1.0 Release Notes](docs/release-notes-0.1.0-draft.md)と[Backup・Rollback・Recoveryガイド](docs/recovery-guide.md)を参照してください。
 
 ## MVP の価値
 
@@ -27,6 +63,9 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 
 ## 文書
 
+- [GitHub Release v0.1.0](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)
+- [v0.1.0 Release Notes](docs/release-notes-0.1.0-draft.md)
+- [公開後再取得検証](docs/validation/phase6-public-release-verification-2026-09-19.md)
 - [要件](docs/requirements.md)
 - [MVP スコープ](docs/mvp-scope.md)
 - [アーキテクチャ](docs/architecture.md)
@@ -76,7 +115,9 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 
 ## 現在の実装とテスト
 
-Phase 1〜3の基盤に加え、Phase 4ではsandbox限定のLocalBackupStore、複数source-spanを束ねるAtomicFileExecutor、stale hash/path/symlink検査、FileValidator、承認に束縛されたSafeApplyCoordinator、root変更専用のBackup→helper Apply→runtime Validate→helper Rollback、逆順rollbackと故障注入テストを実装しています。単体テストは次のコマンドで実行できます。
+Phase 6までにLocal／OpenSSH診断、用途別推奨、差分review、exact approval、暗号化dual backup、Apply、runtime validation、自動rollback、切断後のimmutable result照合、手動restoreを実装しました。公開mutation routeはlocal user Apply、SSH user Apply、local user restore、local root restoreの4経路です。root GUI起動、mutation自動retry、秘密値のGUI／引数／標準入力受け渡しは行いません。
+
+最終sourceとartifactでは全806 test（767成功・39 expected skip）、両deb verifier、security regression、OS／通常GUI Gateに成功しています。単体テストは次のコマンドで実行できます。PySide6がない環境ではQt runtime testがexpected skipになります。
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v
