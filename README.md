@@ -15,33 +15,27 @@ UIはユーザーlocaleを初期値として日本語・英語を提供し、未
 
 ## Download、検証、install
 
-[GitHub Release v0.1.0](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)から、使用するdebだけでなく、`RELEASE_KEY.asc`、`SHA256SUMS`、`SHA256SUMS.asc`を含むrelease assetを同じdirectoryへdownloadしてください。完全なrelease setはlocal／remote helperのdeb、source archive、直接依存SBOM、3環境のresolved-environment SBOM、公開鍵、checksum、署名の11 fileです。
-
-公開鍵を一時keyring等へimportし、表示されるfingerprintを別経路で照合してからmanifest署名とartifact checksumを検証します。短いkey IDだけで判定しないでください。
+配布物の保存先は、リポジトリ直下の **`release/v0.1.0/`** です。トップdirectoryで次のscriptを実行すると、[GitHub Release v0.1.0](https://github.com/NBE03xxx/LLM-Manager/releases/tag/v0.1.0)の11配布物をそのdirectoryへdownloadし、公開鍵fingerprint、manifest署名、全checksumを自動検証します。
 
 ```bash
-(
-  set -eu
-  verify_home="$(mktemp -d)"
-  trap 'rm -rf -- "$verify_home"' EXIT
-  chmod 700 "$verify_home"
-  gpg --homedir "$verify_home" --import RELEASE_KEY.asc
-  gpg --homedir "$verify_home" --fingerprint --fingerprint
-  gpg --homedir "$verify_home" --status-fd 1 --verify SHA256SUMS.asc SHA256SUMS
-  sha256sum --check SHA256SUMS
-)
+./release/download-v0.1.0.sh
 ```
+
+成功時だけ`release/v0.1.0/`が保持されます。既存directoryは上書きしません。完全なrelease setはlocal／remote helperのdeb、source archive、直接依存SBOM、3環境のresolved-environment SBOM、公開鍵、checksum、署名の11 fileです。scriptの詳細は[`release/README.md`](release/README.md)を参照してください。
+
+自動検証で照合するfingerprintは次のとおりです。短いkey IDだけでは判定しません。
 
 - primary fingerprint: `353F4D4F55175F537FBCD07C3E2532969B404FFD`
 - signing subkey fingerprint: `034DA1601E14BE534254BA4DD8F253C086BE34C2`
 
-local GUI packageは対象PCでAPTへ渡します。
+local GUI packageは、download完了後に次の具体的なdirectoryからAPTへ渡します。
 
 ```bash
+cd release/v0.1.0
 sudo apt install ./llm-manager_0.1.0_all.deb
 ```
 
-SSH user経路を利用する場合は、接続先hostでremote helper packageを管理者が事前導入します。local packageがSSH先へhelperを自動install／upgradeすることはありません。
+SSH user経路を利用する場合は、`release/v0.1.0/llm-manager-remote-helper_0.1.0_all.deb`を接続先hostへ安全に転送し、そのhost上で管理者が事前導入します。local packageがSSH先へhelperを自動install／upgradeすることはありません。
 
 ```bash
 sudo apt install ./llm-manager-remote-helper_0.1.0_all.deb
@@ -137,6 +131,7 @@ llm-manager/
 │   ├── adapters/           # Local/SSH/Ollama/OpenCode/system
 │   └── infrastructure/     # 実行、バックアップ、権限、永続化
 ├── rules/                  # 制約付き外部ルールデータ（MVP後の候補）
+├── release/                # 公式配布物のdownload・検証とversion別保存先
 ├── tests/
 └── docs/
 ```

@@ -17,6 +17,7 @@ env/
 build/
 dist/
 *.egg-info/
+/release/v*/
 
 # Local environment and secrets
 .env
