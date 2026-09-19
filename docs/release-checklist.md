@@ -1,6 +1,6 @@
 # MVP Release Checklist
 
-このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`、distributionは`unstable`へ固定済みだが、最終Gate、署名、公開後再検証が完了するまで一般配布しない。
+このchecklistは、同じGit commitから作成したlocal deb、remote helper deb、SBOM、checksum、署名を1つのrelease setとして判定する。versionは`0.1.0`、distributionは`unstable`へ固定済みだが、signed tagと公開後再検証が完了するまで一般配布しない。
 
 ## 1. Scopeとversion freeze
 
@@ -62,6 +62,11 @@ artifact署名、signed tag、公開後再取得検証の4項目。署名・tag�
 通常`sha256sum`と独立Python実装で全件一致、対象集合の過不足なし、両deb／3環境証拠verifier成功を確認。
 進捗は41/44（93.2%）。残件はartifact署名、signed tag、公開後再取得検証の3項目。
 署名・tag・公開は未実施。
+
+2026-09-19: [release set detached signature](validation/phase6-release-set-signature-2026-09-19.md)を作成・検証した。
+署名副鍵fingerprintを完全指定して`SHA256SUMS.asc`を作成し、公開鍵だけをimportした隔離GPG環境で
+primary／subkey fingerprint一致、`GOODSIG`、`VALIDSIG`を確認。manifest hashは不変で9/9を再検証した。
+進捗は42/44（95.5%）。残件はsigned tagと公開後再取得検証の2項目。tag・公開は未実施。
 
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
@@ -200,12 +205,12 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 
 - [x] release setの両deb、source archive、直接依存SBOM、resolved-environment SBOMに対して`SHA256SUMS`を作る。公開鍵も含む9fileを固定し、通常`sha256sum`と独立Python再hash、対象集合、両deb／3環境証拠verifierに成功。詳細: [release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)。
 - [x] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`、保管責任者`Project owner (NBE03xxx)`。詳細は[鍵検証記録](validation/phase6-release-signing-key-2026-09-15.md)。
-- [ ] `SHA256SUMS`へASCII armored detached signatureを作成し、別環境でfingerprint指定の検証を行う。
+- [x] `SHA256SUMS`へASCII armored detached signatureを作成し、公開鍵だけの隔離GPG環境でprimary／署名副鍵fingerprint、`GOODSIG`、`VALIDSIG`を検証した。詳細: [release set detached signature](validation/phase6-release-set-signature-2026-09-19.md)。
 - [ ] Git tagを同じkeyで署名し、tagがbuild source commitを指すことを確認する。
 - [x] release notesへsupported OS/version、公開route、既知制限、upgrade/uninstall、recovery guide、checksum検証方法、signing key fingerprintを記載した。[0.1.0 release notes](release-notes-0.1.0-draft.md)はrelease dateと固定tag `v0.1.0`を記載し、artifact identityの正本を後続で作る`SHA256SUMS`へ固定した。
 - [ ] 公開先から全artifactを再取得してchecksum、署名、package verifierを再実行する。
 
-署名鍵は指定済みだが、実署名、signed tag、公開は未実施であり、公開実行には別の明示承認が
+release setの実署名は完了したが、signed tagと公開は未実施であり、各実行には別の明示承認が
 必要である。鍵を自動生成したり別の個人鍵を推測選択したりしない。
 
 ## 7. Release判定

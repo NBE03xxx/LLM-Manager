@@ -1,4 +1,4 @@
-# 次チャット用引継ぎ（2026-09-17）
+# 次チャット用引継ぎ（2026-09-19）
 
 `/home/yoshimi/WorkSpace/LLM-Manager` のPhase 6 Hardening / MVP Releaseを続けてください。
 まず本ファイルを読み、必要な詳細だけ `docs/handoff-phase6.md` と検証記録で補ってください。
@@ -6,6 +6,14 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-19、[release set detached signature](validation/phase6-release-set-signature-2026-09-19.md)を作成・検証。
+  `SHA256SUMS`のSHA-256 `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`
+  を変えず、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`を完全指定してASCII armored
+  detached signatureを作成。`SHA256SUMS.asc`のSHA-256は
+  `3581654c520ab5dac6890d1579a1fb875c766964dc3bcd753e3bdc566a906c90`、228 bytes、mode 0644。
+  公開鍵だけの隔離GPG homeでprimary／subkey fingerprint一致、secret key entryなし、`GOODSIG`、
+  `VALIDSIG`を確認し、release set 9/9も再検証した。進捗42/44、95.5%。残件はsigned tagと
+  公開後再取得検証。tag・公開は未実施で、別の明示承認が必要。
 - 2026-09-17、[release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)を作成・検証。
   `/tmp/llm-manager-final-5b7d4de-20260916/artifacts/SHA256SUMS`へ、両deb、source archive、
   直接依存SBOM 2件、resolved-environment SBOM 3件、公開鍵の9fileを固定。manifest SHA-256は
@@ -14,8 +22,7 @@
   3環境証拠verifier、final source commit内の公開鍵／直接依存SBOMとのbyte一致に成功。
   2026-09-19の`/tmp`揮発後は、両deb／source archiveを記録済み手順で再現buildし元hashへ一致、
   3環境archiveをtracked証拠から復元して9/9を再検証済み。primary release directoryは復元済み。
-  進捗41/44、93.2%。残件はdetached signature、signed tag、公開後再取得検証。
-  秘密鍵アクセス、署名、tag、公開は未実施。
+  この時点の進捗は41/44、93.2%だった。detached signatureは2026-09-19に完了。
 - 2026-09-17、[final artifact SSH user Apply/rollback＋実NIC断Gate](validation/phase6-final-ssh-gui-disconnect-2026-09-17.md)が成功。
   Debian通常user・installed final deb・通常`qt_app.main`からUbuntu SSH userへのcommitと自然rollbackを
   別namespace／snapshot／operationで実行。plan/approval/validation結果注入なし。commitはApply 1回、
@@ -173,7 +180,7 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-17現在は41/44件、**93.2%（公開チェックリスト項目数ベース）**。
+2026-09-19現在は42/44件、**95.5%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
 この86.4%とは比較しない。今後は再集計可能な値を主表示とする。
@@ -194,7 +201,8 @@ source commit: `5b7d4de03e495fe630deab952de043f945a22bd7`
 | `llm-manager-0.1.0.tar.gz` | `6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18` |
 
 独立2回build、各build内806 test、両runのverifier、展開監査に成功。最終OS／GUI／security Gate、
-resolved-environment SBOM、OS／GUI／security Gate、release set `SHA256SUMS`は完了。署名、tag、公開は未実施。
+resolved-environment SBOM、OS／GUI／security Gate、release set `SHA256SUMS`とdetached signatureは完了。
+tag、公開は未実施。
 下記pre-final candidateを混用しない。
 
 ### Pre-final candidate（履歴）
@@ -299,15 +307,16 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. final artifactの全Gateとrelease set `SHA256SUMS`作成・独立検証は完了。次は利用者の明示承認後にだけ、
-   `SHA256SUMS`へASCII armored detached signatureを作り、別環境で指定fingerprintを検証する。
-2. 署名後もsource commit `5b7d4de03e495fe630deab952de043f945a22bd7`、manifest SHA-256
+1. final artifactの全Gate、release set `SHA256SUMS`作成・独立検証、detached signatureと隔離検証は完了。
+   次は利用者の別の明示承認後にだけsigned tag `v0.1.0`を作成する。tag targetはvalidation文書の
+   最新commitではなく、build source commit `5b7d4de03e495fe630deab952de043f945a22bd7`へ固定して検証する。
+2. source commit `5b7d4de03e495fe630deab952de043f945a22bd7`、manifest SHA-256
    `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`、上記artifact hashを正本とし、
    pre-final artifactを混用しない。既存Gate operationは完了済みなので再実行・再送しない。
 3. release専用署名鍵、target distribution、署名者、公開先は確定済み。final source metadataで
    `UNRELEASED`を`unstable`へ変更し、release日時・変更点も確定済み。
    秘密鍵を自動生成・推測選択しない。
-   release署名・tag・公開の承認を、通常のcommit/push承認と同一視しない。
+   signed tag・公開の承認を、今回のchecksum署名承認や通常のcommit/push承認と同一視しない。
 
 ## VMと復元条件
 
