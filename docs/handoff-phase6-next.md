@@ -6,14 +6,19 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-19、[signed tag `v0.1.0`](validation/phase6-signed-tag-2026-09-19.md)を作成・検証。
+  tag object `e766d2041e83fedffb5fd3180aabadbc8696345e`、peeled targetはfinal artifact source commit
+  `5b7d4de03e495fe630deab952de043f945a22bd7`。release専用署名副鍵を完全指定し、公開鍵だけの
+  隔離GPG homeでfingerprint一致、秘密鍵file 0件、`GOODSIG`、`VALIDSIG`を確認した。tagだけを
+  originへpushし、remote object／peeled targetも一致。進捗43/44、97.7%。GitHub Releaseは未公開で、
+  公開と公開後再取得検証には別の明示承認が必要。
 - 2026-09-19、[release set detached signature](validation/phase6-release-set-signature-2026-09-19.md)を作成・検証。
   `SHA256SUMS`のSHA-256 `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`
   を変えず、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`を完全指定してASCII armored
   detached signatureを作成。`SHA256SUMS.asc`のSHA-256は
   `3581654c520ab5dac6890d1579a1fb875c766964dc3bcd753e3bdc566a906c90`、228 bytes、mode 0644。
   公開鍵だけの隔離GPG homeでprimary／subkey fingerprint一致、secret key entryなし、`GOODSIG`、
-  `VALIDSIG`を確認し、release set 9/9も再検証した。進捗42/44、95.5%。残件はsigned tagと
-  公開後再取得検証。tag・公開は未実施で、別の明示承認が必要。
+  `VALIDSIG`を確認し、release set 9/9も再検証した。この時点の進捗は42/44、95.5%だった。
 - 2026-09-17、[release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)を作成・検証。
   `/tmp/llm-manager-final-5b7d4de-20260916/artifacts/SHA256SUMS`へ、両deb、source archive、
   直接依存SBOM 2件、resolved-environment SBOM 3件、公開鍵の9fileを固定。manifest SHA-256は
@@ -180,7 +185,7 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-19現在は42/44件、**95.5%（公開チェックリスト項目数ベース）**。
+2026-09-19現在は43/44件、**97.7%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
 この86.4%とは比較しない。今後は再集計可能な値を主表示とする。
@@ -201,8 +206,8 @@ source commit: `5b7d4de03e495fe630deab952de043f945a22bd7`
 | `llm-manager-0.1.0.tar.gz` | `6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18` |
 
 独立2回build、各build内806 test、両runのverifier、展開監査に成功。最終OS／GUI／security Gate、
-resolved-environment SBOM、OS／GUI／security Gate、release set `SHA256SUMS`とdetached signatureは完了。
-tag、公開は未実施。
+resolved-environment SBOM、OS／GUI／security Gate、release set `SHA256SUMS`、detached signature、
+signed tagは完了。GitHub Release公開は未実施。
 下記pre-final candidateを混用しない。
 
 ### Pre-final candidate（履歴）
@@ -307,16 +312,16 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. final artifactの全Gate、release set `SHA256SUMS`作成・独立検証、detached signatureと隔離検証は完了。
-   次は利用者の別の明示承認後にだけsigned tag `v0.1.0`を作成する。tag targetはvalidation文書の
-   最新commitではなく、build source commit `5b7d4de03e495fe630deab952de043f945a22bd7`へ固定して検証する。
+1. final artifactの全Gate、release set `SHA256SUMS`作成・独立検証、detached signature、signed tagは完了。
+   次は利用者の別の明示承認後にだけGitHub Release `v0.1.0`を公開し、公開先から全artifactを新しい
+   directoryへ再取得してchecksum、署名、両package verifier、公開asset集合を検証する。
 2. source commit `5b7d4de03e495fe630deab952de043f945a22bd7`、manifest SHA-256
    `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`、上記artifact hashを正本とし、
    pre-final artifactを混用しない。既存Gate operationは完了済みなので再実行・再送しない。
 3. release専用署名鍵、target distribution、署名者、公開先は確定済み。final source metadataで
    `UNRELEASED`を`unstable`へ変更し、release日時・変更点も確定済み。
    秘密鍵を自動生成・推測選択しない。
-   signed tag・公開の承認を、今回のchecksum署名承認や通常のcommit/push承認と同一視しない。
+   公開の承認を、今回のchecksum署名／signed tag承認や通常のcommit/push承認と同一視しない。
 
 ## VMと復元条件
 

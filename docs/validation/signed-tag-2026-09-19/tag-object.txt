@@ -1,0 +1,13 @@
+object 5b7d4de03e495fe630deab952de043f945a22bd7
+type commit
+tag v0.1.0
+tagger NBE03xxx <NBE03247@nifty.com> 1789822855 +0900
+
+LLM Manager 0.1.0
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQQDTaFgHhS+U0JUuk3Y8lPAhr40wgUCaq6HhwAKCRDY8lPAhr40
+wiS0AQCePE3o+Gg68x5u+JEg8w+H5A9PB3IF2VjebRIUjqpz2AEAtYmW1+WO6aYr
+leSSv1DudX4M1LlCDbhlvJsjGGAfxgs=
+=IDOG
+-----END PGP SIGNATURE-----
