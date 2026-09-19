@@ -6,6 +6,16 @@
 
 ## 今回の継続結果（最優先）
 
+- 2026-09-17、[release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)を作成・検証。
+  `/tmp/llm-manager-final-5b7d4de-20260916/artifacts/SHA256SUMS`へ、両deb、source archive、
+  直接依存SBOM 2件、resolved-environment SBOM 3件、公開鍵の9fileを固定。manifest SHA-256は
+  `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`、mode 0644。
+  通常`sha256sum` 9/9と独立Python再hash、対象集合の過不足／重複／symlinkなし、両deb verifier、
+  3環境証拠verifier、final source commit内の公開鍵／直接依存SBOMとのbyte一致に成功。
+  2026-09-19の`/tmp`揮発後は、両deb／source archiveを記録済み手順で再現buildし元hashへ一致、
+  3環境archiveをtracked証拠から復元して9/9を再検証済み。primary release directoryは復元済み。
+  進捗41/44、93.2%。残件はdetached signature、signed tag、公開後再取得検証。
+  秘密鍵アクセス、署名、tag、公開は未実施。
 - 2026-09-17、[final artifact SSH user Apply/rollback＋実NIC断Gate](validation/phase6-final-ssh-gui-disconnect-2026-09-17.md)が成功。
   Debian通常user・installed final deb・通常`qt_app.main`からUbuntu SSH userへのcommitと自然rollbackを
   別namespace／snapshot／operationで実行。plan/approval/validation結果注入なし。commitはApply 1回、
@@ -163,7 +173,7 @@
 
 ユーザーは今後の報告に進捗率の%表示を希望している。
 再開時にrelease checklistのトップレベルcheckboxを集計し、分母を明記する。
-2026-09-17現在は40/44件、**90.9%（公開チェックリスト項目数ベース）**。
+2026-09-17現在は41/44件、**93.2%（公開チェックリスト項目数ベース）**。
 Phase 0〜5を含む全開発工数の割合や残り時間を意味しない。
 以前報告した「技術検証約89%／公開準備約62%」は重み付けを定義していない概算であり、
 この86.4%とは比較しない。今後は再集計可能な値を主表示とする。
@@ -184,7 +194,7 @@ source commit: `5b7d4de03e495fe630deab952de043f945a22bd7`
 | `llm-manager-0.1.0.tar.gz` | `6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18` |
 
 独立2回build、各build内806 test、両runのverifier、展開監査に成功。最終OS／GUI／security Gate、
-resolved-environment SBOM、OS／GUI／security Gateは完了。release set `SHA256SUMS`、署名、tag、公開は未実施。
+resolved-environment SBOM、OS／GUI／security Gate、release set `SHA256SUMS`は完了。署名、tag、公開は未実施。
 下記pre-final candidateを混用しない。
 
 ### Pre-final candidate（履歴）
@@ -289,10 +299,10 @@ loopback SSH・Gate plan/例外注入を含み、別マシン間の物理切断�
 
 ## 次の作業（この順を基本とする）
 
-1. final artifactのSBOM、lifecycle、security、local user/root GUI、SSH user commit／自然rollback＋実NIC断Gateは完了。
-   次は保存済みfinal release artifact setを再hashし、両deb、source archive、直接依存SBOM、
-   resolved-environment SBOMを対象にrelease set `SHA256SUMS`を作成・検証する。
-2. `SHA256SUMS`作成時もsource commit `5b7d4de03e495fe630deab952de043f945a22bd7`と上記artifact hashを正本とし、
+1. final artifactの全Gateとrelease set `SHA256SUMS`作成・独立検証は完了。次は利用者の明示承認後にだけ、
+   `SHA256SUMS`へASCII armored detached signatureを作り、別環境で指定fingerprintを検証する。
+2. 署名後もsource commit `5b7d4de03e495fe630deab952de043f945a22bd7`、manifest SHA-256
+   `147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d`、上記artifact hashを正本とし、
    pre-final artifactを混用しない。既存Gate operationは完了済みなので再実行・再送しない。
 3. release専用署名鍵、target distribution、署名者、公開先は確定済み。final source metadataで
    `UNRELEASED`を`unstable`へ変更し、release日時・変更点も確定済み。

@@ -57,6 +57,12 @@ Debian通常userの通常GUIからUbuntu SSH userへ、正常commitと実runtime
 performance親項目とfinal SSH user GUI項目が完了し、進捗は40/44（90.9%）。残件はrelease set checksum、
 artifact署名、signed tag、公開後再取得検証の4項目。署名・tag・公開は未実施。
 
+2026-09-17: [release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)を作成・検証した。
+両deb、source archive、直接依存SBOM 2件、resolved-environment SBOM 3件、公開鍵の9fileを固定し、
+通常`sha256sum`と独立Python実装で全件一致、対象集合の過不足なし、両deb／3環境証拠verifier成功を確認。
+進捗は41/44（93.2%）。残件はartifact署名、signed tag、公開後再取得検証の3項目。
+署名・tag・公開は未実施。
+
 - [x] MVP production routeをlocal user/SSH user Applyとlocal user/local root manual restoreに固定した。local root Applyはactionable Ollama rule待ち、SSH root ApplyとSSH user/root restoreは専用protocol待ちとしてrelease scopeから外し、requirements、MVP scope、README、route availability、受け入れ条件を照合した。
 - [x] Debian 13 desktopへ通常ログインし、desktop menuからlocal candidateの実display起動を確認した。2026-09-10にUID 1000のWaylandで英語画面、日本語切替、keyboard focus、通常終了を確認し、追加12 packageのpurge後にpackage/manual一覧が完全一致。詳細: [実display記録](validation/phase6-debian-display-2026-09-10.md)。最終artifactでの再実行はsection 4に残す。
 - [x] performance、長時間Agent、accessibility、完成GUI経路のSSH切断Gateを判定する。長文layout、window close時のcancel・worker終了待機、協力的fake taskと有限のcancel非協力区間のevent処理・明示的待機UXはUbuntu 26.04実Qtの合成Gateまで完了した。local user production Apply compositionはhost/Ubuntu/Debianでcommit/rollback/recovery-requiredを各5 sample、実Ollama/OpenCodeのcomplete local診断はhostで5 sample完了。[ff7913b Debian Orca capture](validation/phase6-ff7913b-debian-orca-2026-09-13.md)では製品名・Hosts用途/valueの発話eventと20.672秒の非無音WAVを保存し、人の聴取確認も完了。[通常GUI全経路＋実NIC断](validation/phase6-full-gui-network-2026-09-14.md)ではSSH Applyのcommit case 1 sample、[通常GUI全経路の自動rollback](validation/phase6-full-gui-rollback-2026-09-14.md)ではvalidation fault付きrollback case 1 sample、[実runtime不在rollback](validation/phase6-natural-runtime-rollback-2026-09-15.md)ではproduction validatorによる自然障害caseを完了した。性能の複数sample、自然障害rollback、[final artifact SSH user Apply/rollback＋実NIC断Gate](validation/phase6-final-ssh-gui-disconnect-2026-09-17.md)を補完し、完了条件を満たした。
@@ -192,7 +198,7 @@ local root手動restoreの公開条件を[コードと照合](validation/phase6-
 
 ## 6. Checksum、署名、公開
 
-- [ ] release setの両deb、source archive、直接依存SBOM、resolved-environment SBOMに対して`SHA256SUMS`を作る。
+- [x] release setの両deb、source archive、直接依存SBOM、resolved-environment SBOMに対して`SHA256SUMS`を作る。公開鍵も含む9fileを固定し、通常`sha256sum`と独立Python再hash、対象集合、両deb／3環境証拠verifierに成功。詳細: [release set SHA256SUMS](validation/phase6-release-set-sha256-2026-09-17.md)。
 - [x] release専用OpenPGP keyのfingerprintと保管責任者を決める。秘密鍵をrepository、VM、artifact、ログへ置かない。主鍵`353F4D4F55175F537FBCD07C3E2532969B404FFD`、署名副鍵`034DA1601E14BE534254BA4DD8F253C086BE34C2`、保管責任者`Project owner (NBE03xxx)`。詳細は[鍵検証記録](validation/phase6-release-signing-key-2026-09-15.md)。
 - [ ] `SHA256SUMS`へASCII armored detached signatureを作成し、別環境でfingerprint指定の検証を行う。
 - [ ] Git tagを同じkeyで署名し、tagがbuild source commitを指すことを確認する。

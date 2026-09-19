@@ -1,0 +1,9 @@
+ca9aa1f6cc747008d1133aa688e887fe31a10ce2de87ced5cb044e7f0736d9f8  RELEASE_KEY.asc
+6d569199110bdc155a14c0a6222353ccc92380b63b20cfebff083ace1c91fe18  llm-manager-0.1.0.tar.gz
+1878023f02c347018deb663b5b657d1a70b0b744f7997276598391bc35b2d09b  llm-manager-remote-helper.cdx.json
+ee042ece330cc62febff1e4effdb59801ca55042bc845db54e0c5d78c8eea9e4  llm-manager-remote-helper_0.1.0_all.deb
+0849f2a21c4eaca844e2abd1977606c6646fb1b54dc8b6aabeaf8ec8e6c651c1  llm-manager-remote-helper_0.1.0_ubuntu-26.04_environment-sbom.tar.xz
+ed224935304652d6ac9bb613376f8f85c28462d15786059e3729ff9f332cf89a  llm-manager.cdx.json
+63f4b1b43d0b72f4578f30282d99313b675c29166e37637f9d79040bdbafece1  llm-manager_0.1.0_all.deb
+c51602b536cc618acc2847666e13ef214e500578341291b0779c8ea8e9eea8b0  llm-manager_0.1.0_debian-13_environment-sbom.tar.xz
+e1ef61769f2c4db749353d1ebe34adc324858488b8e0c7e91df214572ec30eae  llm-manager_0.1.0_ubuntu-26.04_environment-sbom.tar.xz

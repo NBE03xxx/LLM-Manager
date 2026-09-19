@@ -1,0 +1,39 @@
+{
+  "source_commit": "5b7d4de03e495fe630deab952de043f945a22bd7",
+  "artifact_directory": "/tmp/llm-manager-final-5b7d4de-20260916/artifacts",
+  "manifest_sha256": "147dba88d28af1e64f27a51cf70774fee65b62f9749877de4d321a2c138c647d",
+  "manifest_mode": "0644",
+  "entry_count": 9,
+  "target_set_exact": true,
+  "target_names_sorted": true,
+  "duplicate_names": false,
+  "symlink_targets": false,
+  "sha256sum_check": "passed",
+  "independent_python_hash_check": "passed",
+  "local_deb_verifier": "passed",
+  "remote_deb_verifier": "passed",
+  "environment_evidence_verifiers": {
+    "ubuntu_26_04_local": "passed",
+    "debian_13_local": "passed",
+    "ubuntu_26_04_remote_helper": "passed"
+  },
+  "source_commit_byte_matches": {
+    "RELEASE_KEY.asc": true,
+    "llm-manager.cdx.json": true,
+    "llm-manager-remote-helper.cdx.json": true
+  },
+  "tmp_eviction_recovery_2026_09_19": {
+    "release_set_restored": true,
+    "local_deb_reproducible_hash_match": true,
+    "remote_deb_reproducible_hash_match": true,
+    "source_archive_reproducible_hash_match": true,
+    "environment_archives_restored_from_tracked_evidence": true,
+    "post_restore_sha256sum_check": "passed",
+    "post_restore_independent_python_hash_check": "passed",
+    "post_restore_deb_verifiers": "passed",
+    "post_restore_environment_evidence_verifiers": "passed"
+  },
+  "signature_created": false,
+  "tag_created": false,
+  "published": false
+}
