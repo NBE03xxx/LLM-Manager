@@ -396,6 +396,15 @@ class QtRuntimeTests(unittest.TestCase):
             self.assertEqual(status.text(), "Completed")
             self.assertTrue(diagnose.isEnabled())
             self.assertEqual(requested, ["ssh:development"])
+            diagnosis_summary = window.findChild(QLabel, "diagnosis-summary")
+            diagnosis_items = window.findChild(QListWidget, "diagnosis-list")
+            recommendation_diagnosis = window.findChild(
+                QLabel, "recommendation-diagnosis-summary"
+            )
+            self.assertIn("Test host", diagnosis_summary.text())
+            self.assertEqual(diagnosis_items.count(), 5)
+            self.assertIn("Ollama", diagnosis_items.item(3).text())
+            self.assertEqual(recommendation_diagnosis.text(), diagnosis_summary.text())
             profile_selector = window.findChild(QComboBox, "profile-selector")
             recommendations = window.findChild(QListWidget, "recommendation-list")
             summary = window.findChild(QLabel, "recommendation-summary")

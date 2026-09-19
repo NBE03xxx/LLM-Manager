@@ -32,6 +32,7 @@ from llm_manager.domain.models import (
 )
 from llm_manager.optimization import PROFILES
 
+from .diagnostics import present_diagnostic_report
 from .i18n import Catalog
 from .qt_worker import PYSIDE_AVAILABLE, QtTaskRunner, QtUnavailableError, QtWorkerCoordinator
 from .recommendations import (
@@ -173,6 +174,19 @@ else:
             self._cancel_button = QPushButton()
             self._cancel_button.setObjectName("cancel-operation")
             self._cancel_button.setAccessibleName("cancel-operation")
+            self._diagnosis_summary = QLabel()
+            self._diagnosis_summary.setObjectName("diagnosis-summary")
+            self._diagnosis_summary.setAccessibleName("diagnosis-summary")
+            self._diagnosis_list = QListWidget()
+            self._diagnosis_list.setObjectName("diagnosis-list")
+            self._diagnosis_list.setAccessibleName("diagnosis-list")
+            self._recommendation_diagnosis_summary = QLabel()
+            self._recommendation_diagnosis_summary.setObjectName(
+                "recommendation-diagnosis-summary"
+            )
+            self._recommendation_diagnosis_summary.setAccessibleName(
+                "recommendation-diagnosis-summary"
+            )
             self._profile_selector = QComboBox()
             self._profile_selector.setObjectName("profile-selector")
             self._profile_selector.setAccessibleName("profile-selector")
@@ -260,6 +274,8 @@ else:
             self._root_restore_button.setObjectName("open-root-restore")
             self._root_restore_button.setAccessibleName("open-root-restore")
             for label in (
+                self._diagnosis_summary,
+                self._recommendation_diagnosis_summary,
                 self._recommendation_summary,
                 self._review_summary,
                 self._backup_summary,
@@ -323,7 +339,10 @@ else:
                 layout.addWidget(self._status_label)
                 layout.addWidget(self._diagnose_button)
                 layout.addWidget(self._cancel_button)
+                layout.addWidget(self._diagnosis_summary)
+                layout.addWidget(self._diagnosis_list)
             elif step is GuiStep.RECOMMENDATIONS:
+                layout.addWidget(self._recommendation_diagnosis_summary)
                 layout.addWidget(self._profile_label)
                 layout.addWidget(self._profile_selector)
                 layout.addWidget(self._recommendation_summary)
@@ -919,6 +938,7 @@ else:
                 for label in labels:
                     if label.objectName() == f"placeholder-{step.value}":
                         label.setText(self._catalog.text(f"nav.{step.value}"))
+            self._render_diagnosis()
             self._render_recommendations()
             self._render_review()
             self._render_approval()
@@ -929,6 +949,26 @@ else:
                 self._apply_cancel_button.setEnabled(False)
                 self._cancel_restore_button.setEnabled(False)
             self._refresh_accessible_names()
+
+        def _render_diagnosis(self) -> None:
+            self._diagnosis_list.clear()
+            state = self._presenter.state
+            report = state.report
+            if report is None:
+                if state.busy and state.step is GuiStep.DIAGNOSE:
+                    text = self._catalog.text("diagnosis.running")
+                elif state.error_code is not None and state.step is GuiStep.DIAGNOSE:
+                    text = self._catalog.text("diagnosis.failed", code=state.error_code)
+                else:
+                    text = self._catalog.text("diagnosis.not_run")
+                self._diagnosis_summary.setText(text)
+                self._recommendation_diagnosis_summary.setText("")
+                return
+            view = present_diagnostic_report(report, self._catalog)
+            self._diagnosis_summary.setText(view.summary)
+            self._recommendation_diagnosis_summary.setText(view.summary)
+            for text in view.items:
+                self._diagnosis_list.addItem(QListWidgetItem(text))
 
         def _refresh_accessible_names(self) -> None:
             self._navigation.setAccessibleName(self._catalog.text("app.title"))
@@ -944,6 +984,9 @@ else:
             )
             self._recommendation_list.setAccessibleName(
                 self._catalog.text("nav.recommendations")
+            )
+            self._diagnosis_list.setAccessibleName(
+                self._catalog.text("nav.diagnose")
             )
             self._review_list.setAccessibleName(self._catalog.text("nav.review"))
             self._backup_inventory_list.setAccessibleName(
@@ -973,6 +1016,8 @@ else:
                 self._language_label,
                 self._profile_label,
                 self._status_label,
+                self._diagnosis_summary,
+                self._recommendation_diagnosis_summary,
                 self._recommendation_summary,
                 self._review_summary,
                 self._backup_summary,
